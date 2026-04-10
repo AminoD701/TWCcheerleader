@@ -722,6 +722,60 @@
 
             let tags = sports.filter(s => s).map(s => `<div class="sport-tag tag-${s.includes("棒")?'baseball':s.includes("籃")?'basketball':'volleyball'}">${s}</div>`).join('');
 
+            // --- 新增：取得該女孩本月班表邏輯 ---
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1;
+            const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
+
+            // 過濾出她這個月的班表
+            let herSchedules = dbSchedules.filter(s => 
+                (s.name === c.realname || s.name === c.nickname) && 
+                s.safeDate.year === currentYear && 
+                s.safeDate.month === currentMonth
+            );
+
+            let scheduleHtml = '';
+            if (herSchedules.length > 0) {
+                // 照日期排序
+                herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
+                let dateBoxes = '';
+                let uniqueDates = [];
+
+                herSchedules.forEach(s => {
+                    // 避免同一天重複顯示
+                    if (!uniqueDates.includes(s.safeDate.num)) {
+                        uniqueDates.push(s.safeDate.num);
+                        // 判斷日期是否已過，改變視覺樣式
+                        const isPast = s.safeDate.num < todayNum;
+                        const opacity = isPast ? '0.4' : '1';
+                        const borderColor = isPast ? 'var(--border-color)' : cardAccent;
+                        const textColor = isPast ? 'var(--text-sub)' : '#fff';
+
+                        dateBoxes += `
+                        <div style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 6px 12px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3);">
+                            <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
+                            <span style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: ${textColor}; line-height: 1.1; margin-top: 2px;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                        </div>`;
+                    }
+                });
+
+                scheduleHtml = `
+                    <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            ${dateBoxes}
+                        </div>
+                    </div>`;
+            } else {
+                scheduleHtml = `
+                    <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: var(--text-sub); margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE</div>
+                        <div style="font-size: 14px; color: #6a7a90; font-weight: 700;">本月目前尚無班表資料。</div>
+                    </div>`;
+            }
+            // ------------------------------------
+
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
 
             document.getElementById('modal-dynamic-content').innerHTML = `
@@ -743,6 +797,7 @@
                         <div class="modal-data-row"><span class="modal-data-label">身高 HEIGHT</span><span class="modal-data-value">${c.height ? c.height + ' cm' : 'N/A'}</span></div>
                         ${noteText ? `<div class="modal-data-row" style="margin-top:10px; border-top:2px dashed #2d3748; padding-top:15px;"><span class="modal-data-label">備註 NOTE</span><span class="modal-data-value" style="color:var(--event-accent)">${noteText}</span></div>` : ''}
                     </div>
+                    ${scheduleHtml}
                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="modal-ig-btn"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>INSTAGRAM</span></a>` : ''}
                 </div>
             `;
