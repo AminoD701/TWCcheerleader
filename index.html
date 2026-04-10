@@ -376,10 +376,9 @@
         .data-label { color: var(--text-sub); font-weight: 700; min-width: 65px; }
         .data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 15px;}
         
-        .ig-link { display: inline-flex; vertical-align: middle; transition: all 0.2s; background: #fff; padding: 4px; border-radius: 50%; box-shadow: 2px 2px 0px rgba(0,0,0,0.5);}
-        .ig-link:hover { transform: scale(1.1) translate(-2px, -2px); box-shadow: 4px 4px 0px #e53935; }
-        .ig-icon { width: 18px; height: 18px; fill: url(#ig-grad-final); display: block;}
-
+        .ig-link { display: inline-flex; vertical-align: middle; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.9; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8)); }
+        .ig-link:hover { transform: scale(1.2) rotate(-5deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(220,39,67,0.6)); }
+        .ig-icon { width: 22px; height: 22px; fill: url(#ig-grad-final); display: block; }
         /* =========================================
            外籍行程表 (賽事門票風)
         ========================================= */
