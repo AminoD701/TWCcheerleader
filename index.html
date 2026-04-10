@@ -450,50 +450,91 @@
         /* =========================================
            ✨ 響應式微調 ✨
         ========================================= */
+        /* =========================================
+           ✨ 手機版專屬優化 (橫向滑動 & 極致壓縮) ✨
+        ========================================= */
         @media (max-width: 768px) {
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
             .landing-subtitle { font-size: 1rem; letter-spacing: 3px; }
             .enter-btn { padding: 12px 30px; font-size: 1.2rem; }
-            
             .title { font-size: 22px; letter-spacing: 2px; }
-            .grid-container { padding: 0 15px; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px auto 40px;}
-            .photo-area { height: 220px; border-bottom-width: 3px; }
-            .card { box-shadow: 4px 4px 0px rgba(0,0,0,0.6); }
-            .card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.8); }
             
-            .info-section { padding: 15px; }
-            .nickname { font-size: 18px; }
-            .number { font-size: 22px; padding: 2px 8px; }
+            /* [1] 女孩卡片壓縮 */
+            .grid-container { padding: 0 10px; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px auto 40px;}
+            .photo-area { height: 180px; border-bottom-width: 3px; }
+            .card { box-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
+            .card:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.8); }
+            .info-section { padding: 12px; }
+            .nickname { font-size: 16px; }
+            .number { font-size: 18px; padding: 2px 6px; }
+            .data-label { min-width: 45px; font-size: 12px; }
+            .data-value { font-size: 13px; }
+            .sport-tag { font-size: 10px; padding: 4px 8px; }
+
+            /* [2] 上方區塊：改為橫向滑動 (省下超多垂直空間) */
+            .sport-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .sport-tabs::-webkit-scrollbar { display: none; } /* 隱藏滾動條 */
+            .sport-btn { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
             
-            .event-list-container { padding: 0 15px; }
-            .event-item { flex-direction: column; align-items: stretch; gap: 20px; padding: 20px; }
-            .event-date-box { flex-direction: row; width: 100%; justify-content: flex-start; gap: 15px; padding: 15px; min-width: auto; transform: skewX(0); box-shadow: 4px 4px 0px rgba(0,0,0,0.5);}
-            .date-month { margin-bottom: 0; padding: 4px 12px; }
-            .date-day { font-size: 32px; }
+            .team-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .team-tabs::-webkit-scrollbar { display: none; }
+            .tab-btn { flex-shrink: 0; min-width: 85px; height: 80px; padding: 8px; }
+            .tab-logo { width: 28px; height: 28px; }
             
-            .event-girls-hero { gap: 15px; justify-content: flex-start; }
-            .girl-hero-img { width: 65px; height: 65px; }
-            .girl-hero-card { width: 70px; }
-            .girl-hero-name { font-size: 14px; }
+            /* 針對 JS 內聯樣式的覆蓋 */
+            .league-group { align-items: flex-start; }
+            .league-group > div { flex-wrap: nowrap !important; overflow-x: auto; width: 100%; justify-content: flex-start !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; padding-bottom: 5px;}
+            .league-group > div::-webkit-scrollbar { display: none; }
+
+            /* [3] 搜尋與篩選列：橫向滑動 */
+            .sticky-filter-wrapper { padding: 10px; }
+            .filters { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; }
+            .filters::-webkit-scrollbar { display: none; }
+            .filters input, .filters select { flex-shrink: 0; padding: 8px 12px; min-width: 110px; font-size: 13px; }
+            #searchInput { min-width: 160px; order: 0; }
+
+            /* [4] 班表矩陣：極致壓縮版 */
+            .schedule-matrix-container { padding: 0 5px; }
+            .schedule-table th, .schedule-table td { padding: 10px 4px; }
             
-            .tab-btn { min-width: calc(33.33% - 6px); height: auto; padding: 12px 8px; font-size: 12px; }
-            .tab-logo { width: 32px; height: 32px; }
+            /* 縮小首列 (日期) */
+            .schedule-table td:first-child, .schedule-table th:first-child { width: 70px; min-width: 70px; padding: 10px 2px; font-size: 14px;}
+            .schedule-date { font-size: 16px; }
+            .schedule-day { font-size: 10px; margin-top: 2px; }
             
-            .schedule-matrix-container { padding: 0 10px; }
-            .schedule-team-btn { width: 100%; gap: 15px; padding: 18px; }
+            /* 縮小女孩列 */
+            .schedule-table th:not(:first-child), .schedule-table td:not(:first-child) { width: 60px; min-width: 60px; }
+            .schedule-girl-img { width: 38px; height: 38px; border-width: 1px; border-radius: 4px; }
+            .schedule-girl-name { font-size: 11px; }
+            .schedule-girl-nickname { font-size: 10px; }
+            .schedule-heart { width: 18px; height: 18px; }
             
+            /* 班表大廳 */
+            .schedule-league-section { padding: 15px; }
+            .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
+            .schedule-team-btn img { width: 40px; height: 40px; }
+            .no-logo-icon { width: 40px; height: 40px; font-size: 20px; }
+
+            /* [5] 外籍行程 */
+            .event-list-container { padding: 0 10px; }
+            .event-item { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
+            .event-date-box { flex-direction: row; width: 100%; justify-content: flex-start; gap: 12px; padding: 12px; min-width: auto; transform: skewX(0); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);}
+            .date-month { margin-bottom: 0; padding: 4px 10px; font-size: 12px;}
+            .date-day { font-size: 24px; }
+            .event-girls-hero { gap: 12px; }
+            .girl-hero-img { width: 50px; height: 50px; }
+            .girl-hero-card { width: 55px; }
+            .girl-hero-name { font-size: 12px; }
+            .event-title-small { font-size: 16px; }
+            
+            /* [6] 個人彈窗與其他 */
             .modal-content { max-width: 100%; border-radius: 4px 4px 0 0; align-self: flex-end; border-bottom: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-            .modal-photo { height: 300px; border-bottom-width: 4px;}
-            .modal-body { padding: 25px; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
-            .modal-nickname { font-size: 26px; }
-            .modal-number { font-size: 28px; }
+            .modal-photo { height: 260px; border-bottom-width: 3px;}
+            .modal-body { padding: 20px; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+            .modal-nickname { font-size: 24px; }
+            .modal-number { font-size: 26px; }
             
-            .sticky-filter-wrapper { padding: 12px; }
-            .filters { gap: 8px; }
-            .filters input, .filters select { padding: 10px; min-width: calc(50% - 4px); font-size: 13px; }
-            #searchInput { width: 100%; min-width: 100%; order: -1; }
-            
-            .back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; box-shadow: 3px 3px 0px var(--border-color);}
+            .back-to-top { bottom: 15px; right: 15px; width: 45px; height: 45px; box-shadow: 3px 3px 0px var(--border-color);}
         }
     </style>
 </head>
