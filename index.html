@@ -158,9 +158,10 @@
         .tab-btn:hover { background: #252c36; transform: translateY(-3px); color: #fff; border-bottom-color: var(--team-accent); }
         .tab-logo { width: 40px; height: 40px; object-fit: contain; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
         .tab-btn.active { 
-            background-color: #fff; color: #000; 
-            border-color: #fff; border-bottom: 4px solid var(--team-accent);
-            transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.5); 
+            background-color: var(--team-accent); color: #111; /* 背景使用球隊專屬色，文字用深黑確保對比清晰 */
+            border-color: var(--team-accent); border-bottom: 4px solid rgba(0,0,0,0.3); /* 底部加深一點製造按鈕立體感 */
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.6), 0 0 15px var(--team-accent); /* 加入該顏色的光暈，更有運動賽事感 */
         }
 
         /* ✨ 吸頂浮動搜尋列 (競技計分板) ✨ */
