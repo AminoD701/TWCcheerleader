@@ -274,10 +274,6 @@
         .schedule-team-btn:hover { background: #252c36; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: #fff; border-bottom-color: var(--btn-accent, #fff); }
         .schedule-team-btn img { width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         
-        .no-logo-icon { 
-            width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; 
-            background: #252c36; border-radius: 50%; font-family: var(--sport-font); font-size: 28px; font-weight: 900; 
-        }
         .schedule-team-btn span { color: #fff; font-weight: 900; font-size: 18px; letter-spacing: 1px; font-family: var(--tc-font); }
 
         .back-btn { 
@@ -448,9 +444,6 @@
         .footer-content strong { color: #fff; letter-spacing: 1px; }
 
         /* =========================================
-           ✨ 響應式微調 ✨
-        ========================================= */
-        /* =========================================
            ✨ 手機版專屬優化 (橫向滑動 & 極致壓縮) ✨
         ========================================= */
         @media (max-width: 768px) {
@@ -513,7 +506,6 @@
             .schedule-league-section { padding: 15px; }
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
-            .no-logo-icon { width: 40px; height: 40px; font-size: 20px; }
 
             /* [5] 外籍行程 */
             .event-list-container { padding: 0 10px; }
@@ -643,7 +635,7 @@
         <div class="footer-content">
             <p> <strong>備註：</strong>資料如需更正或是照片需下架，麻煩請聯繫告知。聯繫信箱：lc559058@gmail.com</p>
             <p> <strong>免責聲明：</strong>本網站所有資料版權均屬原球團及所屬經紀公司所有。行程僅供參考，以官方公佈為準。</p>
-            <p style="font-family: var(--sport-font); margin-top: 10px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2024</p>
+            <p style="font-family: var(--sport-font); margin-top: 10px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2026</p>
         </div>
     </footer>
 
@@ -729,7 +721,7 @@
         const eventsGid = "925411186";
         const schedulesGid = "1702657458"; 
 
-        // 運動版主題配色 (強調飽和度)
+        // 運動版主題配色
         const teamThemes = {
             "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: false, league: "" },
             "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
@@ -892,7 +884,8 @@
             const btn = document.createElement('button');
             btn.className = `tab-btn ${safeTeam === currentTeam ? 'active' : ''}`;
             
-            const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : `<div class="no-logo-icon" style="color:${config.accent}">${safeTeam.charAt(0)}</div>`;
+            // 移除原本自動抓取首字的 fallback，改為直接輸出空字串
+            const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
             
             btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
             btn.style.setProperty('--team-accent', config.accent); 
@@ -954,15 +947,31 @@
                     else groups["其他活動"].push(p);
                 });
 
+                // 新增各聯盟對應顏色
+                let leagueColors = { 
+                    "CPBL 職業棒球": "#00e5ff", 
+                    "TPBL 職籃聯盟": "#ff9800", 
+                    "P. LEAGUE+ 職籃聯盟": "#ffeb3b", 
+                    "職業排球": "#ff80ab", 
+                    "其他活動": "#a0aec0" 
+                };
+
                 let html = `<div class="schedule-selection-wrapper">`;
                 for(let [gName, pList] of Object.entries(groups)) {
                     if(pList.length === 0) continue;
-                    html += `<div class="schedule-league-section"><div class="schedule-league-title">${gName}</div><div class="schedule-teams-grid">`;
+                    
+                    let lColor = leagueColors[gName] || "#00e676";
+                    
+                    // 動態帶入背景色
+                    html += `<div class="schedule-league-section"><div class="schedule-league-title" style="background: ${lColor};">${gName}</div><div class="schedule-teams-grid">`;
                     pList.sort((a,b)=>a.team.localeCompare(b.team, 'zh-TW')).forEach(p => {
                         let t = p.team; let sp = p.sport;
                         let cfgKey = teamThemes[`${t}_${sp}`] ? `${t}_${sp}` : t;
                         let cfg = teamThemes[cfgKey] || { accent: "#ccc" };
-                        let logoHtml = (cfg.logo && !cfg.noLogo) ? `<img src="${cfg.logo}">` : `<div class="no-logo-icon" style="color:${cfg.accent}">${t.charAt(0)}</div>`;
+                        
+                        // 班表區塊也取消強制產生首字母的設定
+                        let logoHtml = (cfg.logo && !cfg.noLogo) ? `<img src="${cfg.logo}">` : ``;
+                        
                         html += `<div class="schedule-team-btn" style="--btn-accent: ${cfg.accent}" onclick="selectScheduleTeam('${t}', '${sp}')">${logoHtml}<span>${t}</span></div>`;
                     });
                     html += `</div></div>`;
