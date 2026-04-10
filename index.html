@@ -199,10 +199,10 @@
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
         /* =========================================
-           ✨ 個人詳細彈窗 ✨
+           ✨ 個人詳細彈窗 (修復手機版捲動高度) ✨
         ========================================= */
         .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; /* 使用 dvh 解決手機網址列縮放吃高度的問題 */
             background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); 
             display: flex; align-items: center; justify-content: center; 
             z-index: 10000; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px; 
@@ -213,6 +213,7 @@
             width: 100%; max-width: 450px; position: relative; 
             transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             box-shadow: 15px 15px 0px rgba(0,0,0,0.6); overflow: hidden;
+            max-height: 90dvh; display: flex; flex-direction: column; /* 確保外層可伸縮 */
         }
         .modal-overlay.active .modal-content { transform: scale(1); }
         
@@ -227,7 +228,7 @@
         .modal-close:hover { background: var(--fav-accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.5); }
         
         /* 彈窗排版與解決捲動問題 */
-        .modal-layout { display: flex; flex-direction: column; max-height: 88vh; height: 100%; overflow: hidden; }
+        .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; } /* 強制縮放並允許內部滾動 */
         .modal-photo { 
             flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; object-position: top center; 
             border-bottom: 6px solid var(--modal-accent, #fff); 
@@ -256,7 +257,7 @@
             background: #15191e; color: #fff; text-decoration: none; padding: 16px; border-radius: 2px; 
             font-weight: 900; font-size: 16px; margin-top: 30px; transition: all 0.3s ease;
             border: 2px solid #2d3748; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); 
-            font-family: var(--sport-font); letter-spacing: 1px; overflow: hidden; position: relative;
+            font-family: var(--sport-font); letter-spacing: 1px; overflow: hidden; position: relative; flex-shrink: 0;
         }
         .modal-ig-btn svg { width: 22px; height: 22px; fill: url(#ig-grad-final); transition: all 0.3s; position: relative; z-index: 1; }
         .modal-ig-btn span { position: relative; z-index: 1; }
@@ -457,7 +458,7 @@
         .footer-content strong { color: #fff; letter-spacing: 1px; }
 
         /* =========================================
-           ✨ 手機版專屬優化 (橫向滑動 & 極致壓縮) ✨
+           ✨ 手機版專屬優化 (橫向滑動 & 底部滑出彈窗) ✨
         ========================================= */
         @media (max-width: 768px) {
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
@@ -477,9 +478,9 @@
             .data-value { font-size: 13px; }
             .sport-tag { font-size: 10px; padding: 4px 8px; }
 
-            /* [2] 上方區塊：改為橫向滑動 (省下超多垂直空間) */
+            /* [2] 上方區塊：改為橫向滑動 */
             .sport-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-            .sport-tabs::-webkit-scrollbar { display: none; } /* 隱藏滾動條 */
+            .sport-tabs::-webkit-scrollbar { display: none; } 
             .sport-btn { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
             
             .team-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
@@ -487,7 +488,6 @@
             .tab-btn { flex-shrink: 0; min-width: 85px; height: 80px; padding: 8px; }
             .tab-logo { width: 28px; height: 28px; }
             
-            /* 針對 JS 內聯樣式的覆蓋 */
             .league-group { align-items: flex-start; }
             .league-group > div { flex-wrap: nowrap !important; overflow-x: auto; width: 100%; justify-content: flex-start !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; padding-bottom: 5px;}
             .league-group > div::-webkit-scrollbar { display: none; }
@@ -503,19 +503,16 @@
             .schedule-matrix-container { padding: 0 5px; }
             .schedule-table th, .schedule-table td { padding: 10px 4px; }
             
-            /* 縮小首列 (日期) */
             .schedule-table td:first-child, .schedule-table th:first-child { width: 70px; min-width: 70px; padding: 10px 2px; font-size: 14px;}
             .schedule-date { font-size: 16px; }
             .schedule-day { font-size: 10px; margin-top: 2px; }
             
-            /* 縮小女孩列 */
             .schedule-table th:not(:first-child), .schedule-table td:not(:first-child) { width: 60px; min-width: 60px; }
             .schedule-girl-img { width: 38px; height: 38px; border-width: 1px; border-radius: 4px; }
             .schedule-girl-name { font-size: 11px; }
             .schedule-girl-nickname { font-size: 10px; }
             .schedule-heart { width: 18px; height: 18px; }
             
-            /* 班表大廳 */
             .schedule-league-section { padding: 15px; }
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
@@ -532,13 +529,27 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
-            /* [6] 個人彈窗與其他 */
-            .modal-content { max-height: 85vh; display: flex; flex-direction: column; max-width: 100%; border-radius: 4px 4px 0 0; align-self: flex-end; border-bottom: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-            .modal-layout { height: 100%; }
-            .modal-photo { flex-shrink: 0; height: 260px; border-bottom-width: 3px;}
-            .modal-body { flex: 1; min-height: 0; padding: 20px; overflow-y: auto; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
-            .modal-nickname { font-size: 24px; }
-            .modal-number { font-size: 26px; }
+            /* [6] 個人彈窗與其他 (完美解決底部滑動問題) */
+            .modal-overlay { align-items: flex-end; padding: 0; }
+            .modal-content { 
+                max-height: 85dvh; display: flex; flex-direction: column; 
+                max-width: 100%; border-radius: 12px 12px 0 0; 
+                border: none; border-top: 4px solid var(--modal-accent, #fff);
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.8); 
+                transform: translateY(100%) !important; margin: 0;
+            }
+            .modal-overlay.active .modal-content { transform: translateY(0) !important; } /* 滑動出現動畫 */
+            .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+            .modal-photo { flex-shrink: 0; height: 160px; border-bottom-width: 2px;} /* 照片縮小留給資料 */
+            .modal-body { 
+                flex: 1; min-height: 0; padding: 20px; overflow-y: auto; 
+                -webkit-overflow-scrolling: touch; 
+                padding-bottom: max(40px, env(safe-area-inset-bottom)); 
+            }
+            .modal-nickname { font-size: 22px; }
+            .modal-number { font-size: 22px; padding: 2px 10px; }
+            .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
+            .modal-close { top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(0,0,0,0.8); }
             
             .back-to-top { bottom: 15px; right: 15px; width: 45px; height: 45px; box-shadow: 3px 3px 0px var(--border-color);}
         }
@@ -736,7 +747,7 @@
 
         // 運動版主題配色
         const teamThemes = {
-            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" }, // 全部的 noLogo 設為 true 避免產生文字圖示
+            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
             "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
             "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
             "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
@@ -897,7 +908,6 @@
             const btn = document.createElement('button');
             btn.className = `tab-btn ${safeTeam === currentTeam ? 'active' : ''}`;
             
-            // 如果有設定官方 logo 就顯示，沒有的話就不產生任何 logo 標記
             const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
             
             btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
@@ -960,12 +970,11 @@
                     else groups["其他活動"].push(p);
                 });
 
-                // 各聯盟對應專屬背景顏色
                 let leagueColors = { 
-                    "CPBL 職業棒球": "#00b0ff", /* 電光藍 */
-                    "TPBL 職籃聯盟": "#ff9800", /* 活力橘 */
-                    "P. LEAGUE+ 職籃聯盟": "#ffeb3b", /* 閃電黃 */
-                    "職業排球": "#ff4081", /* 螢光粉 */
+                    "CPBL 職業棒球": "#00b0ff", 
+                    "TPBL 職籃聯盟": "#ff9800", 
+                    "P. LEAGUE+ 職籃聯盟": "#ffeb3b", 
+                    "職業排球": "#ff4081", 
                     "其他活動": "#a0aec0" 
                 };
 
@@ -981,7 +990,6 @@
                         let cfgKey = teamThemes[`${t}_${sp}`] ? `${t}_${sp}` : t;
                         let cfg = teamThemes[cfgKey] || { accent: "#ccc" };
                         
-                        // 班表區塊也沒有文字 fallback
                         let logoHtml = (cfg.logo && !cfg.noLogo) ? `<img src="${cfg.logo}">` : ``;
                         
                         html += `<div class="schedule-team-btn" style="--btn-accent: ${cfg.accent}" onclick="selectScheduleTeam('${t}', '${sp}')">${logoHtml}<span>${t}</span></div>`;
