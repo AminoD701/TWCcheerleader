@@ -380,8 +380,8 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <p>💡 <strong>練習生備註：</strong>部分女孩目前為「練習生」或「培訓生」身分，實際登場與轉正安排請依各球團公告為主。</p>
-            <p>⚠️ <strong>免責聲明：</strong>本網站所有資料版權均屬原球團及所屬經紀公司所有。行程與班表僅供參考。</p>
+            <p> <strong>備註：</strong>資料如需更正或是照片需下架，麻煩請聯繫告知。聯繫信箱：lc559058@gmail.com</p>
+            <p> <strong>免責聲明：</strong>本網站所有資料版權均屬原球團及所屬經紀公司所有。行程僅供參考。</p>
         </div>
     </footer>
 
@@ -842,6 +842,8 @@
                             <div class="data-row"><span class="data-label">啦啦隊</span><span class="data-value" style="color:${cardAccent}">${teams.join('<br>')}</span></div>
                             <div class="data-row"><span class="data-label">國籍</span><span class="data-value">${c.nat || "-"}</span></div>
                             <div class="data-row"><span class="data-label">生日</span><span class="data-value">${c.dob || "-"}</span></div>
+                            <div class="data-row"><span class="data-label">星座</span><span class="data-value">${c.zodiac || "-"}</span></div>
+                            <div class="data-row"><span class="data-label">身高</span><span class="data-value">${c.height ? c.height + ' cm' : '-'}</span></div>
                         </div>
                     </div>
                 </div>`;
