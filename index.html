@@ -199,10 +199,10 @@
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
         /* =========================================
-           ✨ 個人詳細彈窗 (修復手機版捲動高度) ✨
+           ✨ 個人詳細彈窗 ✨
         ========================================= */
         .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; /* 使用 dvh 解決手機網址列縮放吃高度的問題 */
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); 
             display: flex; align-items: center; justify-content: center; 
             z-index: 10000; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px; 
@@ -213,7 +213,7 @@
             width: 100%; max-width: 450px; position: relative; 
             transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             box-shadow: 15px 15px 0px rgba(0,0,0,0.6); overflow: hidden;
-            max-height: 90dvh; display: flex; flex-direction: column; /* 確保外層可伸縮 */
+            max-height: 90dvh; display: flex; flex-direction: column; 
         }
         .modal-overlay.active .modal-content { transform: scale(1); }
         
@@ -228,7 +228,7 @@
         .modal-close:hover { background: var(--fav-accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.5); }
         
         /* 彈窗排版與解決捲動問題 */
-        .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; } /* 強制縮放並允許內部滾動 */
+        .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; } 
         .modal-photo { 
             flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; object-position: top center; 
             border-bottom: 6px solid var(--modal-accent, #fff); 
@@ -241,11 +241,15 @@
         .modal-header-info { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px dashed var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
         .modal-nickname { font-size: 32px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
         .modal-realname { font-size: 15px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; }
+        
+        /* 彈窗背號樣式 (深色質感) */
         .modal-number { 
-            font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #000; 
-            background: #fff; padding: 2px 15px; border-radius: 2px; line-height: 1.2;
-            box-shadow: 4px 4px 0px var(--modal-accent, #555); transform: skewX(-5deg);
+            font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: var(--modal-accent, #ffeb3b); 
+            background: #111418; padding: 4px 15px; border-radius: 4px; line-height: 1.2;
+            border: 2px solid var(--border-color);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5); transform: skewX(-5deg);
         }
+
         .modal-data-grid { display: flex; flex-direction: column; gap: 16px; }
         .modal-data-row { display: flex; justify-content: space-between; font-size: 15px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;}
         .modal-data-label { color: var(--text-sub); font-weight: 700; font-family: var(--tc-font); }
@@ -378,11 +382,14 @@
         .nickname-container { display: flex; align-items: center; gap: 10px; }
         .nickname { font-size: 24px; font-weight: 900; color: var(--team-accent, #fff); line-height: 1; text-transform: uppercase;}
         .realname { font-size: 14px; color: var(--text-sub); margin-top: 8px; font-weight: 700; letter-spacing: 1px; }
+        
+        /* 卡片背號樣式 (縮小、深色底) */
         .number { 
-            font-family: var(--sport-font); font-size: 28px; font-weight: 900; color: #000; 
-            background: #fff; padding: 2px 12px; border-radius: 2px; text-align: center; line-height: 1.1;
-            transform: skewX(-5deg); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+            font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: var(--team-accent, #ffeb3b); 
+            background: #111418; padding: 4px 12px; border-radius: 4px; text-align: center; line-height: 1.1;
+            border: 2px solid var(--border-color); transform: skewX(-5deg); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
         }
+
         .data-grid { display: flex; flex-direction: column; gap: 12px; }
         .data-row { display: flex; justify-content: space-between; font-size: 14px; align-items: center; }
         .data-label { color: var(--text-sub); font-weight: 700; min-width: 65px; }
@@ -466,19 +473,20 @@
             .enter-btn { padding: 12px 30px; font-size: 1.2rem; }
             .title { font-size: 22px; letter-spacing: 2px; }
             
-            /* [1] 女孩卡片壓縮 */
             .grid-container { padding: 0 10px; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px auto 40px;}
             .photo-area { height: 180px; border-bottom-width: 3px; }
             .card { box-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
             .card:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.8); }
             .info-section { padding: 12px; }
             .nickname { font-size: 16px; }
-            .number { font-size: 18px; padding: 2px 6px; }
+            
+            /* 手機版卡片背號縮小 */
+            .number { font-size: 16px; padding: 4px 8px; }
+            
             .data-label { min-width: 45px; font-size: 12px; }
             .data-value { font-size: 13px; }
             .sport-tag { font-size: 10px; padding: 4px 8px; }
 
-            /* [2] 上方區塊：改為橫向滑動 */
             .sport-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
             .sport-tabs::-webkit-scrollbar { display: none; } 
             .sport-btn { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
@@ -492,14 +500,12 @@
             .league-group > div { flex-wrap: nowrap !important; overflow-x: auto; width: 100%; justify-content: flex-start !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; padding-bottom: 5px;}
             .league-group > div::-webkit-scrollbar { display: none; }
 
-            /* [3] 搜尋與篩選列：橫向滑動 */
             .sticky-filter-wrapper { padding: 10px; }
             .filters { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; }
             .filters::-webkit-scrollbar { display: none; }
             .filters input, .filters select { flex-shrink: 0; padding: 8px 12px; min-width: 110px; font-size: 13px; }
             #searchInput { min-width: 160px; order: 0; }
 
-            /* [4] 班表矩陣：極致壓縮版 */
             .schedule-matrix-container { padding: 0 5px; }
             .schedule-table th, .schedule-table td { padding: 10px 4px; }
             
@@ -517,7 +523,6 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
-            /* [5] 外籍行程 */
             .event-list-container { padding: 0 10px; }
             .event-item { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
             .event-date-box { flex-direction: row; width: 100%; justify-content: flex-start; gap: 12px; padding: 12px; min-width: auto; transform: skewX(0); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);}
@@ -529,7 +534,6 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
-            /* [6] 個人彈窗與其他 (完美解決底部滑動問題) */
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { 
                 max-height: 85dvh; display: flex; flex-direction: column; 
@@ -538,16 +542,19 @@
                 box-shadow: 0 -10px 30px rgba(0,0,0,0.8); 
                 transform: translateY(100%) !important; margin: 0;
             }
-            .modal-overlay.active .modal-content { transform: translateY(0) !important; } /* 滑動出現動畫 */
+            .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
             .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-            .modal-photo { flex-shrink: 0; height: 380px; border-bottom-width: 4px;} /* 恢復大張美照！底下的資料一樣可以順暢滑動 */
+            .modal-photo { flex-shrink: 0; height: 380px; border-bottom-width: 4px;} 
             .modal-body { 
                 flex: 1; min-height: 0; padding: 20px; overflow-y: auto; 
                 -webkit-overflow-scrolling: touch; 
                 padding-bottom: max(40px, env(safe-area-inset-bottom)); 
             }
             .modal-nickname { font-size: 22px; }
-            .modal-number { font-size: 22px; padding: 2px 10px; }
+            
+            /* 手機版彈窗背號縮小 */
+            .modal-number { font-size: 22px; padding: 4px 12px; }
+            
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
             .modal-close { top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(0,0,0,0.8); }
             
@@ -696,7 +703,10 @@
 
             const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
             const sports = (c.mS || [c.sport || ""]);
-            const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-");
+            
+            // 透過 map 幫背號加上 '#' 符號
+            const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-").map(n => '#' + n);
+            
             const lookupTeam = teams[0] || "全部啦啦隊"; 
             const lookupSport = currentSport === "全部" ? "" : currentSport;
             
@@ -745,7 +755,6 @@
         const eventsGid = "925411186";
         const schedulesGid = "1702657458"; 
 
-        // 運動版主題配色
         const teamThemes = {
             "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
             "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
@@ -1126,7 +1135,9 @@
                 const isFav = myFavorites.includes(c.realname);
                 
                 let sportTags = sports.map(s=>`<div class="sport-tag tag-${s.includes("棒")?'baseball':s.includes("籃")?'basketball':'volleyball'}">${s}</div>`).join('');
-                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").join('<br>') || "-";
+                
+                // 透過 map 幫背號加上 '#' 符號
+                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + n).join('<br>') || "-";
 
                 return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="openModal('${c.realname}')">
