@@ -1095,10 +1095,13 @@
             const cfg = teamThemes[currentScheduleTeam+"_"+currentScheduleSport] || teamThemes[currentScheduleTeam] || { accent: "#fff" };
 
             let html = `<div style="width:100%;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
-            html += `<div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
+           html += `<div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
                     const g = dbGirls.find(girl => girl.realname === n || girl.nickname === n);
-                    return `<th onclick="window.openModal('${n}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${g?g.img:''}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${g?g.realname:n}</span></div></div></th>`;
+                    const showReal = g ? g.realname : n;
+                    const showNick = (g && g.nickname && g.nickname !== g.realname) ? g.nickname : "";
+                    
+                    return `<th onclick="window.openModal('${n}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${g?g.img:''}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
             dates.forEach(dNum => {
