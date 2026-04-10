@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台灣啦啦隊資料庫 |</title>
+    <title>台灣啦啦隊資料庫 | </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         /* 引入運動風字體 Oswald 與 思源黑體 */
@@ -227,7 +227,6 @@
         .modal-close svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 3; fill: none; }
         .modal-close:hover { background: var(--fav-accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.5); }
         
-        /* 彈窗排版與解決捲動問題 */
         .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; } 
         .modal-photo { 
             flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; object-position: top center; 
@@ -242,7 +241,6 @@
         .modal-nickname { font-size: 32px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
         .modal-realname { font-size: 15px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; }
         
-        /* 彈窗背號樣式 (深色質感) */
         .modal-number { 
             font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: var(--modal-accent, #ffeb3b); 
             background: #111418; padding: 4px 15px; border-radius: 4px; line-height: 1.2;
@@ -255,7 +253,6 @@
         .modal-data-label { color: var(--text-sub); font-weight: 700; font-family: var(--tc-font); }
         .modal-data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 16px; }
         
-        /* 高級感 IG 按鈕 (暗黑漸層質感版) */
         .modal-ig-btn { 
             display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; 
             background: #15191e; color: #fff; text-decoration: none; padding: 16px; border-radius: 2px; 
@@ -271,6 +268,10 @@
             transform: translate(-2px, -2px); box-shadow: 8px 8px 0px rgba(0,0,0,0.9); 
         }
         .modal-ig-btn:hover svg { fill: #fff; transform: scale(1.1); }
+
+        /* 班表導航按鈕樣式 */
+        .schedule-jump-btn { transition: all 0.2s; cursor: pointer; }
+        .schedule-jump-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 4px 4px 0px rgba(0,0,0,0.6) !important; filter: brightness(1.1); }
 
         /* =========================================
            ✨ 班表專屬大廳 ✨
@@ -465,7 +466,7 @@
         .footer-content strong { color: #fff; letter-spacing: 1px; }
 
         /* =========================================
-           ✨ 手機版專屬優化 (橫向滑動 & 底部滑出彈窗) ✨
+           ✨ 手機版專屬優化 ✨
         ========================================= */
         @media (max-width: 768px) {
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
@@ -473,7 +474,6 @@
             .enter-btn { padding: 12px 30px; font-size: 1.2rem; }
             .title { font-size: 22px; letter-spacing: 2px; }
             
-            /* [1] 女孩卡片壓縮 */
             .grid-container { padding: 0 10px; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px auto 40px;}
             .photo-area { height: 180px; border-bottom-width: 3px; }
             .card { box-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
@@ -488,7 +488,6 @@
             .data-value { font-size: 13px; }
             .sport-tag { font-size: 10px; padding: 4px 8px; }
 
-            /* [2] 上方區塊：改為橫向滑動 */
             .sport-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
             .sport-tabs::-webkit-scrollbar { display: none; } 
             .sport-btn { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
@@ -502,14 +501,12 @@
             .league-group > div { flex-wrap: nowrap !important; overflow-x: auto; width: 100%; justify-content: flex-start !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; padding-bottom: 5px;}
             .league-group > div::-webkit-scrollbar { display: none; }
 
-            /* [3] 搜尋與篩選列：橫向滑動 */
             .sticky-filter-wrapper { padding: 10px; }
             .filters { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; }
             .filters::-webkit-scrollbar { display: none; }
             .filters input, .filters select { flex-shrink: 0; padding: 8px 12px; min-width: 110px; font-size: 13px; }
             #searchInput { min-width: 160px; order: 0; }
 
-            /* [4] 班表矩陣：極致壓縮版 */
             .schedule-matrix-container { padding: 0 5px; }
             .schedule-table th, .schedule-table td { padding: 10px 4px; }
             
@@ -527,7 +524,6 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
-            /* [5] 外籍行程 */
             .event-list-container { padding: 0 10px; }
             .event-item { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
             .event-date-box { flex-direction: row; width: 100%; justify-content: flex-start; gap: 12px; padding: 12px; min-width: auto; transform: skewX(0); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);}
@@ -539,7 +535,6 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
-            /* [6] 個人彈窗與其他 (完美解決底部滑動問題) */
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { 
                 max-height: 85dvh; display: flex; flex-direction: column; 
@@ -703,6 +698,19 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // =========================================================================
+        // ✨ 新增跳轉至班表功能
+        // =========================================================================
+        window.goToSchedule = function(team, sport) {
+            closeModal();
+            // 切換到班表 Tab
+            document.querySelector('.sport-btn.btn-schedule').click();
+            // 選擇指定球隊與運動
+            selectScheduleTeam(team, sport);
+            // 滾動到最上方
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         function openModal(name) {
             const c = dbGirls.find(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
             if(!c) return;
@@ -710,7 +718,6 @@
             const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
             const sports = (c.mS || [c.sport || ""]);
             
-            // 透過 map 幫背號加上 '#' 符號
             const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-").map(n => '#' + n);
             
             const lookupTeam = teams[0] || "全部啦啦隊"; 
@@ -740,29 +747,33 @@
                 // 照日期排序
                 herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
                 let dateBoxes = '';
-                let uniqueDates = [];
+                let renderedKeys = [];
 
                 herSchedules.forEach(s => {
-                    // 避免同一天重複顯示
-                    if (!uniqueDates.includes(s.safeDate.num)) {
-                        uniqueDates.push(s.safeDate.num);
+                    // 以 日期+球隊+運動 為唯一鍵值，避免同一天同一隊重複顯示
+                    let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
+                    if (!renderedKeys.includes(key)) {
+                        renderedKeys.push(key);
                         // 判斷日期是否已過，改變視覺樣式
                         const isPast = s.safeDate.num < todayNum;
                         const opacity = isPast ? '0.4' : '1';
                         const borderColor = isPast ? 'var(--border-color)' : cardAccent;
                         const textColor = isPast ? 'var(--text-sub)' : '#fff';
+                        const teamColor = isPast ? 'var(--text-sub)' : cardAccent;
 
+                        // dateBoxes 內容，並掛上 onclick 跳轉事件
                         dateBoxes += `
-                        <div style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 6px 12px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3);">
+                        <div class="schedule-jump-btn" onclick="goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: all 0.2s;">
                             <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
-                            <span style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: ${textColor}; line-height: 1.1; margin-top: 2px;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                            <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: ${textColor}; line-height: 1.1; margin: 4px 0;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                            <span style="font-size: 11px; color: ${teamColor}; text-align: center; line-height: 1.2; font-weight: 700;">${s.team}<br>${s.sport}</span>
                         </div>`;
                     }
                 });
 
                 scheduleHtml = `
                     <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
-                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE</div>
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE <span style="font-size: 12px; color: var(--text-sub); font-family: var(--tc-font); font-weight: normal; margin-left: 5px;">(點擊前往班表)</span></div>
                         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                             ${dateBoxes}
                         </div>
@@ -985,14 +996,6 @@
             btn.onclick = () => { currentTeam = safeTeam; document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active')); btn.classList.add('active'); applyTheme(safeTeam); renderContent(); };
             return btn;
         }
-
-        window.selectScheduleTeam = function(t, sp) { 
-            currentScheduleTeam = t; currentScheduleSport = sp;
-            let cfgKey = teamThemes[`${t}_${sp}`] ? `${t}_${sp}` : t;
-            let config = teamThemes[cfgKey] || teamThemes["全部啦啦隊"];
-            document.documentElement.style.setProperty('--team-accent', config.accent);
-            renderContent(); 
-        };
         
         window.backToScheduleSelection = function() { 
             currentScheduleTeam = null; currentScheduleSport = null;
@@ -1073,7 +1076,7 @@
             let teamData = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             let html = `<button class="back-btn" onclick="backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回賽程總覽 BACK</span></button>`;
             
-            // == 新增：過濾掉過去的日期 ==
+            // == 過濾掉過去的日期 ==
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             teamData = teamData.filter(s => s.safeDate.num >= todayNum);
 
