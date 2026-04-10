@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台灣啦啦隊資料庫 | </title>
+    <title>台灣啦啦隊資料庫 | 競技熱血版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         /* 引入運動風字體 Oswald 與 思源黑體 */
@@ -57,10 +57,9 @@
             opacity: 0; filter: grayscale(40%) contrast(120%);
             animation: slideFade 24s infinite; z-index: 0;
         }
-        /* 高畫質運動員免費圖庫資源 */
-        .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } /* 棒球/熱血 */
-        .slide-2 { background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2000&auto=format&fit=crop'); animation-delay: 8s; } /* 籃球 */
-        .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } /* 排球 */
+        .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } 
+        .slide-2 { background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2000&auto=format&fit=crop'); animation-delay: 8s; } 
+        .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } 
         
         @keyframes slideFade {
             0% { opacity: 0; transform: scale(1.05); }
@@ -71,7 +70,7 @@
         }
 
         /* =========================================
-           ✨ 華麗入口畫面 (賽事海報風) ✨
+           ✨ 華麗入口畫面 ✨
         ========================================= */
         .landing-page {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -97,12 +96,12 @@
             letter-spacing: 2px; transform: skewX(-10deg); box-shadow: 6px 6px 0px var(--event-accent);
         }
         .enter-btn:hover { background: var(--event-accent); color: #fff; transform: skewX(-10deg) translate(-4px, -4px); box-shadow: 10px 10px 0px rgba(255,87,34,0.3); }
-        .enter-btn span { display: inline-block; transform: skewX(10deg); } /* 字體轉回來 */
+        .enter-btn span { display: inline-block; transform: skewX(10deg); }
         
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
         /* =========================================
-           主系統 Header (硬派計分板)
+           主系統 Header 
         ========================================= */
         .header { 
             background-color: rgba(17, 20, 24, 0.95);
@@ -130,7 +129,6 @@
         .sport-btn.active { background: #fff; color: #000; border-color: #fff; box-shadow: 4px 4px 0px rgba(255,255,255,0.2); }
         .btn-icon { width: 16px; height: 16px; fill: currentColor; }
         
-        /* 特別按鈕樣式 */
         .sport-btn.btn-fav { border-color: var(--fav-accent); color: var(--fav-accent); }
         .sport-btn.btn-fav.active { background: var(--fav-accent); color: #fff; border-color: var(--fav-accent); box-shadow: 4px 4px 0px rgba(229,57,53,0.3); }
 
@@ -157,14 +155,16 @@
         }
         .tab-btn:hover { background: #252c36; transform: translateY(-3px); color: #fff; border-bottom-color: var(--team-accent); }
         .tab-logo { width: 40px; height: 40px; object-fit: contain; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+        
+        /* 隊伍專屬色選取狀態 */
         .tab-btn.active { 
-            background-color: var(--team-accent); color: #111; /* 背景使用球隊專屬色，文字用深黑確保對比清晰 */
-            border-color: var(--team-accent); border-bottom: 4px solid rgba(0,0,0,0.3); /* 底部加深一點製造按鈕立體感 */
+            background-color: var(--team-accent); color: #111; 
+            border-color: var(--team-accent); border-bottom: 4px solid rgba(0,0,0,0.3); 
             transform: translateY(-3px); 
-            box-shadow: 0 8px 15px rgba(0,0,0,0.6), 0 0 15px var(--team-accent); /* 加入該顏色的光暈，更有運動賽事感 */
+            box-shadow: 0 8px 15px rgba(0,0,0,0.6), 0 0 15px var(--team-accent); 
         }
 
-        /* ✨ 吸頂浮動搜尋列 (競技計分板) ✨ */
+        /* ✨ 吸頂浮動搜尋列 ✨ */
         .sticky-filter-wrapper { 
             position: sticky; top: 0; z-index: 40; 
             background: rgba(17, 20, 24, 0.98); padding: 15px 20px; 
@@ -199,7 +199,7 @@
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
         /* =========================================
-           ✨ 個人詳細彈窗 (球員卡風格) ✨
+           ✨ 個人詳細彈窗 ✨
         ========================================= */
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
@@ -226,12 +226,16 @@
         .modal-close svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 3; fill: none; }
         .modal-close:hover { background: var(--fav-accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 5px 5px 0px rgba(0,0,0,0.5); }
         
-        .modal-layout { display: flex; flex-direction: column; max-height: 88dvh; overflow: hidden; }
+        /* 彈窗排版與解決捲動問題 */
+        .modal-layout { display: flex; flex-direction: column; max-height: 88vh; height: 100%; overflow: hidden; }
         .modal-photo { 
             flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; object-position: top center; 
             border-bottom: 6px solid var(--modal-accent, #fff); 
         }
-        .modal-body { padding: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(35px, env(safe-area-inset-bottom)); }
+        .modal-body { 
+            flex: 1; min-height: 0; padding: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+            padding-bottom: max(35px, env(safe-area-inset-bottom)); 
+        }
         
         .modal-header-info { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px dashed var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
         .modal-nickname { font-size: 32px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
@@ -246,25 +250,32 @@
         .modal-data-label { color: var(--text-sub); font-weight: 700; font-family: var(--tc-font); }
         .modal-data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 16px; }
         
-        /* 高級感 IG 按鈕 (熱血版) */
+        /* 高級感 IG 按鈕 (暗黑漸層質感版) */
         .modal-ig-btn { 
             display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; 
-            background: #fff; color: #000; text-decoration: none; padding: 16px; border-radius: 2px; 
-            font-weight: 900; font-size: 16px; margin-top: 30px; transition: all 0.2s;
-            box-shadow: 6px 6px 0px var(--border-color); font-family: var(--sport-font); letter-spacing: 1px;
+            background: #15191e; color: #fff; text-decoration: none; padding: 16px; border-radius: 2px; 
+            font-weight: 900; font-size: 16px; margin-top: 30px; transition: all 0.3s ease;
+            border: 2px solid #2d3748; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); 
+            font-family: var(--sport-font); letter-spacing: 1px; overflow: hidden; position: relative;
         }
-        .modal-ig-btn:hover { background: #bc1888; color: #fff; transform: translate(-2px, -2px); box-shadow: 8px 8px 0px rgba(0,0,0,0.5); }
-        .modal-ig-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .modal-ig-btn svg { width: 22px; height: 22px; fill: url(#ig-grad-final); transition: all 0.3s; position: relative; z-index: 1; }
+        .modal-ig-btn span { position: relative; z-index: 1; }
+        .modal-ig-btn:hover { 
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); 
+            border-color: transparent; color: #fff; 
+            transform: translate(-2px, -2px); box-shadow: 8px 8px 0px rgba(0,0,0,0.9); 
+        }
+        .modal-ig-btn:hover svg { fill: #fff; transform: scale(1.1); }
 
         /* =========================================
-           ✨ 班表專屬大廳 (賽程表風) ✨
+           ✨ 班表專屬大廳 ✨
         ========================================= */
         .schedule-selection-wrapper { display: flex; flex-direction: column; gap: 40px; align-items: center; width: 100%; padding: 30px 0; }
         .schedule-league-section { width: 100%; max-width: 950px; display: flex; flex-direction: column; align-items: center; background: rgba(17,20,24,0.8); padding: 30px; border-radius: 8px; border: 2px solid var(--border-color);}
         .schedule-league-title { 
-            font-family: var(--sport-font); color: #fff; font-size: 24px; font-weight: 900; 
-            background: var(--schedule-accent); color: #000; padding: 5px 20px; 
-            margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; transform: skewX(-5deg); display: inline-block;
+            font-family: var(--sport-font); color: #000; font-size: 24px; font-weight: 900; 
+            padding: 5px 20px; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; 
+            transform: skewX(-5deg); display: inline-block;
         }
         .schedule-teams-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: flex-start; width: 100%; }
         .schedule-team-btn { 
@@ -287,7 +298,7 @@
         .back-btn:hover { background: var(--schedule-accent); transform: skewX(-5deg) translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.5); }
 
         /* =========================================
-           官方動態班表矩陣 (大型計分板)
+           官方動態班表矩陣 
         ========================================= */
         .schedule-matrix-container { max-width: 1150px; width: 100%; margin: 10px auto 50px; padding: 0 20px; display: flex; flex-direction: column; align-items: center; }
         .schedule-wrapper { 
@@ -327,7 +338,7 @@
         .schedule-heart { width: 30px; height: 30px; fill: var(--team-accent); animation: heartPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; display: inline-block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
 
         /* =========================================
-           女孩卡片與外籍行程樣式 (球員卡風格)
+           女孩卡片與外籍行程樣式 
         ========================================= */
         .grid-container { max-width: 1200px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
         
@@ -376,11 +387,13 @@
         .data-label { color: var(--text-sub); font-weight: 700; min-width: 65px; }
         .data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 15px;}
         
+        /* 質感去背透明 IG 小圖標 */
         .ig-link { display: inline-flex; vertical-align: middle; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.9; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8)); }
         .ig-link:hover { transform: scale(1.2) rotate(-5deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(220,39,67,0.6)); }
         .ig-icon { width: 22px; height: 22px; fill: url(#ig-grad-final); display: block; }
+
         /* =========================================
-           外籍行程表 (賽事門票風)
+           外籍行程表 
         ========================================= */
         .event-list-container { max-width: 950px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: flex; flex-direction: column; gap: 30px; }
         .event-section-divider { 
@@ -434,7 +447,7 @@
         .event-item.expired .meta-item i { color: #888; }
 
         /* =========================================
-           Footer (硬派底座)
+           Footer 
         ========================================= */
         .footer { 
             background-color: rgba(17, 20, 24, 0.95); border-top: 4px solid var(--border-color); 
@@ -520,9 +533,10 @@
             .event-title-small { font-size: 16px; }
             
             /* [6] 個人彈窗與其他 */
-            .modal-content { max-width: 100%; border-radius: 4px 4px 0 0; align-self: flex-end; border-bottom: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-            .modal-photo { height: 260px; border-bottom-width: 3px;}
-            .modal-body { padding: 20px; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+            .modal-content { max-height: 85vh; display: flex; flex-direction: column; max-width: 100%; border-radius: 4px 4px 0 0; align-self: flex-end; border-bottom: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+            .modal-layout { height: 100%; }
+            .modal-photo { flex-shrink: 0; height: 260px; border-bottom-width: 3px;}
+            .modal-body { flex: 1; min-height: 0; padding: 20px; overflow-y: auto; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
             .modal-nickname { font-size: 24px; }
             .modal-number { font-size: 26px; }
             
@@ -635,7 +649,7 @@
         <div class="footer-content">
             <p> <strong>備註：</strong>資料如需更正或是照片需下架，麻煩請聯繫告知。聯繫信箱：lc559058@gmail.com</p>
             <p> <strong>免責聲明：</strong>本網站所有資料版權均屬原球團及所屬經紀公司所有。行程僅供參考，以官方公佈為準。</p>
-            <p style="font-family: var(--sport-font); margin-top: 10px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2026</p>
+            <p style="font-family: var(--sport-font); margin-top: 10px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2024</p>
         </div>
     </footer>
 
@@ -665,7 +679,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- Modal 打開與關閉 ---
         function openModal(name) {
             const c = dbGirls.find(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
             if(!c) return;
@@ -723,7 +736,7 @@
 
         // 運動版主題配色
         const teamThemes = {
-            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: false, league: "" },
+            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" }, // 全部的 noLogo 設為 true 避免產生文字圖示
             "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
             "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
             "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
@@ -884,7 +897,7 @@
             const btn = document.createElement('button');
             btn.className = `tab-btn ${safeTeam === currentTeam ? 'active' : ''}`;
             
-            // 移除原本自動抓取首字的 fallback，改為直接輸出空字串
+            // 如果有設定官方 logo 就顯示，沒有的話就不產生任何 logo 標記
             const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
             
             btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
@@ -947,12 +960,12 @@
                     else groups["其他活動"].push(p);
                 });
 
-                // 新增各聯盟對應顏色
+                // 各聯盟對應專屬背景顏色
                 let leagueColors = { 
-                    "CPBL 職業棒球": "#00e5ff", 
-                    "TPBL 職籃聯盟": "#ff9800", 
-                    "P. LEAGUE+ 職籃聯盟": "#ffeb3b", 
-                    "職業排球": "#ff80ab", 
+                    "CPBL 職業棒球": "#00b0ff", /* 電光藍 */
+                    "TPBL 職籃聯盟": "#ff9800", /* 活力橘 */
+                    "P. LEAGUE+ 職籃聯盟": "#ffeb3b", /* 閃電黃 */
+                    "職業排球": "#ff4081", /* 螢光粉 */
                     "其他活動": "#a0aec0" 
                 };
 
@@ -962,14 +975,13 @@
                     
                     let lColor = leagueColors[gName] || "#00e676";
                     
-                    // 動態帶入背景色
                     html += `<div class="schedule-league-section"><div class="schedule-league-title" style="background: ${lColor};">${gName}</div><div class="schedule-teams-grid">`;
                     pList.sort((a,b)=>a.team.localeCompare(b.team, 'zh-TW')).forEach(p => {
                         let t = p.team; let sp = p.sport;
                         let cfgKey = teamThemes[`${t}_${sp}`] ? `${t}_${sp}` : t;
                         let cfg = teamThemes[cfgKey] || { accent: "#ccc" };
                         
-                        // 班表區塊也取消強制產生首字母的設定
+                        // 班表區塊也沒有文字 fallback
                         let logoHtml = (cfg.logo && !cfg.noLogo) ? `<img src="${cfg.logo}">` : ``;
                         
                         html += `<div class="schedule-team-btn" style="--btn-accent: ${cfg.accent}" onclick="selectScheduleTeam('${t}', '${sp}')">${logoHtml}<span>${t}</span></div>`;
