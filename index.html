@@ -535,6 +535,7 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
+            /* 手機版 Bottom Sheet */
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { 
                 max-height: 85dvh; display: flex; flex-direction: column; 
@@ -553,7 +554,6 @@
             }
             .modal-nickname { font-size: 22px; }
             
-            /* 手機版彈窗背號縮小 */
             .modal-number { font-size: 22px; padding: 4px 12px; }
             
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
@@ -673,9 +673,40 @@
     </footer>
 
     <script>
-        // === 核心邏輯與資料處理 ===
+        // =========================================================================
+        // 核心邏輯與完整資料處理
+        // =========================================================================
         
         let myFavorites = JSON.parse(localStorage.getItem('cheer_favorites')) || [];
+
+        // 完整球隊主題與分類資料庫
+        const teamThemes = {
+            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
+            "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
+            "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
+            "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
+            "Uni-Girls": { accent: "#ff9800", logo: "images/unilions_logo.png", noLogo: false, league: "CPBL" },
+            "Rakuten Girls": { accent: "#f44336", logo: "images/rakuten_logo.png", noLogo: false, league: "CPBL" },
+            "Dragon Beauties": { accent: "#e91e63", logo: "images/dragons_logo.png", noLogo: false, league: "CPBL" },
+            "Formosa Sexy": { accent: "#76ff03", logo: "", noLogo: true, league: "TPBL" },
+            "Passion Sisters_籃球": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
+            "Muse Girls": { accent: "#ce93d8", logo: "", noLogo: true, league: "TPBL" },
+            "Taishin Wonders": { accent: "#f44336", logo: "", noLogo: true, league: "TPBL" },
+            "Leopard Girls": { accent: "#ffffff", logo: "", noLogo: true, league: "TPBL" },
+            "New Taipei Queens": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
+            "Aqua Mermaids": { accent: "#03a9f4", logo: "", noLogo: true, league: "TPBL" },
+            "Pilots Crew": { accent: "#ff9800", logo: "", noLogo: true, league: "P. LEAGUE+" },
+            "Youngkey Girls": { accent: "#69f0ae", logo: "", noLogo: true, league: "P. LEAGUE+" },
+            "Wing Stars_籃球": { accent: "#f48fb1", logo: "", noLogo: true, league: "P. LEAGUE+" },
+            "Fubon Angels_籃球": { accent: "#81d4fa", logo: "", noLogo: true, league: "P. LEAGUE+" },
+            "Tokki Cutie": { accent: "#ff9800", logo: "", noLogo: true, league: "排球" },
+            "Little witches": { accent: "#00e5ff", logo: "", noLogo: true, league: "排球" },
+            "Peach Girls": { accent: "#f06292", logo: "", noLogo: true, league: "排球" },
+            "Wing Stars_排球": { accent: "#29b6f6", logo: "", noLogo: true, league: "排球" }
+        };
+
+        const monthMap = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const weekMap = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
 
         function toggleFavorite(name, event) {
             event.stopPropagation();
@@ -698,16 +729,11 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // =========================================================================
-        // ✨ 新增跳轉至班表功能
-        // =========================================================================
+        // 新增跳轉至班表功能
         window.goToSchedule = function(team, sport) {
             closeModal();
-            // 切換到班表 Tab
             document.querySelector('.sport-btn.btn-schedule').click();
-            // 選擇指定球隊與運動
             selectScheduleTeam(team, sport);
-            // 滾動到最上方
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -718,7 +744,8 @@
             const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
             const sports = (c.mS || [c.sport || ""]);
             
-            const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-").map(n => '#' + n);
+            // 透過 map 幫背號加上 '#' 符號，並移除原本可能有的 '#' 避免重複
+            const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-").map(n => '#' + n.replace('#',''));
             
             const lookupTeam = teams[0] || "全部啦啦隊"; 
             const lookupSport = currentSport === "全部" ? "" : currentSport;
@@ -735,7 +762,6 @@
             const currentMonth = today.getMonth() + 1;
             const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
 
-            // 過濾出她這個月的班表
             let herSchedules = dbSchedules.filter(s => 
                 (s.name === c.realname || s.name === c.nickname) && 
                 s.safeDate.year === currentYear && 
@@ -744,13 +770,11 @@
 
             let scheduleHtml = '';
             if (herSchedules.length > 0) {
-                // 照日期排序
                 herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
                 let dateBoxes = '';
                 let renderedKeys = [];
 
                 herSchedules.forEach(s => {
-                    // 以 日期+球隊+運動 為唯一鍵值，避免同一天同一隊重複顯示
                     let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
                     if (!renderedKeys.includes(key)) {
                         renderedKeys.push(key);
@@ -761,7 +785,6 @@
                         const textColor = isPast ? 'var(--text-sub)' : '#fff';
                         const teamColor = isPast ? 'var(--text-sub)' : cardAccent;
 
-                        // dateBoxes 內容，並掛上 onclick 跳轉事件
                         dateBoxes += `
                         <div class="schedule-jump-btn" onclick="goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: all 0.2s;">
                             <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
@@ -785,7 +808,6 @@
                         <div style="font-size: 14px; color: #6a7a90; font-weight: 700;">本月目前尚無班表資料。</div>
                     </div>`;
             }
-            // ------------------------------------
 
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
 
@@ -822,39 +844,6 @@
             document.body.classList.remove('no-scroll');
         }
 
-        const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
-        const girlsGid = "0";
-        const eventsGid = "925411186";
-        const schedulesGid = "1702657458"; 
-
-        const teamThemes = {
-            "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
-            "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
-            "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
-            "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
-            "Uni-Girls": { accent: "#ff9800", logo: "images/unilions_logo.png", noLogo: false, league: "CPBL" },
-            "Rakuten Girls": { accent: "#f44336", logo: "images/rakuten_logo.png", noLogo: false, league: "CPBL" },
-            "Dragon Beauties": { accent: "#e91e63", logo: "images/dragons_logo.png", noLogo: false, league: "CPBL" },
-            "Formosa Sexy": { accent: "#76ff03", logo: "", noLogo: true, league: "TPBL" },
-            "Passion Sisters_籃球": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
-            "Muse Girls": { accent: "#ce93d8", logo: "", noLogo: true, league: "TPBL" },
-            "Taishin Wonders": { accent: "#f44336", logo: "", noLogo: true, league: "TPBL" },
-            "Leopard Girls": { accent: "#ffffff", logo: "", noLogo: true, league: "TPBL" },
-            "New Taipei Queens": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
-            "Aqua Mermaids": { accent: "#03a9f4", logo: "", noLogo: true, league: "TPBL" },
-            "Pilots Crew": { accent: "#ff9800", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Youngkey Girls": { accent: "#69f0ae", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Wing Stars_籃球": { accent: "#f48fb1", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Fubon Angels_籃球": { accent: "#81d4fa", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Tokki Cutie": { accent: "#ff9800", logo: "", noLogo: true, league: "排球" },
-            "Little witches": { accent: "#00e5ff", logo: "", noLogo: true, league: "排球" },
-            "Peach Girls": { accent: "#f06292", logo: "", noLogo: true, league: "排球" },
-            "Wing Stars_排球": { accent: "#29b6f6", logo: "", noLogo: true, league: "排球" }
-        };
-
-        const monthMap = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        const weekMap = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
-
         function parseDateFlexible(dStr) {
             if(!dStr) return null;
             let s = String(dStr).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
@@ -884,6 +873,11 @@
         let currentScheduleSport = null; 
 
         function loadData() {
+            const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
+            const girlsGid = "0";
+            const eventsGid = "925411186";
+            const schedulesGid = "1702657458"; 
+
             const t = new Date().getTime();
             Papa.parse(`${baseSheetUrl}&gid=${girlsGid}&t=${t}`, {
                 download: true, header: true, skipEmptyLines: true,
@@ -904,6 +898,7 @@
                                         let sport = (row.sport || "").trim();
                                         let team = (row.team || "").trim();
                                         let name = (row.name || row.nickname || row['綽號'] || "").trim();
+                                        // 支援多種符號分割
                                         let datesRaw = (row.dates || row.date || "").split(/[,\s、，\n]+/);
                                         datesRaw.forEach(dStr => {
                                             let p = parseDateFlexible(dStr);
@@ -997,6 +992,14 @@
             return btn;
         }
         
+        window.selectScheduleTeam = function(t, sp) { 
+            currentScheduleTeam = t; currentScheduleSport = sp;
+            let cfgKey = teamThemes[`${t}_${sp}`] ? `${t}_${sp}` : t;
+            let config = teamThemes[cfgKey] || teamThemes["全部啦啦隊"];
+            document.documentElement.style.setProperty('--team-accent', config.accent);
+            renderContent(); 
+        };
+
         window.backToScheduleSelection = function() { 
             currentScheduleTeam = null; currentScheduleSport = null;
             applyTheme("全部啦啦隊"); 
@@ -1014,6 +1017,9 @@
             else if (currentMode === 'schedule') { sched.style.display = 'flex'; renderSchedule(sched); }
         }
 
+        // =========================================
+        // 渲染班表大廳與矩陣 
+        // =========================================
         function renderSchedule(container) {
             if (!currentScheduleTeam) {
                 let availablePairs = [];
@@ -1076,7 +1082,7 @@
             let teamData = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             let html = `<button class="back-btn" onclick="backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回賽程總覽 BACK</span></button>`;
             
-            // == 過濾掉過去的日期 ==
+            // 過濾掉過去的日期
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             teamData = teamData.filter(s => s.safeDate.num >= todayNum);
 
@@ -1126,6 +1132,9 @@
             container.innerHTML = html + `</tbody></table></div>`;
         }
 
+        // =========================================
+        // 渲染外籍行程
+        // =========================================
         function renderEvents(container, search) {
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             let filtered = dbEvents.filter(e => {
@@ -1154,6 +1163,9 @@
             container.innerHTML = html;
         }
 
+        // =========================================
+        // 渲染女孩卡片
+        // =========================================
         function renderGirls(container, search) {
             const nat = document.getElementById('natFilter').value, zodiac = document.getElementById('zodiacFilter').value, sort = document.getElementById('sortFilter').value;
             let result = dbGirls.filter(c => {
@@ -1192,7 +1204,11 @@
                 if(sort === 'birthdayAsc') return parseGirlDOB(a.dob).mmdd - parseGirlDOB(b.dob).mmdd;
                 if(sort === 'ageAsc') return parseGirlDOB(b.dob).num - parseGirlDOB(a.dob).num; 
                 if(sort === 'heightDesc') return (parseFloat(b.height) || 0) - (parseFloat(a.height) || 0);
-                if(sort === 'numberAsc') return (parseInt(a.num) || 999) - (parseInt(b.num) || 999);
+                if(sort === 'numberAsc') {
+                    let numA = parseInt((a.mN||[a.num])[0].replace('#','')) || 999;
+                    let numB = parseInt((b.mN||[b.num])[0].replace('#','')) || 999;
+                    return numA - numB;
+                }
                 return 0;
             });
 
@@ -1204,8 +1220,8 @@
                 
                 let sportTags = sports.map(s=>`<div class="sport-tag tag-${s.includes("棒")?'baseball':s.includes("籃")?'basketball':'volleyball'}">${s}</div>`).join('');
                 
-                // 透過 map 幫背號加上 '#' 符號
-                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + n).join('<br>') || "-";
+                // 透過 map 幫背號加上 '#' 符號，並移除原本可能有的 # 避免重複
+                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + n.replace('#','')).join(' ') || "-";
 
                 return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="openModal('${c.realname}')">
@@ -1214,7 +1230,7 @@
                         <div class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${c.realname}', event)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
-                        ${c.img?`<img src="${c.img}" style="width:100%;height:100%;object-fit:cover;object-position:top center;">`:''}
+                        ${c.img?`<img src="${c.img}" style="width:100%;height:100%;object-fit:cover;object-position:top center;" loading="lazy">`:''}
                     </div>
                     <div class="info-section">
                         <div class="header-info">
@@ -1228,7 +1244,7 @@
                             <div class="number">${displayNum}</div>
                         </div>
                         <div class="data-grid">
-                            <div class="data-row"><span class="data-label">球隊 UNIT</span><span class="data-value" style="color:${cardAccent}">${teams.join('<br>')}</span></div>
+                            <div class="data-row"><span class="data-label">球隊 UNIT</span><span class="data-value" style="color:${cardAccent}">${teams.join(' / ')}</span></div>
                             <div class="data-row"><span class="data-label">國籍 NAT</span><span class="data-value">${c.nat || "-"}</span></div>
                             <div class="data-row"><span class="data-label">生日 DOB</span><span class="data-value">${c.dob || "-"}</span></div>
                             <div class="data-row"><span class="data-label">星座 SIGN</span><span class="data-value">${c.zodiac || "-"}</span></div>
