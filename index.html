@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台灣啦啦隊資料庫 | </title>
+    <title>台灣啦啦隊資料庫 |</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         /* 引入運動風字體 Oswald 與 思源黑體 */
@@ -473,6 +473,7 @@
             .enter-btn { padding: 12px 30px; font-size: 1.2rem; }
             .title { font-size: 22px; letter-spacing: 2px; }
             
+            /* [1] 女孩卡片壓縮 */
             .grid-container { padding: 0 10px; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px auto 40px;}
             .photo-area { height: 180px; border-bottom-width: 3px; }
             .card { box-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
@@ -487,6 +488,7 @@
             .data-value { font-size: 13px; }
             .sport-tag { font-size: 10px; padding: 4px 8px; }
 
+            /* [2] 上方區塊：改為橫向滑動 */
             .sport-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
             .sport-tabs::-webkit-scrollbar { display: none; } 
             .sport-btn { flex-shrink: 0; padding: 8px 16px; font-size: 13px; }
@@ -500,12 +502,14 @@
             .league-group > div { flex-wrap: nowrap !important; overflow-x: auto; width: 100%; justify-content: flex-start !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; padding-bottom: 5px;}
             .league-group > div::-webkit-scrollbar { display: none; }
 
+            /* [3] 搜尋與篩選列：橫向滑動 */
             .sticky-filter-wrapper { padding: 10px; }
             .filters { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; }
             .filters::-webkit-scrollbar { display: none; }
             .filters input, .filters select { flex-shrink: 0; padding: 8px 12px; min-width: 110px; font-size: 13px; }
             #searchInput { min-width: 160px; order: 0; }
 
+            /* [4] 班表矩陣：極致壓縮版 */
             .schedule-matrix-container { padding: 0 5px; }
             .schedule-table th, .schedule-table td { padding: 10px 4px; }
             
@@ -523,6 +527,7 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
+            /* [5] 外籍行程 */
             .event-list-container { padding: 0 10px; }
             .event-item { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
             .event-date-box { flex-direction: row; width: 100%; justify-content: flex-start; gap: 12px; padding: 12px; min-width: auto; transform: skewX(0); box-shadow: 3px 3px 0px rgba(0,0,0,0.5);}
@@ -534,6 +539,7 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
+            /* [6] 個人彈窗與其他 (完美解決底部滑動問題) */
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { 
                 max-height: 85dvh; display: flex; flex-direction: column; 
@@ -1012,8 +1018,12 @@
             let teamData = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             let html = `<button class="back-btn" onclick="backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回賽程總覽 BACK</span></button>`;
             
+            // == 新增：過濾掉過去的日期 ==
+            const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
+            teamData = teamData.filter(s => s.safeDate.num >= todayNum);
+
             if(teamData.length === 0) {
-                html += '<div style="text-align:center; padding:100px 50px; color:#a0aec0; font-family:var(--tc-font); font-weight:700;">查無資料。</div>';
+                html += '<div style="text-align:center; padding:100px 50px; color:#a0aec0; font-family:var(--tc-font); font-weight:700;">目前沒有未來的班表資料。</div>';
                 container.innerHTML = html;
                 return;
             }
