@@ -1037,6 +1037,7 @@
 
         window.renderScheduleMatrix = function() {
             const container = document.getElementById('schedule-container');
+            // 只顯示該隊伍且該運動的班表
             let data = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
@@ -1068,10 +1069,9 @@
             let dates = [...new Set(data.map(s => s.safeDate.num))].sort((a,b)=>a-b);
             const cfg = teamThemes[currentScheduleTeam+"_"+currentScheduleSport] || teamThemes[currentScheduleTeam] || { accent: "#fff" };
 
-            // 頂部返回按鈕
             let html = `<div style="width:100%; max-width: 1200px; margin: 0 auto;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
             
-            // 💻 電腦版大矩陣 HTML
+            // 💻 電腦版大矩陣 HTML (已修復並加入綽號)
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
                     const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
@@ -1090,7 +1090,7 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
-            // 📱 手機版時間軸 HTML (Timeline)
+            // 📱 手機版時間軸 HTML (已修復並加入綽號)
             let mobileHtml = `<div class="schedule-mobile">`;
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
@@ -1104,8 +1104,13 @@
                     attendees.forEach(gn => {
                         const g = dbGirls.find(girl => (girl.realname||"").trim() === gn || (girl.nickname||"").trim() === gn);
                         const showReal = g ? g.realname : gn;
-                        mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${showReal}')">
-                            <img src="${g?g.img:''}" loading="lazy"><span>${showReal}</span>
+                        const showNick = (g && g.nickname && g.nickname !== g.realname) ? g.nickname : "";
+                        mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${showReal}')" style="align-items:center; display:flex;">
+                            <img src="${g?g.img:''}" loading="lazy">
+                            <div style="display:flex; flex-direction:column; line-height:1.2;">
+                                <span>${showReal}</span>
+                                ${showNick ? `<span style="font-size:10px; color:var(--team-accent);">${showNick}</span>` : ''}
+                            </div>
                         </div>`;
                     });
                     mobileHtml += `</div></div>`;
