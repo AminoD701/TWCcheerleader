@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台灣啦啦隊資料庫 | </title>
+    <title>台灣啦啦隊資料庫 | 競技熱血終極版</title>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script>
@@ -78,7 +78,7 @@
         }
 
         /* =========================================
-           ✨ 華麗入口畫面 & 載入動畫優化
+           ✨ 華麗入口畫面 & 載入動畫
         ========================================= */
         .landing-page {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -96,12 +96,10 @@
             transition: all 0.2s; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto;
         }
         .enter-btn:hover:not(:disabled) { background: var(--event-accent); color: #fff; transform: skewX(-10deg) translate(-4px, -4px); box-shadow: 10px 10px 0px rgba(255,87,34,0.3); }
-        
-        /* 載入中狀態 */
         .enter-btn:disabled { background: #333; color: #888; cursor: not-allowed; box-shadow: none; }
+        
         .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; transform: skewX(10deg); }
         @keyframes spin { to { transform: skewX(10deg) rotate(360deg); } }
-        
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
         /* =========================================
@@ -126,7 +124,6 @@
         .sport-btn.btn-schedule.active { background: var(--schedule-accent); color: #000; border-color: var(--schedule-accent); box-shadow: 4px 4px 0px rgba(0,230,118,0.3); }
         .sport-btn.btn-event { border-color: var(--event-accent); color: var(--event-accent); }
         .sport-btn.btn-event.active { background: var(--event-accent); color: #000; border-color: var(--event-accent); box-shadow: 4px 4px 0px rgba(255,87,34,0.3); }
-
         .btn-icon { width: 16px; height: 16px; fill: currentColor; }
 
         .team-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding-top: 20px; border-top: 2px dashed var(--border-color); }
@@ -186,7 +183,7 @@
         .ig-icon { width: 22px; height: 22px; fill: url(#ig-grad-final); display: block; }
 
         /* =========================================
-           ✨ 個人詳細彈窗 (Bottom Sheet 完美排版)
+           ✨ 個人詳細彈窗
         ========================================= */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
@@ -221,7 +218,7 @@
         .schedule-jump-btn:hover { transform: translateY(-3px); box-shadow: 4px 4px 0px rgba(0,0,0,0.6) !important; filter: brightness(1.2); }
 
         /* =========================================
-           ✨ 班表大廳與表格
+           ✨ 班表大廳與表格 (包含電腦與手機版)
         ========================================= */
         .schedule-selection-wrapper { display: flex; flex-direction: column; gap: 40px; align-items: center; width: 100%; padding: 30px 0; }
         .schedule-league-section { width: 100%; max-width: 950px; margin: 0 auto; background: rgba(17,20,24,0.8); padding: 30px; border-radius: 8px; border: 2px solid var(--border-color); }
@@ -232,14 +229,13 @@
         .schedule-team-btn img { width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         .schedule-team-btn span { color: #fff; font-weight: 900; font-size: 18px; letter-spacing: 1px; }
 
-        /* 💻 電腦版班表 (Desktop Matrix) */
+        /* 💻 電腦版班表 */
         .schedule-desktop { display: block; width: 100%; }
         .schedule-wrapper { width: 100%; overflow-x: auto; background: var(--bg-panel); border: 4px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.8); padding-bottom: 5px;}
         .schedule-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 750px; table-layout: fixed;}
         .schedule-table th, .schedule-table td { padding: 20px 8px; border-bottom: 2px solid var(--border-color); border-right: 2px solid var(--border-color);}
         .schedule-table th { background: #1a1e24; position: sticky; top: 0; z-index: 2; border-bottom: 4px solid var(--team-accent); vertical-align: bottom;}
         .schedule-table tr:hover td { background: #252c36; }
-        
         .schedule-table td:first-child { border-right: 4px solid var(--border-color); background: #15191e; font-weight: 900; position: sticky; left: 0; z-index: 1; width: 120px; min-width: 120px; box-shadow: 5px 0 15px rgba(0,0,0,0.5);}
         .schedule-table th:first-child { border-right: 4px solid var(--border-color); background: #1a1e24; position: sticky; left: 0; z-index: 3; width: 120px; min-width: 120px; color: #fff; font-family: var(--sport-font); font-size: 20px; letter-spacing: 2px; vertical-align: middle;}
         .schedule-table th:not(:first-child), .schedule-table td:not(:first-child) { width: 105px; min-width: 105px; }
@@ -253,11 +249,10 @@
 
         .schedule-date { font-family: var(--sport-font); font-size: 24px; color: #fff; font-weight: 900; }
         .schedule-day { font-size: 13px; font-weight: 700; color: var(--team-accent); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
-
         .schedule-heart { width: 30px; height: 30px; fill: var(--team-accent); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); animation: heartPop 0.3s forwards; display: inline-block;}
         @keyframes heartPop { 0% { transform: scale(0.5); opacity: 0;} 70% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1;} }
 
-        /* 📱 手機版專屬班表 (Timeline 卡片) */
+        /* 📱 手機版時間軸 (預設隱藏) */
         .schedule-mobile { display: none; }
 
         /* =========================================
@@ -294,7 +289,6 @@
         
         .event-details-sub { background: #15191e; border: 2px solid var(--border-color); border-radius: 4px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .event-title-small { font-size: 18px; font-weight: 900; color: #fff; display: flex; align-items: center; border-left: 6px solid var(--event-accent); padding-left: 12px; letter-spacing: 1px; text-transform: uppercase;}
-        
         .event-meta-row { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; color: var(--text-sub); font-weight: 700;}
         .meta-item { display: inline-flex; align-items: center; gap: 8px; }
         .meta-item i { font-style: normal; color: var(--event-accent); font-size: 16px; font-weight: 900;}
@@ -315,7 +309,7 @@
         .back-btn:hover { background: var(--schedule-accent); transform: skewX(-5deg) translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.5); }
 
         /* =========================================
-           ✨ 手機版專屬優化 (橫滑 & Bottom Sheet & Timeline)
+           ✨ 手機版專屬優化
         ========================================= */
         @media (max-width: 768px) {
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
@@ -379,23 +373,13 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
-            /* 手機版 Bottom Sheet 彈窗 */
+            /* 手機版 Bottom Sheet */
             .modal-overlay { align-items: flex-end; padding: 0; }
-            .modal-content { 
-                max-height: 85dvh; display: flex; flex-direction: column; 
-                max-width: 100%; border-radius: 12px 12px 0 0; 
-                border: none; border-top: 5px solid var(--modal-accent, #fff);
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.8); 
-                transform: translateY(100%) !important; margin: 0;
-            }
+            .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
             .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
             .modal-photo { flex-shrink: 0; height: 380px; border-bottom-width: 4px;} 
-            .modal-body { 
-                flex: 1; min-height: 0; padding: 20px; overflow-y: auto; 
-                -webkit-overflow-scrolling: touch; 
-                padding-bottom: max(40px, env(safe-area-inset-bottom)); 
-            }
+            .modal-body { flex: 1; min-height: 0; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
             .modal-nickname { font-size: 22px; }
             .modal-number { font-size: 22px; padding: 4px 12px; }
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
@@ -448,7 +432,7 @@
                 <stop offset="0%" style="stop-color:#f09433;" /><stop offset="25%" style="stop-color:#e6683c;" /><stop offset="50%" style="stop-color:#dc2743;" /><stop offset="75%" style="stop-color:#cc2366;" /><stop offset="100%" style="stop-color:#bc1888;" />
             </linearGradient>
             <symbol id="icon-ig" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.332 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.332-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.281.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.332 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.332-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.281.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </symbol>
             <symbol id="icon-heart" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -554,22 +538,6 @@
         const monthMap = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const weekMap = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
 
-        function toggleFavorite(name, event) {
-            event.stopPropagation();
-            if (myFavorites.includes(name)) myFavorites = myFavorites.filter(n => n !== name);
-            else myFavorites.push(name);
-            localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
-            renderContent(); 
-        }
-
-        window.addEventListener('scroll', () => {
-            const btn = document.getElementById('backToTopBtn');
-            if (window.scrollY > 400) btn.classList.add('show');
-            else btn.classList.remove('show');
-        });
-
-        window.scrollToTop = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-
         function parseDateFlexible(dStr) {
             if(!dStr) return null;
             let s = String(dStr).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
@@ -597,9 +565,9 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 優化 1 & 2：載入動畫與本地快取 (Data Caching)
+        // 載入與快取邏輯
         const CACHE_KEY = "tw_cheerleader_cache_v1";
-        const CACHE_TIME = 60 * 60 * 1000; // 快取有效時間 1 小時
+        const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
             const btn = document.getElementById('enter-btn');
@@ -613,24 +581,17 @@
         }
 
         function loadData() {
-            // 先檢查有沒有有效的快取
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
                 if (cached) {
                     const parsed = JSON.parse(cached);
                     if (Date.now() - parsed.timestamp < CACHE_TIME) {
-                        dbGirls = parsed.dbGirls;
-                        dbEvents = parsed.dbEvents;
-                        dbSchedules = parsed.dbSchedules;
-                        init();
-                        enableEnterButton();
-                        console.log("從本機快取載入資料，享受秒開體驗！");
-                        return; // 終止後續的 Google Sheet 請求
+                        dbGirls = parsed.dbGirls; dbEvents = parsed.dbEvents; dbSchedules = parsed.dbSchedules;
+                        init(); enableEnterButton(); return; 
                     }
                 }
-            } catch(e) { console.warn("讀取快取失敗", e); }
+            } catch(e) { }
 
-            // 如果沒有快取或已過期，則重新向 Google Sheet 請求
             const t = new Date().getTime();
             const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
             
@@ -661,16 +622,8 @@
                                         });
                                     });
                                     dbSchedules = flat;
-                                    init();
-                                    enableEnterButton(); // 資料處理完畢，開放按鈕
-
-                                    // 存入快取
-                                    try {
-                                        localStorage.setItem(CACHE_KEY, JSON.stringify({
-                                            timestamp: Date.now(),
-                                            dbGirls, dbEvents, dbSchedules
-                                        }));
-                                    } catch(e) { console.warn("儲存快取失敗", e); }
+                                    init(); enableEnterButton();
+                                    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules })); } catch(e) { }
                                 }
                             });
                         }
@@ -679,9 +632,6 @@
             });
         }
 
-        // =========================================================================
-        // UI 互動切換與主題更新
-        // =========================================================================
         function init() {
             updateTeamTabs();
             window.renderContent();
@@ -853,11 +803,11 @@
                     <div class="info-section">
                         <div class="header-info">
                             <div>
-                                <div class="nickname-container">
+                                <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
                                     <div class="nickname" style="color:${cardAccent}">${c.nickname}</div>
                                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
                                 </div>
-                                <div class="realname">${c.realname}</div>
+                                <div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.realname}</div>
                             </div>
                             <div class="number">${displayNum}</div>
                         </div>
@@ -874,6 +824,7 @@
         }
 
         window.openModal = function(name) {
+            // 高佳彬雙棲卡片修復
             const allRows = dbGirls.filter(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
             if(allRows.length === 0) return;
             
@@ -918,7 +869,7 @@
                         const teamColor = isPast ? 'var(--text-sub)' : cardAccent;
 
                         dateBoxes += `
-                        <div class="schedule-jump-btn" onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer;">
+                        <div class="schedule-jump-btn" onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: all 0.2s;">
                             <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
                             <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: ${textColor}; line-height: 1.1; margin: 4px 0;">${String(s.safeDate.day).padStart(2,'0')}</span>
                             <span style="font-size: 11px; color: ${teamColor}; text-align: center; line-height: 1.2; font-weight: 700;">${s.team}<br>${s.sport}</span>
@@ -978,8 +929,31 @@
             document.body.classList.remove('no-scroll'); 
         };
 
+        // 🏆 跳轉班表 100% 成功修復版
+        window.goToSchedule = function(team, sport) {
+            closeModal();
+            document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active'));
+            let targetBtn = document.querySelector('.sport-btn.btn-schedule');
+            if(targetBtn) targetBtn.classList.add('active');
+            
+            currentMode = 'schedule';
+            currentScheduleTeam = team;
+            currentScheduleSport = sport;
+            
+            document.getElementById('extra-filters').style.display = 'none';
+            document.getElementById('filter-bar').style.display = 'none';
+            document.getElementById('tabs-container').style.display = 'none';
+            
+            let cfgKey = teamThemes[`${team}_${sport}`] ? `${team}_${sport}` : team;
+            let config = teamThemes[cfgKey] || teamThemes["全部啦啦隊"];
+            document.documentElement.style.setProperty('--team-accent', config.accent);
+            
+            window.renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         // =========================================================================
-        // 班表系統 (大廳、電腦矩陣與 🏆 優化 3：手機卡片時間軸)
+        // 班表系統 (大廳、電腦矩陣與手機卡片時間軸)
         // =========================================================================
         window.selectScheduleTeam = function(t, sp) { 
             currentScheduleTeam = t; currentScheduleSport = sp;
@@ -998,8 +972,11 @@
         window.renderScheduleSelection = function() {
             const container = document.getElementById('schedule-container');
             let available = [];
+            
             dbSchedules.forEach(s => { 
-                if(s.team && !available.find(a => a.team === s.team && a.sport === s.sport)) { available.push(s); }
+                if(s.team && !available.find(a => a.team === s.team && a.sport === s.sport)) {
+                    available.push(s); 
+                }
             });
             
             if (available.length === 0) {
@@ -1012,14 +989,14 @@
             
             for(let key in leagueGroups) {
                 let teams = available.filter(a => {
-                    let leagueName = "";
-                    if(key.includes("CPBL")) leagueName = "棒球";
-                    if(key.includes("TPBL")) leagueName = "TPBL";
-                    if(key.includes("P. LEAGUE+")) leagueName = "P. LEAGUE+";
-                    if(key.includes("排球")) leagueName = "排球";
-
-                    if(key === "其他賽事活動") return !a.sport.includes("棒球") && !a.sport.includes("籃") && !a.sport.includes("排球") && (!teamThemes[a.team] || !teamThemes[a.team].league);
-                    return (a.sport||"").includes(leagueName) || (teamThemes[a.team] && teamThemes[a.team].league === leagueName);
+                    const cfg = teamThemes[a.team+"_"+a.sport] || teamThemes[a.team] || {};
+                    const l = cfg.league || "";
+                    if(key === "其他賽事活動") return !l && !(a.sport||"").includes("棒球") && !(a.sport||"").includes("籃") && !(a.sport||"").includes("排球");
+                    if(key.includes("CPBL")) return l === "CPBL" || (a.sport||"").includes("棒球");
+                    if(key.includes("TPBL")) return l === "TPBL";
+                    if(key.includes("P. LEAGUE+")) return l === "P. LEAGUE+";
+                    if(key.includes("排球")) return l === "排球" || (a.sport||"").includes("排球");
+                    return false;
                 });
                 
                 if(teams.length) {
@@ -1037,7 +1014,6 @@
 
         window.renderScheduleMatrix = function() {
             const container = document.getElementById('schedule-container');
-            // 只顯示該隊伍且該運動的班表
             let data = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
@@ -1071,7 +1047,7 @@
 
             let html = `<div style="width:100%; max-width: 1200px; margin: 0 auto;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
             
-            // 💻 電腦版大矩陣 HTML (已修復變數並加入綽號)
+            // 💻 電腦版大矩陣 HTML
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
                     const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
@@ -1090,7 +1066,7 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
-            // 📱 手機版時間軸 HTML (已修復變數並加入綽號)
+            // 📱 手機版時間軸 HTML
             let mobileHtml = `<div class="schedule-mobile">`;
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
