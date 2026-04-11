@@ -1071,7 +1071,7 @@
 
             let html = `<div style="width:100%; max-width: 1200px; margin: 0 auto;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
             
-            // 💻 電腦版大矩陣 HTML (已修復並加入綽號)
+            // 💻 電腦版大矩陣 HTML (已修復變數並加入綽號)
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
                     const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
@@ -1090,7 +1090,7 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
-            // 📱 手機版時間軸 HTML (已修復並加入綽號)
+            // 📱 手機版時間軸 HTML (已修復變數並加入綽號)
             let mobileHtml = `<div class="schedule-mobile">`;
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
