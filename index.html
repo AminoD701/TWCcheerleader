@@ -886,12 +886,16 @@
         }
 
         window.openModal = function(name) {
-            const c = dbGirls.find(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
-            if(!c) return;
-
-            const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
-            const sports = (c.mS || [c.sport || ""]);
-            const nums = (c.mN || [c.num || ""]).filter(n => n && n !== "-").map(n => '#' + String(n).replace(/#/g,''));
+            // 找出該女孩的所有資料列 (解決跨運動的問題)
+            const allRows = dbGirls.filter(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
+            if(allRows.length === 0) return;
+            
+            const c = allRows[0]; // 拿第一筆當基本資料
+            
+            // 將她的所有球隊、運動、背號合併
+            const teams = [...new Set(allRows.map(g => (g.team||"").trim()).filter(t => t))];
+            const sports = [...new Set(allRows.map(g => (g.sport||"").trim()).filter(s => s))];
+            const nums = [...new Set(allRows.map(g => (g.num||"").trim()).filter(n => n && n !== "-"))].map(n => '#' + String(n).replace(/#/g,''));
             
             const lookupTeam = teams[0] || "全部啦啦隊"; 
             const lookupSport = currentSport === "全部" ? "" : currentSport;
@@ -1097,7 +1101,7 @@
             let html = `<div style="width:100%;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
            html += `<div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
-                    const g = dbGirls.find(girl => girl.realname === n || girl.nickname === n);
+                    const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
                     const showReal = g ? g.realname : n;
                     const showNick = (g && g.nickname && g.nickname !== g.realname) ? g.nickname : "";
                     
