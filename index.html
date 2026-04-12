@@ -234,7 +234,7 @@
         .schedule-mobile { display: none; }
 
         /* =========================================
-           ✨ 外籍行程
+           ✨ 外援活動行程
         ========================================= */
         .event-list-container { max-width: 950px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: flex; flex-direction: column; gap: 30px; }
         .event-section-divider { font-family: var(--sport-font); display: flex; align-items: center; text-align: center; color: #fff; font-size: 20px; font-weight: 900; margin: 40px 0 10px; letter-spacing: 3px; text-transform: uppercase; }
@@ -439,7 +439,7 @@
                     <span><svg class="btn-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>我的最愛 FAV</span>
                 </button>
                 <button class="nav-btn btn-schedule" onclick="window.setMode('schedule', this)"><span>應援班表 SCHEDULE</span></button>
-                <button class="nav-btn btn-event" onclick="window.setMode('events', this)"><span>外籍行程 EVENTS</span></button>
+                <button class="nav-btn btn-event" onclick="window.setMode('events', this)"><span>外援活動行程 EVENTS</span></button>
             </div>
             
             <div class="sub-nav" id="sub-nav-sports">
@@ -1144,7 +1144,7 @@
         };
 
         // =========================================================================
-        // 外籍行程渲染 (包含 Google Map 連結)
+        // 外援活動行程渲染 (包含 Google Map 連結)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
