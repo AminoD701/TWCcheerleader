@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>台灣啦啦隊資料庫 | </title>
 
+    <link rel="manifest" href="manifest.json">
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -218,7 +220,7 @@
         .schedule-jump-btn:hover { transform: translateY(-3px); box-shadow: 4px 4px 0px rgba(0,0,0,0.6) !important; filter: brightness(1.2); }
 
         /* =========================================
-           ✨ 班表大廳與表格 (包含電腦與手機版)
+           ✨ 班表大廳與表格
         ========================================= */
         .schedule-selection-wrapper { display: flex; flex-direction: column; gap: 40px; align-items: center; width: 100%; padding: 30px 0; }
         .schedule-league-section { width: 100%; max-width: 950px; margin: 0 auto; background: rgba(17,20,24,0.8); padding: 30px; border-radius: 8px; border: 2px solid var(--border-color); }
@@ -373,7 +375,7 @@
             .girl-hero-name { font-size: 12px; }
             .event-title-small { font-size: 16px; }
             
-            /* 手機版 Bottom Sheet */
+            /* 手機版 Bottom Sheet 彈窗 */
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
@@ -506,7 +508,7 @@
 
     <script>
         // =========================================================================
-        // 核心邏輯與完整資料處理
+        // 核心邏輯與完整資料庫
         // =========================================================================
         let myFavorites = JSON.parse(localStorage.getItem('cheer_favorites')) || [];
 
@@ -649,6 +651,17 @@
             updateTeamTabs();
             applyTheme(currentMode === 'schedule' ? "全部啦啦隊" : currentTeam);
             window.renderContent();
+        };
+
+        window.toggleFavorite = function(name, event) {
+            event.stopPropagation();
+            if (myFavorites.includes(name)) {
+                myFavorites = myFavorites.filter(n => n !== name);
+            } else {
+                myFavorites.push(name);
+            }
+            localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
+            window.renderContent(); 
         };
 
         function applyTheme(tName) {
@@ -824,7 +837,6 @@
         }
 
         window.openModal = function(name) {
-            // 高佳彬雙棲卡片修復
             const allRows = dbGirls.filter(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
             if(allRows.length === 0) return;
             
@@ -846,10 +858,12 @@
             const currentMonth = today.getMonth() + 1;
             const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
 
+            // 🏆 過濾掉過期日期
             let herSchedules = dbSchedules.filter(s => 
-                (s.name === c.realname || s.name === c.nickname) && 
+                (s.name === (c.realname||"").trim() || s.name === (c.nickname||"").trim()) && 
                 s.safeDate.year === currentYear && 
-                s.safeDate.month === currentMonth
+                s.safeDate.month === currentMonth &&
+                s.safeDate.num >= todayNum
             );
 
             let scheduleHtml = '';
@@ -862,17 +876,12 @@
                     let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
                     if (!renderedKeys.includes(key)) {
                         renderedKeys.push(key);
-                        const isPast = s.safeDate.num < todayNum;
-                        const opacity = isPast ? '0.4' : '1';
-                        const borderColor = isPast ? 'var(--border-color)' : cardAccent;
-                        const textColor = isPast ? 'var(--text-sub)' : '#fff';
-                        const teamColor = isPast ? 'var(--text-sub)' : cardAccent;
-
+                        // 不用再判斷是否過期，因為已經過濾了
                         dateBoxes += `
-                        <div class="schedule-jump-btn" onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${borderColor}; border-bottom: 3px solid ${borderColor}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; opacity: ${opacity}; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: all 0.2s;">
+                        <div class="schedule-jump-btn" onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: 0.2s;">
                             <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
-                            <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: ${textColor}; line-height: 1.1; margin: 4px 0;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                            <span style="font-size: 11px; color: ${teamColor}; text-align: center; line-height: 1.2; font-weight: 700;">${s.team}<br>${s.sport}</span>
+                            <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                            <span style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700;">${s.team}<br>${s.sport}</span>
                         </div>`;
                     }
                 });
@@ -888,7 +897,7 @@
                 scheduleHtml = `
                     <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
                         <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: var(--text-sub); margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE</div>
-                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700;">本月目前尚無班表資料。</div>
+                        <div style="font-size: 14px; color: #6a7a90; font-weight: 700;">本月目前尚無後續班表。</div>
                     </div>`;
             }
 
@@ -929,7 +938,6 @@
             document.body.classList.remove('no-scroll'); 
         };
 
-        // 🏆 跳轉班表 100% 成功修復版
         window.goToSchedule = function(team, sport) {
             closeModal();
             document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active'));
@@ -1047,7 +1055,6 @@
 
             let html = `<div style="width:100%; max-width: 1200px; margin: 0 auto;"><button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg class="back-icon" viewBox="0 0 24 24"><use xlink:href="#icon-back"></use></svg>返回大廳 BACK</span></button>`;
             
-            // 💻 電腦版大矩陣 HTML
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
                     const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
@@ -1066,7 +1073,6 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
-            // 📱 手機版時間軸 HTML
             let mobileHtml = `<div class="schedule-mobile">`;
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
@@ -1098,10 +1104,7 @@
         };
 
         // =========================================================================
-        // 外籍行程渲染
-        // =========================================================================
-        // =========================================================================
-        // 外籍行程渲染 (新增：地址串接 Google 地圖功能)
+        // 外籍行程渲染 (包含 Google Map 連結)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -1126,10 +1129,10 @@
                     return `<div class="girl-hero-card" onclick="window.openModal('${g?g.realname:name}')">${g?`<img src="${g.img}" class="girl-hero-img" loading="lazy">`:`<div class="girl-hero-img default-avatar"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`}<div class="girl-hero-name-container"><span class="girl-hero-name">${g?g.realname:name}</span>${showNick?`<span class="girl-hero-nickname">${showNick}</span>`:''}</div></div>`;
                 }).join('');
                 
-                // 🏆 重點修復：處理地址轉 Google Map 連結
+                // 🏆 地址轉 Google Map
                 const addressRaw = (e.address || "").trim();
                 const addressDisplay = addressRaw 
-                    ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:inherit; text-decoration:none; border-bottom:1px dashed var(--event-accent);">${addressRaw}</a>`
+                    ? `<a href="http://maps.google.com/maps?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:inherit; text-decoration:none; border-bottom:1px dashed var(--event-accent);">${addressRaw}</a>`
                     : "請見球團官網";
 
                 return `<div class="event-item ${isExp?'expired':''}">${isExp?'<div class="expired-badge">已結束 PAST</div>':''}<div class="event-date-box"><span class="date-month">${e.safeDate.monStr}</span><span class="date-day">${String(e.safeDate.day).padStart(2,'0')}</span></div><div class="event-content-wrapper"><div class="event-girls-hero">${attendHtml}</div><div class="event-details-sub"><div class="event-title-small">${e.eventname||"賽事活動未定"}</div><div class="event-meta-row"><span class="meta-item"><i>🕒</i> ${e.time||"TBA"}</span><span class="meta-item"><i>📍</i> ${addressDisplay}</span>${e.host?`<span class="meta-item"><i>🏢</i> ${e.host}</span>`:''}</div></div></div></div>`;
@@ -1139,6 +1142,13 @@
             if(ex.length) html += `<div class="event-section-divider">歷史賽事紀錄 ARCHIVE</div>` + ex.map(e=>buildItemHtml(e,true)).join('');
             document.getElementById('event-container').innerHTML = html;
         };
+
+        // 註冊 Service Worker 讓 PWA 生效
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW註冊失敗', err));
+            });
+        }
 
         // 啟動程式
         window.onload = loadData;
