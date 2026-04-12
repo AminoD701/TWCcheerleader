@@ -299,6 +299,12 @@
            ✨ 手機版專屬優化
         ========================================= */
         @media (max-width: 768px) {
+            /* 📱 只有手機版會生效：縮小女孩卡片的數據與球隊字體 */
+            .data-row { font-size: 12px; gap: 6px; }
+            .data-label { font-size: 11px; }
+            .data-value { font-size: 12px; letter-spacing: 0; line-height: 1.2; }
+
+            /* ... (保留你原本在這邊的其他手機版設定) ... */
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
             .landing-subtitle { font-size: 1rem; letter-spacing: 3px; }
             .enter-btn { padding: 12px 30px; font-size: 1.2rem; }
