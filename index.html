@@ -686,7 +686,9 @@
                 myFavorites.push(name);
             }
             localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
-            window.renderContent(); 
+            
+            // 傳入 true，告訴系統「這次更新請原地不動，不要滾回最上面」
+            window.renderContent(true); 
         };
 
         function applyTheme(tName) {
