@@ -753,10 +753,15 @@
             return btn;
         }
 
-        window.renderContent = function() {
+        // 括號裡加上 skipScroll = false，預設還是會回到最上面
+        window.renderContent = function(skipScroll = false) {
             const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container');
             grid.style.display = list.style.display = sched.style.display = 'none';
-            window.scrollTo({top: 0});
+            
+            // 只有在 skipScroll 不是 true 的時候，才會觸發回到最上面
+            if (!skipScroll) {
+                window.scrollTo({top: 0});
+            }
             
             if (currentMode === 'girls' || currentMode === 'favorites') { grid.style.display = 'grid'; renderGirls(); }
             else if (currentMode === 'events') { list.style.display = 'flex'; renderEvents(); }
