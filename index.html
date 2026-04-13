@@ -268,16 +268,8 @@
         .meta-item { display: inline-flex; align-items: center; gap: 6px; }
         .meta-item i { font-style: normal; font-size: 16px; filter: grayscale(1); opacity: 0.7; }
 
-        /* 下半部：女孩照片展示區 - 加上置中設定 */
-.event-girls-showcase { 
-    background: #0d1014; 
-    padding: 25px 30px; 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 20px; 
-    align-items: flex-start; 
-    justify-content: center; /* 💡 這一行是關鍵：讓女孩照片整體置中 */
-}
+        /* 下半部：凸顯女孩照片的大圓形排版 */
+        .event-girls-showcase { background: #0d1014; padding: 25px 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
         .girl-hero-card { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 95px; cursor: pointer; transition: 0.2s; }
         .girl-hero-img-wrap { width: 85px; height: 85px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #2d3748, #111418); box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: 0.3s; }
         .girl-hero-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #252c36; border: 2px solid #111418; }
@@ -305,34 +297,7 @@
            ✨ 手機版專屬優化
         ========================================= */
         @media (max-width: 768px) {
-    /* 📱 手機版球類重疊徽章：再縮小一點點 */
-    .sport-tag { 
-        width: 22px;   /* 原本是 26px，現在縮小到 22px */
-        height: 22px; 
-        border-width: 1px; 
-        margin-left: -6px; /* 縮小重疊距離，比例才對 */
-    }
-
-    /* 💖 手機版我的最愛（愛心）按鈕：縮小至 24px */
-    .fav-btn { 
-        width: 24px;   /* 原本是 30px，縮小到 24px */
-        height: 24px; 
-        top: 10px; 
-        right: 10px; 
-    }
-    .fav-icon { 
-        width: 12px;   /* 愛心圖案同步縮小 */
-        height: 12px; 
-    }
-
-    /* 📱 確保手機版行程內的照片也是置中的 */
-    .event-girls-showcase { 
-        padding: 20px; 
-        gap: 15px; 
-        justify-content: center; /* 💡 確保手機版也是置中 */
-        border-top: 1px solid rgba(255,255,255,0.05); 
-    }
-}
+            /* 📱 只有手機版會生效：縮小女孩卡片的數據與球隊字體 */
             .data-row { font-size: 12px; gap: 6px; }
             .data-label { font-size: 11px; }
             .data-value { font-size: 12px; letter-spacing: 0; line-height: 1.2; }
