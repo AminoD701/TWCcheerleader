@@ -158,7 +158,7 @@
         .data-row { display: flex; justify-content: space-between; font-size: 14px; align-items: flex-start; gap: 10px; }
         .data-label { color: var(--text-sub); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
         .data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 15px; word-break: break-word; }
-
+        
         /* 🏀 🏆 完美「田」字型數據面板與獨立備註 */
         .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 15px 0; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; background: #111418; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); }
         .stat-box { padding: 12px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
@@ -882,7 +882,12 @@
                             <div class="number">${displayNum}</div>
                         </div>
                         <div class="data-grid">
-                            <div class="data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 10px;"><span class="data-label">球隊 UNIT</span><span class="data-value" style="color:${cardAccent}">${teams.join(' / ')}</span></div>
+                            <div class="data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; align-items: center;">
+                                <span class="data-label">球隊 UNIT</span>
+                                <div class="team-tags-wrapper">
+                                    ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
+                                </div>
+                            </div>
                         </div>
                         <div class="stats-grid">
                             <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
@@ -980,7 +985,12 @@
                     </div>
                     
                     <div class="modal-data-grid">
-                        <div class="modal-data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 5px;"><span class="modal-data-label">所屬球隊 UNIT</span><span class="modal-data-value" style="color:${cardAccent}">${teams.join(' / ')}</span></div>
+                        <div class="modal-data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 5px; align-items: flex-start;">
+                            <span class="modal-data-label" style="margin-top: 5px;">所屬球隊 UNIT</span>
+                            <div class="team-tags-wrapper">
+                                ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
+                            </div>
+                        </div>
                     </div>
                     <div class="stats-grid">
                         <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
