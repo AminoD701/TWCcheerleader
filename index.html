@@ -122,6 +122,7 @@
         .card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px rgba(0,0,0,0.8); border-color: #fff; }
         
         .photo-area { height: 350px; background-color: #000; overflow: hidden; position: relative; border-bottom: 4px solid var(--border-color); }
+        /* 照片不裁切頭頂 */
         .photo-area img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.5s; }
         .card:hover .photo-area img { transform: scale(1.05); }
 
@@ -248,7 +249,7 @@
         .schedule-mobile { display: none; }
 
         /* =========================================
-           ✨ 外籍行程 (VIP 黑金質感排版)
+           ✨ 外籍行程 (以女孩為主體的排版)
         ========================================= */
         .event-list-container { max-width: 950px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: flex; flex-direction: column; gap: 25px; }
         .event-section-divider { font-family: var(--sport-font); display: flex; align-items: center; text-align: center; color: #fff; font-size: 20px; font-weight: 900; margin: 40px 0 10px; letter-spacing: 3px; text-transform: uppercase; }
@@ -257,34 +258,34 @@
         .event-item { background: #15191e; border-radius: 12px; display: flex; flex-direction: column; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s; position: relative; overflow: hidden; }
         .event-item:hover { border-color: #5a6a82; transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.7); }
         .event-item.expired { opacity: 0.5; filter: grayscale(1); }
-        .expired-badge { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 900; letter-spacing: 1px; font-family: var(--sport-font); border: 1px solid #555; z-index: 10; }
+        .expired-badge { position: absolute; top: 12px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 4px; font-weight: 900; letter-spacing: 1px; font-family: var(--sport-font); border: 1px solid #555; z-index: 10; backdrop-filter: blur(4px);}
 
-        /* 上半部：日期與資訊完美融合 */
-        .event-header-row { display: flex; align-items: center; gap: 25px; padding: 25px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .event-date-sleek { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; border-right: 2px dashed var(--border-color); padding-right: 25px; }
-        .date-month-sleek { color: #ffeb3b; font-family: var(--sport-font); font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: -5px; }
-        .event-item.expired .date-month-sleek { color: #888; }
-        .date-day-sleek { font-family: var(--sport-font); font-size: 52px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        
-        .event-info-wrapper { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .event-title-sleek { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px; line-height: 1.2; text-transform: uppercase; }
-        .event-meta-row { display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: var(--text-sub); font-weight: 700; }
-        .meta-item { display: inline-flex; align-items: center; gap: 6px; }
-        .meta-item i { font-style: normal; font-size: 16px; filter: grayscale(1); opacity: 0.7; }
-
-        /* 下半部：凸顯女孩照片的大圓形排版 (不裁切頭部) */
-        .event-girls-showcase { background: #0d1014; padding: 25px 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; justify-content: center; }
-        .girl-hero-card { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 95px; cursor: pointer; transition: 0.2s; }
-        .girl-hero-img-wrap { width: 85px; height: 85px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #2d3748, #111418); box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: 0.3s; }
+        /* 上半部：凸顯女孩照片的超大圓形排版 (放大置中) */
+        .event-girls-showcase { background: transparent; padding: 30px 30px 20px; display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; justify-content: center; }
+        .girl-hero-card { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 110px; cursor: pointer; transition: 0.2s; }
+        .girl-hero-img-wrap { width: 110px; height: 110px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #2d3748, #111418); box-shadow: 0 6px 18px rgba(0,0,0,0.8); transition: 0.3s; }
         .girl-hero-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; background: #252c36; border: 2px solid #111418; }
         .girl-hero-card:hover .girl-hero-img-wrap { background: linear-gradient(135deg, #ffeb3b, #ff9800); transform: translateY(-5px) scale(1.05); }
         
         .girl-hero-name-container { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; text-align: center; }
-        .girl-hero-name { font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-        .girl-hero-nickname { font-size: 12px; color: #ffeb3b; font-weight: 900; letter-spacing: 1px; line-height: 1; }
+        .girl-hero-name { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 1px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .girl-hero-nickname { font-size: 13px; color: #ffeb3b; font-weight: 900; letter-spacing: 1px; line-height: 1; }
 
         .default-avatar { display: flex; align-items: center; justify-content: center; background: #252c36; border-radius: 50%; width: 100%; height: 100%; }
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
+
+        /* 下半部：縮小的行程與日期資訊 */
+        .event-header-row { display: flex; align-items: center; gap: 20px; padding: 20px 30px; background: #0d1014; border-top: 1px solid rgba(255,255,255,0.05); }
+        .event-date-sleek { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 60px; border-right: 2px dashed var(--border-color); padding-right: 20px; }
+        .date-month-sleek { color: var(--event-accent); font-family: var(--sport-font); font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: -2px; }
+        .event-item.expired .date-month-sleek { color: #888; }
+        .date-day-sleek { font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        
+        .event-info-wrapper { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .event-title-sleek { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 1px; line-height: 1.3; }
+        .event-meta-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-sub); font-weight: 700; }
+        .meta-item { display: inline-flex; align-items: center; gap: 6px; }
+        .meta-item i { font-style: normal; font-size: 15px; filter: grayscale(1); opacity: 0.7; }
 
         /* 回頂端與返回按鈕 */
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #fff; color: #000; border-radius: 2px; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px var(--border-color); cursor: pointer; z-index: 90; opacity: 0; visibility: hidden; transition: 0.2s; transform: translateY(20px); }
@@ -369,18 +370,18 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
-            /* 📱 手機版 VIP 黑金排版微調 */
+            /* 📱 手機版外籍行程微調 (以女孩為主體) */
             .event-list-container { padding: 0 10px; }
             .event-item { padding: 0; border-radius: 8px; }
-            .event-header-row { flex-direction: column; align-items: flex-start; gap: 15px; padding: 20px; border-bottom: none; }
-            .event-date-sleek { flex-direction: row; border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 15px; width: 100%; justify-content: flex-start; gap: 15px; align-items: baseline; }
-            .date-month-sleek { font-size: 18px; margin-bottom: 0; }
-            .date-day-sleek { font-size: 36px; }
-            .event-title-sleek { font-size: 20px; }
-            .event-girls-showcase { padding: 20px; gap: 15px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
-            .girl-hero-card { width: 75px; }
-            .girl-hero-img-wrap { width: 70px; height: 70px; }
-            .girl-hero-name { font-size: 14px; }
+            .event-girls-showcase { padding: 25px 15px 15px; gap: 15px; }
+            .girl-hero-card { width: 90px; }
+            .girl-hero-img-wrap { width: 85px; height: 85px; }
+            .girl-hero-name { font-size: 16px; }
+            .event-header-row { flex-direction: column; align-items: flex-start; gap: 12px; padding: 15px; }
+            .event-date-sleek { flex-direction: row; border-right: none; border-bottom: 2px dashed var(--border-color); padding-right: 0; padding-bottom: 12px; width: 100%; justify-content: flex-start; gap: 10px; align-items: baseline; }
+            .date-month-sleek { font-size: 15px; margin-bottom: 0; }
+            .date-day-sleek { font-size: 28px; }
+            .event-title-sleek { font-size: 16px; }
             
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
@@ -581,8 +582,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V10 (標籤雲與防裁切完美版)
-        const CACHE_KEY = "tw_cheerleader_cache_v10";
+        // 🏆 強制快取 V11 (終極視覺反轉版)
+        const CACHE_KEY = "tw_cheerleader_cache_v11";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -1238,6 +1239,10 @@
                 return `
                 <div class="event-item ${isExp?'expired':''}">
                     ${isExp?'<div class="expired-badge">已結束 PAST</div>':''}
+                    ${attendHtml ? `
+                    <div class="event-girls-showcase">
+                        ${attendHtml}
+                    </div>` : ''}
                     <div class="event-header-row">
                         <div class="event-date-sleek">
                             <span class="date-month-sleek">${e.safeDate.monStr}</span>
@@ -1252,10 +1257,6 @@
                             </div>
                         </div>
                     </div>
-                    ${attendHtml ? `
-                    <div class="event-girls-showcase">
-                        ${attendHtml}
-                    </div>` : ''}
                 </div>`;
             };
 
