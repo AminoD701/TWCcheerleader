@@ -484,7 +484,7 @@
 
     <div class="sticky-filter-wrapper" id="filter-bar">
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="搜尋姓名、綽號或活動..." oninput="window.renderContent()">
+            <input type="text" id="searchInput" placeholder="搜尋姓名、綽號或活動..." oninput="window.debounceSearch()">
             <div id="extra-filters" style="display: flex; gap: 10px;">
                 <select id="natFilter" onchange="window.renderContent()">
                     <option value="all">所有國籍</option>
@@ -582,8 +582,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V11 (終極視覺反轉版)
-        const CACHE_KEY = "tw_cheerleader_cache_v11";
+        // 🏆 強制快取 V13 (班表月份分隔版)
+        const CACHE_KEY = "tw_cheerleader_cache_v13";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -760,7 +760,21 @@
             return btn;
         }
 
+        // =========================================================================
+        // 效能優化：搜尋防抖機制
+        // =========================================================================
+        let searchTimeout;
+        window.debounceSearch = function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                window.renderContent();
+            }, 300); // 停下鍵盤 0.3 秒後才執行重繪
+        };
+
         window.renderContent = function(skipScroll = false) {
+            // 重置女孩卡片的顯示數量
+            window.currentDisplayLimit = 24; 
+
             const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container');
             grid.style.display = list.style.display = sched.style.display = 'none';
             
@@ -779,7 +793,7 @@
         };
 
         // =========================================================================
-        // 女孩卡片與彈窗
+        // 女孩卡片與彈窗 (包含分批載入功能)
         // =========================================================================
         function renderGirls() {
             const container = document.getElementById('grid-container');
@@ -850,7 +864,9 @@
                 return 0;
             });
 
-            container.innerHTML = result.map(c => {
+            window.currentDisplayLimit = window.currentDisplayLimit || 24;
+
+            let htmlContent = result.slice(0, window.currentDisplayLimit).map(c => {
                 const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
                 const sports = (c.mS || [c.sport || ""]);
                 const cardAccent = (teamThemes[`${teams[0]}_${currentSport==="全部"?"":currentSport}`] || teamThemes[teams[0]] || teamThemes["全部啦啦隊"]).accent;
@@ -904,6 +920,17 @@
                     </div>
                 </div>`;
             }).join('');
+
+            if (result.length > window.currentDisplayLimit) {
+                htmlContent += `
+                <div style="grid-column: 1 / -1; text-align: center; margin-top: 20px; padding-bottom: 20px;">
+                    <button onclick="window.currentDisplayLimit += 24; renderGirls();" class="enter-btn" style="display: inline-flex; font-size: 16px; padding: 12px 30px;">
+                        載入更多女孩 LOAD MORE 🔽
+                    </button>
+                </div>`;
+            }
+
+            container.innerHTML = htmlContent;
         }
 
         window.openModal = function(name) {
@@ -1155,8 +1182,15 @@
                     return `<th onclick="window.openModal('${n}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${g?g.img:''}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
+            // 加入電腦版月份分隔線
+            let currentMonthDesk = "";
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
+                if (dInfo.monStr !== currentMonthDesk) {
+                    currentMonthDesk = dInfo.monStr;
+                    desktopHtml += `<tr><td colspan="${girls.length + 1}" style="background: rgba(17,20,24,0.95); color: ${cfg.accent}; font-family: var(--sport-font); text-align: left; padding: 15px 25px; font-size: 22px; font-weight: 900; letter-spacing: 2px; border-bottom: 2px dashed ${cfg.accent}; position: sticky; left: 0; z-index: 2;">${currentMonthDesk} <span style="font-size:14px; color:var(--text-sub); font-family:var(--tc-font); margin-left: 5px;">${dInfo.year}</span></td></tr>`;
+                }
+                
                 desktopHtml += `<tr><td><div class="schedule-date">${dInfo.month}/${String(dInfo.day).padStart(2,'0')}</div><div class="schedule-day">${dInfo.week}</div></td>` +
                     girls.map(gn => {
                         const work = data.some(s => s.safeDate.num === dNum && s.name === gn);
@@ -1165,12 +1199,20 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
+            // 加入手機版月份分隔線
             let mobileHtml = `<div class="schedule-mobile">`;
+            let currentMonthMob = "";
+            
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
                 let attendees = girls.filter(gn => data.some(s => s.safeDate.num === dNum && s.name === gn));
                 
                 if (attendees.length > 0) {
+                    if (dInfo.monStr !== currentMonthMob) {
+                        currentMonthMob = dInfo.monStr;
+                        mobileHtml += `<div style="font-family: var(--sport-font); color: ${cfg.accent}; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin: 15px 0 5px; padding-bottom: 5px; border-bottom: 2px solid ${cfg.accent}; display:flex; align-items:baseline; gap:10px;">${currentMonthMob} <span style="font-size:14px; color:var(--text-sub); font-family:var(--tc-font); font-weight:700;">${dInfo.year}</span></div>`;
+                    }
+                    
                     mobileHtml += `<div class="timeline-card" style="--team-accent:${cfg.accent}">
                         <div class="timeline-date">${dInfo.month}/${String(dInfo.day).padStart(2,'0')} <span style="font-size:13px;color:var(--text-sub);">${dInfo.week}</span></div>
                         <div class="timeline-roster">`;
