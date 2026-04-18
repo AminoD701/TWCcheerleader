@@ -1306,7 +1306,24 @@
             if(ex.length) html += `<div class="event-section-divider">歷史賽事紀錄 ARCHIVE</div>` + ex.map(e=>buildItemHtml(e,true)).join('');
             document.getElementById('event-container').innerHTML = html;
         };
+        // =========================================================================
+        // 🚀 回頂端按鈕邏輯 (找回遺失的引擎)
+        // =========================================================================
+        window.addEventListener('scroll', function() {
+            const topBtn = document.getElementById('backToTopBtn');
+            if (topBtn) {
+                // 當往下捲動超過 300px 時，顯示按鈕
+                if (window.scrollY > 300) {
+                    topBtn.classList.add('show');
+                } else {
+                    topBtn.classList.remove('show');
+                }
+            }
+        });
 
+        window.scrollToTop = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
         // 註冊 Service Worker 讓 PWA 生效
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
