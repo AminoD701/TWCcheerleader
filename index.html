@@ -18,9 +18,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
-        /* =========================================
-           🎨 運動風字體與核心變數
-        ========================================= */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@400;700;900&display=swap');
 
         :root {
@@ -29,29 +26,19 @@
             --text-main: #f0f4f8;
             --text-sub: #a0aec0;
             --border-color: #2d3748;
-            
             --team-accent: #ffffff;
             --event-accent: #ff5722;
             --schedule-accent: #00e676;
             --fav-accent: #ff4757;
-            
             --sport-font: 'Oswald', sans-serif;
             --tc-font: 'Noto Sans TC', sans-serif;
         }
 
         * { box-sizing: border-box; font-family: var(--tc-font); margin: 0; padding: 0; }
 
-        html, body {
-            max-width: 100vw; overflow-x: hidden;
-            background-color: #050505; color: var(--text-main);
-            min-height: 100vh; display: flex; flex-direction: column; scroll-behavior: smooth;
-        }
-
+        html, body { max-width: 100vw; overflow-x: hidden; background-color: #050505; color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; scroll-behavior: smooth; }
         body.no-scroll { overflow: hidden !important; }
 
-        /* =========================================
-           🔥 運動員概念輪播背景
-        ========================================= */
         .sports-bg-slider { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: #000; overflow: hidden; }
         .sports-bg-slider::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, rgba(10,12,16,0.92) 0%, rgba(20,25,30,0.85) 100%); z-index: 1; pointer-events: none; }
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; filter: grayscale(30%) contrast(110%); animation: slideFade 24s infinite; z-index: 0; }
@@ -60,9 +47,6 @@
         .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } 
         @keyframes slideFade { 0% { opacity: 0; transform: scale(1.05); } 10% { opacity: 0.4; transform: scale(1); } 33% { opacity: 0.4; transform: scale(1); } 43% { opacity: 0; transform: scale(1.05); } 100% { opacity: 0; } }
 
-        /* =========================================
-           ✨ 華麗入口畫面 & 載入動畫
-        ========================================= */
         .landing-page { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a1a24 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.5s ease; }
         .landing-content { text-align: center; animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .landing-title { font-size: 3.5rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; text-shadow: 4px 4px 0px rgba(229, 57, 53, 0.8); margin-bottom: 5px; transform: skewX(-5deg);}
@@ -74,9 +58,6 @@
         @keyframes spin { to { transform: skewX(10deg) rotate(360deg); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* =========================================
-           🔥 數據驚喜中心 (左下角懸浮盒)
-        ========================================= */
         .floating-hub-btn { position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px; background: linear-gradient(135deg, #ff5722, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 5px 20px rgba(255,87,34,0.5); transition: 0.3s; border: 2px solid #fff; }
         .floating-hub-btn:hover { transform: scale(1.1) rotate(10deg); }
         .floating-hub-btn svg { width: 28px; height: 28px; fill: #fff; }
@@ -100,7 +81,6 @@
         .mvp-text { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.6; }
         .mvp-highlight { color: #ffeb3b; font-size: 20px; font-weight: 900; font-family: var(--sport-font); margin: 0 5px; }
 
-        /* 改為網格自動換行顯示 */
         .birthday-grid { display: flex; flex-wrap: wrap; gap: 15px; padding: 5px 0 15px; justify-content: flex-start; }
         .birthday-item { width: 72px; text-align: center; cursor: pointer; transition: 0.2s; }
         .birthday-item:hover { transform: translateY(-4px); }
@@ -108,14 +88,10 @@
         .birthday-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .birthday-date { font-size: 11px; color: var(--event-accent); font-family: var(--sport-font); margin-top: 3px; font-weight: 700;}
 
-        /* =========================================
-           主系統 Header 
-        ========================================= */
         .header { background-color: rgba(17, 20, 24, 0.95); padding: 25px 20px 0; border-bottom: 4px solid var(--border-color); z-index: 50; position: relative;}
         .title { font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 25px; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
         .controls-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 15px; }
         
-        /* 🏆 主導覽列 (四大模塊) */
         .main-nav { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .nav-btn { font-family: var(--sport-font); background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-sub); padding: 12px 25px; font-size: 15px; font-weight: 900; border-radius: 4px; cursor: pointer; transition: all 0.2s; transform: skewX(-5deg); letter-spacing: 1px;}
         .nav-btn span { transform: skewX(5deg); display: inline-flex; align-items: center; gap: 8px; }
@@ -126,13 +102,11 @@
         .nav-btn.btn-event.active { background: var(--event-accent); border-color: var(--event-accent); color: #000; box-shadow: 4px 4px 0px rgba(255,87,34,0.3); }
         .btn-icon { width: 18px; height: 18px; fill: currentColor; }
 
-        /* 🏆 次級導覽列 (運動分類膠囊) */
         .sub-nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding-top: 18px; margin-top: 5px; border-top: 2px dashed var(--border-color); }
         .sub-btn { font-family: var(--tc-font); background: transparent; border: 1px solid var(--text-sub); color: var(--text-sub); padding: 6px 18px; font-size: 13px; font-weight: 900; border-radius: 30px; cursor: pointer; transition: 0.2s; letter-spacing: 1px;}
         .sub-btn:hover { border-color: #fff; color: #fff; transform: translateY(-2px);}
         .sub-btn.active { background: var(--text-sub); color: #000; border-color: var(--text-sub); }
 
-        /* 🏆 輕量化流線膠囊球隊選單 */
         .team-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding-top: 15px; border-top: 2px dashed var(--border-color); }
         .league-group { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
         .league-title { font-family: var(--sport-font); font-size: 12px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 4px 16px; border-radius: 20px; text-transform: uppercase; letter-spacing: 2px; margin: 5px 0; border: 1px solid rgba(255,255,255,0.1); }
@@ -147,9 +121,6 @@
         .filters input, .filters select { background-color: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-main); padding: 11px 16px; font-size: 14px; font-weight: 700; border-radius: 2px; outline: none; transition: all 0.2s;}
         .filters input:focus, .filters select:focus { border-color: #fff; background-color: #252c36; }
 
-        /* =========================================
-           ✨ 女孩卡片網格 
-        ========================================= */
         #main-content { flex: 1; padding-top: 15px; position: relative; }
         .grid-container { max-width: 1200px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
         .card { background-color: var(--bg-card); border: 2px solid var(--border-color); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.2s; box-shadow: 8px 8px 0px rgba(0,0,0,0.6); cursor: pointer; position: relative; }
@@ -159,7 +130,6 @@
         .photo-area img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.5s; }
         .card:hover .photo-area img { transform: scale(1.05); }
 
-        /* 🏀 🏆 質感大升級：水平重疊徽章設計 */
         .sport-tags { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: row; z-index: 5; }
         .sport-tag { width: 30px; height: 30px; border-radius: 50%; box-shadow: 2px 2px 6px rgba(0,0,0,0.6); cursor: help; background-size: cover; background-repeat: no-repeat; background-position: center; border: 2px solid #fff; background-color: #fff; margin-left: -10px; transition: 0.2s; position: relative; }
         .sport-tag:first-child { margin-left: 0; }
@@ -170,7 +140,6 @@
         .tag-volleyball { background-image: url('./vollyball.png'); }
         .tag-other { background-color: #8e44ad; background-image: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 900; letter-spacing: 1px; font-family: var(--tc-font); border-color: #fff; } 
 
-        /* 💖 精緻版我的最愛按鈕 */
         .fav-btn { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 3px 8px rgba(0,0,0,0.6); color: #000; transition: 0.2s;}
         .fav-btn:hover { transform: scale(1.15); background: var(--fav-accent); }
         .fav-icon { width: 15px; height: 15px; fill: none; stroke: #000; stroke-width: 2.5; transition: 0.2s; }
@@ -178,7 +147,6 @@
         .fav-btn.active { background: var(--fav-accent); }
         .fav-btn.active .fav-icon { fill: #fff; stroke: #fff; animation: heartPop 0.3s; }
 
-        /* 資訊區塊：改為彈性容器，讓底部永遠對齊 */
         .info-section { padding: 25px; background: var(--bg-card); display: flex; flex-direction: column; flex: 1; }
         .header-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px dashed var(--border-color); }
         .nickname-container { display: flex; align-items: center; gap: 8px; }
@@ -191,12 +159,10 @@
         .data-label { color: var(--text-sub); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
         .data-value { font-weight: 900; color: #fff; text-align: right; font-family: var(--sport-font); letter-spacing: 0.5px; font-size: 15px; word-break: break-word; }
 
-        /* 🏷️ 球隊多標籤精緻排版 */
         .team-tags-wrapper { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex: 1; margin-left: 10px;}
         .team-tag-mini { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.05); border: 1px solid currentColor; line-height: 1.2; text-align: center; }
         .modal-data-row .team-tag-mini { font-size: 14px; padding: 4px 12px; }
 
-        /* 🏀 🏆 完美「田」字型數據面板與獨立備註 */
         .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 15px 0; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; background: #111418; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); }
         .stat-box { padding: 12px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
         .stat-box:nth-child(even) { border-right: none; }
@@ -276,8 +242,7 @@
         .schedule-date { font-family: var(--sport-font); font-size: 24px; color: #fff; font-weight: 900; }
         .schedule-day { font-size: 13px; font-weight: 700; color: var(--team-accent); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
         .schedule-heart { width: 30px; height: 30px; fill: var(--team-accent); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); animation: heartPop 0.3s forwards; display: inline-block;}
-        @keyframes heartPop { 0% { transform: scale(0.5); opacity: 0;} 70% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1;} }
-
+        
         .schedule-mobile { display: none; }
 
         /* =========================================
@@ -306,7 +271,6 @@
         .event-mini-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--bg-card); object-fit: cover; object-position: top center; background: #252c36; margin-left: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .event-mini-avatar:first-child { margin-left: 0; }
 
-        /* 彈窗內的女孩頭像樣式 */
         .girl-hero-card { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
         .girl-hero-img-wrap { border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #2d3748, #111418); box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: 0.3s; }
         .girl-hero-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; background: #252c36; border: 2px solid #111418; }
@@ -345,29 +309,23 @@
             .nickname { font-size: 16px; }
             .number { font-size: 16px; padding: 4px 8px; }
             
-            /* 📱 手機版微調：縮小女孩卡片的數據與球隊字體防換行 */
             .data-row { font-size: 12px; gap: 6px; }
             .data-label { font-size: 11px; }
             .data-value { font-size: 12px; letter-spacing: 0; line-height: 1.2; }
 
-            /* 📱 手機版球類重疊徽章：再縮小一點點 */
             .sport-tag { width: 22px; height: 22px; border-width: 1px; margin-left: -6px; }
             .tag-other { font-size: 8px; transform: scale(0.9); }
 
-            /* 💖 手機版我的最愛（愛心）按鈕：縮小至 24px */
             .fav-btn { width: 24px; height: 24px; top: 10px; right: 10px; }
             .fav-icon { width: 12px; height: 12px; }
 
-            /* 📱 雙層導覽列手機版設定 */
             .main-nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px;}
             .main-nav::-webkit-scrollbar { display: none; } 
             .nav-btn { flex-shrink: 0; padding: 10px 18px; font-size: 14px; }
             .sub-nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; padding-top: 12px;}
             .sub-btn { flex-shrink: 0; padding: 6px 14px; font-size: 12px;}
             
-            /* 📱 手機版膠囊選單微調 */
             .team-tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 6px; }
-            .team-tabs::-webkit-scrollbar { display: none; }
             .tab-btn { flex-shrink: 0; min-width: auto; height: auto; padding: 6px 14px; font-size: 13px; }
             .tab-logo { width: 16px; height: 16px; }
             
@@ -377,11 +335,9 @@
 
             .sticky-filter-wrapper { padding: 10px; }
             .filters { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 8px; }
-            .filters::-webkit-scrollbar { display: none; }
             .filters input, .filters select { flex-shrink: 0; padding: 8px 12px; min-width: 110px; font-size: 13px; }
             #searchInput { min-width: 160px; order: 0; }
 
-            /* 📱 田字格手機版微調防字體換行 */
             .stat-box { padding: 10px 2px; }
             .stat-label { font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px; }
             .stat-value { font-size: 13px; letter-spacing: 0; }
@@ -400,7 +356,6 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
-            /* 📱 手機版外籍行程 (日曆聚合版) */
             .event-list-container { padding: 0 10px; }
             .event-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
             .event-date-header { padding: 10px; }
@@ -605,9 +560,6 @@
             "LuxyGirls": { accent: "#e040fb", logo: "", noLogo: true, league: "其他" }
         };
 
-        const monthMap = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        const weekMap = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
-
         function parseDateFlexible(dStr) {
             if(!dStr) return null;
             let s = String(dStr).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
@@ -618,7 +570,9 @@
             else return null;
             if(isNaN(m) || isNaN(d)) return null;
             let jsDate = new Date(y, m-1, d);
-            return { year:y, month:m, day:d, week:weekMap[jsDate.getDay()], num:parseInt(`${y}${String(m).padStart(2,'0')}${String(d).padStart(2,'0')}`), monStr: monthMap[m-1] };
+            const weekMap = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
+            const monMap = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            return { year:y, month:m, day:d, week:weekMap[jsDate.getDay()], num:parseInt(`${y}${String(m).padStart(2,'0')}${String(d).padStart(2,'0')}`), monStr: monMap[m-1] };
         }
 
         function parseGirlDOB(d) {
@@ -635,8 +589,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V16.3 
-        const CACHE_KEY = "tw_cheerleader_cache_v16_3";
+        // 🏆 強制快取 V16.4 終極潔癖版
+        const CACHE_KEY = "tw_cheerleader_cache_v16_4";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -709,14 +663,13 @@
         }
 
         // =========================================================================
-        // 🎁 數據驚喜中心計算邏輯 (V16.3 打磨版)
+        // 🎁 數據驚喜中心計算邏輯
         // =========================================================================
         function calculateHubStats() {
             const today = new Date();
             const curMonth = today.getMonth() + 1;
             const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
             
-            // 1. 今日幸運女孩
             if (dbGirls.length > 0) {
                 const luckyGirl = dbGirls[seed % dbGirls.length];
                 document.getElementById('lucky-girl-content').innerHTML = `
@@ -729,7 +682,6 @@
                     </div>`;
             }
 
-            // 2. 本月應援鐵人 (增加可點擊互動)
             const counts = {};
             dbSchedules.filter(s => s.safeDate.month === curMonth).forEach(s => counts[s.name] = (counts[s.name] || 0) + 1);
             const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
@@ -747,18 +699,8 @@
                 document.getElementById('mvp-content').innerHTML = '<div style="color:var(--text-sub)">本月暫無應援數據</div>';
             }
 
-            // 3. 本月壽星 (改為全部展開排列並依照日期排序)
-            let birthdayGirls = dbGirls.filter(g => {
-                let m = parseInt(String(g.dob).split('/')[0]);
-                return m === curMonth;
-            });
-            
-            // 依照日期排序
-            birthdayGirls.sort((a, b) => {
-                let dayA = parseInt(String(a.dob).split('/')[1]) || 0;
-                let dayB = parseInt(String(b.dob).split('/')[1]) || 0;
-                return dayA - dayB;
-            });
+            let birthdayGirls = dbGirls.filter(g => parseInt(String(g.dob).split('/')[0]) === curMonth);
+            birthdayGirls.sort((a, b) => (parseInt(String(a.dob).split('/')[1]) || 0) - (parseInt(String(b.dob).split('/')[1]) || 0));
             
             document.getElementById('birthday-content').innerHTML = birthdayGirls.map(g => {
                 let day = parseInt(String(g.dob).split('/')[1]) || "";
@@ -1462,7 +1404,7 @@
 
             const addressRaw = (e.address || "").trim();
             const addressDisplay = addressRaw 
-                ? `<a href="https://maps.google.com/?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
+                ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
                 : "請見球團官網";
 
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
@@ -1495,8 +1437,13 @@
         };
 
         // =========================================================================
-        // 🚀 回頂端按鈕邏輯
+        // 🚀 視窗操作邏輯
         // =========================================================================
+        window.closeModal = function() { 
+            document.getElementById('girl-modal').classList.remove('active'); 
+            document.body.classList.remove('no-scroll'); 
+        };
+
         window.addEventListener('scroll', function() {
             const topBtn = document.getElementById('backToTopBtn');
             if (topBtn) {
@@ -1512,14 +1459,12 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // 註冊 Service Worker 讓 PWA 生效
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW註冊失敗', err));
+                navigator.serviceWorker.register('sw.js').catch(err => {});
             });
         }
 
-        // 啟動程式
         window.onload = loadData;
     </script>
 </body>
