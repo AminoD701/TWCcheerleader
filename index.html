@@ -75,6 +75,40 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
         /* =========================================
+           🔥 數據驚喜中心 (左下角懸浮盒)
+        ========================================= */
+        .floating-hub-btn { position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px; background: linear-gradient(135deg, #ff5722, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 5px 20px rgba(255,87,34,0.5); transition: 0.3s; border: 2px solid #fff; }
+        .floating-hub-btn:hover { transform: scale(1.1) rotate(10deg); }
+        .floating-hub-btn svg { width: 28px; height: 28px; fill: #fff; }
+
+        .hub-panel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .hub-panel-overlay.active { display: flex; }
+        .hub-content { background: var(--bg-panel); border: 2px solid var(--event-accent); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px; position: relative; box-shadow: 0 0 50px rgba(255,87,34,0.3); overflow-y: auto; max-height: 85vh; }
+        .hub-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 20px; }
+
+        .hub-section { margin-bottom: 30px; }
+        .hub-title { font-family: var(--sport-font); font-size: 18px; color: var(--event-accent); font-weight: 900; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        
+        .lucky-girl-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .lucky-girl-box:hover { transform: translateX(8px); border-color: var(--event-accent); background: rgba(255,255,255,0.08); }
+        .lucky-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid var(--event-accent); }
+        .lucky-name { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .lucky-team { font-size: 13px; color: var(--text-sub); }
+
+        .mvp-box { background: linear-gradient(90deg, rgba(255,235,59,0.15), transparent); padding: 15px; border-radius: 8px; border-left: 5px solid #ffeb3b; cursor: pointer; transition: 0.2s; border-right: 1px solid transparent; border-top: 1px solid transparent; border-bottom: 1px solid transparent; position: relative;}
+        .mvp-box:hover { background: linear-gradient(90deg, rgba(255,235,59,0.25), rgba(255,235,59,0.05)); transform: translateX(5px); border-color: rgba(255,235,59,0.3); border-left-color: #ffeb3b; }
+        .mvp-text { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.6; }
+        .mvp-highlight { color: #ffeb3b; font-size: 20px; font-weight: 900; font-family: var(--sport-font); margin: 0 5px; }
+
+        /* 改為網格自動換行顯示 */
+        .birthday-grid { display: flex; flex-wrap: wrap; gap: 15px; padding: 5px 0 15px; justify-content: flex-start; }
+        .birthday-item { width: 72px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .birthday-item:hover { transform: translateY(-4px); }
+        .birthday-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid #fff; margin-bottom: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .birthday-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .birthday-date { font-size: 11px; color: var(--event-accent); font-family: var(--sport-font); margin-top: 3px; font-weight: 700;}
+
+        /* =========================================
            主系統 Header 
         ========================================= */
         .header { background-color: rgba(17, 20, 24, 0.95); padding: 25px 20px 0; border-bottom: 4px solid var(--border-color); z-index: 50; position: relative;}
@@ -283,33 +317,6 @@
         .default-avatar { display: flex; align-items: center; justify-content: center; background: #252c36; border-radius: 50%; width: 100%; height: 100%; }
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
-        /* 🎁 左下角懸浮驚喜盒 */
-        .floating-hub-btn { position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px; background: linear-gradient(135deg, #ff5722, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 5px 20px rgba(255,87,34,0.5); transition: 0.3s; border: 2px solid #fff; }
-        .floating-hub-btn:hover { transform: scale(1.1) rotate(10deg); }
-        .floating-hub-btn svg { width: 28px; height: 28px; fill: #fff; }
-
-        .hub-panel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .hub-panel-overlay.active { display: flex; }
-        .hub-content { background: var(--bg-panel); border: 2px solid var(--event-accent); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px; position: relative; box-shadow: 0 0 50px rgba(255,87,34,0.3); overflow-y: auto; max-height: 85vh; }
-        .hub-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 20px; }
-
-        .hub-section { margin-bottom: 30px; }
-        .hub-title { font-family: var(--sport-font); font-size: 18px; color: var(--event-accent); font-weight: 900; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-        
-        .lucky-girl-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
-        .lucky-girl-box:hover { transform: translateX(8px); border-color: var(--event-accent); background: rgba(255,255,255,0.08); }
-        .lucky-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid var(--event-accent); }
-        .lucky-name { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-        .lucky-team { font-size: 13px; color: var(--text-sub); }
-
-        .mvp-box { background: linear-gradient(90deg, rgba(255,235,59,0.15), transparent); padding: 15px; border-radius: 8px; border-left: 5px solid #ffeb3b; }
-        .mvp-highlight { color: #ffeb3b; font-size: 20px; font-weight: 900; font-family: var(--sport-font); margin: 0 5px; }
-
-        .birthday-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 5px 0 15px; scrollbar-width: none; }
-        .birthday-item { flex-shrink: 0; width: 85px; text-align: center; cursor: pointer; }
-        .birthday-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid #fff; margin-bottom: 8px; }
-        .birthday-name { font-size: 13px; font-weight: 700; color: #fff; }
-
         /* 回頂端與返回按鈕 */
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #fff; color: #000; border-radius: 2px; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px var(--border-color); cursor: pointer; z-index: 90; opacity: 0; visibility: hidden; transition: 0.2s; transform: translateY(20px); }
         .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -463,7 +470,7 @@
 
             <div class="hub-section">
                 <div class="hub-title"><span>🎂</span> 本月壽星女孩</div>
-                <div class="birthday-scroll" id="birthday-content"></div>
+                <div class="birthday-grid" id="birthday-content"></div>
             </div>
         </div>
     </div>
@@ -628,8 +635,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V16.2 
-        const CACHE_KEY = "tw_cheerleader_cache_v16_2";
+        // 🏆 強制快取 V16.3 
+        const CACHE_KEY = "tw_cheerleader_cache_v16_3";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -702,7 +709,7 @@
         }
 
         // =========================================================================
-        // 🎁 數據驚喜中心計算邏輯
+        // 🎁 數據驚喜中心計算邏輯 (V16.3 打磨版)
         // =========================================================================
         function calculateHubStats() {
             const today = new Date();
@@ -722,30 +729,46 @@
                     </div>`;
             }
 
-            // 2. 本月應援鐵人
+            // 2. 本月應援鐵人 (增加可點擊互動)
             const counts = {};
             dbSchedules.filter(s => s.safeDate.month === curMonth).forEach(s => counts[s.name] = (counts[s.name] || 0) + 1);
             const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            
             if(sorted.length > 0) {
+                let mvpName = sorted[0][0];
+                let mvpCount = sorted[0][1];
                 document.getElementById('mvp-content').innerHTML = `
-                <div class="mvp-box">
-                    <div class="mvp-text">本月最勤奮女孩：<span class="mvp-highlight">${sorted[0][0]}</span></div>
-                    <div class="mvp-text">目前已排定 <span class="mvp-highlight">${sorted[0][1]}</span> 場應援！🔥</div>
+                <div class="mvp-box" onclick="toggleHub(false); window.openModal('${mvpName}')" title="點擊查看她的專屬檔案">
+                    <div class="mvp-text">本月最勤奮女孩：<span class="mvp-highlight">${mvpName}</span></div>
+                    <div class="mvp-text">目前已排定 <span class="mvp-highlight">${mvpCount}</span> 場應援！🔥</div>
+                    <div style="font-size:11px; color:var(--text-sub); margin-top:8px;">👉 點擊查看她的專屬檔案</div>
                 </div>`;
             } else {
                 document.getElementById('mvp-content').innerHTML = '<div style="color:var(--text-sub)">本月暫無應援數據</div>';
             }
 
-            // 3. 本月壽星
-            const birthdayGirls = dbGirls.filter(g => {
+            // 3. 本月壽星 (改為全部展開排列並依照日期排序)
+            let birthdayGirls = dbGirls.filter(g => {
                 let m = parseInt(String(g.dob).split('/')[0]);
                 return m === curMonth;
             });
-            document.getElementById('birthday-content').innerHTML = birthdayGirls.map(g => `
+            
+            // 依照日期排序
+            birthdayGirls.sort((a, b) => {
+                let dayA = parseInt(String(a.dob).split('/')[1]) || 0;
+                let dayB = parseInt(String(b.dob).split('/')[1]) || 0;
+                return dayA - dayB;
+            });
+            
+            document.getElementById('birthday-content').innerHTML = birthdayGirls.map(g => {
+                let day = parseInt(String(g.dob).split('/')[1]) || "";
+                return `
                 <div class="birthday-item" onclick="toggleHub(false); window.openModal('${g.realname}')">
                     <img src="${g.img}" class="birthday-img">
                     <div class="birthday-name">${g.realname}</div>
-                </div>`).join('') || '<div style="color:var(--text-sub)">本月暫無壽星</div>';
+                    <div class="birthday-date">${curMonth}/${day}</div>
+                </div>`;
+            }).join('') || '<div style="color:var(--text-sub); margin-left: 5px;">本月暫無壽星</div>';
         }
 
         window.toggleHub = function(show) {
