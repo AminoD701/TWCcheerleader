@@ -1176,7 +1176,7 @@
                  }).join('') + `</div>`;
             }
 
-            // --- 📊 點子三：屬性大解析 (Spotify Wrapped 風格) ---
+            // --- 📊 點子三：屬性大解析 (純粹質感版) ---
             let tasteHtml = '';
             if (favGirls.length < 3) {
                 tasteHtml = `
@@ -1207,29 +1207,50 @@
                 else if (avgHeight > 165) title = "高挑長腿女孩控";
                 else if (topZodiac !== "未知") title = `命中注定愛 ${topZodiac}`;
 
+                // 移除大 Emoji，改用簡約線條裝飾與漸層背景
                 tasteHtml = `
-                    <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.5)); padding:20px; border-radius:8px; border:2px solid var(--event-accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
-                        <div style="position:absolute; right:-15px; top:-25px; font-size:100px; opacity:0.1; filter:grayscale(1);">📊</div>
-                        <div style="font-family:var(--sport-font); font-size:14px; color:var(--text-sub); letter-spacing:2px; margin-bottom:5px;">YOUR CHEERLEADER WRAPPED</div>
-                        <div style="font-size:22px; font-weight:900; color:#fff; margin-bottom:20px;">專屬粉絲屬性：<span style="color:var(--event-accent); border-bottom:2px dashed var(--event-accent);">${title}</span></div>
+                    <div style="background: linear-gradient(135deg, rgba(20,25,30,0.9), rgba(10,12,16,0.95)); padding:25px; border-radius:12px; border:1px solid var(--border-color); border-top: 4px solid var(--event-accent); box-shadow: 0 10px 30px rgba(0,0,0,0.6); position:relative; overflow:hidden;">
                         
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; position:relative; z-index:2;">
-                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
-                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">📏 偏好平均身高</div>
-                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${avgHeight} cm</div>
+                        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, var(--event-accent) 0%, transparent 60%); opacity:0.15; border-radius:50%;"></div>
+                        <div style="position:absolute; bottom:-10px; left:-10px; width:80px; height:80px; background:radial-gradient(circle, var(--event-accent) 0%, transparent 60%); opacity:0.1; border-radius:50%;"></div>
+
+                        <div style="font-family:var(--sport-font); font-size:12px; color:var(--text-sub); letter-spacing:3px; margin-bottom:8px; text-transform:uppercase;">YOUR CHEERLEADER WRAPPED</div>
+                        <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:25px; line-height:1.4;">專屬粉絲屬性<br><span style="color:var(--event-accent); font-size:26px;">${title}</span></div>
+                        
+                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; position:relative; z-index:2;">
+                            
+                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2L3 4l3.5 2"></path><path d="M4 19.5v-15"></path><path d="M9 13h11"></path><path d="M9 9h11"></path><path d="M9 5h11"></path></svg>
+                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">偏好平均身高</div>
+                                </div>
+                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${avgHeight} <span style="font-size:14px; color:var(--text-sub);">cm</span></div>
                             </div>
-                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
-                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">🔮 致命吸引星座</div>
-                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topZodiac}</div>
+                            
+                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">致命吸引星座</div>
+                                </div>
+                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topZodiac}</div>
                             </div>
-                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
-                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">⚾ 陣營傾向</div>
-                                <div style="font-size:15px; font-weight:900; color:#fff;">${topTeam} <span style="font-size:12px; color:var(--event-accent);">(${teamPct}%)</span></div>
+                            
+                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">陣營傾向</div>
+                                </div>
+                                <div style="font-size:16px; font-weight:900; color:#fff; line-height:1.2;">${topTeam} <div style="font-size:13px; color:var(--event-accent); margin-top:2px;">(${teamPct}%)</div></div>
                             </div>
-                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
-                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">🌍 偏好國籍</div>
-                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topNat}</div>
+                            
+                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3v0a2 2 0 0 1 2 2v0c0 1.1.9 2 2 2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2v0a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">偏好國籍</div>
+                                </div>
+                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topNat}</div>
                             </div>
+
                         </div>
                     </div>
                 `;
