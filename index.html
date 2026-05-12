@@ -1488,11 +1488,11 @@
         };
         
         window.backToScheduleSelection = function() { 
-            currentScheduleTeam = null; currentScheduleSport = null;
-            applyTheme("全部啦啦隊"); 
+            currentScheduleTeam = null; 
+            currentScheduleSport = null;
+            document.documentElement.style.setProperty('--team-accent', '#ffeb3b'); 
             window.renderContent(); 
         };
-
         window.renderScheduleSelection = function() {
             const container = document.getElementById('schedule-container');
             let available = [];
