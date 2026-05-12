@@ -1196,21 +1196,23 @@
                     <div style="font-family:var(--sport-font); font-size:32px; font-weight:900; color:var(--event-accent); line-height:1.2;" id="countdown-timer">-- : -- : --</div>
                 </div>
 
-                <div class="passport-section-title" style="margin-top:40px;">
-                    <span>🗓️ 我的專屬月曆 (MY CALENDAR)</span>
-                </div>
-                
-                <div class="calendar-wrapper">
-                    <div class="calendar-header">
-                        <button class="calendar-nav-btn" onclick="window.changeCalMonth(-1)"><</button>
-                        <span class="calendar-title">${monNames[calMonth]} ${calYear}</span>
-                        <button class="calendar-nav-btn" onclick="window.changeCalMonth(1)">></button>
+                <div style="max-width: 480px; margin: 0 auto;">
+                    <div class="passport-section-title" style="margin-top:40px;">
+                        <span>🗓️ 我的專屬月曆 (MY CALENDAR)</span>
                     </div>
-                    ${gridHtml}
-                </div>
+                    
+                    <div class="calendar-wrapper">
+                        <div class="calendar-header">
+                            <button class="calendar-nav-btn" onclick="window.changeCalMonth(-1)">❮</button>
+                            <span class="calendar-title">${monNames[calMonth]} ${calYear}</span>
+                            <button class="calendar-nav-btn" onclick="window.changeCalMonth(1)">❯</button>
+                        </div>
+                        ${gridHtml}
+                    </div>
 
-                <div style="margin-top: 20px;">
-                    ${schedHtml}
+                    <div style="margin-top: 20px;">
+                        ${schedHtml}
+                    </div>
                 </div>
 
                 <div class="passport-section-title" style="margin-top:40px;">❤️ 我的最愛 (MY FAVORITES)</div>
