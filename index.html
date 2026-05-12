@@ -122,7 +122,6 @@
         .card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px rgba(0,0,0,0.8); border-color: #fff; }
         
         .photo-area { height: 350px; background-color: #000; overflow: hidden; position: relative; border-bottom: 4px solid var(--border-color); }
-        /* 照片不裁切頭頂 */
         .photo-area img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.5s; }
         .card:hover .photo-area img { transform: scale(1.05); }
 
@@ -153,7 +152,6 @@
         .realname { font-size: 14px; color: var(--text-sub); margin-top: 8px; font-weight: 700; letter-spacing: 1px; }
         .number { font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: var(--team-accent, #ffeb3b); background: #111418; padding: 4px 12px; border-radius: 4px; border: 2px solid var(--border-color); transform: skewX(-5deg); box-shadow: 3px 3px 0px rgba(0,0,0,0.5); text-align: center; }
 
-        /* margin-bottom: auto 負責把下面的田字格推到底部對齊 */
         .data-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: auto; }
         .data-row { display: flex; justify-content: space-between; font-size: 14px; align-items: flex-start; gap: 10px; }
         .data-label { color: var(--text-sub); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
@@ -285,6 +283,33 @@
         .default-avatar { display: flex; align-items: center; justify-content: center; background: #252c36; border-radius: 50%; width: 100%; height: 100%; }
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
+        /* 🎁 左下角懸浮驚喜盒 */
+        .floating-hub-btn { position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px; background: linear-gradient(135deg, #ff5722, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 5px 20px rgba(255,87,34,0.5); transition: 0.3s; border: 2px solid #fff; }
+        .floating-hub-btn:hover { transform: scale(1.1) rotate(10deg); }
+        .floating-hub-btn svg { width: 28px; height: 28px; fill: #fff; }
+
+        .hub-panel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .hub-panel-overlay.active { display: flex; }
+        .hub-content { background: var(--bg-panel); border: 2px solid var(--event-accent); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px; position: relative; box-shadow: 0 0 50px rgba(255,87,34,0.3); overflow-y: auto; max-height: 85vh; }
+        .hub-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 20px; }
+
+        .hub-section { margin-bottom: 30px; }
+        .hub-title { font-family: var(--sport-font); font-size: 18px; color: var(--event-accent); font-weight: 900; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        
+        .lucky-girl-box { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .lucky-girl-box:hover { transform: translateX(8px); border-color: var(--event-accent); background: rgba(255,255,255,0.08); }
+        .lucky-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid var(--event-accent); }
+        .lucky-name { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .lucky-team { font-size: 13px; color: var(--text-sub); }
+
+        .mvp-box { background: linear-gradient(90deg, rgba(255,235,59,0.15), transparent); padding: 15px; border-radius: 8px; border-left: 5px solid #ffeb3b; }
+        .mvp-highlight { color: #ffeb3b; font-size: 20px; font-weight: 900; font-family: var(--sport-font); margin: 0 5px; }
+
+        .birthday-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 5px 0 15px; scrollbar-width: none; }
+        .birthday-item { flex-shrink: 0; width: 85px; text-align: center; cursor: pointer; }
+        .birthday-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid #fff; margin-bottom: 8px; }
+        .birthday-name { font-size: 13px; font-weight: 700; color: #fff; }
+
         /* 回頂端與返回按鈕 */
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #fff; color: #000; border-radius: 2px; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px var(--border-color); cursor: pointer; z-index: 90; opacity: 0; visibility: hidden; transition: 0.2s; transform: translateY(20px); }
         .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -389,7 +414,8 @@
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
             .modal-close { top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(0,0,0,0.6); border:none;}
             
-            .back-to-top { bottom: 15px; right: 15px; width: 45px; height: 45px; box-shadow: 3px 3px 0px var(--border-color);}
+            .floating-hub-btn { bottom: 20px; left: 20px; width: 50px; height: 50px; }
+            .back-to-top { bottom: 20px; right: 20px; width: 50px; height: 50px; box-shadow: 3px 3px 0px var(--border-color);}
         }
 
         .footer { background-color: rgba(17, 20, 24, 0.95); padding: 40px 20px; text-align: center; border-top: 4px solid var(--border-color); color: var(--text-sub); font-size: 13px; line-height: 1.8; font-weight: 700; margin-top: auto;}
@@ -414,6 +440,31 @@
                 <span class="spinner" id="loading-spinner"></span>
                 <span id="enter-text" style="display:inline-block; transform: skewX(10deg);">資料載入中 LOADING...</span>
             </button>
+        </div>
+    </div>
+
+    <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
+        <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
+    </div>
+
+    <div id="hub-overlay" class="hub-panel-overlay" onclick="toggleHub(false)">
+        <div class="hub-content" onclick="event.stopPropagation()">
+            <div class="hub-close" onclick="toggleHub(false)">✕</div>
+            
+            <div class="hub-section">
+                <div class="hub-title"><span>✨</span> 今日幸運女孩</div>
+                <div id="lucky-girl-content"></div>
+            </div>
+
+            <div class="hub-section">
+                <div class="hub-title"><span>🏆</span> 本月應援鐵人榜</div>
+                <div id="mvp-content"></div>
+            </div>
+
+            <div class="hub-section">
+                <div class="hub-title"><span>🎂</span> 本月壽星女孩</div>
+                <div class="birthday-scroll" id="birthday-content"></div>
+            </div>
         </div>
     </div>
 
@@ -577,8 +628,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V15 (日曆聚合版)
-        const CACHE_KEY = "tw_cheerleader_cache_v15";
+        // 🏆 強制快取 V16.2 
+        const CACHE_KEY = "tw_cheerleader_cache_v16_2";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -646,9 +697,66 @@
 
         function init() {
             updateTeamTabs();
+            calculateHubStats();
             window.renderContent();
         }
 
+        // =========================================================================
+        // 🎁 數據驚喜中心計算邏輯
+        // =========================================================================
+        function calculateHubStats() {
+            const today = new Date();
+            const curMonth = today.getMonth() + 1;
+            const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+            
+            // 1. 今日幸運女孩
+            if (dbGirls.length > 0) {
+                const luckyGirl = dbGirls[seed % dbGirls.length];
+                document.getElementById('lucky-girl-content').innerHTML = `
+                    <div class="lucky-girl-box" onclick="toggleHub(false); window.openModal('${luckyGirl.realname}')">
+                        <img src="${luckyGirl.img}" class="lucky-img">
+                        <div class="lucky-info">
+                            <div class="lucky-name">${luckyGirl.realname}</div>
+                            <div class="lucky-team">${luckyGirl.team}</div>
+                        </div>
+                    </div>`;
+            }
+
+            // 2. 本月應援鐵人
+            const counts = {};
+            dbSchedules.filter(s => s.safeDate.month === curMonth).forEach(s => counts[s.name] = (counts[s.name] || 0) + 1);
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            if(sorted.length > 0) {
+                document.getElementById('mvp-content').innerHTML = `
+                <div class="mvp-box">
+                    <div class="mvp-text">本月最勤奮女孩：<span class="mvp-highlight">${sorted[0][0]}</span></div>
+                    <div class="mvp-text">目前已排定 <span class="mvp-highlight">${sorted[0][1]}</span> 場應援！🔥</div>
+                </div>`;
+            } else {
+                document.getElementById('mvp-content').innerHTML = '<div style="color:var(--text-sub)">本月暫無應援數據</div>';
+            }
+
+            // 3. 本月壽星
+            const birthdayGirls = dbGirls.filter(g => {
+                let m = parseInt(String(g.dob).split('/')[0]);
+                return m === curMonth;
+            });
+            document.getElementById('birthday-content').innerHTML = birthdayGirls.map(g => `
+                <div class="birthday-item" onclick="toggleHub(false); window.openModal('${g.realname}')">
+                    <img src="${g.img}" class="birthday-img">
+                    <div class="birthday-name">${g.realname}</div>
+                </div>`).join('') || '<div style="color:var(--text-sub)">本月暫無壽星</div>';
+        }
+
+        window.toggleHub = function(show) {
+            document.getElementById('hub-overlay').classList.toggle('active', show);
+            if(show) document.body.classList.add('no-scroll');
+            else document.body.classList.remove('no-scroll');
+        };
+
+        // =========================================================================
+        // UI 操作邏輯
+        // =========================================================================
         window.setMode = function(mode, btn) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
@@ -689,7 +797,6 @@
             }
             localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
             
-            // 傳入 true，告訴系統「這次更新請原地不動，不要滾回最上面」
             window.renderContent(true); 
         };
 
@@ -763,17 +870,15 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 window.renderContent();
-            }, 300); // 停下鍵盤 0.3 秒後才執行重繪
+            }, 300);
         };
 
         window.renderContent = function(skipScroll = false) {
-            // 重置女孩卡片的顯示數量
             window.currentDisplayLimit = 24; 
 
             const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container');
             grid.style.display = list.style.display = sched.style.display = 'none';
             
-            // 只有在 skipScroll 不是 true 的時候，才會觸發回到最上面
             if (!skipScroll) {
                 window.scrollTo({top: 0});
             }
@@ -1231,13 +1336,12 @@
         };
 
         // =========================================================================
-        // ✨ 新版：同一天聚合的「日曆方塊卡」(外籍行程)
+        // ✨ 同一天聚合的「日曆方塊卡」(外籍行程)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             
-            // 替每個事件標記原始的 Index，方便點擊時呼叫彈窗
             let filtered = dbEvents.map((e, index) => ({ ...e, originalIndex: index })).filter(e => {
                 if (search === "") return true;
                 const girlsStr = (e.girls || "").toLowerCase();
@@ -1249,14 +1353,11 @@
             const up = filtered.filter(e => e.safeDate.num >= todayNum); 
             const ex = filtered.filter(e => e.safeDate.num < todayNum).reverse(); 
             
-            // 將相同日期的事件進行群組化
             function groupEventsByDate(eventsArray) {
                 const map = new Map();
                 eventsArray.forEach(e => {
                     const key = e.safeDate.num;
-                    if (!map.has(key)) {
-                        map.set(key, { date: e.safeDate, events: [] });
-                    }
+                    if (!map.has(key)) { map.set(key, { date: e.safeDate, events: [] }); }
                     map.get(key).events.push(e);
                 });
                 return Array.from(map.values());
@@ -1267,7 +1368,7 @@
                 
                 const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
-                    const displayGirls = attendGirls.slice(0, 3); // 最多顯示 3 個頭像
+                    const displayGirls = attendGirls.slice(0, 3);
                     const avatarsHtml = displayGirls.map(n => {
                         const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
                         return g 
@@ -1316,7 +1417,7 @@
         };
 
         // =========================================================================
-        // 賽事專屬彈窗 (沿用 girl-modal 但替換內容)
+        // 賽事專屬彈窗
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
