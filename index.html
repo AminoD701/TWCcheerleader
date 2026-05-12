@@ -1061,12 +1061,12 @@
         }
 
         // =========================================================================
-        // 🗓️ 追星護照：專屬月曆與本命設定渲染邏輯
+        // 🗓️ 追星護照：專屬月曆、本命設定與「婆屬性大解析」
         // =========================================================================
         window.changeCalMonth = function(offset) {
             window.passportCalDate.setMonth(window.passportCalDate.getMonth() + offset);
             window.passportSelectedDateNum = null; 
-            renderPassport(true); 
+            renderPassport(true); // true 代表不重啟倒數計時器
         };
 
         window.selectCalDate = function(dateNum) {
@@ -1141,7 +1141,7 @@
                 `).join('');
             }
 
-            // --- 我的最愛女孩 ---
+            // --- 我的最愛女孩 (防重複版本) ---
             let favGirlsRaw = dbGirls.filter(g => favSet.has(g.realname));
             let favMap = new Map();
             favGirlsRaw.forEach(c => {
@@ -1174,6 +1174,65 @@
                         </div>
                      </div>`;
                  }).join('') + `</div>`;
+            }
+
+            // --- 📊 點子三：屬性大解析 (Spotify Wrapped 風格) ---
+            let tasteHtml = '';
+            if (favGirls.length < 3) {
+                tasteHtml = `
+                    <div style="background:var(--bg-card); padding:20px; border-radius:8px; text-align:center; border:1px dashed var(--border-color);">
+                        <div style="font-size:14px; color:var(--text-sub); font-weight:700;">🔒 收藏至少 3 位女孩，解鎖你的專屬「偏好大數據解析」！</div>
+                    </div>`;
+            } else {
+                let validHeights = favGirls.map(g => parseFloat(g.height)).filter(h => !isNaN(h));
+                let avgHeight = validHeights.length > 0 ? (validHeights.reduce((a,b)=>a+b,0)/validHeights.length).toFixed(1) : "未知";
+
+                let zodiacCounts = {}; let teamCounts = {}; let natCounts = {};
+                favGirls.forEach(g => {
+                    let z = (g.zodiac||"").replace("白羊","牡羊").replace("魔羯","摩羯");
+                    if(z) zodiacCounts[z] = (zodiacCounts[z] || 0) + 1;
+                    if(g.nat) natCounts[g.nat] = (natCounts[g.nat] || 0) + 1;
+                    g.mT.forEach(t => { if(t) teamCounts[t] = (teamCounts[t] || 0) + 1; });
+                });
+
+                let getTop = (obj) => Object.keys(obj).length ? Object.keys(obj).reduce((a,b) => obj[a] > obj[b] ? a : b) : "未知";
+                let topZodiac = getTop(zodiacCounts);
+                let topTeam = getTop(teamCounts);
+                let topNat = getTop(natCounts);
+                let teamPct = Math.round((teamCounts[topTeam] / favGirls.length) * 100) || 0;
+
+                let title = "博愛型應援大師";
+                if (teamPct >= 60) title = `死忠的 ${topTeam} 狂粉`;
+                else if (topNat === "韓國") title = "韓援魅力無法擋";
+                else if (avgHeight > 165) title = "高挑長腿女孩控";
+                else if (topZodiac !== "未知") title = `命中注定愛 ${topZodiac}`;
+
+                tasteHtml = `
+                    <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.5)); padding:20px; border-radius:8px; border:2px solid var(--event-accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
+                        <div style="position:absolute; right:-15px; top:-25px; font-size:100px; opacity:0.1; filter:grayscale(1);">📊</div>
+                        <div style="font-family:var(--sport-font); font-size:14px; color:var(--text-sub); letter-spacing:2px; margin-bottom:5px;">YOUR CHEERLEADER WRAPPED</div>
+                        <div style="font-size:22px; font-weight:900; color:#fff; margin-bottom:20px;">專屬粉絲屬性：<span style="color:var(--event-accent); border-bottom:2px dashed var(--event-accent);">${title}</span></div>
+                        
+                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; position:relative; z-index:2;">
+                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
+                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">📏 偏好平均身高</div>
+                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${avgHeight} cm</div>
+                            </div>
+                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
+                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">🔮 致命吸引星座</div>
+                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topZodiac}</div>
+                            </div>
+                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
+                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">⚾ 陣營傾向</div>
+                                <div style="font-size:15px; font-weight:900; color:#fff;">${topTeam} <span style="font-size:12px; color:var(--event-accent);">(${teamPct}%)</span></div>
+                            </div>
+                            <div style="background:var(--bg-panel); padding:12px; border-radius:6px; border:1px solid var(--border-color);">
+                                <div style="font-size:11px; color:var(--text-sub); font-weight:700;">🌍 偏好國籍</div>
+                                <div style="font-size:18px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topNat}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
 
             // --- 本命球隊選單 ---
@@ -1214,6 +1273,9 @@
                         ${schedHtml}
                     </div>
                 </div>
+
+                <div class="passport-section-title" style="margin-top:40px;">📊 我的偏好大數據 (MY TASTE)</div>
+                ${tasteHtml}
 
                 <div class="passport-section-title" style="margin-top:40px;">❤️ 我的最愛 (MY FAVORITES)</div>
                 ${favHtml}
