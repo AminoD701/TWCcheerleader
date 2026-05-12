@@ -88,6 +88,7 @@
         .birthday-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .birthday-date { font-size: 11px; color: var(--event-accent); font-family: var(--sport-font); margin-top: 3px; font-weight: 700;}
 
+        /* Header */
         .header { background-color: rgba(17, 20, 24, 0.95); padding: 25px 20px 0; border-bottom: 4px solid var(--border-color); z-index: 50; position: relative;}
         .title { font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 25px; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
         .controls-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 15px; }
@@ -147,6 +148,9 @@
         .fav-btn.active { background: var(--fav-accent); }
         .fav-btn.active .fav-icon { fill: #fff; stroke: #fff; animation: heartPop 0.3s; }
 
+        /* 🆕 解鎖圖鑑徽章 */
+        .unlocked-badge { position: absolute; bottom: 15px; right: 15px; background: rgba(255, 152, 0, 0.95); color: #000; padding: 6px 12px; font-size: 12px; font-weight: 900; border-radius: 4px; z-index: 10; transform: rotate(-5deg); border: 2px solid #fff; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); font-family: var(--tc-font); letter-spacing: 1px; }
+
         .info-section { padding: 25px; background: var(--bg-card); display: flex; flex-direction: column; flex: 1; }
         .header-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px dashed var(--border-color); }
         .nickname-container { display: flex; align-items: center; gap: 8px; }
@@ -161,7 +165,6 @@
 
         .team-tags-wrapper { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex: 1; margin-left: 10px;}
         .team-tag-mini { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.05); border: 1px solid currentColor; line-height: 1.2; text-align: center; }
-        .modal-data-row .team-tag-mini { font-size: 14px; padding: 4px 12px; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 15px 0; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; background: #111418; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); }
         .stat-box { padding: 12px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
@@ -169,7 +172,6 @@
         .stat-box:nth-child(n+3) { border-bottom: none; }
         .stat-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; }
         .stat-value { font-size: 15px; font-weight: 900; color: #fff; font-family: var(--sport-font); letter-spacing: 0.5px; }
-        .note-box { margin-top: 10px; padding: 12px 15px; background: rgba(255, 87, 34, 0.1); border-left: 4px solid var(--event-accent); font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.5; border-radius: 0 4px 4px 0; }
 
         .ig-link { display: inline-flex; vertical-align: middle; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.9; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8)); margin-left: 10px; }
         .ig-link:hover { transform: scale(1.2) rotate(-5deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(220,39,67,0.6)); }
@@ -281,6 +283,20 @@
         .default-avatar { display: flex; align-items: center; justify-content: center; background: #252c36; border-radius: 50%; width: 100%; height: 100%; }
         .default-avatar svg { width: 45%; height: 45%; stroke: #6a7a90; stroke-width: 2; fill: none; opacity: 0.8; }
 
+        /* =========================================
+           🛂 追星護照專屬樣式 (V17 新增)
+        ========================================= */
+        #passport-container { max-width: 1200px; margin: 30px auto 60px; padding: 0 20px; display: none; }
+        .passport-section-title { font-family: var(--sport-font); font-size: 22px; color: #fff; border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; margin: 30px 0 15px; letter-spacing: 1px; }
+        
+        .timeline-item { background: var(--bg-card); border-left: 4px solid var(--schedule-accent); padding: 15px 20px; margin-bottom: 12px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); transition: 0.2s;}
+        .timeline-item:hover { transform: translateX(5px); border-color: #fff; }
+        
+        .progress-row { margin-bottom: 18px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 900; margin-bottom: 6px; color: var(--text-sub); }
+        .progress-track { width: 100%; height: 14px; background: #111418; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .progress-fill { height: 100%; background: var(--team-accent); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 2px 4px rgba(255,255,255,0.3); }
+
         /* 回頂端與返回按鈕 */
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #fff; color: #000; border-radius: 2px; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px var(--border-color); cursor: pointer; z-index: 90; opacity: 0; visibility: hidden; transition: 0.2s; transform: translateY(20px); }
         .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -293,7 +309,7 @@
         .back-btn:hover { background: var(--schedule-accent); transform: skewX(-5deg) translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.5); }
 
         /* =========================================
-           ✨ 手機版專屬優化 (包含所有縮小與防換行魔法)
+           ✨ 手機版專屬優化
         ========================================= */
         @media (max-width: 768px) {
             .landing-title { font-size: 2.5rem; letter-spacing: 3px; }
@@ -473,8 +489,8 @@
         <div class="controls-container">
             <div class="main-nav" id="main-nav-container">
                 <button class="nav-btn active" onclick="window.setMode('girls', this)"><span>女孩圖鑑 ROSTER</span></button>
-                <button class="nav-btn btn-fav" onclick="window.setMode('favorites', this)">
-                    <span><svg class="btn-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>我的最愛 FAV</span>
+                <button class="nav-btn btn-fav" onclick="window.setMode('passport', this)">
+                    <span>🛂 追星護照 MY PASSPORT</span>
                 </button>
                 <button class="nav-btn btn-schedule" onclick="window.setMode('schedule', this)"><span>應援班表 SCHEDULE</span></button>
                 <button class="nav-btn btn-event" onclick="window.setMode('events', this)"><span>外籍行程 EVENTS</span></button>
@@ -520,6 +536,7 @@
         <div class="grid-container" id="grid-container"></div>
         <div class="event-list-container" id="event-container" style="display:none;"></div>
         <div class="schedule-matrix-container" id="schedule-container" style="display:none;"></div>
+        <div id="passport-container"></div>
     </main>
 
     <footer class="footer">
@@ -531,10 +548,9 @@
     </footer>
 
     <script>
-        // =========================================================================
-        // 核心邏輯與完整資料庫
-        // =========================================================================
         let myFavorites = JSON.parse(localStorage.getItem('cheer_favorites')) || [];
+        let myUnlocked = JSON.parse(localStorage.getItem('cheer_unlocked')) || [];
+        let mySchedules = JSON.parse(localStorage.getItem('cheer_my_schedules')) || [];
 
         const teamThemes = {
             "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
@@ -591,8 +607,7 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V16.6 (壽星不重複終極版)
-        const CACHE_KEY = "tw_cheerleader_cache_v16_6";
+        const CACHE_KEY = "tw_cheerleader_cache_v17";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -664,9 +679,6 @@
             window.renderContent();
         }
 
-        // =========================================================================
-        // 🎁 數據驚喜中心計算邏輯
-        // =========================================================================
         function calculateHubStats() {
             const today = new Date();
             const curMonth = today.getMonth() + 1;
@@ -701,7 +713,6 @@
                 document.getElementById('mvp-content').innerHTML = '<div style="color:var(--text-sub)">本月暫無應援數據</div>';
             }
 
-            // 3. 本月壽星 (精準抓取月份並過濾重複名單)
             let birthdayGirlsRaw = dbGirls.filter(g => {
                 let dobStr = String(g.dob || "").replace(/年|月|-/g, '/').replace(/日/g, '').trim();
                 let parts = dobStr.split('/').filter(x => x !== '');
@@ -711,12 +722,9 @@
                 return m === curMonth;
             });
             
-            // 過濾重複的女孩 (用 Map 記住已經出現過的名字)
             let uniqueBirthdays = new Map();
             birthdayGirlsRaw.forEach(g => {
-                if (!uniqueBirthdays.has(g.realname)) {
-                    uniqueBirthdays.set(g.realname, g);
-                }
+                if (!uniqueBirthdays.has(g.realname)) { uniqueBirthdays.set(g.realname, g); }
             });
             let birthdayGirls = Array.from(uniqueBirthdays.values());
             
@@ -754,6 +762,49 @@
         };
 
         // =========================================================================
+        // 🌟 解鎖與行事曆儲存邏輯 (V17 新增)
+        // =========================================================================
+        window.toggleUnlock = function(name, event) {
+            if(event) event.stopPropagation();
+            if (myUnlocked.includes(name)) { myUnlocked = myUnlocked.filter(n => n !== name); } 
+            else { myUnlocked.push(name); }
+            localStorage.setItem('cheer_unlocked', JSON.stringify(myUnlocked));
+            
+            if(currentMode === 'passport') window.renderContent(true);
+            else if(document.getElementById('girl-modal').classList.contains('active')) window.openModal(name);
+            else window.renderContent(true);
+        };
+
+        window.toggleMySchedule = function(id, dateNum, dateStr, title, event) {
+            if(event) event.stopPropagation();
+            const existing = mySchedules.findIndex(s => s.id === id);
+            if (existing >= 0) {
+                mySchedules.splice(existing, 1);
+            } else {
+                mySchedules.push({ id, dateNum, dateStr, title });
+            }
+            localStorage.setItem('cheer_my_schedules', JSON.stringify(mySchedules));
+            
+            if(currentMode === 'passport') {
+                window.renderContent(true);
+            } else {
+                alert(existing >= 0 ? "已從專屬行事曆移除！" : "✅ 已成功加入我的專屬行事曆！\n可以去「追星護照」查看喔！");
+                if(document.getElementById('girl-modal').classList.contains('active')) {
+                    // Refresh modal to update button state implicitly by re-calling openModal or just let user close it. 
+                    // A simple alert is enough feedback for now.
+                }
+            }
+        };
+
+        window.toggleFavorite = function(name, event) {
+            if(event) event.stopPropagation();
+            if (myFavorites.includes(name)) { myFavorites = myFavorites.filter(n => n !== name); } 
+            else { myFavorites.push(name); }
+            localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
+            window.renderContent(true); 
+        };
+
+        // =========================================================================
         // UI 操作邏輯
         // =========================================================================
         window.setMode = function(mode, btn) {
@@ -765,10 +816,10 @@
             currentScheduleTeam = null; 
             currentScheduleSport = null; 
 
-            const showSubNav = (currentMode === 'girls' || currentMode === 'favorites');
+            const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             document.getElementById('extra-filters').style.display = showSubNav ? 'flex' : 'none';
-            document.getElementById('filter-bar').style.display = (currentMode === 'schedule') ? 'none' : 'block';
+            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport') ? 'none' : 'block';
             
             updateTeamTabs();
             applyTheme(currentMode === 'schedule' ? "全部啦啦隊" : currentTeam);
@@ -778,25 +829,11 @@
         window.setSport = function(sport, btn) {
             document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
-            
             currentSport = sport;
             currentTeam = "全部啦啦隊"; 
-            
             updateTeamTabs();
             applyTheme("全部啦啦隊");
             window.renderContent();
-        };
-
-        window.toggleFavorite = function(name, event) {
-            event.stopPropagation();
-            if (myFavorites.includes(name)) {
-                myFavorites = myFavorites.filter(n => n !== name);
-            } else {
-                myFavorites.push(name);
-            }
-            localStorage.setItem('cheer_favorites', JSON.stringify(myFavorites));
-            
-            window.renderContent(true); 
         };
 
         function applyTheme(tName) {
@@ -808,7 +845,7 @@
 
         function updateTeamTabs() {
             const container = document.getElementById('tabs-container');
-            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'favorites' || (currentMode === 'girls' && currentSport === "全部")) { 
+            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || (currentMode === 'girls' && currentSport === "全部")) { 
                 container.style.display = 'none'; return; 
             }
             
@@ -847,7 +884,6 @@
             const config = teamThemes[`${safeTeam}_${safeSport}`] || teamThemes[safeTeam] || { accent: "#ccc", logo: "", noLogo: false };
             const btn = document.createElement('button');
             btn.className = `tab-btn ${safeTeam === currentTeam ? 'active' : ''}`;
-            
             const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
             btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
             btn.style.setProperty('--team-accent', config.accent); 
@@ -864,32 +900,108 @@
         let searchTimeout;
         window.debounceSearch = function() {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                window.renderContent();
-            }, 300);
+            searchTimeout = setTimeout(() => { window.renderContent(); }, 300);
         };
 
         window.renderContent = function(skipScroll = false) {
             window.currentDisplayLimit = 24; 
 
-            const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container');
-            grid.style.display = list.style.display = sched.style.display = 'none';
+            const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container'), passport = document.getElementById('passport-container');
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = 'none';
             
-            if (!skipScroll) {
-                window.scrollTo({top: 0});
-            }
+            if (!skipScroll) { window.scrollTo({top: 0}); }
             
-            if (currentMode === 'girls' || currentMode === 'favorites') { grid.style.display = 'grid'; renderGirls(); }
+            if (currentMode === 'girls') { grid.style.display = 'grid'; renderGirls(); }
             else if (currentMode === 'events') { list.style.display = 'flex'; renderEvents(); }
             else if (currentMode === 'schedule') { 
                 sched.style.display = 'flex'; 
-                if (currentScheduleTeam) { renderScheduleMatrix(); } 
-                else { renderScheduleSelection(); }
+                if (currentScheduleTeam) renderScheduleMatrix(); else renderScheduleSelection(); 
+            }
+            else if (currentMode === 'passport') {
+                passport.style.display = 'block'; renderPassport();
             }
         };
 
         // =========================================================================
-        // 女孩卡片與彈窗 (包含分批載入功能)
+        // 🛂 追星護照渲染邏輯 (V17 新增)
+        // =========================================================================
+        function renderPassport() {
+            const container = document.getElementById('passport-container');
+            const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
+            
+            // 1. 專屬行事曆
+            let schedHtml = '';
+            let upcoming = mySchedules.filter(s => s.dateNum >= todayNum).sort((a,b) => a.dateNum - b.dateNum);
+            if (upcoming.length === 0) {
+                schedHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">目前沒有即將到來的行程，趕快去「應援班表」或「外籍行程」把女孩加入吧！</div>';
+            } else {
+                schedHtml = upcoming.map(s => `
+                    <div class="timeline-item">
+                        <div>
+                            <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:var(--schedule-accent);">${s.dateStr}</div>
+                            <div style="font-size:15px; font-weight:700; color:#fff; margin-top:4px;">${s.title}</div>
+                        </div>
+                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event)" style="background:var(--fav-accent); color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer;">移除</button>
+                    </div>
+                `).join('');
+            }
+
+            // 2. 圖鑑收集進度
+            const teamsSet = [...new Set(dbGirls.map(g => (g.team||"").trim()).filter(t=>t))].sort();
+            let progHtml = teamsSet.map(team => {
+                let teamGirls = dbGirls.filter(g => (g.team||"").trim() === team);
+                let unlockedCount = teamGirls.filter(g => myUnlocked.includes(g.realname)).length;
+                let total = teamGirls.length;
+                let pct = total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
+                let accent = (teamThemes[team] || {accent:"#fff"}).accent;
+                if(unlockedCount === 0) return ''; // 隱藏還沒開始收集的球隊，保持版面乾淨
+                return `
+                    <div class="progress-row">
+                        <div class="progress-label"><span>${team}</span><span style="color:${accent}">${unlockedCount} / ${total} (${pct}%)</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:${accent};"></div></div>
+                    </div>`;
+            }).join('');
+
+            if(!progHtml) progHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">你還沒有解鎖任何女孩，快去圖鑑按下「打卡」吧！</div>';
+
+            // 3. 我的最愛女孩
+            let favGirls = dbGirls.filter(g => myFavorites.includes(g.realname));
+            let favHtml = '';
+            if (favGirls.length === 0) {
+                 favHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">還沒有加入最愛的女孩，快去點擊卡片上的愛心！</div>';
+            } else {
+                 favHtml = `<div class="grid-container" style="padding:0; margin:0;">` + favGirls.map(c => {
+                     const accent = (teamThemes[c.team] || {accent:"#fff"}).accent;
+                     const isUnlocked = myUnlocked.includes(c.realname);
+                     return `
+                     <div class="card" style="border-bottom: 6px solid ${accent};" onclick="window.openModal('${c.realname}')">
+                        <div class="photo-area">
+                            ${isUnlocked ? `<div class="unlocked-badge">✅ 已解鎖</div>` : ''}
+                            <div class="fav-btn active" onclick="window.toggleFavorite('${c.realname}', event)"><svg class="fav-icon"><use xlink:href="#icon-heart"></use></svg></div>
+                            <img src="${c.img}" loading="lazy">
+                        </div>
+                        <div class="info-section">
+                            <div style="font-size:22px; font-weight:900; color:${accent}">${c.realname}</div>
+                            <div style="color:var(--text-sub); font-weight:700; margin-top:5px;">${c.team}</div>
+                        </div>
+                     </div>`;
+                 }).join('') + `</div>`;
+            }
+
+            container.innerHTML = `
+                <div class="passport-section-title">🗓️ 我的專屬行事曆 (MY SCHEDULE)</div>
+                ${schedHtml}
+                <div class="passport-section-title" style="margin-top:40px;">🏆 圖鑑收集進度 (COLLECTION)</div>
+                <div style="background:var(--bg-card); padding:20px; border-radius:8px; border:1px solid var(--border-color);">
+                    ${progHtml}
+                </div>
+                <div class="passport-section-title" style="margin-top:40px;">❤️ 婆的陣容 (MY FAVORITES)</div>
+                ${favHtml}
+            `;
+        }
+
+        // =========================================================================
+        // 女孩卡片網格渲染
         // =========================================================================
         function renderGirls() {
             const container = document.getElementById('grid-container');
@@ -899,22 +1011,20 @@
             const sort = document.getElementById('sortFilter').value;
 
             let result = dbGirls.filter(c => {
-                if (currentMode === 'favorites' && !myFavorites.includes(c.realname)) return false;
                 const ms = currentSport === "全部" || (c.sport || "").includes(currentSport);
                 const mt = currentTeam === "全部啦啦隊" || (c.team || "").trim() === currentTeam;
                 const mS = search === "" || (c.nickname || "").toLowerCase().includes(search) || (c.realname || "").toLowerCase().includes(search);
                 const mN = nat === 'all' || (c.nat || "").includes(nat);
                 const cz = (c.zodiac || "").trim().replace("魔羯","摩羯").replace("白羊","牡羊");
-                return (currentMode === 'favorites' ? true : (ms && mt)) && mS && mN && (zodiac === 'all' || cz === zodiac);
+                return ms && mt && mS && mN && (zodiac === 'all' || cz === zodiac);
             });
 
-            if ((currentSport === "全部" && currentTeam === "全部啦啦隊") || currentMode === 'favorites') {
+            if (currentSport === "全部" && currentTeam === "全部啦啦隊") {
                 const mMap = new Map();
                 result.forEach(c => { 
                     const k = (c.realname || "").trim(); if (!k) return;
-                    if (!mMap.has(k)) {
-                        mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); 
-                    } else { 
+                    if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); } 
+                    else { 
                         let e = mMap.get(k); 
                         if (!e.mS.includes(c.sport || "")) e.mS.push(c.sport || ""); 
                         if (!e.mT.includes(c.team || "")) e.mT.push(c.team || ""); 
@@ -922,11 +1032,6 @@
                     } 
                 });
                 result = Array.from(mMap.values());
-            }
-
-            if (currentMode === 'favorites' && result.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); grid-column: 1 / -1; font-weight:700; line-height:2;">球隊休息室目前是空的！<br>趕快去點擊球員卡右上角的愛心標記，把喜歡的女孩加入名單吧！</div>`;
-                return;
             }
 
             result.sort((a,b) => {
@@ -941,14 +1046,13 @@
                     if (wA !== wB) return wA - wB;
 
                     const isLastA = ((a.note || a['備註'] || a.備註 || "").includes('練習生') || (a.note || a['備註'] || a.備註 || "").includes('培訓生') || !a.num || a.num === "-") ? 1 : 0;
-                    const isLastB = ((b.note || b['備註'] || b.備註 || "").includes('練習生') || (b.note || b['備註'] || b.備註 || "").includes('培訓生') || !b.num || b.num === "-") ? 1 : 0;
+                    const isLastB = ((gB=b).note || gB['備註'] || gB.備註 || "").includes('練習生') || (gB.note || gB['備註'] || gB.備註 || "").includes('培訓生') || !gB.num || gB.num === "-" ? 1 : 0;
                     if (isLastA !== isLastB) return isLastA - isLastB;
 
                     let nA = parseInt(String((a.mN||[a.num])[0] || "").replace(/#/g, '')) || 999;
                     let nB = parseInt(String((b.mN||[b.num])[0] || "").replace(/#/g, '')) || 999;
                     return nA - nB;
                 }
-                
                 if(sort === 'birthdayAsc') return parseGirlDOB(a.dob).mmdd - parseGirlDOB(b.dob).mmdd;
                 if(sort === 'ageAsc') return parseGirlDOB(b.dob).num - parseGirlDOB(a.dob).num; 
                 if(sort === 'heightDesc') return (parseFloat(b.height) || 0) - (parseFloat(a.height) || 0);
@@ -967,12 +1071,11 @@
                 const sports = (c.mS || [c.sport || ""]);
                 const cardAccent = (teamThemes[`${teams[0]}_${currentSport==="全部"?"":currentSport}`] || teamThemes[teams[0]] || teamThemes["全部啦啦隊"]).accent;
                 const isFav = myFavorites.includes(c.realname);
+                const isUnlocked = myUnlocked.includes(c.realname);
                 
                 let sportTags = sports.map(s => {
                     let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
-                    return type === 'other' 
-                        ? `<div class="sport-tag tag-other" title="${s}">其他</div>` 
-                        : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
+                    return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
                 }).join('');
                 
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
@@ -982,6 +1085,7 @@
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="window.openModal('${c.realname}')">
                     <div class="photo-area">
                         <div class="sport-tags">${sportTags}</div>
+                        ${isUnlocked ? `<div class="unlocked-badge">✅ 已解鎖</div>` : ''}
                         <div class="fav-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${c.realname}', event)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
@@ -1029,6 +1133,9 @@
             container.innerHTML = htmlContent;
         }
 
+        // =========================================================================
+        // 個人詳細彈窗 (加入解鎖與加行程功能)
+        // =========================================================================
         window.openModal = function(name) {
             const allRows = dbGirls.filter(g => (g.realname||"").trim() === name.trim() || (g.nickname||"").trim() === name.trim());
             if(allRows.length === 0) return;
@@ -1046,9 +1153,7 @@
 
             let tags = sports.filter(s => s).map(s => {
                 let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
-                return type === 'other' 
-                    ? `<div class="sport-tag tag-other" title="${s}">其他</div>` 
-                    : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
+                return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
             }).join('');
 
             const today = new Date();
@@ -1073,18 +1178,22 @@
                     let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
                     if (!renderedKeys.includes(key)) {
                         renderedKeys.push(key);
+                        let isSaved = mySchedules.some(ms => ms.id === key);
+                        let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
+                        
                         dateBoxes += `
-                        <div class="schedule-jump-btn" onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; cursor: pointer; transition: 0.2s;">
-                            <span style="font-size: 11px; color: var(--text-sub); font-weight: 700;">${s.safeDate.monStr} / ${s.safeDate.week}</span>
-                            <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                            <span style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700;">${s.team}<br>${s.sport}</span>
+                        <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
+                            <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
+                            <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                            <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
+                            <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${s.team} 應援', event); this.innerText = this.innerText==='➕ 加行程' ? '➖ 移除' : '➕ 加行程'; this.style.background = this.style.background==='var(--fav-accent)' ? '#333' : 'var(--fav-accent)';" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:none; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
                         </div>`;
                     }
                 });
 
                 scheduleHtml = `
                     <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
-                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE <span style="font-size: 12px; color: var(--text-sub); font-family: var(--tc-font); font-weight: normal; margin-left: 5px;">(點擊前往)</span></div>
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE <span style="font-size: 12px; color: var(--text-sub); font-family: var(--tc-font); font-weight: normal; margin-left: 5px;">(點日期前往)</span></div>
                         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                             ${dateBoxes}
                         </div>
@@ -1096,6 +1205,9 @@
                         <div style="font-size: 14px; color: #6a7a90; font-weight: 700;">本月目前尚無後續班表資料。</div>
                     </div>`;
             }
+
+            let isUnlocked = myUnlocked.includes(c.realname);
+            let unlockBtn = `<button onclick="window.toggleUnlock('${c.realname}', event)" style="width:100%; padding:14px; background:${isUnlocked?'var(--event-accent)':'#15191e'}; color:#fff; border:2px solid ${isUnlocked?'var(--event-accent)':'var(--border-color)'}; margin-top:25px; border-radius:4px; font-weight:900; cursor:pointer; font-size:16px; letter-spacing:1px; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); transition:0.2s;">${isUnlocked?'✅ 已解鎖現場見面成就！':'🔓 打卡：我在現場看過她！'}</button>`;
 
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
 
@@ -1128,6 +1240,7 @@
                     </div>
                     ${noteText ? `<div class="note-box">${noteText}</div>` : ''}
                     
+                    ${unlockBtn}
                     ${scheduleHtml}
                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="modal-ig-btn"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>前往 INSTAGRAM</span></a>` : ''}
                 </div>
@@ -1147,20 +1260,14 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             let targetBtn = document.querySelector('.nav-btn.btn-schedule');
             if(targetBtn) targetBtn.classList.add('active');
-            
-            currentMode = 'schedule';
-            currentScheduleTeam = team;
-            currentScheduleSport = sport;
-            
+            currentMode = 'schedule'; currentScheduleTeam = team; currentScheduleSport = sport;
             document.getElementById('extra-filters').style.display = 'none';
             document.getElementById('filter-bar').style.display = 'none';
             document.getElementById('tabs-container').style.display = 'none';
             document.getElementById('sub-nav-sports').style.display = 'none';
-            
             let cfgKey = teamThemes[`${team}_${sport}`] ? `${team}_${sport}` : team;
             let config = teamThemes[cfgKey] || teamThemes["全部啦啦隊"];
             document.documentElement.style.setProperty('--team-accent', config.accent);
-            
             window.renderContent();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
@@ -1185,13 +1292,9 @@
         window.renderScheduleSelection = function() {
             const container = document.getElementById('schedule-container');
             let available = [];
-            
             dbSchedules.forEach(s => { 
-                if(s.team && !available.find(a => a.team === s.team && a.sport === s.sport)) {
-                    available.push(s); 
-                }
+                if(s.team && !available.find(a => a.team === s.team && a.sport === s.sport)) { available.push(s); }
             });
-            
             if (available.length === 0) {
                container.innerHTML = '<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前沒有班表資料可以顯示！</div>';
                return;
@@ -1249,9 +1352,7 @@
                     if ((nat || "").includes("臺灣") || (nat || "").includes("台灣")) return 4;
                     return 3;
                 };
-                
-                let wA = getNatWeight(gA.nat);
-                let wB = getNatWeight(gB.nat);
+                let wA = getNatWeight(gA.nat); let wB = getNatWeight(gB.nat);
                 if (wA !== wB) return wA - wB;
                 
                 const isLastA = ((gA.note || gA['備註'] || gA.備註 || "").includes('練習生') || (gA.note || gA['備註'] || gA.備註 || "").includes('培訓生') || !gA.num || gA.num === "-") ? 1 : 0;
@@ -1261,7 +1362,6 @@
                 let nA = parseInt(String(gA.num || "").replace(/#/g, '')) || 999;
                 let nB = parseInt(String(gB.num || "").replace(/#/g, '')) || 999;
                 if (nA !== nB) return nA - nB;
-                
                 return nameA.localeCompare(nameB, 'zh-TW');
             });
 
@@ -1413,7 +1513,7 @@
         };
 
         // =========================================================================
-        // 賽事專屬彈窗
+        // 賽事專屬彈窗 (加行程按鈕)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
@@ -1438,6 +1538,11 @@
                 ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
                 : "請見球團官網";
 
+            let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"");
+            let isSaved = mySchedules.some(ms => ms.id === key);
+            let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event); this.innerText = this.innerText.includes('➕') ? '➖ 已加入專屬行程 (點擊移除)' : '➕ 加入我的專屬行事曆'; this.style.background = this.style.background==='var(--fav-accent)' ? '#15191e' : 'var(--fav-accent)'; this.style.borderColor = this.style.background==='var(--fav-accent)' ? 'transparent' : '#2d3748';" style="display:block; width:100%; padding:16px; margin-top:20px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入專屬行程 (點擊移除)':'➕ 加入我的專屬行事曆'}</button>`;
+
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
 
             document.getElementById('modal-dynamic-content').innerHTML = `
@@ -1460,6 +1565,7 @@
                     <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
                         ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">目前尚未公布名單</div>'}
                     </div>
+                    ${saveBtnHtml}
                 </div>
             `;
 
@@ -1484,7 +1590,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => {});
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW註冊失敗', err));
             });
         }
 
