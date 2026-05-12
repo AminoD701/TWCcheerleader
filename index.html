@@ -26,11 +26,16 @@
             --text-main: #f0f4f8;
             --text-sub: #a0aec0;
             --border-color: #2d3748;
-            /* 預設主題色 (若設定本命球隊，這三組變數會被 JavaScript 覆寫) */
+            
+            /* 預設主題色 (若設定本命球隊，這幾組變數會被 JavaScript 覆寫) */
             --team-accent: #ffffff;
             --event-accent: #ff5722;
             --schedule-accent: #00e676;
             --fav-accent: #ff4757;
+            
+            /* ✨ 新增：背景氛圍光與 Header 邊框變數 */
+            --theme-glow: transparent;
+            --header-border: #2d3748;
             
             --sport-font: 'Oswald', sans-serif;
             --tc-font: 'Noto Sans TC', sans-serif;
@@ -42,8 +47,12 @@
         body.no-scroll { overflow: hidden !important; }
 
         .sports-bg-slider { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: #000; overflow: hidden; }
-        .sports-bg-slider::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, rgba(10,12,16,0.92) 0%, rgba(20,25,30,0.85) 100%); z-index: 1; pointer-events: none; }
-        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; filter: grayscale(30%) contrast(110%); animation: slideFade 24s infinite; z-index: 0; }
+        .sports-bg-slider::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, rgba(10,12,16,0.92) 0%, rgba(20,25,30,0.85) 100%); z-index: 2; pointer-events: none; }
+        
+        /* ✨ 新增：本命色專屬背景氛圍光晕 */
+        .sports-bg-slider::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top center, var(--theme-glow) 0%, transparent 70%); opacity: 0.25; z-index: 3; pointer-events: none; transition: background 0.5s ease; mix-blend-mode: screen;}
+        
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; filter: grayscale(30%) contrast(110%); animation: slideFade 24s infinite; z-index: 1; }
         .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } 
         .slide-2 { background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2000&auto=format&fit=crop'); animation-delay: 8s; } 
         .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } 
@@ -64,7 +73,6 @@
         .floating-hub-btn:hover { transform: scale(1.1) rotate(10deg); }
         .floating-hub-btn svg { width: 28px; height: 28px; fill: #fff; }
 
-        /* 優化：降低 blur 數值減輕 GPU 負擔 */
         .hub-panel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
         .hub-panel-overlay.active { display: flex; }
         .hub-content { background: var(--bg-panel); border: 2px solid var(--event-accent); border-radius: 12px; width: 100%; max-width: 420px; padding: 30px; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); overflow-y: auto; max-height: 85vh; }
@@ -91,8 +99,8 @@
         .birthday-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .birthday-date { font-size: 11px; color: var(--event-accent); font-family: var(--sport-font); margin-top: 3px; font-weight: 700;}
 
-        /* Header */
-        .header { background-color: rgba(17, 20, 24, 0.95); padding: 25px 20px 0; border-bottom: 4px solid var(--border-color); z-index: 50; position: relative;}
+        /* Header 加入動態邊框顏色變數 */
+        .header { background-color: rgba(17, 20, 24, 0.95); padding: 25px 20px 0; border-bottom: 4px solid var(--header-border); z-index: 50; position: relative; transition: border-color 0.5s ease;}
         .title { font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 25px; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
         .controls-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 15px; }
         
@@ -144,7 +152,6 @@
         .tag-volleyball { background-image: url('./vollyball.png'); }
         .tag-other { background-color: #8e44ad; background-image: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 900; letter-spacing: 1px; font-family: var(--tc-font); border-color: #fff; } 
 
-        /* 💖 修改：愛心變成灰色實體填色，高亮時變成白色 */
         .fav-btn { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 3px 8px rgba(0,0,0,0.6); transition: 0.2s; cursor: pointer;}
         .fav-btn:hover { transform: scale(1.15); background: var(--fav-accent); }
         .fav-icon { width: 16px; height: 16px; fill: #b0bec5; transition: 0.2s; }
@@ -185,7 +192,7 @@
         ========================================= */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--bg-panel); border: 4px solid #fff; border-radius: 8px; width: 100%; max-width: 460px; position: relative; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 10px 10px 0px rgba(0,0,0,0.6); overflow: hidden; max-height: 90dvh; display: flex; flex-direction: column; }
+        .modal-content { background: var(--bg-panel); border: 4px solid #fff; border-radius: 8px; width: 100%; max-width: 460px; position: relative; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 15px 15px 0px rgba(0,0,0,0.6); overflow: hidden; max-height: 90dvh; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         
@@ -247,10 +254,8 @@
         .schedule-date { font-family: var(--sport-font); font-size: 24px; color: #fff; font-weight: 900; }
         .schedule-day { font-size: 13px; font-weight: 700; color: var(--team-accent); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
         
-        /* 💖 修改：確保班表愛心渲染顏色正常 */
         .schedule-heart { width: 30px; height: 30px; fill: var(--team-accent); color: var(--team-accent); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); animation: heartPop 0.3s forwards; display: inline-block;}
-        @keyframes heartPop { 0% { transform: scale(0.5); opacity: 0;} 70% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1;} }
-
+        
         .schedule-mobile { display: none; }
 
         /* =========================================
@@ -497,6 +502,10 @@
                 <path fill="none" stroke="currentColor" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle fill="none" stroke="currentColor" stroke-width="2" cx="12" cy="7" r="4"></circle>
             </symbol>
+            <symbol id="icon-back" viewBox="0 0 24 24">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </symbol>
         </defs>
     </svg>
 
@@ -570,6 +579,7 @@
         let myFavorites = JSON.parse(localStorage.getItem('cheer_favorites')) || [];
         let mySchedules = JSON.parse(localStorage.getItem('cheer_my_schedules')) || [];
         
+        // 🌟 新增：讀取本命球隊設定
         let myHomeTeam = localStorage.getItem('cheer_home_team') || "none";
 
         let favSet = new Set(myFavorites);
@@ -718,10 +728,14 @@
                 document.documentElement.style.setProperty('--event-accent', color);
                 document.documentElement.style.setProperty('--schedule-accent', color);
                 document.documentElement.style.setProperty('--fav-accent', color);
+                document.documentElement.style.setProperty('--theme-glow', color);
+                document.documentElement.style.setProperty('--header-border', color);
             } else {
                 document.documentElement.style.setProperty('--event-accent', '#ff5722');
                 document.documentElement.style.setProperty('--schedule-accent', '#00e676');
                 document.documentElement.style.setProperty('--fav-accent', '#ff4757');
+                document.documentElement.style.setProperty('--theme-glow', 'transparent');
+                document.documentElement.style.setProperty('--header-border', '#2d3748');
             }
         }
 
@@ -830,7 +844,6 @@
         window.toggleMySchedule = function(id, dateNum, dateStr, title, event, element) {
             if(event) event.stopPropagation();
             
-            // 讓瀏覽器優先渲染按鈕變色，背景再處理儲存動作
             requestAnimationFrame(() => {
                 const existing = mySchedules.findIndex(s => s.id === id);
                 
@@ -849,7 +862,6 @@
                     element.style.borderColor = isSaved ? 'transparent' : '#2d3748';
                 }
 
-                // 延遲寫入硬碟，防止畫面卡頓
                 setTimeout(() => {
                     localStorage.setItem('cheer_my_schedules', JSON.stringify(mySchedules));
                     if(currentMode === 'passport') window.renderContent(true);
@@ -925,7 +937,6 @@
             
             container.innerHTML = ''; container.style.display = 'flex';
             
-            // "全部啦啦隊" 的按鈕建立
             const allBtn = document.createElement('button');
             allBtn.className = `tab-btn ${"全部啦啦隊" === currentTeam ? 'active' : ''}`;
             allBtn.innerHTML = `<span>全部啦啦隊</span>`;
@@ -964,7 +975,6 @@
             const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
             btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
             
-            // 按下按鈕時不更改主顏色（主顏色由本命球隊決定），這裡只改 tab 本身
             btn.onclick = () => { 
                 currentTeam = safeTeam; 
                 document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active')); 
@@ -1011,6 +1021,8 @@
             const titleEl = document.getElementById('countdown-title');
             const timerEl = document.getElementById('countdown-timer');
 
+            if(!titleEl || !timerEl) return;
+
             if(upcoming.length === 0) {
                 titleEl.innerText = "目前沒有即將到來的行程";
                 timerEl.innerText = "快去加入行事曆吧！";
@@ -1022,7 +1034,6 @@
             titleEl.innerText = `⏳ 距離 ${nextEvent.title} 還有：`;
             timerEl.style.fontSize = "32px";
             
-            // 預設活動時間抓下午 17:00
             const y = Math.floor(nextEvent.dateNum / 10000);
             const m = Math.floor((nextEvent.dateNum % 10000) / 100) - 1;
             const d = nextEvent.dateNum % 100;
@@ -1046,7 +1057,7 @@
             }
             
             update();
-            countdownTimer = setInterval(update, 60000); // 每一分鐘更新一次，超低耗能
+            countdownTimer = setInterval(update, 60000); 
         }
 
         // =========================================================================
@@ -1055,7 +1066,7 @@
         window.changeCalMonth = function(offset) {
             window.passportCalDate.setMonth(window.passportCalDate.getMonth() + offset);
             window.passportSelectedDateNum = null; 
-            renderPassport(true); // true 代表不重啟倒數計時器
+            renderPassport(true); 
         };
 
         window.selectCalDate = function(dateNum) {
@@ -1787,7 +1798,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => {});
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW註冊失敗', err));
             });
         }
 
