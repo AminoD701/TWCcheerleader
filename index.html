@@ -249,28 +249,32 @@
         .schedule-mobile { display: none; }
 
         /* =========================================
-           ✨ 新版：小格日曆外籍行程 (Mini Event Card)
+           ✨ 新版：同一天聚合的「日曆方塊卡」
         ========================================= */
         .event-list-container { max-width: 1200px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: flex; flex-direction: column; gap: 25px; }
         .event-section-divider { font-family: var(--sport-font); display: flex; align-items: center; text-align: center; color: #fff; font-size: 20px; font-weight: 900; margin: 40px 0 10px; letter-spacing: 3px; text-transform: uppercase; }
         .event-section-divider::before, .event-section-divider::after { content: ''; flex: 1; border-bottom: 2px dashed var(--border-color); margin: 0 20px; }
         
-        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%; }
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; align-items: start; } 
         
-        .event-mini-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; position: relative; text-align: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
-        .event-mini-card:hover { transform: translateY(-4px); border-color: var(--event-accent); box-shadow: 6px 6px 0px rgba(255,87,34,0.3); }
-        .event-mini-card.expired { opacity: 0.6; filter: grayscale(1); }
+        .event-date-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: 0.3s; }
+        .event-date-card:hover { border-color: var(--event-accent); box-shadow: 6px 6px 0px rgba(255,87,34,0.3); }
+        .event-date-card.expired { opacity: 0.6; filter: grayscale(1); }
         
-        .event-mini-date { font-family: var(--sport-font); line-height: 1; margin-bottom: 12px; }
-        .event-mini-month { font-size: 14px; color: var(--event-accent); font-weight: 900; letter-spacing: 1px; }
-        .event-mini-day { font-size: 38px; color: #fff; font-weight: 900; margin-top: 2px; }
+        .event-date-header { background: #111418; padding: 12px 10px; text-align: center; border-bottom: 2px solid var(--border-color); }
+        .event-date-month { font-family: var(--sport-font); font-size: 14px; color: var(--event-accent); font-weight: 900; letter-spacing: 1px; line-height: 1; margin-bottom: 4px;}
+        .event-date-day { font-family: var(--sport-font); font-size: 38px; color: #fff; font-weight: 900; line-height: 1; }
         
-        .event-mini-avatars { display: flex; justify-content: center; flex-wrap: wrap; gap: -8px; margin-bottom: 12px; }
-        .event-mini-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--bg-card); object-fit: cover; object-position: top center; background: #252c36; margin-left: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .event-mini-avatar:first-child { margin-left: 0; }
-        
-        .event-mini-title { font-size: 13px; font-weight: 700; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .event-slots-container { display: flex; flex-direction: column; padding: 10px; gap: 10px; }
+        .event-slot-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px 10px; cursor: pointer; transition: 0.2s; text-align: center; }
+        .event-slot-item:hover { background: rgba(255,255,255,0.08); border-color: var(--event-accent); transform: translateY(-2px); }
+        .event-slot-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px;}
 
+        .event-mini-avatars { display: flex; justify-content: center; flex-wrap: wrap; gap: -8px; }
+        .event-mini-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--bg-card); object-fit: cover; object-position: top center; background: #252c36; margin-left: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .event-mini-avatar:first-child { margin-left: 0; }
+
+        /* 彈窗內的女孩頭像樣式 */
         .girl-hero-card { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
         .girl-hero-img-wrap { border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #2d3748, #111418); box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: 0.3s; }
         .girl-hero-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; background: #252c36; border: 2px solid #111418; }
@@ -364,13 +368,15 @@
             .schedule-team-btn { width: 100%; gap: 12px; padding: 12px; }
             .schedule-team-btn img { width: 40px; height: 40px; }
 
-            /* 📱 手機版外籍行程 (小格日曆) */
+            /* 📱 手機版外籍行程 (日曆聚合版) */
             .event-list-container { padding: 0 10px; }
-            .event-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
-            .event-mini-card { padding: 15px 10px; }
-            .event-mini-day { font-size: 32px; }
-            .event-mini-avatar { width: 38px; height: 38px; margin-left: -10px;}
-            .event-mini-title { font-size: 11px; }
+            .event-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+            .event-date-header { padding: 10px; }
+            .event-date-day { font-size: 32px; }
+            .event-slots-container { padding: 8px; gap: 8px; }
+            .event-slot-item { padding: 10px 8px; }
+            .event-slot-title { font-size: 12px; margin-bottom: 8px; padding-bottom: 4px; }
+            .event-mini-avatar { width: 32px; height: 32px; margin-left: -6px;}
             
             .modal-overlay { align-items: flex-end; padding: 0; }
             .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
@@ -571,8 +577,8 @@
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 強制快取 V14 (小格日曆版)
-        const CACHE_KEY = "tw_cheerleader_cache_v14";
+        // 🏆 強制快取 V15 (日曆聚合版)
+        const CACHE_KEY = "tw_cheerleader_cache_v15";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -1171,7 +1177,6 @@
                     return `<th onclick="window.openModal('${n}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${g?g.img:''}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
-            // 加入電腦版月份分隔線
             let currentMonthDesk = "";
             dates.forEach(dNum => {
                 const dInfo = data.find(s => s.safeDate.num === dNum).safeDate;
@@ -1188,7 +1193,6 @@
             });
             desktopHtml += `</tbody></table></div></div>`;
 
-            // 加入手機版月份分隔線
             let mobileHtml = `<div class="schedule-mobile">`;
             let currentMonthMob = "";
             
@@ -1227,7 +1231,7 @@
         };
 
         // =========================================================================
-        // ✨ 新版：小格日曆外籍行程 (Mini Event Card)
+        // ✨ 新版：同一天聚合的「日曆方塊卡」(外籍行程)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -1245,41 +1249,67 @@
             const up = filtered.filter(e => e.safeDate.num >= todayNum); 
             const ex = filtered.filter(e => e.safeDate.num < todayNum).reverse(); 
             
-            const buildMiniCard = (e, isExp) => {
-                const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
+            // 將相同日期的事件進行群組化
+            function groupEventsByDate(eventsArray) {
+                const map = new Map();
+                eventsArray.forEach(e => {
+                    const key = e.safeDate.num;
+                    if (!map.has(key)) {
+                        map.set(key, { date: e.safeDate, events: [] });
+                    }
+                    map.get(key).events.push(e);
+                });
+                return Array.from(map.values());
+            }
+
+            const buildDateCard = (group, isExp) => {
+                const { date, events } = group;
                 
-                // 最多顯示 3 個頭像，超過的用數字代替
-                const displayGirls = attendGirls.slice(0, 3);
-                const avatarsHtml = displayGirls.map(n => {
-                    const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
-                    return g 
-                        ? `<img src="${g.img}" class="event-mini-avatar" loading="lazy">` 
-                        : `<div class="event-mini-avatar default-avatar" style="width:45px;height:45px;margin-left:-8px;"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`;
+                const slotsHtml = events.map(e => {
+                    const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
+                    const displayGirls = attendGirls.slice(0, 3); // 最多顯示 3 個頭像
+                    const avatarsHtml = displayGirls.map(n => {
+                        const g = dbGirls.find(girl => (girl.realname||"").trim() === n || (girl.nickname||"").trim() === n);
+                        return g 
+                            ? `<img src="${g.img}" class="event-mini-avatar" loading="lazy">` 
+                            : `<div class="event-mini-avatar default-avatar" style="width:36px;height:36px;margin-left:-8px;"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`;
+                    }).join('');
+                    
+                    const moreBadge = attendGirls.length > 3 
+                        ? `<div class="event-mini-avatar" style="display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;background:#333;">+${attendGirls.length-3}</div>` 
+                        : '';
+
+                    return `
+                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})">
+                        <div class="event-slot-title">${e.eventname || "活動賽事"}</div>
+                        <div class="event-mini-avatars">
+                            ${avatarsHtml}${moreBadge}
+                        </div>
+                    </div>`;
                 }).join('');
-                
-                const moreBadge = attendGirls.length > 3 
-                    ? `<div class="event-mini-avatar" style="display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:#333;">+${attendGirls.length-3}</div>` 
-                    : '';
 
                 return `
-                <div class="event-mini-card ${isExp?'expired':''}" onclick="window.openEventModal(${e.originalIndex})">
-                    <div class="event-mini-date">
-                        <div class="event-mini-month">${e.safeDate.monStr}</div>
-                        <div class="event-mini-day">${String(e.safeDate.day).padStart(2,'0')}</div>
+                <div class="event-date-card ${isExp?'expired':''}">
+                    <div class="event-date-header">
+                        <div class="event-date-month">${date.monStr}</div>
+                        <div class="event-date-day">${String(date.day).padStart(2,'0')}</div>
+                        <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">${date.week}</div>
                     </div>
-                    <div class="event-mini-avatars">
-                        ${avatarsHtml}${moreBadge}
+                    <div class="event-slots-container">
+                        ${slotsHtml}
                     </div>
-                    <div class="event-mini-title">${e.eventname || "賽事活動"}</div>
                 </div>`;
             };
 
-            let html = up.length 
-                ? `<div class="event-grid">${up.map(e=>buildMiniCard(e,false)).join('')}</div>` 
+            const groupedUp = groupEventsByDate(up);
+            const groupedEx = groupEventsByDate(ex);
+
+            let html = groupedUp.length 
+                ? `<div class="event-grid">${groupedUp.map(g=>buildDateCard(g,false)).join('')}</div>` 
                 : (search===""?'<div style="text-align:center;padding:100px 50px;color:var(--text-sub); font-weight:700; width:100%;">目前沒有近期的活動賽事。</div>':'');
             
-            if(ex.length) {
-                html += `<div class="event-section-divider">歷史賽事紀錄 ARCHIVE</div><div class="event-grid">${ex.map(e=>buildMiniCard(e,true)).join('')}</div>`;
+            if(groupedEx.length) {
+                html += `<div class="event-section-divider">歷史賽事紀錄 ARCHIVE</div><div class="event-grid">${groupedEx.map(g=>buildDateCard(g,true)).join('')}</div>`;
             }
             
             document.getElementById('event-container').innerHTML = html;
