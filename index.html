@@ -514,23 +514,54 @@
             .dt-poster-item:nth-child(1) .dt-poster-name { font-size: 26px; } /* 首位名字放大 */
             .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        /* 手機版優化：5人等比例 橫幅直列排版 */
+        /* 手機版優化：撲克牌陣型 (5人等大、直式卡片不裁切) */
         @media(max-width: 768px) {
-            .dt-poster { padding: 15px; margin-top: 15px; border-width: 3px; }
-            .dt-poster-title { font-size: 26px; margin-bottom: 2px; }
-            .dt-poster-sub { font-size: 11px; margin-bottom: 15px; }
+            .dt-poster { padding: 20px 15px; margin-top: 15px; border-width: 3px; }
+            .dt-poster-title { font-size: 26px; margin-bottom: 5px; text-align: center; }
+            .dt-poster-sub { font-size: 11px; margin-bottom: 20px; text-align: center; }
             
-            /* 改回垂直排列，5個人高度一模一樣 */
-            .dt-poster-grid { display: flex; flex-direction: column; height: auto; gap: 8px; }
-            .dt-poster-item { height: 125px; transform: none; border-width: 2px; width: 100%; flex: none; }
+            /* 改為 2 欄網格，確保女孩照片是直式的(Portrait) */
+            .dt-poster-grid { 
+                display: grid; 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 12px; 
+                height: auto; 
+            }
+            
+            /* 讓卡片變成直立的長方形，完美顯示半身/全身 */
+            .dt-poster-item { 
+                transform: none; 
+                border-width: 2px; 
+                height: 200px; 
+                width: 100%;
+                flex: none;
+            }
+            
+            /* 黑魔法：將第 5 個女孩置中於第 3 排，且保持與其他人一模一樣的寬高 */
+            .dt-poster-item:nth-child(5) {
+                grid-column: 1 / -1;
+                width: calc(50% - 6px);
+                justify-self: center;
+            }
+            
             .dt-poster-item img { transform: none; width: 100%; object-position: top center; }
-            .dt-poster-item:hover { transform: scale(1.02); flex: none; }
+            .dt-poster-item:hover { transform: scale(1.02); }
             .dt-poster-item:hover img { transform: none; }
             
-            /* 讓文字靠左下角，減少對臉部的遮擋，漸層高度縮小 */
-            .dt-poster-info { transform: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding: 30px 15px 8px; text-align: left; background: linear-gradient(transparent, rgba(0,0,0,0.8) 60%); }
-            .dt-poster-name { font-size: 22px; margin-bottom: 0; display: flex; align-items: baseline; flex-wrap: wrap;}
-            .dt-poster-role { font-size: 12px; margin-bottom: 2px; }
+            /* 文字區塊置中排列，縮小陰影避免擋臉 */
+            .dt-poster-info { 
+                transform: none; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: flex-end; 
+                align-items: center; 
+                padding: 25px 5px 8px; 
+                text-align: center; 
+                background: linear-gradient(transparent, rgba(0,0,0,0.85) 60%); 
+            }
+            .dt-poster-name { font-size: 16px; margin-bottom: 0; line-height: 1.2; flex-direction: column; }
+            .dt-poster-name span { margin-left: 0; margin-top: 2px; } /* 本名換行顯示 */
+            .dt-poster-role { font-size: 11px; margin-bottom: 2px; }
             
             .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
         }
