@@ -450,11 +450,12 @@
             .timeline-item button { width: 100%; }
 
             /* 手機版 Minigame 調整 */
-            .vs-container { flex-direction: column; height: 75vh; gap: 15px; }
-            .vs-card img { object-position: top center; }
-            .vs-info { padding: 30px 15px 15px; }
+            .vs-container { flex-direction: column; height: auto; min-height: auto; gap: 20px; padding-bottom: 10px; } 
+            .vs-card { flex: none; height: 350px; } /* 給予固定的足夠高度，防止照片被壓扁裁剪 */
+            .vs-card img { object-position: top center; } /* 確保縮放時優先對焦女孩的臉部與上半身 */
+            .vs-info { padding: 40px 15px 15px; }
             .vs-name { font-size: 24px; }
-            .vs-badge { width: 50px; height: 50px; font-size: 24px; border-width: 2px; }
+            .vs-badge { width: 50px; height: 50px; font-size: 20px; border-width: 2px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; box-shadow: 0 0 15px rgba(255,0,68,0.8); }
             .game-title { font-size: 24px; }
         }
 
