@@ -496,74 +496,64 @@
         .dt-poster-name { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; line-height: 1.1; margin-bottom: 4px;}
         .dt-poster-role { font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 4px; text-shadow: 1px 1px 2px #000; letter-spacing: 1px;}
 
-        /* 手機版優化：1大4小 完美截圖排版 */
-        @media(max-width: 768px) {
-            .dt-poster { padding: 15px; margin-top: 15px; border-width: 3px; }
-            .dt-poster-title { font-size: 26px; margin-bottom: 2px; }
-            .dt-poster-sub { font-size: 11px; margin-bottom: 15px; }
-            /* 改為 2x3 網格 */
-            .dt-poster-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; gap: 8px; height: auto; }
-            .dt-poster-item { transform: none; border-width: 2px; }
-            /* 第一個位置 (性感擔當) 佔據最上方大版面 */
-            .dt-poster-item:nth-child(1) { grid-column: 1 / -1; grid-row: span 2; }
-            .dt-poster-item img { transform: none; width: 100%; object-position: top center; }
-            .dt-poster-item:hover { flex: unset; transform: scale(1.02); }
-            .dt-poster-item:hover img { transform: none; }
-            .dt-poster-info { transform: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 40px 5px 8px; text-align: center; }
-            .dt-poster-name { font-size: 18px; }
-            .dt-poster-item:nth-child(1) .dt-poster-name { font-size: 26px; } /* 首位名字放大 */
-            .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        /* 手機版優化：撲克牌陣型 (5人等大、直式卡片不裁切) */
+        /* 手機版優化：撲克牌陣型 (5人等大、直式卡片不裁切、防呆覆蓋版) */
         @media(max-width: 768px) {
             .dt-poster { padding: 20px 15px; margin-top: 15px; border-width: 3px; }
             .dt-poster-title { font-size: 26px; margin-bottom: 5px; text-align: center; }
             .dt-poster-sub { font-size: 11px; margin-bottom: 20px; text-align: center; }
             
-            /* 改為 2 欄網格，確保女孩照片是直式的(Portrait) */
+            /* 強制使用 2 欄網格 */
             .dt-poster-grid { 
-                display: grid; 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 12px; 
-                height: auto; 
+                display: grid !important; 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 12px !important; 
+                height: auto !important; 
             }
             
-            /* 讓卡片變成直立的長方形，完美顯示半身/全身 */
+            /* 強制所有卡片變成直立的長方形 */
             .dt-poster-item { 
-                transform: none; 
-                border-width: 2px; 
-                height: 200px; 
-                width: 100%;
-                flex: none;
+                transform: none !important; 
+                border-width: 2px !important; 
+                height: 200px !important; 
+                width: 100% !important;
+                flex: none !important;
             }
             
-            /* 黑魔法：將第 5 個女孩置中於第 3 排，且保持與其他人一模一樣的寬高 */
+            /* 🚫 徹底清除舊版魔咒：強制前 4 位女孩只能佔據 1 格！ */
+            .dt-poster-item:nth-child(1),
+            .dt-poster-item:nth-child(2),
+            .dt-poster-item:nth-child(3),
+            .dt-poster-item:nth-child(4) {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+            }
+            
+            /* 讓第 5 個女孩置中，且寬度跟其他人一模一樣 */
             .dt-poster-item:nth-child(5) {
-                grid-column: 1 / -1;
-                width: calc(50% - 6px);
-                justify-self: center;
+                grid-column: 1 / -1 !important;
+                width: calc(50% - 6px) !important;
+                justify-self: center !important;
             }
             
-            .dt-poster-item img { transform: none; width: 100%; object-position: top center; }
-            .dt-poster-item:hover { transform: scale(1.02); }
-            .dt-poster-item:hover img { transform: none; }
+            .dt-poster-item img { transform: none !important; width: 100% !important; object-position: top center !important; }
+            .dt-poster-item:hover { transform: scale(1.02) !important; }
             
-            /* 文字區塊置中排列，縮小陰影避免擋臉 */
+            /* 文字區塊優化 */
             .dt-poster-info { 
-                transform: none; 
-                display: flex; 
-                flex-direction: column; 
-                justify-content: flex-end; 
-                align-items: center; 
-                padding: 25px 5px 8px; 
-                text-align: center; 
-                background: linear-gradient(transparent, rgba(0,0,0,0.85) 60%); 
+                transform: none !important; 
+                display: flex !important; 
+                flex-direction: column !important; 
+                justify-content: flex-end !important; 
+                align-items: center !important; 
+                padding: 25px 5px 8px !important; 
+                text-align: center !important; 
+                background: linear-gradient(transparent, rgba(0,0,0,0.85) 60%) !important; 
             }
-            .dt-poster-name { font-size: 16px; margin-bottom: 0; line-height: 1.2; flex-direction: column; }
-            .dt-poster-name span { margin-left: 0; margin-top: 2px; } /* 本名換行顯示 */
-            .dt-poster-role { font-size: 11px; margin-bottom: 2px; }
+            .dt-poster-name { font-size: 16px !important; margin-bottom: 0 !important; line-height: 1.2 !important; display: flex; flex-direction: column; }
+            .dt-poster-name span { margin-left: 0 !important; margin-top: 2px !important; }
+            .dt-poster-role { font-size: 11px !important; margin-bottom: 2px !important; }
             
-            .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
+            .dt-selector-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         /* =========================================
            📂 電競風收納下拉選單 (Dropdown)
