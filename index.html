@@ -508,6 +508,23 @@
             .dt-poster-title { font-size: 28px; }
             .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
         }
+        /* =========================================
+           📂 電競風收納下拉選單 (Dropdown)
+        ========================================= */
+        .dropdowns-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
+        .dropdown-container { position: relative; width: 100%; max-width: 250px; flex: 1; min-width: 200px; }
+        .dropdown-btn { width: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 12px 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
+        .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
+        .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
+        
+        .dropdown-menu { display: none; position: absolute; top: calc(100% + 15px); left: 0; width: 100%; background: rgba(17, 20, 24, 0.98); border: 2px solid var(--border-color); border-radius: 8px; z-index: 100; max-height: 50vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+        .dropdown-menu.show { display: flex; flex-direction: column; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dropdown-item { padding: 15px 20px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-sub); font-family: var(--tc-font); font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
+        .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
     </style>
 </head>
 <body class="no-scroll">
@@ -599,15 +616,32 @@
     <header class="header">
         <h1 class="title">TAIWAN CHEERLEADER DATABASE</h1>
         <div class="controls-container">
-            <div class="main-nav" id="main-nav-container">
-                <button class="nav-btn active" onclick="window.setMode('girls', this)"><span>女孩圖鑑 ROSTER</span></button>
-                <button class="nav-btn btn-fav" onclick="window.setMode('passport', this)">
-                    <span>🛂 追星護照 MY PASSPORT</span>
-                </button>
-                <button class="nav-btn btn-schedule" onclick="window.setMode('schedule', this)"><span>應援班表 SCHEDULE</span></button>
-                <button class="nav-btn btn-event" onclick="window.setMode('events', this)"><span>外籍行程 EVENTS</span></button>
-                <button class="nav-btn btn-game" onclick="window.setMode('minigame', this)"><span>🎮 二選一 GAME</span></button>
-                <button class="nav-btn btn-game" onclick="window.setMode('dreamteam', this)"><span>🌟 夢幻陣容</span></button>
+            <div class="dropdowns-row">
+                
+                <div class="dropdown-container">
+                    <button class="dropdown-btn" onclick="window.toggleDropdown('mode-menu', event)">
+                        <span id="mode-btn-text">👧 女孩圖鑑 ROSTER</span> 
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu" id="mode-menu">
+                        <button class="dropdown-item active" onclick="window.setMode('girls')">👧 女孩圖鑑 ROSTER</button>
+                        <button class="dropdown-item" onclick="window.setMode('passport')">🛂 追星護照 MY PASSPORT</button>
+                        <button class="dropdown-item" onclick="window.setMode('schedule')">📅 應援班表 SCHEDULE</button>
+                        <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
+                        <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
+                        <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
+                    </div>
+                </div>
+
+                <div class="dropdown-container" id="team-dropdown-wrapper" style="display:none;">
+                    <button class="dropdown-btn" onclick="window.toggleDropdown('team-menu', event)">
+                        <span id="team-btn-text">全部啦啦隊</span> 
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu" id="team-menu">
+                        </div>
+                </div>
+
             </div>
             
             <div class="sub-nav" id="sub-nav-sports">
@@ -617,6 +651,7 @@
                 <button class="sub-btn" onclick="window.setSport('排球', this)">排球 VOLLEYBALL</button>
                 <button class="sub-btn" onclick="window.setSport('其他', this)">其他 OTHERS</button>
             </div>
+        </div>
 
             <div class="team-tabs" id="tabs-container"></div>
         </div>
@@ -1047,19 +1082,72 @@
         // =========================================================================
         // UI 導覽邏輯 (支援 Minigame)
         // =========================================================================
-        window.setMode = function(mode, btn) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+        // =========================================================================
+        // 📂 下拉選單開關與控制邏輯
+        // =========================================================================
+        window.toggleDropdown = function(menuId, event) {
+            if(event) event.stopPropagation();
+            const menu = document.getElementById(menuId);
+            const btn = menu.previousElementSibling;
+            const isShowing = menu.classList.contains('show');
+            
+            // 先關閉畫面上所有的下拉選單
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-btn').forEach(b => b.classList.remove('active'));
+            
+            // 如果點擊的這個原本是關的，就展開它
+            if (!isShowing) {
+                menu.classList.add('show');
+                btn.classList.add('active');
+            }
+        };
+
+        // 點擊網頁空白處時，自動關閉所有選單
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown-container')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+                document.querySelectorAll('.dropdown-btn').forEach(b => b.classList.remove('active'));
+            }
+        });
+
+        // =========================================================================
+        // UI 導覽切換邏輯 (下拉選單版)
+        // =========================================================================
+        window.setMode = function(mode) {
+            const modeNames = {
+                'girls': '👧 女孩圖鑑 ROSTER',
+                'passport': '🛂 追星護照 MY PASSPORT',
+                'schedule': '📅 應援班表 SCHEDULE',
+                'events': '✈️ 外籍行程 EVENTS',
+                'minigame': '🎮 殘酷二選一 GAME',
+                'dreamteam': '🌟 夢幻陣容 DREAM TEAM'
+            };
+            
+            // 更新按鈕上顯示的文字
+            document.getElementById('mode-btn-text').innerText = modeNames[mode] || '選擇功能';
+            
+            // 關閉所有選單
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-btn').forEach(b => b.classList.remove('active'));
+            
+            // 將選中的項目標示為 active
+            const modeMenu = document.getElementById('mode-menu');
+            if(modeMenu) {
+                modeMenu.querySelectorAll('.dropdown-item').forEach(btn => {
+                    btn.classList.remove('active');
+                    if(btn.innerText.includes(modeNames[mode].split(' ')[1])) btn.classList.add('active');
+                });
+            }
 
             currentMode = mode;
             currentTeam = "全部啦啦隊"; 
             currentScheduleTeam = null; 
             currentScheduleSport = null; 
+            if(document.getElementById('team-btn-text')) document.getElementById('team-btn-text').innerText = "全部啦啦隊";
 
             const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             document.getElementById('extra-filters').style.display = showSubNav ? 'flex' : 'none';
-            // 進遊戲隱藏搜尋列，加入 dreamteam 判定
             document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam') ? 'none' : 'block';
             
             updateTeamTabs();
@@ -1071,14 +1159,20 @@
             if(btn) btn.classList.add('active');
             currentSport = sport;
             currentTeam = "全部啦啦隊"; 
+            if(document.getElementById('team-btn-text')) document.getElementById('team-btn-text').innerText = "全部啦啦隊";
             updateTeamTabs();
             window.renderContent();
         };
 
+        // =========================================================================
+        // 動態生成「球隊」下拉選單
+        // =========================================================================
         function updateTeamTabs() {
-            const container = document.getElementById('tabs-container');
-            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || currentMode === 'minigame' || (currentMode === 'girls' && currentSport === "全部")) { 
-                container.style.display = 'none'; return; 
+            const wrapper = document.getElementById('team-dropdown-wrapper');
+            const container = document.getElementById('team-menu');
+            
+            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || (currentMode === 'girls' && currentSport === "全部")) { 
+                wrapper.style.display = 'none'; return; 
             }
             
             const teamsSet = new Set();
@@ -1089,53 +1183,77 @@
             });
             const activeTeams = Array.from(teamsSet).sort();
             
-            container.innerHTML = ''; container.style.display = 'flex';
+            container.innerHTML = ''; 
+            wrapper.style.display = 'block';
             
+            const createItem = (tName, isLeagueTitle = false) => {
+                if(isLeagueTitle) {
+                    const div = document.createElement('div');
+                    div.style.padding = "12px 20px 4px";
+                    div.style.fontSize = "12px";
+                    div.style.color = "var(--text-sub)";
+                    div.style.fontFamily = "var(--sport-font)";
+                    div.style.letterSpacing = "1px";
+                    div.innerText = tName;
+                    return div;
+                }
+
+                const safeTeam = (tName || "").trim();
+                const safeSport = currentSport === "全部" ? "" : currentSport;
+                const config = teamThemes[`${safeTeam}_${safeSport}`] || teamThemes[safeTeam] || { accent: "#ccc", logo: "", noLogo: false };
+                
+                const btn = document.createElement('button');
+                btn.className = `dropdown-item ${safeTeam === currentTeam ? 'active' : ''}`;
+                const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}">` : ``;
+                btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
+                
+                btn.onclick = () => { 
+                    currentTeam = safeTeam; 
+                    document.getElementById('team-btn-text').innerText = safeTeam;
+                    container.querySelectorAll('.dropdown-item').forEach(tb => tb.classList.remove('active')); 
+                    btn.classList.add('active'); 
+                    
+                    // 點擊後自動收起選單
+                    container.classList.remove('show');
+                    wrapper.querySelector('.dropdown-btn').classList.remove('active');
+                    window.renderContent(); 
+                };
+                return btn;
+            };
+
+            // 預設的「全部」選項
             const allBtn = document.createElement('button');
-            allBtn.className = `tab-btn ${"全部啦啦隊" === currentTeam ? 'active' : ''}`;
+            allBtn.className = `dropdown-item ${"全部啦啦隊" === currentTeam ? 'active' : ''}`;
             allBtn.innerHTML = `<span>全部啦啦隊</span>`;
             allBtn.onclick = () => { 
                 currentTeam = "全部啦啦隊"; 
-                document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active')); 
+                document.getElementById('team-btn-text').innerText = "全部啦啦隊";
+                container.querySelectorAll('.dropdown-item').forEach(tb => tb.classList.remove('active')); 
                 allBtn.classList.add('active'); 
+                
+                container.classList.remove('show');
+                wrapper.querySelector('.dropdown-btn').classList.remove('active');
                 window.renderContent(); 
             };
             container.appendChild(allBtn);
             
             if (currentSport === "籃球") {
                 const getLeague = (t) => (teamThemes[`${t}_籃球`] || teamThemes[t] || {}).league;
-                renderLeagueGroup(container, "TPBL 職籃聯盟", activeTeams.filter(t => getLeague(t) === "TPBL"));
-                renderLeagueGroup(container, "P. LEAGUE+ 職籃聯盟", activeTeams.filter(t => getLeague(t) === "P. LEAGUE+"));
+                
+                const tpblTeams = activeTeams.filter(t => getLeague(t) === "TPBL");
+                if(tpblTeams.length) {
+                    container.appendChild(createItem("TPBL 職籃聯盟", true));
+                    tpblTeams.forEach(t => container.appendChild(createItem(t)));
+                }
+
+                const pleagueTeams = activeTeams.filter(t => getLeague(t) === "P. LEAGUE+");
+                if(pleagueTeams.length) {
+                    container.appendChild(createItem("P. LEAGUE+ 職籃聯盟", true));
+                    pleagueTeams.forEach(t => container.appendChild(createItem(t)));
+                }
             } else { 
-                activeTeams.forEach(t => container.appendChild(createTeamBtn(t))); 
+                activeTeams.forEach(t => container.appendChild(createItem(t))); 
             }
-        }
-
-        function renderLeagueGroup(container, title, teams) {
-            if(teams.length === 0) return;
-            const group = document.createElement('div');
-            group.className = 'league-group';
-            group.innerHTML = `<div class="league-title">${title}</div><div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;"></div>`;
-            teams.forEach(t => group.lastChild.appendChild(createTeamBtn(t)));
-            container.appendChild(group);
-        }
-
-        function createTeamBtn(tName) {
-            const safeTeam = (tName || "").trim();
-            const safeSport = currentSport === "全部" ? "" : currentSport;
-            const config = teamThemes[`${safeTeam}_${safeSport}`] || teamThemes[safeTeam] || { accent: "#ccc", logo: "", noLogo: false };
-            const btn = document.createElement('button');
-            btn.className = `tab-btn ${safeTeam === currentTeam ? 'active' : ''}`;
-            const logoHtml = (config.logo && !config.noLogo) ? `<img src="${config.logo}" class="tab-logo">` : ``;
-            btn.innerHTML = `${logoHtml}<span>${safeTeam}</span>`;
-            
-            btn.onclick = () => { 
-                currentTeam = safeTeam; 
-                document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active')); 
-                btn.classList.add('active'); 
-                window.renderContent(); 
-            };
-            return btn;
         }
 
         let searchTimeout;
