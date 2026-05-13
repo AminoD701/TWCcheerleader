@@ -1364,9 +1364,42 @@
             `;
         };
 
+        // 🌟 1. 內建台灣啦啦隊專屬翻譯蒟蒻 (支援多隊名、簡稱、英文)
+        const getTeamAliases = (teamName) => {
+            if(!teamName) return "";
+            const t = teamName.toLowerCase();
+            let aliases = "";
+            // 如果 combinedTeam 裡面同時有台鋼和 SSG，這裡會把兩邊的關鍵字都加進去！
+            if(t.includes('rakuten') || t.includes('樂天')) aliases += " 樂天 桃猿 rkg rakuten monkeys";
+            if(t.includes('passion') || t.includes('中信')) aliases += " 中信 兄弟 ps passion brothers";
+            if(t.includes('fubon') || t.includes('富邦')) aliases += " 富邦 悍將 勇士 fubon fa angels";
+            if(t.includes('dragon') || t.includes('味全')) aliases += " 味全 龍 小龍女 dragon db beauties";
+            if(t.includes('uni') || t.includes('統一')) aliases += " 統一 獅 統一獅 uni ug lions";
+            if(t.includes('wing') || t.includes('台鋼') || t.includes('tsg')) aliases += " 台鋼 雄鷹 獵鷹 wing tsg"; 
+            if(t.includes('formosa') || t.includes('夢想家')) aliases += " 夢想家 formosa";
+            if(t.includes('muse') || t.includes('攻城獅')) aliases += " 攻城獅 慕獅 muse";
+            if(t.includes('pilots') || t.includes('領航猿')) aliases += " 領航猿 pilots";
+            if(t.includes('taishin') || t.includes('台新')) aliases += " 台新 戰神 taishin";
+            if(t.includes('leopard') || t.includes('雲豹') || t.includes('電豹')) aliases += " 雲豹 電豹女 leopard";
+            return aliases;
+        };
+
         window.openDtSelector = function(slotIndex) {
             let uniqueMap = new Map();
-            dbGirls.filter(g => g.img).forEach(g => { if(!uniqueMap.has(g.realname)) uniqueMap.set(g.realname, g); });
+            
+            // 🌟 核心修復：遇到多棲女孩，把她的「球隊」全部合併起來，不丟失任何資料！
+            dbGirls.filter(g => g.img).forEach(g => { 
+                if(!uniqueMap.has(g.realname)) {
+                    // 第一筆資料：複製一份，並建立 combinedTeam 來收集球隊
+                    uniqueMap.set(g.realname, { ...g, combinedTeam: g.team || "" });
+                } else {
+                    // 第二筆資料 (例如 SSG)：不要丟掉！把球隊名字合併進去
+                    let existingGirl = uniqueMap.get(g.realname);
+                    if (g.team && !existingGirl.combinedTeam.includes(g.team)) {
+                        existingGirl.combinedTeam += " " + g.team;
+                    }
+                }
+            });
             let pool = Array.from(uniqueMap.values());
             
             pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
@@ -1378,8 +1411,11 @@
 
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
 
+                // 🌟 使用合併了所有球隊的 `g.combinedTeam` 來做搜尋關鍵字！
+                const searchKeywords = `${g.realname} ${g.nickname||''} ${g.combinedTeam} ${getTeamAliases(g.combinedTeam)}`;
+
                 return `
-                <div class="dt-pick-card" data-search="${g.realname} ${g.nickname||''} ${g.team||''}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
+                <div class="dt-pick-card" data-search="${searchKeywords}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
                     <img src="${g.img}" loading="lazy">
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>
@@ -1388,12 +1424,11 @@
                 </div>`;
             }).join('');
 
-            // 🌟 終極優化：加入 ontouchstart 觸發 blur() 自動收起鍵盤，並用 flex:1 讓網格彈性填滿空間
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div style="padding:20px; background:var(--bg-panel); height:100%; display:flex; flex-direction:column; box-sizing: border-box;">
                     <div style="border-bottom:2px dashed var(--border-color); padding-bottom:15px; margin-bottom:10px; flex-shrink: 0;">
                         <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:${roleColor}; margin-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
-                        <input type="text" id="dtSearchInput" placeholder="🔍 搜尋... (觸碰下方可收起鍵盤)" oninput="window.filterDtGirls()" style="width:100%; padding:12px; border-radius:6px; border:2px solid var(--border-color); background:var(--bg-card); color:#fff; font-size:15px; outline:none; transition:0.2s; box-sizing: border-box;">
+                        <input type="text" id="dtSearchInput" placeholder="🔍 可輸入 姓名/綽號/球隊 (支援空格多關鍵字)" oninput="window.filterDtGirls()" style="width:100%; padding:12px; border-radius:6px; border:2px solid var(--border-color); background:var(--bg-card); color:#fff; font-size:15px; outline:none; transition:0.2s; box-sizing: border-box;">
                     </div>
                     <div class="dt-selector-grid" id="dt-selector-grid" ontouchstart="document.getElementById('dtSearchInput').blur()" style="flex: 1; overflow-y: auto; padding-bottom: 20px; margin-top: 0; max-height: none;">
                         ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩或已被選取。</div>'}
@@ -1410,15 +1445,27 @@
                 searchInput.addEventListener('blur', () => searchInput.style.borderColor = 'var(--border-color)');
             }
         };
+
+        // 🌟 2. 強化版搜尋引擎：支援空格切割的多關鍵字搜尋
         window.filterDtGirls = function() {
-            const query = (document.getElementById('dtSearchInput').value || "").toLowerCase().trim();
+            const queryText = (document.getElementById('dtSearchInput').value || "").toLowerCase().trim();
+            const queries = queryText.split(/\s+/); // 用空格切開關鍵字
             const cards = document.querySelectorAll('#dt-selector-grid .dt-pick-card');
             let hasVisible = false;
+
             cards.forEach(card => {
                 const searchData = card.getAttribute('data-search').toLowerCase();
-                if (searchData.includes(query)) { card.style.display = 'block'; hasVisible = true; } 
-                else { card.style.display = 'none'; }
+                // 必須「同時滿足」使用者輸入的所有關鍵字
+                const isMatch = queries.every(q => searchData.includes(q));
+                
+                if (isMatch) {
+                    card.style.display = 'block';
+                    hasVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
             });
+
             let emptyMsg = document.getElementById('dt-empty-msg');
             if (!hasVisible) {
                 if (!emptyMsg) document.getElementById('dt-selector-grid').insertAdjacentHTML('beforeend', '<div id="dt-empty-msg" style="grid-column:1/-1; text-align:center; padding:30px 10px; color:var(--text-sub); font-weight:700;">找不到符合的女孩 😢</div>');
