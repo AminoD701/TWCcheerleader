@@ -1209,7 +1209,7 @@
 
         window.openDtSelector = function(slotIndex) {
             let uniqueMap = new Map();
-            // 過濾實名且有照片的女大
+            // 過濾實名且有照片的女孩
             dbGirls.filter(g => g.img).forEach(g => { if(!uniqueMap.has(g.realname)) uniqueMap.set(g.realname, g); });
             let pool = Array.from(uniqueMap.values());
             
@@ -1222,17 +1222,28 @@
                 const isPicked = myDreamTeam.some(picked => picked && picked.realname === g.realname);
                 if(isPicked) return '';
 
+                // 新增：判斷並顯示綽號
+                const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:${acc}; font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
+
+                // 新增：把名字、綽號、球隊塞進 data-search 裡面，給搜尋引擎用
                 return `
-                <div class="dt-pick-card" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
+                <div class="dt-pick-card" data-search="${g.realname} ${g.nickname||''} ${g.team||''}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
                     <img src="${g.img}" loading="lazy">
-                    <div class="dt-pick-name" style="border-top:2px solid ${acc};">${g.realname}</div>
+                    <div class="dt-pick-name" style="border-top:2px solid ${acc}; line-height:1.2; padding:8px 4px;">
+                        <div style="font-size:14px;">${g.realname}</div>
+                        ${showNick}
+                    </div>
                 </div>`;
             }).join('');
 
+            // 新增：在彈窗上方加入搜尋框
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div style="padding:20px; background:var(--bg-panel); height:100%; display:flex; flex-direction:column;">
-                    <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:#fff; border-bottom:2px dashed var(--border-color); padding-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
-                    <div class="dt-selector-grid">
+                    <div style="border-bottom:2px dashed var(--border-color); padding-bottom:15px; margin-bottom:15px;">
+                        <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:#fff; margin-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
+                        <input type="text" id="dtSearchInput" placeholder="🔍 搜尋姓名、綽號或球隊..." oninput="window.filterDtGirls()" style="width:100%; padding:12px; border-radius:6px; border:2px solid var(--border-color); background:var(--bg-card); color:#fff; font-size:15px; outline:none; transition:0.2s;">
+                    </div>
+                    <div class="dt-selector-grid" id="dt-selector-grid">
                         ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩或已被選取。</div>'}
                     </div>
                 </div>
@@ -1240,6 +1251,42 @@
             document.documentElement.style.setProperty('--modal-accent', '#03a9f4');
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll');
+
+            // 讓輸入框被點擊時會有發光回饋
+            const searchInput = document.getElementById('dtSearchInput');
+            if(searchInput) {
+                searchInput.addEventListener('focus', () => searchInput.style.borderColor = '#03a9f4');
+                searchInput.addEventListener('blur', () => searchInput.style.borderColor = 'var(--border-color)');
+            }
+        };
+
+        // 新增：專屬於夢幻陣容的即時搜尋引擎
+        window.filterDtGirls = function() {
+            const query = (document.getElementById('dtSearchInput').value || "").toLowerCase().trim();
+            const cards = document.querySelectorAll('#dt-selector-grid .dt-pick-card');
+            let hasVisible = false;
+
+            cards.forEach(card => {
+                const searchData = card.getAttribute('data-search').toLowerCase();
+                if (searchData.includes(query)) {
+                    card.style.display = 'block';
+                    hasVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // 如果找不到人，顯示提示訊息
+            let emptyMsg = document.getElementById('dt-empty-msg');
+            if (!hasVisible) {
+                if (!emptyMsg) {
+                    document.getElementById('dt-selector-grid').insertAdjacentHTML('beforeend', '<div id="dt-empty-msg" style="grid-column:1/-1; text-align:center; padding:30px 10px; color:var(--text-sub); font-weight:700;">找不到符合的女孩 😢</div>');
+                } else {
+                    emptyMsg.style.display = 'block';
+                }
+            } else if (emptyMsg) {
+                emptyMsg.style.display = 'none';
+            }
         };
 
         window.pickDtGirl = function(slotIndex, realname) {
