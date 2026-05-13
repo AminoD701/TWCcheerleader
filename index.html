@@ -693,112 +693,117 @@
         // =========================================================================
         // 🛡️ 終極防護版：資料載入與錯誤處理
         // =========================================================================
-        function handleFetchError() {
+        // =========================================================================
+        // 🚀 極速平行載入引擎 (解決手機轉圈卡死問題)
+        // =========================================================================
+        function enableEnterButton() {
             const btn = document.getElementById('enter-btn');
-            const text = document.getElementById('enter-text');
             const spinner = document.getElementById('loading-spinner');
-            
-            // 1. 嘗試使用「過期的舊快取」救急，讓粉絲至少能先進網站
-            try {
-                const cached = localStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    const parsed = JSON.parse(cached);
-                    dbGirls = parsed.dbGirls || []; 
-                    dbEvents = parsed.dbEvents || []; 
-                    dbSchedules = parsed.dbSchedules || [];
-                    if(dbGirls.length > 0) {
-                        buildGirlMap(); init(); enableEnterButton();
-                        if(text) text.innerHTML = '進入賽季 (離線快取模式)';
-                        return;
-                    }
-                }
-            } catch(e) {}
-
-            // 2. 如果連舊快取都沒有，顯示紅色警告並允許重整
-            if(btn && text && spinner) {
-                spinner.style.display = 'none';
+            const text = document.getElementById('enter-text');
+            if(btn) {
+                // 強制恢復解鎖狀態與正確的點擊功能，防止被前面的錯誤機制綁架
+                btn.onclick = () => {
+                    document.getElementById('landing-page').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('landing-page').style.display = 'none';
+                        document.body.classList.remove('no-scroll');
+                    }, 500);
+                };
                 btn.disabled = false;
-                btn.style.background = '#ff4757'; // 變成紅色警告色
-                btn.style.boxShadow = '6px 6px 0px #b71540';
-                text.innerHTML = '連線失敗，請點擊重試 🔄';
-                btn.onclick = () => location.reload();
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
+                btn.style.boxShadow = '6px 6px 0px var(--event-accent)';
+                if(spinner) spinner.style.display = 'none';
+                if(text) text.innerHTML = '進入賽季 ENTER SEASON';
             }
         }
 
-        function loadData() {
-            // 嘗試讀取有效快取
+        // 將 Papa.parse 包裝成 Promise，讓三個試算表可以「同時」下載
+        function fetchCSV(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
+                    complete: res => resolve(res.data),
+                    error: err => reject(err)
+                });
+            });
+        }
+
+        async function loadData() {
+            // 1. 嘗試極速讀取手機快取
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
                 if (cached) {
                     const parsed = JSON.parse(cached);
                     if (Date.now() - parsed.timestamp < CACHE_TIME) {
-                        dbGirls = parsed.dbGirls; dbEvents = parsed.dbEvents; dbSchedules = parsed.dbSchedules;
-                        buildGirlMap(); init(); enableEnterButton(); return; 
+                        dbGirls = parsed.dbGirls || []; 
+                        dbEvents = parsed.dbEvents || []; 
+                        dbSchedules = parsed.dbSchedules || [];
+                        if (dbGirls.length > 0) {
+                            buildGirlMap(); init(); enableEnterButton(); return; 
+                        }
                     }
                 }
             } catch(e) { }
 
-            // 設定 10 秒超時保護機制：如果 10 秒後按鈕還是鎖定的，強制啟動錯誤處理
-            const timeoutGuardian = setTimeout(() => {
-                const btn = document.getElementById('enter-btn');
-                if (btn && btn.disabled) {
-                    handleFetchError();
-                }
-            }, 10000);
-
+            // 2. 快取失效，開始從 Google 抓資料 (平行下載大幅提升速度)
             const t = new Date().getTime();
-            const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
-            
+            const baseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
+
             try {
-                Papa.parse(`${baseSheetUrl}&gid=0&t=${t}`, {
-                    download: true, header: true, skipEmptyLines: true,
-                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                    complete: res => {
-                        dbGirls = res.data.filter(i => i.realname);
-                        Papa.parse(`${baseSheetUrl}&gid=925411186&t=${t}`, {
-                            download: true, header: true, skipEmptyLines: true,
-                            transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                            complete: resEv => { 
-                                dbEvents = resEv.data.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate); 
-                                Papa.parse(`${baseSheetUrl}&gid=1702657458&t=${t}`, {
-                                    download: true, header: true, skipEmptyLines: true,
-                                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                                    complete: resSch => {
-                                        try {
-                                            let flat = [];
-                                            resSch.data.forEach(row => {
-                                                let sport = (row.sport || "").trim();
-                                                let team = (row.team || "").trim();
-                                                let name = (row.name || row.nickname || row['綽號'] || "").trim();
-                                                let dStr = String(row.dates || row.date || "");
-                                                let dParts = dStr.split(/[,\s\n、，]+/);
-                                                dParts.forEach(d => {
-                                                    const p = parseDateFlexible(d);
-                                                    if(p && name) flat.push({ sport, team, name, safeDate: p });
-                                                });
-                                            });
-                                            dbSchedules = flat;
-                                            
-                                            // 全部成功！解除超時炸彈，並解鎖按鈕
-                                            clearTimeout(timeoutGuardian);
-                                            buildGirlMap(); init(); enableEnterButton();
-                                            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules }));
-                                        } catch(err) {
-                                            // 資料解析過程發生當機
-                                            handleFetchError();
-                                        }
-                                    },
-                                    error: handleFetchError // CSV 連線失敗
-                                });
-                            },
-                            error: handleFetchError // CSV 連線失敗
-                        });
-                    },
-                    error: handleFetchError // CSV 連線失敗
+                // 這裡會「同時」發出三個請求，載入時間直接縮短 3 倍！
+                const [girlsData, eventsData, schedulesData] = await Promise.all([
+                    fetchCSV(`${baseUrl}&gid=0&t=${t}`),
+                    fetchCSV(`${baseUrl}&gid=925411186&t=${t}`),
+                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`)
+                ]);
+
+                // 處理女孩資料
+                dbGirls = girlsData.filter(i => i.realname);
+
+                // 處理活動資料
+                dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+
+                // 處理班表資料
+                let flat = [];
+                schedulesData.forEach(row => {
+                    let sport = (row.sport || "").trim();
+                    let team = (row.team || "").trim();
+                    let name = (row.name || row.nickname || row['綽號'] || "").trim();
+                    let dStr = String(row.dates || row.date || "");
+                    let dParts = dStr.split(/[,\s\n、，]+/);
+                    dParts.forEach(d => {
+                        const p = parseDateFlexible(d);
+                        if(p && name) flat.push({ sport, team, name, safeDate: p });
+                    });
                 });
+                dbSchedules = flat;
+
+                // 全部資料處理完畢，順利解鎖大門！
+                buildGirlMap(); 
+                init(); 
+                enableEnterButton();
+                
+                // 將最新資料存入手機快取
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules })); } catch(e) {}
+
             } catch (err) {
-                // PapaParse 啟動失敗
-                handleFetchError();
+                // 如果真的遇到斷網或 Google 伺服器掛掉，才會顯示紅色的重試按鈕
+                const btn = document.getElementById('enter-btn');
+                const text = document.getElementById('enter-text');
+                const spinner = document.getElementById('loading-spinner');
+                if (btn && text) {
+                    if (spinner) spinner.style.display = 'none';
+                    btn.disabled = false;
+                    btn.style.background = '#ff4757';
+                    btn.style.color = '#fff';
+                    btn.style.boxShadow = '6px 6px 0px #b71540';
+                    text.innerHTML = '網路不穩，請點擊重試 🔄';
+                    btn.onclick = () => location.reload();
+                }
             }
         }
 
