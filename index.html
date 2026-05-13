@@ -462,6 +462,52 @@
         .footer { background-color: rgba(17, 20, 24, 0.95); padding: 40px 20px; text-align: center; border-top: 4px solid var(--border-color); color: var(--text-sub); font-size: 13px; line-height: 1.8; font-weight: 700; margin-top: auto;}
         .footer-content { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
         .footer-content strong { color: #fff; letter-spacing: 1px; }
+        /* =========================================
+           🌟 夢幻陣容 (Dream Team) 專屬樣式
+        ========================================= */
+        #dreamteam-container { max-width: 1000px; margin: 30px auto 60px; padding: 0 20px; text-align: center; }
+        .dt-slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-top: 30px; }
+        .dt-slot { background: var(--bg-card); border: 2px dashed var(--border-color); border-radius: 8px; height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .dt-slot:hover { border-color: var(--event-accent); background: #252c36; transform: translateY(-5px); }
+        .dt-slot.filled { border-style: solid; border-color: var(--event-accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .dt-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.7; transition: 0.3s; }
+        .dt-slot.filled:hover img { opacity: 1; transform: scale(1.05); }
+        .dt-role-badge { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); border: 1px solid var(--event-accent); color: #fff; padding: 4px 12px; font-size: 13px; font-weight: 900; border-radius: 20px; z-index: 2; white-space: nowrap; font-family: var(--sport-font); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .dt-name { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: #fff; z-index: 2; text-shadow: 2px 2px 4px #000; white-space: nowrap; }
+        .dt-empty-icon { font-size: 40px; color: var(--text-sub); }
+
+        /* 選人彈窗 */
+        .dt-selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+        .dt-pick-card { background: #111; border: 2px solid var(--border-color); border-radius: 6px; overflow: hidden; cursor: pointer; transition: 0.2s; }
+        .dt-pick-card:hover { border-color: #fff; transform: translateY(-2px); }
+        .dt-pick-card img { width: 100%; height: 90px; object-fit: cover; object-position: top center; }
+        .dt-pick-name { font-size: 13px; font-weight: 900; color: #fff; padding: 6px; text-align: center; white-space: nowrap; }
+
+        /* 海報模式 (含傾斜特效) */
+        .dt-poster { background: linear-gradient(135deg, #111, #2a2a35); padding: 30px; border-radius: 12px; border: 4px solid var(--event-accent); box-shadow: 0 15px 40px rgba(0,0,0,0.8); position: relative; overflow: hidden; margin-top: 30px; }
+        .dt-poster-title { font-family: var(--sport-font); font-size: 40px; font-weight: 900; color: #fff; letter-spacing: 4px; transform: skewX(-10deg); margin-bottom: 5px; text-shadow: 4px 4px 0 var(--event-accent); }
+        .dt-poster-sub { font-size: 14px; color: #ccc; font-weight: 700; margin-bottom: 25px; letter-spacing: 2px; }
+        .dt-poster-grid { display: flex; gap: 8px; justify-content: center; height: 380px; }
+        .dt-poster-item { flex: 1; position: relative; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); transform: skewX(-5deg); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: default; }
+        .dt-poster-item:hover { flex: 1.8; border-color: var(--event-accent); box-shadow: 0 0 20px rgba(255,255,255,0.3); z-index: 10;}
+        .dt-poster-item img { width: 150%; height: 100%; object-fit: cover; transform: skewX(5deg) translateX(-15%); transition: 0.4s; }
+        .dt-poster-item:hover img { transform: skewX(5deg) translateX(-10%) scale(1.05); }
+        .dt-poster-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.95) 60%); padding: 30px 10px 15px; text-align: center; transform: skewX(5deg); pointer-events: none;}
+        .dt-poster-name { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        .dt-poster-role { font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px #000;}
+
+        /* 手機版優化 */
+        @media(max-width: 768px) {
+            .dt-poster-grid { flex-direction: column; height: auto; gap: 10px;}
+            .dt-poster-item { height: 110px; transform: none; border-width: 2px; }
+            .dt-poster-item img { transform: none; width: 100%; object-position: center 20%;}
+            .dt-poster-item:hover { flex: 1; transform: scale(1.02); }
+            .dt-poster-item:hover img { transform: none; }
+            .dt-poster-info { transform: none; display: flex; justify-content: space-between; align-items: baseline; padding: 40px 15px 10px; text-align: left;}
+            .dt-poster-name { font-size: 20px; }
+            .dt-poster-title { font-size: 28px; }
+            .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body class="no-scroll">
@@ -561,6 +607,7 @@
                 <button class="nav-btn btn-schedule" onclick="window.setMode('schedule', this)"><span>應援班表 SCHEDULE</span></button>
                 <button class="nav-btn btn-event" onclick="window.setMode('events', this)"><span>外籍行程 EVENTS</span></button>
                 <button class="nav-btn btn-game" onclick="window.setMode('minigame', this)"><span>🎮 二選一 GAME</span></button>
+                <button class="nav-btn btn-game" onclick="window.setMode('dreamteam', this)"><span>🌟 夢幻陣容</span></button>
             </div>
             
             <div class="sub-nav" id="sub-nav-sports">
@@ -605,6 +652,7 @@
         <div class="schedule-matrix-container" id="schedule-container" style="display:none;"></div>
         <div id="passport-container"></div>
         <div id="minigame-container"></div>
+        <div id="dreamteam-container" style="display:none;"></div>
     </main>
 
     <footer class="footer">
@@ -1011,7 +1059,8 @@
             const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             document.getElementById('extra-filters').style.display = showSubNav ? 'flex' : 'none';
-            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame') ? 'none' : 'block';
+            // 進遊戲隱藏搜尋列，加入 dreamteam 判定
+            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam') ? 'none' : 'block';
             
             updateTeamTabs();
             window.renderContent();
@@ -1098,8 +1147,8 @@
         window.renderContent = function(skipScroll = false) {
             window.currentDisplayLimit = 24; 
 
-            const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container'), passport = document.getElementById('passport-container'), game = document.getElementById('minigame-container');
-            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = 'none';
+            const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container'), passport = document.getElementById('passport-container'), game = document.getElementById('minigame-container'), dt = document.getElementById('dreamteam-container');
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = 'none';
             
             if (!skipScroll) { window.scrollTo({top: 0}); }
             
@@ -1109,12 +1158,135 @@
                 sched.style.display = 'flex'; 
                 if (currentScheduleTeam) renderScheduleMatrix(); else renderScheduleSelection(); 
             }
-            else if (currentMode === 'passport') {
-                passport.style.display = 'block'; renderPassport();
-            }
-            else if (currentMode === 'minigame') {
-                game.style.display = 'block'; renderMinigameStart();
-            }
+            else if (currentMode === 'passport') { passport.style.display = 'block'; renderPassport(); }
+            else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
+            else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
+        };
+        // =========================================================================
+        // 🌟 夢幻陣容 (Dream Team) 遊戲引擎
+        // =========================================================================
+        let myDreamTeam = [null, null, null, null, null];
+        const dtRoles = ['👑 隊長 CAPTAIN', '✨ 顏值擔當 VISUAL', '💃 舞蹈擔當 DANCER', '🎀 可愛擔當 CUTE', '⚡ 活力擔當 ENERGY'];
+
+        window.renderDreamTeamStart = function() {
+            const container = document.getElementById('dreamteam-container');
+            let isFull = myDreamTeam.every(slot => slot !== null);
+
+            let slotsHtml = myDreamTeam.map((girl, index) => {
+                if (girl) {
+                    return `
+                    <div class="dt-slot filled" style="--event-accent: ${(teamThemes[girl.team]||{accent:"#fff"}).accent};" onclick="window.openDtSelector(${index})">
+                        <div class="dt-role-badge">${dtRoles[index]}</div>
+                        <img src="${girl.img}">
+                        <div class="dt-name">${girl.realname}</div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="dt-slot" onclick="window.openDtSelector(${index})">
+                        <div class="dt-role-badge" style="background:#333; border-color:#555;">${dtRoles[index]}</div>
+                        <div class="dt-empty-icon">➕</div>
+                        <div style="color:var(--text-sub); font-weight:700; margin-top:10px;">點擊選擇</div>
+                    </div>`;
+                }
+            }).join('');
+
+            container.innerHTML = `
+                <div class="game-title" style="text-shadow: 3px 3px 0px #03a9f4; margin-bottom:5px;">打造夢幻五人女團</div>
+                <div style="color:var(--text-sub); font-size:16px; font-weight:700;">填滿 5 個位置，生成專屬於你的電競風戰隊海報！</div>
+                
+                <div class="dt-slots-grid">
+                    ${slotsHtml}
+                </div>
+
+                <div style="margin-top: 40px; display:flex; flex-direction:column; align-items:center;">
+                    <button class="nav-btn" style="background:${isFull ? '#03a9f4' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:18px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
+                        ${isFull ? '📸 生成戰隊海報' : '請先選滿 5 位女孩'}
+                    </button>
+                    ${isFull ? `<div style="color:var(--text-sub); font-size:13px; font-weight:700; margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新選擇</div>` : ''}
+                </div>
+            `;
+        };
+
+        window.openDtSelector = function(slotIndex) {
+            let uniqueMap = new Map();
+            // 過濾實名且有照片的女大
+            dbGirls.filter(g => g.img).forEach(g => { if(!uniqueMap.has(g.realname)) uniqueMap.set(g.realname, g); });
+            let pool = Array.from(uniqueMap.values());
+            
+            // 依球隊排序
+            pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
+
+            let listHtml = pool.map(g => {
+                const acc = (teamThemes[g.team] || {accent:"#fff"}).accent;
+                // 防止同一個女孩被選兩次 (不能影分身)
+                const isPicked = myDreamTeam.some(picked => picked && picked.realname === g.realname);
+                if(isPicked) return '';
+
+                return `
+                <div class="dt-pick-card" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
+                    <img src="${g.img}" loading="lazy">
+                    <div class="dt-pick-name" style="border-top:2px solid ${acc};">${g.realname}</div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('modal-dynamic-content').innerHTML = `
+                <div style="padding:20px; background:var(--bg-panel); height:100%; display:flex; flex-direction:column;">
+                    <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:#fff; border-bottom:2px dashed var(--border-color); padding-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
+                    <div class="dt-selector-grid">
+                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩或已被選取。</div>'}
+                    </div>
+                </div>
+            `;
+            document.documentElement.style.setProperty('--modal-accent', '#03a9f4');
+            document.getElementById('girl-modal').classList.add('active');
+            document.body.classList.add('no-scroll');
+        };
+
+        window.pickDtGirl = function(slotIndex, realname) {
+            myDreamTeam[slotIndex] = dbGirls.find(g => g.realname === realname);
+            closeModal();
+            renderDreamTeamStart();
+        };
+
+        window.resetDreamTeam = function() {
+            myDreamTeam = [null, null, null, null, null];
+            renderDreamTeamStart();
+        };
+
+        window.generateDtPoster = function() {
+            const container = document.getElementById('dreamteam-container');
+            
+            let posterItems = myDreamTeam.map((g, index) => {
+                const acc = (teamThemes[g.team] || {accent:"#fff"}).accent;
+                const showNick = (g.nickname && g.nickname !== g.realname) ? ` / ${g.nickname}` : '';
+                return `
+                <div class="dt-poster-item" style="--event-accent: ${acc};">
+                    <img src="${g.img}">
+                    <div class="dt-poster-info">
+                        <div class="dt-poster-role" style="color:${acc};">${dtRoles[index].split(' ')[1]}</div>
+                        <div class="dt-poster-name">${g.realname}<span style="font-size:14px;">${showNick}</span></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="game-title" style="text-shadow: 3px 3px 0px #03a9f4; margin-bottom:5px;">你的專屬戰隊已集結</div>
+                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 手機請直接截圖下方海報分享給朋友！</div>
+                
+                <div class="dt-poster">
+                    <div class="dt-poster-title">DREAM TEAM</div>
+                    <div class="dt-poster-sub">TAIWAN CHEERLEADER DB</div>
+                    <div class="dt-poster-grid">
+                        ${posterItems}
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+                    <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="window.renderDreamTeamStart()">🔙 返回修改</button>
+                    <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重組戰隊</button>
+                </div>
+            `;
+            if(typeof createConfetti === 'function') createConfetti();
         };
 
         // =========================================================================
