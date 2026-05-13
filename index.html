@@ -690,7 +690,43 @@
             }
         }
 
+        // =========================================================================
+        // 🛡️ 終極防護版：資料載入與錯誤處理
+        // =========================================================================
+        function handleFetchError() {
+            const btn = document.getElementById('enter-btn');
+            const text = document.getElementById('enter-text');
+            const spinner = document.getElementById('loading-spinner');
+            
+            // 1. 嘗試使用「過期的舊快取」救急，讓粉絲至少能先進網站
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    dbGirls = parsed.dbGirls || []; 
+                    dbEvents = parsed.dbEvents || []; 
+                    dbSchedules = parsed.dbSchedules || [];
+                    if(dbGirls.length > 0) {
+                        buildGirlMap(); init(); enableEnterButton();
+                        if(text) text.innerHTML = '進入賽季 (離線快取模式)';
+                        return;
+                    }
+                }
+            } catch(e) {}
+
+            // 2. 如果連舊快取都沒有，顯示紅色警告並允許重整
+            if(btn && text && spinner) {
+                spinner.style.display = 'none';
+                btn.disabled = false;
+                btn.style.background = '#ff4757'; // 變成紅色警告色
+                btn.style.boxShadow = '6px 6px 0px #b71540';
+                text.innerHTML = '連線失敗，請點擊重試 🔄';
+                btn.onclick = () => location.reload();
+            }
+        }
+
         function loadData() {
+            // 嘗試讀取有效快取
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
                 if (cached) {
@@ -702,44 +738,68 @@
                 }
             } catch(e) { }
 
+            // 設定 10 秒超時保護機制：如果 10 秒後按鈕還是鎖定的，強制啟動錯誤處理
+            const timeoutGuardian = setTimeout(() => {
+                const btn = document.getElementById('enter-btn');
+                if (btn && btn.disabled) {
+                    handleFetchError();
+                }
+            }, 10000);
+
             const t = new Date().getTime();
             const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
             
-            Papa.parse(`${baseSheetUrl}&gid=0&t=${t}`, {
-                download: true, header: true, skipEmptyLines: true,
-                transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                complete: res => {
-                    dbGirls = res.data.filter(i => i.realname);
-                    Papa.parse(`${baseSheetUrl}&gid=925411186&t=${t}`, {
-                        download: true, header: true, skipEmptyLines: true,
-                        transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                        complete: resEv => { 
-                            dbEvents = resEv.data.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate); 
-                            Papa.parse(`${baseSheetUrl}&gid=1702657458&t=${t}`, {
-                                download: true, header: true, skipEmptyLines: true,
-                                transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                                complete: resSch => {
-                                    let flat = [];
-                                    resSch.data.forEach(row => {
-                                        let sport = (row.sport || "").trim();
-                                        let team = (row.team || "").trim();
-                                        let name = (row.name || row.nickname || row['綽號'] || "").trim();
-                                        let dStr = String(row.dates || row.date || "");
-                                        let dParts = dStr.split(/[,\s\n、，]+/);
-                                        dParts.forEach(d => {
-                                            const p = parseDateFlexible(d);
-                                            if(p && name) flat.push({ sport, team, name, safeDate: p });
-                                        });
-                                    });
-                                    dbSchedules = flat;
-                                    buildGirlMap(); init(); enableEnterButton();
-                                    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules })); } catch(e) { }
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            try {
+                Papa.parse(`${baseSheetUrl}&gid=0&t=${t}`, {
+                    download: true, header: true, skipEmptyLines: true,
+                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
+                    complete: res => {
+                        dbGirls = res.data.filter(i => i.realname);
+                        Papa.parse(`${baseSheetUrl}&gid=925411186&t=${t}`, {
+                            download: true, header: true, skipEmptyLines: true,
+                            transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
+                            complete: resEv => { 
+                                dbEvents = resEv.data.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate); 
+                                Papa.parse(`${baseSheetUrl}&gid=1702657458&t=${t}`, {
+                                    download: true, header: true, skipEmptyLines: true,
+                                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
+                                    complete: resSch => {
+                                        try {
+                                            let flat = [];
+                                            resSch.data.forEach(row => {
+                                                let sport = (row.sport || "").trim();
+                                                let team = (row.team || "").trim();
+                                                let name = (row.name || row.nickname || row['綽號'] || "").trim();
+                                                let dStr = String(row.dates || row.date || "");
+                                                let dParts = dStr.split(/[,\s\n、，]+/);
+                                                dParts.forEach(d => {
+                                                    const p = parseDateFlexible(d);
+                                                    if(p && name) flat.push({ sport, team, name, safeDate: p });
+                                                });
+                                            });
+                                            dbSchedules = flat;
+                                            
+                                            // 全部成功！解除超時炸彈，並解鎖按鈕
+                                            clearTimeout(timeoutGuardian);
+                                            buildGirlMap(); init(); enableEnterButton();
+                                            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules }));
+                                        } catch(err) {
+                                            // 資料解析過程發生當機
+                                            handleFetchError();
+                                        }
+                                    },
+                                    error: handleFetchError // CSV 連線失敗
+                                });
+                            },
+                            error: handleFetchError // CSV 連線失敗
+                        });
+                    },
+                    error: handleFetchError // CSV 連線失敗
+                });
+            } catch (err) {
+                // PapaParse 啟動失敗
+                handleFetchError();
+            }
         }
 
         function buildGirlMap() {
