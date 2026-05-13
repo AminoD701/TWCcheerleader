@@ -2016,11 +2016,15 @@
 
         function createMinigameCard(g, choice) {
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
+            // 新增：判斷是否有綽號，且不等於本名時顯示
+            const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:18px; color:${accent}; font-weight:700; margin-bottom:5px;">${g.nickname}</div>` : '';
+
             return `
             <div class="vs-card" style="--team-accent: ${accent};" onclick="window.pickMinigameWinner('${choice}')">
                 <img src="${g.img}" onerror="this.src=''">
                 <div class="vs-info">
                     <div class="vs-name">${g.realname}</div>
+                    ${showNick}
                     <div class="vs-team" style="color: ${accent};">${g.team}</div>
                 </div>
             </div>`;
@@ -2037,6 +2041,8 @@
             const container = document.getElementById('minigame-container');
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
             const isFav = favSet.has(g.realname);
+            // 新增：獲勝畫面也要顯示綽號
+            const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:20px; color:${accent}; font-weight:700; text-align:center; margin-top:5px;">${g.nickname}</div>` : '';
             
             container.innerHTML = `
                 <div class="game-title">👑 你的絕對本命誕生</div>
@@ -2048,6 +2054,7 @@
                     </div>
                     <div class="info-section">
                         <div style="font-size:28px; font-weight:900; color:${accent}; text-align:center;">${g.realname}</div>
+                        ${showNick}
                         <div style="color:var(--text-sub); font-weight:700; text-align:center; margin-top:5px;">${g.team}</div>
                     </div>
                 </div>
@@ -2057,7 +2064,7 @@
                     <button class="nav-btn" onclick="window.renderMinigameStart()">🔄 再玩一次</button>
                 </div>
             `;
-            createConfetti();
+            if(typeof createConfetti === 'function') createConfetti();
         };
 
         function createConfetti() {
