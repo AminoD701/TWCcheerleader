@@ -463,7 +463,7 @@
         .footer-content { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
         .footer-content strong { color: #fff; letter-spacing: 1px; }
         /* =========================================
-           🌟 夢幻陣容 (Dream Team) 專屬樣式
+           🌟 夢幻陣容 (Dream Team) 專屬樣式 (完美截圖版)
         ========================================= */
         #dreamteam-container { max-width: 1000px; margin: 30px auto 60px; padding: 0 20px; text-align: center; }
         .dt-slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-top: 30px; }
@@ -483,29 +483,53 @@
         .dt-pick-card img { width: 100%; height: 90px; object-fit: cover; object-position: top center; }
         .dt-pick-name { font-size: 13px; font-weight: 900; color: #fff; padding: 6px; text-align: center; white-space: nowrap; }
 
-        /* 海報模式 (含傾斜特效) */
+        /* 電腦版海報模式 (傾斜特效) */
         .dt-poster { background: linear-gradient(135deg, #111, #2a2a35); padding: 30px; border-radius: 12px; border: 4px solid var(--event-accent); box-shadow: 0 15px 40px rgba(0,0,0,0.8); position: relative; overflow: hidden; margin-top: 30px; }
         .dt-poster-title { font-family: var(--sport-font); font-size: 40px; font-weight: 900; color: #fff; letter-spacing: 4px; transform: skewX(-10deg); margin-bottom: 5px; text-shadow: 4px 4px 0 var(--event-accent); }
         .dt-poster-sub { font-size: 14px; color: #ccc; font-weight: 700; margin-bottom: 25px; letter-spacing: 2px; }
-        .dt-poster-grid { display: flex; gap: 8px; justify-content: center; height: 380px; }
+        .dt-poster-grid { display: flex; gap: 8px; justify-content: center; height: 420px; }
         .dt-poster-item { flex: 1; position: relative; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); transform: skewX(-5deg); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: default; }
         .dt-poster-item:hover { flex: 1.8; border-color: var(--event-accent); box-shadow: 0 0 20px rgba(255,255,255,0.3); z-index: 10;}
         .dt-poster-item img { width: 150%; height: 100%; object-fit: cover; transform: skewX(5deg) translateX(-15%); transition: 0.4s; }
         .dt-poster-item:hover img { transform: skewX(5deg) translateX(-10%) scale(1.05); }
         .dt-poster-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.95) 60%); padding: 30px 10px 15px; text-align: center; transform: skewX(5deg); pointer-events: none;}
-        .dt-poster-name { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
-        .dt-poster-role { font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px #000;}
+        .dt-poster-name { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; line-height: 1.1; margin-bottom: 4px;}
+        .dt-poster-role { font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 4px; text-shadow: 1px 1px 2px #000; letter-spacing: 1px;}
 
-        /* 手機版優化 */
+        /* 手機版優化：1大4小 完美截圖排版 */
         @media(max-width: 768px) {
-            .dt-poster-grid { flex-direction: column; height: auto; gap: 10px;}
-            .dt-poster-item { height: 110px; transform: none; border-width: 2px; }
-            .dt-poster-item img { transform: none; width: 100%; object-position: center 20%;}
-            .dt-poster-item:hover { flex: 1; transform: scale(1.02); }
+            .dt-poster { padding: 15px; margin-top: 15px; border-width: 3px; }
+            .dt-poster-title { font-size: 26px; margin-bottom: 2px; }
+            .dt-poster-sub { font-size: 11px; margin-bottom: 15px; }
+            /* 改為 2x3 網格 */
+            .dt-poster-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; gap: 8px; height: auto; }
+            .dt-poster-item { transform: none; border-width: 2px; }
+            /* 第一個位置 (性感擔當) 佔據最上方大版面 */
+            .dt-poster-item:nth-child(1) { grid-column: 1 / -1; grid-row: span 2; }
+            .dt-poster-item img { transform: none; width: 100%; object-position: top center; }
+            .dt-poster-item:hover { flex: unset; transform: scale(1.02); }
             .dt-poster-item:hover img { transform: none; }
-            .dt-poster-info { transform: none; display: flex; justify-content: space-between; align-items: baseline; padding: 40px 15px 10px; text-align: left;}
-            .dt-poster-name { font-size: 20px; }
-            .dt-poster-title { font-size: 28px; }
+            .dt-poster-info { transform: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 40px 5px 8px; text-align: center; }
+            .dt-poster-name { font-size: 18px; }
+            .dt-poster-item:nth-child(1) .dt-poster-name { font-size: 26px; } /* 首位名字放大 */
+            .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        /* 手機版優化：1大4小 完美截圖排版 */
+        @media(max-width: 768px) {
+            .dt-poster { padding: 15px; margin-top: 15px; border-width: 3px; }
+            .dt-poster-title { font-size: 26px; margin-bottom: 2px; }
+            .dt-poster-sub { font-size: 11px; margin-bottom: 15px; }
+            /* 改為 2x3 網格 */
+            .dt-poster-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; gap: 8px; height: auto; }
+            .dt-poster-item { transform: none; border-width: 2px; }
+            /* 第一個位置 (性感擔當) 佔據最上方大版面 */
+            .dt-poster-item:nth-child(1) { grid-column: 1 / -1; grid-row: span 2; }
+            .dt-poster-item img { transform: none; width: 100%; object-position: top center; }
+            .dt-poster-item:hover { flex: unset; transform: scale(1.02); }
+            .dt-poster-item:hover img { transform: none; }
+            .dt-poster-info { transform: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 40px 5px 8px; text-align: center; }
+            .dt-poster-name { font-size: 18px; }
+            .dt-poster-item:nth-child(1) .dt-poster-name { font-size: 26px; } /* 首位名字放大 */
             .dt-selector-grid { grid-template-columns: repeat(2, 1fr); }
         }
         /* =========================================
@@ -1281,27 +1305,34 @@
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
         };
         // =========================================================================
-        // 🌟 夢幻陣容 (Dream Team) 遊戲引擎
+        // 🌟 夢幻陣容 (Dream Team) 遊戲引擎 (色彩與排版升級版)
         // =========================================================================
         let myDreamTeam = [null, null, null, null, null];
-        const dtRoles = ['👑 隊長 CAPTAIN', '✨ 顏值擔當 VISUAL', '💃 舞蹈擔當 DANCER', '🎀 可愛擔當 CUTE', '⚡ 活力擔當 ENERGY'];
+        
+        // 更新 1：隊長改為「性感擔當」
+        const dtRoles = ['💋 性感擔當 SEXY', '✨ 顏值擔當 VISUAL', '💃 舞蹈擔當 DANCER', '🎀 可愛擔當 CUTE', '⚡ 活力擔當 ENERGY'];
+        
+        // 更新 2：五個擔當的固定專屬色 (紅、紫、綠、粉、橘)
+        const dtColors = ['#ff0044', '#9c27b0', '#00e676', '#ff4081', '#ff9800'];
 
         window.renderDreamTeamStart = function() {
             const container = document.getElementById('dreamteam-container');
             let isFull = myDreamTeam.every(slot => slot !== null);
 
             let slotsHtml = myDreamTeam.map((girl, index) => {
+                const roleColor = dtColors[index]; // 使用職位專屬色
                 if (girl) {
+                    const displayName = (girl.nickname && girl.nickname !== girl.realname) ? girl.nickname : girl.realname;
                     return `
-                    <div class="dt-slot filled" style="--event-accent: ${(teamThemes[girl.team]||{accent:"#fff"}).accent};" onclick="window.openDtSelector(${index})">
+                    <div class="dt-slot filled" style="--event-accent: ${roleColor};" onclick="window.openDtSelector(${index})">
                         <div class="dt-role-badge">${dtRoles[index]}</div>
                         <img src="${girl.img}">
-                        <div class="dt-name">${girl.realname}</div>
+                        <div class="dt-name">${displayName}</div>
                     </div>`;
                 } else {
                     return `
                     <div class="dt-slot" onclick="window.openDtSelector(${index})">
-                        <div class="dt-role-badge" style="background:#333; border-color:#555;">${dtRoles[index]}</div>
+                        <div class="dt-role-badge" style="background:#333; border-color:#555; color:#aaa;">${dtRoles[index]}</div>
                         <div class="dt-empty-icon">➕</div>
                         <div style="color:var(--text-sub); font-weight:700; margin-top:10px;">點擊選擇</div>
                     </div>`;
@@ -1309,7 +1340,7 @@
             }).join('');
 
             container.innerHTML = `
-                <div class="game-title" style="text-shadow: 3px 3px 0px #03a9f4; margin-bottom:5px;">打造夢幻五人女團</div>
+                <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044; margin-bottom:5px;">打造夢幻五人女團</div>
                 <div style="color:var(--text-sub); font-size:16px; font-weight:700;">填滿 5 個位置，生成專屬於你的電競風戰隊海報！</div>
                 
                 <div class="dt-slots-grid">
@@ -1317,7 +1348,7 @@
                 </div>
 
                 <div style="margin-top: 40px; display:flex; flex-direction:column; align-items:center;">
-                    <button class="nav-btn" style="background:${isFull ? '#03a9f4' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:18px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
+                    <button class="nav-btn" style="background:${isFull ? '#ff0044' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:18px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
                         ${isFull ? '📸 生成戰隊海報' : '請先選滿 5 位女孩'}
                     </button>
                     ${isFull ? `<div style="color:var(--text-sub); font-size:13px; font-weight:700; margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新選擇</div>` : ''}
@@ -1327,38 +1358,32 @@
 
         window.openDtSelector = function(slotIndex) {
             let uniqueMap = new Map();
-            // 過濾實名且有照片的女孩
             dbGirls.filter(g => g.img).forEach(g => { if(!uniqueMap.has(g.realname)) uniqueMap.set(g.realname, g); });
             let pool = Array.from(uniqueMap.values());
             
-            // 依球隊排序
             pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
+            const roleColor = dtColors[slotIndex];
 
             let listHtml = pool.map(g => {
-                const acc = (teamThemes[g.team] || {accent:"#fff"}).accent;
-                // 防止同一個女孩被選兩次 (不能影分身)
                 const isPicked = myDreamTeam.some(picked => picked && picked.realname === g.realname);
                 if(isPicked) return '';
 
-                // 新增：判斷並顯示綽號
-                const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:${acc}; font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
+                const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
 
-                // 新增：把名字、綽號、球隊塞進 data-search 裡面，給搜尋引擎用
                 return `
                 <div class="dt-pick-card" data-search="${g.realname} ${g.nickname||''} ${g.team||''}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
                     <img src="${g.img}" loading="lazy">
-                    <div class="dt-pick-name" style="border-top:2px solid ${acc}; line-height:1.2; padding:8px 4px;">
+                    <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>
                         ${showNick}
                     </div>
                 </div>`;
             }).join('');
 
-            // 新增：在彈窗上方加入搜尋框
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div style="padding:20px; background:var(--bg-panel); height:100%; display:flex; flex-direction:column;">
                     <div style="border-bottom:2px dashed var(--border-color); padding-bottom:15px; margin-bottom:15px;">
-                        <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:#fff; margin-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
+                        <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:${roleColor}; margin-bottom:10px;">選擇 ${dtRoles[slotIndex]}</div>
                         <input type="text" id="dtSearchInput" placeholder="🔍 搜尋姓名、綽號或球隊..." oninput="window.filterDtGirls()" style="width:100%; padding:12px; border-radius:6px; border:2px solid var(--border-color); background:var(--bg-card); color:#fff; font-size:15px; outline:none; transition:0.2s;">
                     </div>
                     <div class="dt-selector-grid" id="dt-selector-grid">
@@ -1366,45 +1391,31 @@
                     </div>
                 </div>
             `;
-            document.documentElement.style.setProperty('--modal-accent', '#03a9f4');
+            document.documentElement.style.setProperty('--modal-accent', roleColor);
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll');
 
-            // 讓輸入框被點擊時會有發光回饋
             const searchInput = document.getElementById('dtSearchInput');
             if(searchInput) {
-                searchInput.addEventListener('focus', () => searchInput.style.borderColor = '#03a9f4');
+                searchInput.addEventListener('focus', () => searchInput.style.borderColor = roleColor);
                 searchInput.addEventListener('blur', () => searchInput.style.borderColor = 'var(--border-color)');
             }
         };
 
-        // 新增：專屬於夢幻陣容的即時搜尋引擎
         window.filterDtGirls = function() {
             const query = (document.getElementById('dtSearchInput').value || "").toLowerCase().trim();
             const cards = document.querySelectorAll('#dt-selector-grid .dt-pick-card');
             let hasVisible = false;
-
             cards.forEach(card => {
                 const searchData = card.getAttribute('data-search').toLowerCase();
-                if (searchData.includes(query)) {
-                    card.style.display = 'block';
-                    hasVisible = true;
-                } else {
-                    card.style.display = 'none';
-                }
+                if (searchData.includes(query)) { card.style.display = 'block'; hasVisible = true; } 
+                else { card.style.display = 'none'; }
             });
-
-            // 如果找不到人，顯示提示訊息
             let emptyMsg = document.getElementById('dt-empty-msg');
             if (!hasVisible) {
-                if (!emptyMsg) {
-                    document.getElementById('dt-selector-grid').insertAdjacentHTML('beforeend', '<div id="dt-empty-msg" style="grid-column:1/-1; text-align:center; padding:30px 10px; color:var(--text-sub); font-weight:700;">找不到符合的女孩 😢</div>');
-                } else {
-                    emptyMsg.style.display = 'block';
-                }
-            } else if (emptyMsg) {
-                emptyMsg.style.display = 'none';
-            }
+                if (!emptyMsg) document.getElementById('dt-selector-grid').insertAdjacentHTML('beforeend', '<div id="dt-empty-msg" style="grid-column:1/-1; text-align:center; padding:30px 10px; color:var(--text-sub); font-weight:700;">找不到符合的女孩 😢</div>');
+                else emptyMsg.style.display = 'block';
+            } else if (emptyMsg) emptyMsg.style.display = 'none';
         };
 
         window.pickDtGirl = function(slotIndex, realname) {
@@ -1421,25 +1432,31 @@
         window.generateDtPoster = function() {
             const container = document.getElementById('dreamteam-container');
             
+            // 更新 3：完善名字與球隊顯示邏輯
             let posterItems = myDreamTeam.map((g, index) => {
-                const acc = (teamThemes[g.team] || {accent:"#fff"}).accent;
-                const showNick = (g.nickname && g.nickname !== g.realname) ? ` / ${g.nickname}` : '';
+                const roleColor = dtColors[index]; // 固定用職位色
+                const displayName = (g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname;
+                const subName = (g.nickname && g.nickname !== g.realname) ? g.realname : '';
+                const subNameHtml = subName ? `<div style="font-size:11px; color:#ccc; font-weight:normal;">${subName}</div>` : '';
+
                 return `
-                <div class="dt-poster-item" style="--event-accent: ${acc};">
+                <div class="dt-poster-item" style="--event-accent: ${roleColor};">
                     <img src="${g.img}">
                     <div class="dt-poster-info">
-                        <div class="dt-poster-role" style="color:${acc};">${dtRoles[index].split(' ')[1]}</div>
-                        <div class="dt-poster-name">${g.realname}<span style="font-size:14px;">${showNick}</span></div>
+                        <div class="dt-poster-role" style="color:${roleColor};">${dtRoles[index].split(' ')[1]}</div>
+                        <div class="dt-poster-name">${displayName}</div>
+                        ${subNameHtml}
+                        <div style="font-size:10px; color:#aaa; margin-top:2px; font-family:var(--tc-font);">${g.team}</div>
                     </div>
                 </div>`;
             }).join('');
 
             container.innerHTML = `
-                <div class="game-title" style="text-shadow: 3px 3px 0px #03a9f4; margin-bottom:5px;">你的專屬戰隊已集結</div>
+                <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044; margin-bottom:5px;">你的專屬戰隊已集結</div>
                 <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 手機請直接截圖下方海報分享給朋友！</div>
                 
-                <div class="dt-poster">
-                    <div class="dt-poster-title">DREAM TEAM</div>
+                <div class="dt-poster" style="border-color:#ff0044;">
+                    <div class="dt-poster-title" style="text-shadow: 4px 4px 0 #ff0044;">DREAM TEAM</div>
                     <div class="dt-poster-sub">TAIWAN CHEERLEADER DB</div>
                     <div class="dt-poster-grid">
                         ${posterItems}
