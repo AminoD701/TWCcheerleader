@@ -558,46 +558,60 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
         /* =========================================
-           📱 手機版專屬優化：終極骨架定位壓縮法
+           📱 手機版首頁「小卡片 (Grid)」專屬終極防斷行補丁
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 鎖定彈窗內的第一排 (名字與背號那一橫排)，強制不准換行 */
-            #modal-dynamic-content > div > div:first-child {
+            /* 1. 鎖定小卡片的名字與背號那一排，強制不准換行 */
+            #grid-container > div > div:nth-child(2) > div:first-child,
+            .girl-card > div:nth-child(2) > div:first-child {
                 flex-wrap: nowrap !important;
                 align-items: center !important;
-                gap: 5px !important;
+                gap: 4px !important; /* 縮小名字跟背號的間距 */
             }
 
-            /* 2. 鎖定左邊「裝著名字的框框」，給它彈性空間 */
-            #modal-dynamic-content > div > div:first-child > div:first-child {
+            /* 2. 左側名字區塊給予彈性，防止把右邊擠破 */
+            #grid-container > div > div:nth-child(2) > div:first-child > div:first-child,
+            .girl-card > div:nth-child(2) > div:first-child > div:first-child {
                 flex: 1 1 auto !important;
-                min-width: 0 !important; /* 這是防止內容撐破版面的黑魔法 */
-                padding-right: 5px !important;
+                min-width: 0 !important; /* 防撐破黑魔法 */
+                padding-right: 2px !important;
             }
 
-            /* 3. 鎖定真正的「名字大字」，強迫不准換行、字體縮放 */
-            #modal-dynamic-content > div > div:first-child > div:first-child > div:first-child {
+            /* 3. 強制名字不准換行，且在小卡片中自動縮小字體 (因為半個螢幕真的太窄) */
+            #grid-container div[style*="font-size: 32px"],
+            #grid-container div[style*="font-size: 36px"],
+            #grid-container div[style*="font-weight: 900"],
+            .girl-card div[style*="font-weight: 900"] {
                 white-space: nowrap !important;
-                font-size: clamp(20px, 6vw, 32px) !important;
-            }
-
-            /* 4. 鎖定右邊的「背號框框」，極限瘦身！ */
-            #modal-dynamic-content > div > div:first-child > div:last-child {
-                flex: 0 0 auto !important; /* 不准背號框放大 */
-                padding: 4px 6px !important;
-                font-size: 16px !important; 
+                /* 在小卡片裡，字體在 16px~22px 之間彈性變化，保證塞得下 */
+                font-size: clamp(16px, 5vw, 22px) !important; 
                 line-height: 1.1 !important;
-                min-width: 45px !important;
             }
 
-            /* 5. 鎖定球隊標籤，強制縮小 */
-            #modal-dynamic-content div[style*="border: 1px"],
-            #modal-dynamic-content div[style*="border:1px"],
-            #modal-dynamic-content div[style*="border-radius: 4px"],
-            #modal-dynamic-content div[style*="border-radius:4px"] {
-                padding: 4px 8px !important;
-                font-size: 11px !important;
-                line-height: 1.2 !important;
+            /* 4. 極限壓縮背號框 (手機版小卡專用) */
+            #grid-container div[style*="border: 2px"],
+            #grid-container div[style*="border-radius: 8px"],
+            .girl-card div[style*="border: 2px"] {
+                padding: 2px 4px !important;
+                min-width: 30px !important;
+                flex-shrink: 0 !important; /* 框框不准被壓扁 */
+            }
+
+            /* 5. 壓縮背號的字體大小 */
+            #grid-container div[style*="font-size: 24px"],
+            .girl-card div[style*="font-size: 24px"] {
+                font-size: 13px !important;
+                line-height: 1 !important;
+            }
+
+            /* 6. 極限壓縮球隊標籤 (解決三棲球隊佔滿畫面的問題) */
+            #grid-container div[style*="border: 1px"],
+            #grid-container div[style*="border-radius: 4px"],
+            .girl-card div[style*="border: 1px"] {
+                padding: 2px 4px !important;
+                font-size: 10px !important;
+                line-height: 1.1 !important;
+                margin-bottom: 2px !important;
             }
         }
     </style>
