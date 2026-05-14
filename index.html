@@ -558,40 +558,42 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
         /* =========================================
-           📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (精準版)
+           📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (完美全名版)
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 鎖定第一排 (名字與背號)，強制不換行 */
+            /* 1. 第一排改為「靠上對齊 (flex-start)」 */
+            /* 這樣當背號變成兩行長高時，左邊的名字依然能維持在頂部，不會跟著下沉 */
             #grid-container .card .header-info {
                 flex-wrap: nowrap !important;
-                align-items: center !important;
+                align-items: flex-start !important;
                 gap: 5px !important;
             }
 
-            /* 2. 左側名字區塊給予彈性，防止撐破 */
+            /* 2. 名字區塊：拿掉點點點(...)，強制全名釋放！ */
             #grid-container .card .header-info > div:first-child {
                 flex: 1 1 auto !important;
-                min-width: 0 !important; /* Flexbox 防破版黑魔法 */
             }
-
-            /* 3. 名字強制不換行，遇到超長名字自動變成... */
             #grid-container .card .nickname {
                 white-space: nowrap !important;
-                font-size: clamp(16px, 5vw, 18px) !important; /* 字體稍微彈性縮小 */
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+                font-size: clamp(15px, 5vw, 18px) !important;
+                /* 解除原本的隱藏限制，把空間全數還給名字 */
+                overflow: visible !important; 
+                text-overflow: clip !important;
             }
 
-            /* 4. 極限壓縮背號框與字體 */
+            /* 3. 背號框：允許換行黑魔法！讓多背號自動「上下疊加」 */
             #grid-container .card .number {
-                flex: 0 0 auto !important; /* 確保背號框不變形 */
-                font-size: 13px !important;
-                padding: 3px 6px !important;
-                line-height: 1.1 !important;
-                letter-spacing: 0 !important;
+                flex: 0 1 auto !important; 
+                white-space: normal !important; /* ✨黑魔法：允許遇到空格時自動換行 */
+                word-break: break-word !important;
+                max-width: 65px !important; /* 限制寬度，逼迫過長的背號往第二排擠 */
+                font-size: 12px !important;
+                padding: 4px 6px !important;
+                line-height: 1.2 !important;
+                text-align: center !important;
             }
 
-            /* 5. 壓縮球隊標籤 */
+            /* 4. 壓縮球隊標籤 */
             #grid-container .card .team-tag-mini {
                 font-size: 10px !important;
                 padding: 2px 5px !important;
@@ -599,30 +601,25 @@
         }
 
         /* =========================================
-           🛂 追星護照 1排5個 極簡化收藏卡補丁 (精準版)
+           🛂 追星護照 1排5個 極簡化收藏卡補丁 (維持原版不動)
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 護照區塊強制變為 5 欄 */
             #passport-container .grid-container {
                 grid-template-columns: repeat(5, 1fr) !important;
                 gap: 5px !important;
                 padding: 5px !important;
             }
-
-            /* 2. 卡片整體與照片極度瘦身 */
             #passport-container .card {
                 min-height: auto !important;
                 border-bottom-width: 3px !important;
             }
             #passport-container .photo-area {
-                height: 70px !important; /* 變成正方形小頭貼 */
+                height: 70px !important; 
                 border-bottom-width: 2px !important;
             }
             #passport-container .info-section {
                 padding: 4px 2px !important;
             }
-
-            /* 3. 隱藏不必要的資訊，只留大名 */
             #passport-container .number,
             #passport-container .realname,
             #passport-container .data-grid,
@@ -633,8 +630,6 @@
             #passport-container .note-box {
                 display: none !important;
             }
-
-            /* 4. 名字置中、縮小、防斷行 */
             #passport-container .header-info {
                 border-bottom: none !important;
                 margin-bottom: 0 !important;
