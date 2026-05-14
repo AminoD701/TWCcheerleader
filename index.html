@@ -1539,11 +1539,22 @@ function getCdnUrl(url) {
             const roleColor = dtColors[slotIndex];
 
             let listHtml = pool.map(g => {
-                const isPicked = myDreamTeam.some(picked => picked && picked.realname === g.realname);
-                if(isPicked) return '';
+                // 🛑 已經把這兩行防重複的封印解除了！
+                // const isPicked = myDreamTeam.some(picked => picked && picked.realname === g.realname);
+                // if(isPicked) return '';
 
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 const searchKeywords = `${g.realname} ${g.nickname||''} ${g.combinedTeam} ${getTeamAliases(g.combinedTeam)}`;
+
+                return `
+                <div class="dt-pick-card" data-search="${searchKeywords}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
+                    <img src="${getCdnUrl(g.img)}" style="background: #252c36; min-height: 90px;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                    <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
+                        <div style="font-size:14px;">${g.realname}</div>
+                        ${showNick}
+                    </div>
+                </div>`;
+            }).join('');
 
                 // 修改後的圖片標籤，自動套用 jsDelivr 加速
 return `
