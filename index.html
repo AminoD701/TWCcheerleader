@@ -557,6 +557,41 @@
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
+        /* =========================================
+           🛠️ 修正雙背號框框過大，把空間還給名字
+        ========================================= */
+        /* 1. 確保大字體名字絕對不准換行，且維持原本的霸氣大小 */
+        #modal-dynamic-content div[style*="font-size: 32px"],
+        #modal-dynamic-content div[style*="font-size: 36px"],
+        #modal-dynamic-content div[style*="font-size:32px"],
+        #modal-dynamic-content div[style*="font-size:36px"],
+        #modal-dynamic-content div[style*="font-weight: 900"] {
+            white-space: nowrap !important;
+        }
+
+        /* 2. 針對右側的「背號框」進行極限瘦身 */
+        /* 抓出帶有邊框與圓角的背號容器，強制縮小內留白與行距 */
+        #modal-dynamic-content div[style*="border: 2px"],
+        #modal-dynamic-content div[style*="border:2px"],
+        #modal-dynamic-content div[style*="border-radius: 8px"],
+        #modal-dynamic-content div[style*="border-radius:8px"] {
+            padding: 5px 12px !important; /* 大幅縮小原本上下的 Padding */
+            line-height: 1.1 !important;  /* 讓上下兩個背號貼緊一點，不要占空間 */
+            min-width: 60px !important;
+            text-align: center !important;
+        }
+
+        /* 3. 如果背號原本的字體太大，微調讓它看起來更精緻 */
+        #modal-dynamic-content div[style*="font-size: 24px"],
+        #modal-dynamic-content div[style*="font-size:24px"] {
+            font-size: 20px !important;
+        }
+
+        /* 4. 確保左邊的名字區塊有優先擴展的權利 (Flexbox 推擠保護) */
+        #modal-dynamic-content > div > div:first-child > div:first-child {
+            flex: 1 1 auto !important;
+            padding-right: 10px !important;
+        }
     </style>
 </head>
 <body class="no-scroll">
