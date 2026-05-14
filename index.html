@@ -558,101 +558,100 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
         /* =========================================
-           📱 手機版小卡片 (Grid) 終極骨架強制壓縮補丁
+           📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (精準版)
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 鎖定卡片下方的資訊區，第一排(名字與背號排) 絕對不准換行 */
-            #grid-container .girl-card > div:nth-child(2) > div:first-child {
-                display: flex !important;
+            /* 1. 鎖定第一排 (名字與背號)，強制不換行 */
+            #grid-container .card .header-info {
                 flex-wrap: nowrap !important;
                 align-items: center !important;
-                overflow: hidden !important; /* 防止撐破卡片 */
-                gap: 4px !important;
+                gap: 5px !important;
             }
 
-            /* 2. 鎖定第一排的第一個元素 (名字)，給予彈性縮小空間 */
-            #grid-container .girl-card > div:nth-child(2) > div:first-child > div:first-child {
-                white-space: nowrap !important;
+            /* 2. 左側名字區塊給予彈性，防止撐破 */
+            #grid-container .card .header-info > div:first-child {
                 flex: 1 1 auto !important;
-                min-width: 0 !important; /* Flexbox 必備防撐破黑魔法 */
-                /* 字體自動縮放，最大 22px，絕對不准斷到第二行 */
-                font-size: clamp(16px, 5vw, 22px) !important; 
+                min-width: 0 !important; /* Flexbox 防破版黑魔法 */
             }
 
-            /* 3. 鎖定所有卡片內「有邊框」的元素 (背號框、球隊框)，無差別極限瘦身 */
-            #grid-container .girl-card div[style*="border"],
-            #grid-container .girl-card div[style*="solid"] {
-                padding: 2px 4px !important;
-                margin-bottom: 2px !important;
+            /* 3. 名字強制不換行，遇到超長名字自動變成... */
+            #grid-container .card .nickname {
+                white-space: nowrap !important;
+                font-size: clamp(16px, 5vw, 18px) !important; /* 字體稍微彈性縮小 */
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
 
-            /* 4. 鎖定背號框內的字體 (通常字數較少)，強制縮小 */
-            #grid-container .girl-card > div:nth-child(2) > div:first-child > div:last-child {
-                flex: 0 0 auto !important;
+            /* 4. 極限壓縮背號框與字體 */
+            #grid-container .card .number {
+                flex: 0 0 auto !important; /* 確保背號框不變形 */
                 font-size: 13px !important;
+                padding: 3px 6px !important;
                 line-height: 1.1 !important;
-                min-width: 35px !important;
+                letter-spacing: 0 !important;
             }
 
-            /* 5. 鎖定球隊標籤內的字體，強制縮小 */
-            #grid-container .girl-card > div:nth-child(2) > div:nth-child(3) {
-                font-size: 11px !important;
-                line-height: 1.2 !important;
+            /* 5. 壓縮球隊標籤 */
+            #grid-container .card .team-tag-mini {
+                font-size: 10px !important;
+                padding: 2px 5px !important;
             }
         }
+
         /* =========================================
-           Passport (追星護照) 1排5個 極簡化網格補丁
+           🛂 追星護照 1排5個 極簡化收藏卡補丁 (精準版)
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 鎖定護照容器內的網格，強制 1 排 5 個 */
-            #passport-container .grid-container,
-            #passport-container [style*="display: grid"],
-            .passport-grid {
+            /* 1. 護照區塊強制變為 5 欄 */
+            #passport-container .grid-container {
                 grid-template-columns: repeat(5, 1fr) !important;
-                gap: 5px !important; /* 極窄間距 */
-                padding: 10px 5px !important;
+                gap: 5px !important;
+                padding: 5px !important;
             }
 
-            /* 2. 縮小小卡片的高度，讓照片變成正方形或小長方 */
-            #passport-container .girl-card {
-                height: auto !important;
-                min-height: 100px !important;
+            /* 2. 卡片整體與照片極度瘦身 */
+            #passport-container .card {
+                min-height: auto !important;
+                border-bottom-width: 3px !important;
             }
-
-            /* 3. 圖片高度壓縮 */
-            #passport-container .girl-card img {
-                height: 80px !important;
-                object-position: top center !important;
+            #passport-container .photo-area {
+                height: 70px !important; /* 變成正方形小頭貼 */
+                border-bottom-width: 2px !important;
             }
-
-            /* 4. 隱藏不必要的資訊 (如國籍、身高、背號框)，只留名字 */
-            /* 讓小卡片底部區塊變得很薄 */
-            #passport-container .girl-card > div:nth-child(2) {
+            #passport-container .info-section {
                 padding: 4px 2px !important;
             }
 
-            /* 5. 名字縮到最小，防止字體撐爆格子 */
-            #passport-container .girl-card div[style*="font-weight: 900"],
-            #passport-container .girl-card div[style*="font-size"] {
-                font-size: 11px !important;
-                white-space: nowrap !important;
-                overflow: hidden;
-                text-overflow: ellipsis; /* 名字太長會變... */
-                text-align: center;
-                width: 100%;
+            /* 3. 隱藏不必要的資訊，只留大名 */
+            #passport-container .number,
+            #passport-container .realname,
+            #passport-container .data-grid,
+            #passport-container .stats-grid,
+            #passport-container .fav-btn,
+            #passport-container .sport-tags,
+            #passport-container .ig-link,
+            #passport-container .note-box {
+                display: none !important;
             }
 
-            /* 6. 隱藏護照內的背號與球隊標籤 (因為 5 欄位根本塞不下) */
-            #passport-container .girl-card div[style*="border"],
-            #passport-container .girl-card div[style*="solid"],
-            #passport-container .girl-card .team-label {
-                display: none !important;
+            /* 4. 名字置中、縮小、防斷行 */
+            #passport-container .header-info {
+                border-bottom: none !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+                justify-content: center !important;
             }
-            
-            /* 7. 隱藏 IG 圖示與愛心圖示 (保持乾淨) */
-            #passport-container .girl-card .icon-ig,
-            #passport-container .girl-card .fav-btn {
-                display: none !important;
+            #passport-container .nickname-container {
+                justify-content: center !important;
+                width: 100% !important;
+            }
+            #passport-container .nickname {
+                font-size: 11px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                text-align: center !important;
+                width: 100% !important;
             }
         }
     </style>
