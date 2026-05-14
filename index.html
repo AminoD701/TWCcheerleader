@@ -600,6 +600,61 @@
                 line-height: 1.2 !important;
             }
         }
+        /* =========================================
+           Passport (追星護照) 1排5個 極簡化網格補丁
+        ========================================= */
+        @media (max-width: 768px) {
+            /* 1. 鎖定護照容器內的網格，強制 1 排 5 個 */
+            #passport-container .grid-container,
+            #passport-container [style*="display: grid"],
+            .passport-grid {
+                grid-template-columns: repeat(5, 1fr) !important;
+                gap: 5px !important; /* 極窄間距 */
+                padding: 10px 5px !important;
+            }
+
+            /* 2. 縮小小卡片的高度，讓照片變成正方形或小長方 */
+            #passport-container .girl-card {
+                height: auto !important;
+                min-height: 100px !important;
+            }
+
+            /* 3. 圖片高度壓縮 */
+            #passport-container .girl-card img {
+                height: 80px !important;
+                object-position: top center !important;
+            }
+
+            /* 4. 隱藏不必要的資訊 (如國籍、身高、背號框)，只留名字 */
+            /* 讓小卡片底部區塊變得很薄 */
+            #passport-container .girl-card > div:nth-child(2) {
+                padding: 4px 2px !important;
+            }
+
+            /* 5. 名字縮到最小，防止字體撐爆格子 */
+            #passport-container .girl-card div[style*="font-weight: 900"],
+            #passport-container .girl-card div[style*="font-size"] {
+                font-size: 11px !important;
+                white-space: nowrap !important;
+                overflow: hidden;
+                text-overflow: ellipsis; /* 名字太長會變... */
+                text-align: center;
+                width: 100%;
+            }
+
+            /* 6. 隱藏護照內的背號與球隊標籤 (因為 5 欄位根本塞不下) */
+            #passport-container .girl-card div[style*="border"],
+            #passport-container .girl-card div[style*="solid"],
+            #passport-container .girl-card .team-label {
+                display: none !important;
+            }
+            
+            /* 7. 隱藏 IG 圖示與愛心圖示 (保持乾淨) */
+            #passport-container .girl-card .icon-ig,
+            #passport-container .girl-card .fav-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="no-scroll">
