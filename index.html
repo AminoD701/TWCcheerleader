@@ -601,52 +601,79 @@
         }
 
         /* =========================================
-           🛂 追星護照 1排5個 極簡化收藏卡補丁 (維持原版不動)
+           🛂 追星護照 全裝置 (電腦+手機) 收藏卡冊補丁
         ========================================= */
+        /* --- 電腦版與共用設定 --- */
+        /* 1. 護照區塊網格：電腦版自動排滿 (約一排 7~8 個) */
+        #passport-container .grid-container {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+            gap: 12px !important;
+            padding: 10px 0 !important;
+        }
+
+        /* 2. 卡片整體與照片瘦身 */
+        #passport-container .card {
+            min-height: auto !important;
+            border-bottom-width: 3px !important;
+        }
+        #passport-container .photo-area {
+            height: 130px !important; /* 電腦版照片高度 */
+            border-bottom-width: 2px !important;
+        }
+        #passport-container .info-section {
+            padding: 8px 4px !important;
+        }
+
+        /* 3. 隱藏不必要的資訊，只留大名 */
+        #passport-container .number,
+        #passport-container .realname,
+        #passport-container .data-grid,
+        #passport-container .stats-grid,
+        #passport-container .fav-btn,
+        #passport-container .sport-tags,
+        #passport-container .ig-link,
+        #passport-container .note-box {
+            display: none !important;
+        }
+
+        /* 4. 名字置中、縮小、防斷行 */
+        #passport-container .header-info {
+            border-bottom: none !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+        #passport-container .nickname-container {
+            justify-content: center !important;
+            width: 100% !important;
+            margin: 0 !important;
+            gap: 0 !important;
+        }
+        #passport-container .nickname {
+            font-size: 15px !important; /* 電腦版字體 */
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            text-align: center !important;
+            width: 100% !important;
+        }
+
+        /* --- 手機版專屬微調 --- */
         @media (max-width: 768px) {
             #passport-container .grid-container {
-                grid-template-columns: repeat(5, 1fr) !important;
+                grid-template-columns: repeat(5, 1fr) !important; /* 手機強制 5 欄 */
                 gap: 5px !important;
                 padding: 5px !important;
             }
-            #passport-container .card {
-                min-height: auto !important;
-                border-bottom-width: 3px !important;
-            }
             #passport-container .photo-area {
-                height: 70px !important; 
-                border-bottom-width: 2px !important;
+                height: 70px !important; /* 手機版照片更小 */
             }
             #passport-container .info-section {
                 padding: 4px 2px !important;
             }
-            #passport-container .number,
-            #passport-container .realname,
-            #passport-container .data-grid,
-            #passport-container .stats-grid,
-            #passport-container .fav-btn,
-            #passport-container .sport-tags,
-            #passport-container .ig-link,
-            #passport-container .note-box {
-                display: none !important;
-            }
-            #passport-container .header-info {
-                border-bottom: none !important;
-                margin-bottom: 0 !important;
-                padding-bottom: 0 !important;
-                justify-content: center !important;
-            }
-            #passport-container .nickname-container {
-                justify-content: center !important;
-                width: 100% !important;
-            }
             #passport-container .nickname {
-                font-size: 11px !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                text-align: center !important;
-                width: 100% !important;
+                font-size: 11px !important; /* 手機版字體更小 */
             }
         }
     </style>
