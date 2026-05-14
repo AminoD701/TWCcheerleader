@@ -558,52 +558,45 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
         /* =========================================
-           📱 手機版專屬優化：修正雙棲/多背號把名字擠斷的 Bug
+           📱 手機版專屬優化：終極骨架定位壓縮法
         ========================================= */
         @media (max-width: 768px) {
-            /* 1. 強制彈窗第一排 (名字 + IG + 背號) 絕對單排、不准換行，並縮小間距 */
+            /* 1. 鎖定彈窗內的第一排 (名字與背號那一橫排)，強制不准換行 */
             #modal-dynamic-content > div > div:first-child {
                 flex-wrap: nowrap !important;
-                gap: 8px !important;
                 align-items: center !important;
+                gap: 5px !important;
             }
 
-            /* 2. 名字字體改為「彈性大小」，塞不下時會稍微縮小但不換行 */
-            #modal-dynamic-content div[style*="font-size: 32px"],
-            #modal-dynamic-content div[style*="font-size: 36px"],
-            #modal-dynamic-content div[style*="font-size:32px"],
-            #modal-dynamic-content div[style*="font-size:36px"] {
+            /* 2. 鎖定左邊「裝著名字的框框」，給它彈性空間 */
+            #modal-dynamic-content > div > div:first-child > div:first-child {
+                flex: 1 1 auto !important;
+                min-width: 0 !important; /* 這是防止內容撐破版面的黑魔法 */
+                padding-right: 5px !important;
+            }
+
+            /* 3. 鎖定真正的「名字大字」，強迫不准換行、字體縮放 */
+            #modal-dynamic-content > div > div:first-child > div:first-child > div:first-child {
                 white-space: nowrap !important;
-                font-size: clamp(22px, 6vw, 32px) !important; /* 神奇語法：在 22px~32px 之間彈性縮放 */
-                line-height: 1.1 !important;
-                flex-shrink: 1 !important; /* 允許名字區塊被擠壓 */
-                min-width: 0 !important;
+                font-size: clamp(20px, 6vw, 32px) !important;
             }
 
-            /* 3. 背號框框：手機版極限壓縮，瘦身！ */
-            #modal-dynamic-content div[style*="border: 2px"],
-            #modal-dynamic-content div[style*="border:2px"],
-            #modal-dynamic-content div[style*="border-radius: 8px"],
-            #modal-dynamic-content div[style*="border-radius:8px"] {
+            /* 4. 鎖定右邊的「背號框框」，極限瘦身！ */
+            #modal-dynamic-content > div > div:first-child > div:last-child {
+                flex: 0 0 auto !important; /* 不准背號框放大 */
                 padding: 4px 6px !important;
-                min-width: 40px !important;
-                flex-shrink: 0 !important; /* 背號框不准變形 */
-            }
-
-            /* 4. 背號字體：從原本的 24px 強制縮小到 16px */
-            #modal-dynamic-content div[style*="font-size: 24px"],
-            #modal-dynamic-content div[style*="font-size:24px"] {
                 font-size: 16px !important; 
                 line-height: 1.1 !important;
+                min-width: 45px !important;
             }
 
-            /* 5. 球隊標籤 (UNIT 下方的框框)：一樣縮小，讓多棲球隊能完美並排 */
+            /* 5. 鎖定球隊標籤，強制縮小 */
             #modal-dynamic-content div[style*="border: 1px"],
             #modal-dynamic-content div[style*="border:1px"],
             #modal-dynamic-content div[style*="border-radius: 4px"],
             #modal-dynamic-content div[style*="border-radius:4px"] {
                 padding: 4px 8px !important;
-                font-size: 12px !important;
+                font-size: 11px !important;
                 line-height: 1.2 !important;
             }
         }
