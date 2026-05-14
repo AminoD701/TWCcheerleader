@@ -29,7 +29,7 @@ function getCdnUrl(url) {
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-19L6EYRWKE');
-    </script>ㄑ
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
@@ -1549,10 +1549,8 @@ function getCdnUrl(url) {
             pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
             const roleColor = dtColors[slotIndex];
 
-            // 產生清單
+            // 產生清單 (解鎖重複選取版)
             let listHtml = pool.map(g => {
-                // 🛑 防重複封印已解除！這裡不檢查 isPicked 了！
-
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 const searchKeywords = `${g.realname} ${g.nickname||''} ${g.combinedTeam} ${getTeamAliases(g.combinedTeam)}`;
 
@@ -1582,35 +1580,6 @@ function getCdnUrl(url) {
                 </div>
             `;
             
-            document.documentElement.style.setProperty('--modal-accent', roleColor);
-            document.getElementById('girl-modal').classList.add('active');
-            document.body.classList.add('no-scroll');
-
-            const searchInput = document.getElementById('dtSearchInput');
-            if(searchInput) {
-                searchInput.addEventListener('focus', () => searchInput.style.borderColor = roleColor);
-                searchInput.addEventListener('blur', () => searchInput.style.borderColor = 'var(--border-color)');
-            }
-        };
-
-            // 🌟 終極手機版優化：
-            // 1. input 字體強制 16px，防止 iOS 點擊時畫面自動放大導致看不見結果。
-            // 2. ontouchstart 改成 ontouchmove，確保「滑動」動作不會被吃掉！
-            // 3. 壓縮頭部空間 (padding/margin)，讓鍵盤彈出時還能看到第一排女孩。
-            document.getElementById('modal-dynamic-content').innerHTML = `
-                <div style="padding:15px 10px; background:var(--bg-panel); height:100%; display:flex; flex-direction:column; box-sizing: border-box; overflow: hidden;">
-                    <div style="border-bottom:2px dashed var(--border-color); padding-bottom:10px; margin-bottom:10px; flex-shrink: 0;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px;">
-                            <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:${roleColor};">選擇 ${dtRoles[slotIndex]}</div>
-                            <div style="font-size:11px; color:#888;">滑動名單可收起鍵盤 👇</div>
-                        </div>
-                        <input type="text" id="dtSearchInput" placeholder="🔍 姓名/球隊 (支援空格)" oninput="window.filterDtGirls()" style="width:100%; padding:10px; border-radius:6px; border:2px solid var(--border-color); background:var(--bg-card); color:#fff; font-size:16px; outline:none; transition:0.2s; box-sizing: border-box;">
-                    </div>
-                    <div class="dt-selector-grid" id="dt-selector-grid" ontouchmove="document.getElementById('dtSearchInput').blur()" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; margin-top: 0;">
-                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩或已被選取。</div>'}
-                    </div>
-                </div>
-            `;
             document.documentElement.style.setProperty('--modal-accent', roleColor);
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll');
