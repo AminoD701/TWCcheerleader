@@ -9,22 +9,31 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
-        // ⚡ GitHub 轉 jsDelivr 極速加速器
-function getCdnUrl(url) {
-    if (!url || !url.includes('github.com')) return url;
-    
-    // 將 GitHub 的 raw 連結轉換為 jsDelivr 連結
-    // 範例：https://raw.githubusercontent.com/使用者/倉庫/主分支/圖片.jpg
-    // 轉為：https://cdn.jsdelivr.net/gh/使用者/倉庫@主分支/圖片.jpg
-    let cdnUrl = url
-        .replace('github.com', 'cdn.jsdelivr.net/gh')
-        .replace('raw.githubusercontent.com/', 'cdn.jsdelivr.net/gh/')
-        .replace('/raw/', '@'); // 處理某些格式的 github 網址
-    
-    // 如果網址中還沒包含分支標籤 @，嘗試自動處理（假設是 main 分支）
-    // 這部分會根據你的網址結構自動調整
-    return cdnUrl;
-}
+        // ⚡ GitHub 轉 jsDelivr 極速加速器 (強化精準解析版)
+        window.getCdnUrl = function(url) {
+            if (!url || typeof url !== 'string') return url;
+            
+            // 針對 GitHub Raw 網址進行嚴格的格式轉換
+            if (url.includes('raw.githubusercontent.com')) {
+                try {
+                    let urlObj = new URL(url);
+                    // 切割網址路徑
+                    let parts = urlObj.pathname.split('/').filter(p => p !== '');
+                    if (parts.length >= 4) {
+                        let user = parts[0];
+                        let repo = parts[1];
+                        let branch = parts[2];
+                        let filePath = parts.slice(3).join('/');
+                        // jsDelivr 的正確格式：cdn.jsdelivr.net/gh/帳號/倉庫@分支/檔案路徑
+                        return `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/${filePath}`;
+                    }
+                } catch(e) {
+                    return url; // 如果解析失敗，安全退回原網址
+                }
+            }
+            // 如果不是 GitHub Raw 網址，就保持原樣 (例如 Google Drive 或 FB 圖片)
+            return url;
+        };
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -2052,7 +2061,7 @@ function getCdnUrl(url) {
                         <div class="fav-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${c.realname}', event, this)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
-                        ${c.img?`<img src="${c.img}" loading="lazy">`:''}
+                        ${c.img?`<img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">`:''}
                     </div>
                     <div class="info-section">
                         <div class="header-info">
