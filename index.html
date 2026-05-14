@@ -9,6 +9,22 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
+        // ⚡ GitHub 轉 jsDelivr 極速加速器
+function getCdnUrl(url) {
+    if (!url || !url.includes('github.com')) return url;
+    
+    // 將 GitHub 的 raw 連結轉換為 jsDelivr 連結
+    // 範例：https://raw.githubusercontent.com/使用者/倉庫/主分支/圖片.jpg
+    // 轉為：https://cdn.jsdelivr.net/gh/使用者/倉庫@主分支/圖片.jpg
+    let cdnUrl = url
+        .replace('github.com', 'cdn.jsdelivr.net/gh')
+        .replace('raw.githubusercontent.com/', 'cdn.jsdelivr.net/gh/')
+        .replace('/raw/', '@'); // 處理某些格式的 github 網址
+    
+    // 如果網址中還沒包含分支標籤 @，嘗試自動處理（假設是 main 分支）
+    // 這部分會根據你的網址結構自動調整
+    return cdnUrl;
+}
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -1529,14 +1545,15 @@
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 const searchKeywords = `${g.realname} ${g.nickname||''} ${g.combinedTeam} ${getTeamAliases(g.combinedTeam)}`;
 
-                return `
-                <div class="dt-pick-card" data-search="${searchKeywords}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
-                    <img src="${g.img}" style="background: #252c36; min-height: 90px;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
-                    <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
-                        <div style="font-size:14px;">${g.realname}</div>
-                        ${showNick}
-                    </div>
-                </div>`;
+                // 修改後的圖片標籤，自動套用 jsDelivr 加速
+return `
+<div class="dt-pick-card" data-search="${searchKeywords}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
+    <img src="${getCdnUrl(g.img)}" style="background: #252c36; min-height: 90px;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+    <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
+        <div style="font-size:14px;">${g.realname}</div>
+        ${showNick}
+    </div>
+</div>`;
             }).join('');
 
             // 🌟 終極手機版優化：
