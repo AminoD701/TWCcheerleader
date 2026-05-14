@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
-    <script>
+    <script> 
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -1531,7 +1531,7 @@
 
                 return `
                 <div class="dt-pick-card" data-search="${searchKeywords}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
-                    <img src="https://wsrv.nl/?url=${encodeURIComponent(g.img)}&w=200&output=webp&we" loading="lazy" style="background: #222; min-height: 90px;">
+                    <img src="${g.img}" loading="lazy" decoding="async" fetchpriority="low" style="background: #252c36; min-height: 90px;">
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>
                         ${showNick}
