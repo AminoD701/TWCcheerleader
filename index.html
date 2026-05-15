@@ -1811,6 +1811,17 @@
                 let baseTeamName = dtState.selectedTeam.split('_')[0]; // 把 "Passion Sisters_籃球" 變成 "Passion Sisters"
                 pool = pool.filter(g => g.combinedTeam.includes(baseTeamName));
             }
+
+            // ✨ 新增：不可重複選擇邏輯 (僅限棒球、籃球、排球)
+            if (dtState.rosterType !== 'original') {
+                // 抓出「除了目前點擊的這個位置以外」，場上已經被指派的女孩名單
+                let alreadyPickedNames = dtState.roster
+                    .map((g, idx) => (g !== null && idx !== slotIndex) ? g.realname : null)
+                    .filter(name => name !== null);
+                
+                // 從候選池中把這些「已經在場上」的女孩剔除
+                pool = pool.filter(g => !alreadyPickedNames.includes(g.realname));
+            }
             
             pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
             
@@ -1860,7 +1871,7 @@
                         <input type="text" id="dtSearchInput" placeholder="🔍 姓名搜尋..." oninput="window.filterDtGirls()" style="width:100%; padding:10px; border-radius:6px; border:2px solid var(--border-color); background:#111; color:#fff; font-size:15px; outline:none;">
                     </div>
                     <div class="dt-selector-grid" id="dt-selector-grid" ontouchmove="document.getElementById('dtSearchInput').blur()" style="flex:1; overflow-y:auto; padding-bottom: 20px;">
-                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩。</div>'}
+                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩可選了。</div>'}
                     </div>
                 </div>`;
             
