@@ -784,43 +784,53 @@
         .dt-modal-filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .dt-modal-filters select { flex: 1; min-width: 120px; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 14px; font-weight: 700; outline: none; }
 
-        /* 戰術板容器 (維持原本的 4:5 比例，方便截圖) */
+        /* 戰術板容器 (微調比例，讓排版更有呼吸空間) */
         .dt-tactical-board {
-            position: relative; width: 100%; max-width: 600px; aspect-ratio: 4 / 5; margin: 0 auto;
+            position: relative; width: 100%; max-width: 650px; aspect-ratio: 3 / 4; margin: 0 auto;
             background-color: #0a0c0f; border: 3px solid var(--event-accent);
             border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.8);
         }
 
         /* 🏟️ 球場底圖設定 (直接讀取你 GitHub 的圖片) */
         .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 1; }
-        .court-baseball { background-image: url('./baseball-bg.png'); }     /* 棒球圖 */
-        .court-basketball { background-image: url('./basketball-bg.png'); } /* 籃球圖 */
-        .court-volleyball { background-image: url('./volleyball-bg.png'); } /* 排球圖 */
+        .court-baseball { background-image: url('./baseball-bg.jpg'); }     /* 棒球圖 */
+        .court-basketball { background-image: url('./basketball-bg.jpg'); } /* 籃球圖 */
+        .court-volleyball { background-image: url('./volleyball-bg.jpg'); } /* 排球圖 */
 
-        /* 女孩戰術頭像 (Token) */
+        /* 女孩戰術頭像 (Token) - 尺寸大幅升級！ */
         .dt-token {
             position: absolute; transform: translate(-50%, -50%);
-            display: flex; flex-direction: column; align-items: center; width: 80px; z-index: 10; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; width: 100px; z-index: 10; cursor: pointer; transition: 0.2s;
         }
         .dt-token-img-wrap {
-            position: relative; width: 55px; height: 55px; border-radius: 50%;
-            background: #111; border: 3px solid var(--event-accent);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8); overflow: visible;
+            position: relative; width: 75px; height: 75px; border-radius: 50%;
+            background: #111; border: 4px solid var(--event-accent);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.9); overflow: visible;
         }
         .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
-        .dt-token-empty { font-size: 20px; color: #555; line-height: 49px; text-align: center; }
+        .dt-token-empty { font-size: 28px; color: #555; line-height: 67px; text-align: center; }
         
         /* 守備位置小標籤 (縮寫) */
         .dt-token-abbr {
-            position: absolute; top: -5px; right: -5px; background: #000; color: #fff;
-            font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 10px;
-            border: 1px solid var(--event-accent); font-family: var(--sport-font); box-shadow: 2px 2px 0px #000;
+            position: absolute; top: -6px; right: -6px; background: #000; color: #fff;
+            font-size: 13px; font-weight: 900; padding: 2px 8px; border-radius: 12px;
+            border: 2px solid var(--event-accent); font-family: var(--sport-font); box-shadow: 2px 2px 0px #000;
         }
 
         /* 稱號與名字區塊 */
-        .dt-token-info { text-align: center; margin-top: 5px; width: 110px; }
-        .dt-token-role { font-size: 10px; color: var(--event-accent); font-weight: 900; background: rgba(0,0,0,0.8); padding: 2px 4px; border-radius: 3px; white-space: nowrap; margin-bottom: 2px; }
-        .dt-token-name { font-size: 12px; color: #fff; font-weight: 900; text-shadow: 1px 1px 3px #000; white-space: nowrap; background: rgba(0,0,0,0.5); padding: 1px 4px; border-radius: 3px;}
+        .dt-token-info { text-align: center; margin-top: 6px; width: 130px; }
+        .dt-token-role { font-size: 12px; color: var(--event-accent); font-weight: 900; background: rgba(0,0,0,0.85); padding: 3px 6px; border-radius: 4px; white-space: nowrap; margin-bottom: 3px; border: 1px solid rgba(255,255,255,0.1);}
+        .dt-token-name { font-size: 14px; color: #fff; font-weight: 900; text-shadow: 1px 1px 4px #000; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px;}
+
+        /* 手機版縮放優化 */
+        @media (max-width: 768px) {
+            .dt-token { width: 85px; }
+            .dt-token-img-wrap { width: 65px; height: 65px; border-width: 3px;}
+            .dt-token-empty { line-height: 59px; font-size: 24px;}
+            .dt-token-info { width: 110px; }
+            .dt-token-name { font-size: 13px; }
+            .dt-token-abbr { font-size: 11px; padding: 1px 6px;}
+        }
 
         /* 手機版縮放優化 */
         @media (max-width: 768px) {
@@ -1585,19 +1595,9 @@
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
         };
         // =========================================================================
-        // 🌟 夢幻陣容 (Dream Team) 多賽制擴充引擎
+        // 🌟 夢幻陣容 4.0 (Dream Team) 戰術板核心引擎
         // =========================================================================
         const dtConfigs = {
-            'original': {
-                name: '🌟 經典偶像戰隊 (5人)', count: 5, type: 'grid', defaultColor: '#ff0044',
-                roles: [
-                    { name: '💋 性感擔當 SEXY', color: '#ff0044' },
-                    { name: '✨ 顏值擔當 VISUAL', color: '#9c27b0' },
-                    { name: '💃 舞蹈擔當 DANCER', color: '#00e676' },
-                    { name: '🎀 可愛擔當 CUTE', color: '#ff4081' },
-                    { name: '⚡ 活力擔當 ENERGY', color: '#ff9800' }
-                ]
-            },
             'baseball': { 
                 name: '⚾ 棒球鑽石陣容 (9人)', count: 9, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
                 roles: [
@@ -1615,26 +1615,25 @@
             'basketball': { 
                 name: '🏀 籃球先發五人 (5人)', count: 5, type: 'court', courtClass: 'court-basketball', defaultColor: '#03a9f4',
                 roles: [
-                    { name: '控球後衛 PG', abbr: 'PG', top: '75%', left: '50%' },
-                    { name: '得分後衛 SG', abbr: 'SG', top: '50%', left: '80%' },
-                    { name: '小前鋒 SF',   abbr: 'SF', top: '50%', left: '20%' },
-                    { name: '大前鋒 PF',   abbr: 'PF', top: '35%', left: '70%' },
-                    { name: '中鋒 C',      abbr: 'C',  top: '25%', left: '50%' }
+                    { name: '控球後衛 PG', abbr: 'PG', top: '82%', left: '50%' },  // 移到底部三分線頂端
+                    { name: '得分後衛 SG', abbr: 'SG', top: '45%', left: '82%' },  // 右翼三分線外
+                    { name: '小前鋒 SF',   abbr: 'SF', top: '45%', left: '18%' },  // 左翼三分線外
+                    { name: '大前鋒 PF',   abbr: 'PF', top: '30%', left: '70%' },  // 禁區右下角
+                    { name: '中鋒 C',      abbr: 'C',  top: '20%', left: '50%' }   // 禁區正上方(籃下)
                 ]
             },
             'volleyball': { 
-                name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#e91e63',
+                name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
                 roles: [
-                    { name: '主攻手 WS',   abbr: 'WS', top: '25%', left: '25%' },
-                    { name: '攔中手 MB',   abbr: 'MB', top: '25%', left: '50%' },
-                    { name: '副攻手 OP',   abbr: 'OP', top: '25%', left: '75%' },
-                    { name: '舉球員 S',    abbr: 'S',  top: '65%', left: '75%' },
-                    { name: '自由人 L',    abbr: 'L',  top: '85%', left: '50%' },
-                    { name: '後排主攻 WS', abbr: 'WS', top: '65%', left: '25%' }
+                    { name: '主攻手 WS',   abbr: 'WS', top: '22%', left: '25%' },  // 前排左 (貼網)
+                    { name: '攔中手 MB',   abbr: 'MB', top: '22%', left: '50%' },  // 前排中 (貼網)
+                    { name: '副攻手 OP',   abbr: 'OP', top: '22%', left: '75%' },  // 前排右 (貼網)
+                    { name: '舉球員 S',    abbr: 'S',  top: '62%', left: '72%' },  // 後排右
+                    { name: '自由人 L',    abbr: 'L',  top: '82%', left: '50%' },  // 後排中 (底線)
+                    { name: '後排主攻 WS', abbr: 'WS', top: '62%', left: '28%' }   // 後排左
                 ]
             }
         };
-
         let dtState = { active: false, rosterType: 'original', rule: 'free', selectedTeam: '全部啦啦隊', roster: [], isPosterMode: false };
 
         window.renderDreamTeamStart = function() {
