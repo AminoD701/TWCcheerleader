@@ -791,8 +791,8 @@
             border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.8);
         }
 
-        /* 🏟️ 球場底圖設定 (直接讀取你 GitHub 的圖片) */
-        .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 1; }
+        /* 🏟️ 球場底圖設定 (強制對齊頂部，防止文字被裁切) */
+        .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: top center; z-index: 1; }
         .court-baseball { background-image: url('./baseball-bg.png'); }     
         .court-basketball { background-image: url('./basketball-bg.png'); } 
         .court-volleyball { background-image: url('./volleyball-bg.png'); }
@@ -811,6 +811,7 @@
             overflow: visible; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .dt-token:hover .dt-token-img-wrap { transform: scale(1.1); box-shadow: 0 0 25px var(--event-accent), 0 10px 25px rgba(0,0,0,0.9); }
+        .dt-token:hover { z-index: 50; } /* ✨ 確保滑鼠游標移過去時，卡片絕對在最上層，不會被別人的名字擋住 */
         .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
         .dt-token-empty { font-size: 32px; color: #555; line-height: 84px; text-align: center; }
         
@@ -1606,7 +1607,7 @@
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
         };
         // =========================================================================
-        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎
+        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎 (完美不卡位座標版)
         // =========================================================================
         const dtConfigs = {
             'original': {
@@ -1636,22 +1637,22 @@
             'basketball': { 
                 name: '🏀 籃球先發五人 (5人)', count: 5, type: 'court', courtClass: 'court-basketball', defaultColor: '#03a9f4',
                 roles: [
-                    { name: '控球後衛 PG', abbr: 'PG', top: '82%', left: '50%' },  // 移到底部三分線頂端
-                    { name: '得分後衛 SG', abbr: 'SG', top: '45%', left: '82%' },  // 右翼三分線外
-                    { name: '小前鋒 SF',   abbr: 'SF', top: '45%', left: '18%' },  // 左翼三分線外
-                    { name: '大前鋒 PF',   abbr: 'PF', top: '30%', left: '70%' },  // 禁區右下角
-                    { name: '中鋒 C',      abbr: 'C',  top: '20%', left: '50%' }   // 禁區正上方(籃下)
+                    { name: '控球後衛 PG', abbr: 'PG', top: '80%', left: '50%' },  // 最下方
+                    { name: '得分後衛 SG', abbr: 'SG', top: '58%', left: '78%' },  // 右側稍微往下，避開 PF
+                    { name: '小前鋒 SF',   abbr: 'SF', top: '58%', left: '22%' },  // 左側稍微往下，避開 C
+                    { name: '大前鋒 PF',   abbr: 'PF', top: '35%', left: '76%' },  // 右上角，靠近禁區
+                    { name: '中鋒 C',      abbr: 'C',  top: '18%', left: '50%' }   // 禁區籃下，最高點
                 ]
             },
             'volleyball': { 
                 name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
                 roles: [
-                    { name: '主攻手 WS',   abbr: 'WS', top: '42%', left: '25%' },  // 移回我方前排 (網子與三米線之間)
-                    { name: '攔中手 MB',   abbr: 'MB', top: '42%', left: '50%' },  
-                    { name: '副攻手 OP',   abbr: 'OP', top: '42%', left: '75%' },  
-                    { name: '舉球員 S',    abbr: 'S',  top: '68%', left: '75%' },  // 退到三米線後方
-                    { name: '自由人 L',    abbr: 'L',  top: '88%', left: '50%' },  // 鎮守最後方底線
-                    { name: '後排主攻 WS', abbr: 'WS', top: '68%', left: '25%' }   
+                    { name: '主攻手 WS',   abbr: 'WS', top: '36%', left: '25%' },  // 前排稍微往下移，不擋文字
+                    { name: '攔中手 MB',   abbr: 'MB', top: '36%', left: '50%' },  
+                    { name: '副攻手 OP',   abbr: 'OP', top: '36%', left: '75%' },  
+                    { name: '舉球員 S',    abbr: 'S',  top: '65%', left: '75%' },  // 後排右
+                    { name: '自由人 L',    abbr: 'L',  top: '86%', left: '50%' },  // 壓在底線
+                    { name: '後排主攻 WS', abbr: 'WS', top: '65%', left: '25%' }   // 後排左
                 ]
             }
         };
@@ -1747,9 +1748,11 @@
                         <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 手機請直接截圖下方戰術板分享！</div>
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
                             <div class="court-bg ${cfg.courtClass}"></div>
-                            <div style="position:absolute; top:15px; left:15px; z-index:5; font-family:var(--sport-font); font-size:20px; font-weight:900; color:rgba(255,255,255,0.9); text-shadow:2px 2px 2px #000; text-align:left; line-height:1.2;">
-                                DREAM TEAM<br><span style="font-size:12px; color:${boardAccent}; font-family:var(--tc-font);">${modeSubtitle}</span>
+                            
+                            <div style="position:absolute; bottom:20px; left:20px; z-index:5; font-family:var(--sport-font); font-size:22px; font-weight:900; color:rgba(255,255,255,0.95); text-shadow:2px 2px 4px #000, 0 0 10px #000; text-align:left; line-height:1.2;">
+                                DREAM TEAM<br><span style="font-size:13px; color:${boardAccent}; font-family:var(--tc-font);">${modeSubtitle}</span>
                             </div>
+                            
                             ${tokensHtml}
                         </div>
                         <div style="margin-top:30px; display:flex; justify-content:center; gap:15px;">
