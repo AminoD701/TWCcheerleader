@@ -1713,19 +1713,21 @@
             const container = document.getElementById('dreamteam-container');
             
             let posterItems = myDreamTeam.map((g, index) => {
-                const roleColor = dtColors[index]; // 固定用職位色
-                const displayName = (g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname;
-                const subName = (g.nickname && g.nickname !== g.realname) ? g.realname : '';
-                // 將本名變成較小的字體，跟在主名字旁邊，節省垂直空間
-                const subNameHtml = subName ? `<span style="font-size:12px; color:#ccc; font-weight:normal; margin-left:6px;">${subName}</span>` : '';
+                const roleColor = dtColors[index]; 
+                
+                // ✨ 國籍智慧分流
+                const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台");
+                const mainName = isTaiwanese ? ((g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname) : g.realname;
+                const subNameText = isTaiwanese ? '' : ((g.nickname && g.nickname !== g.realname) ? g.nickname : '');
+                const subNameHtml = subNameText ? `<span style="font-size:12px; color:#ccc; font-weight:normal; margin-left:6px;">${subNameText}</span>` : '';
 
                 return `
                 <div class="dt-poster-item" style="--event-accent: ${roleColor};">
-                    <img src="${g.img}">
+                    <img src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                     <div class="dt-poster-info">
                         <div class="dt-poster-role" style="color:${roleColor};">${dtRoles[index].split(' ')[1]}</div>
-                        <div class="dt-poster-name">${displayName}${subNameHtml}</div>
-                        </div>
+                        <div class="dt-poster-name">${mainName}${subNameHtml}</div>
+                    </div>
                 </div>`;
             }).join('');
 
@@ -2727,14 +2729,19 @@
 
         function createMinigameCard(g, choice) {
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
-            // 新增：判斷是否有綽號，且不等於本名時顯示
-            const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:18px; color:${accent}; font-weight:700; margin-bottom:5px;">${g.nickname}</div>` : '';
+            
+            // ✨ 國籍智慧分流
+            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台");
+            const mainName = isTaiwanese ? ((g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname) : g.realname;
+            const subNameText = isTaiwanese ? '' : ((g.nickname && g.nickname !== g.realname) ? g.nickname : '');
+            
+            const showNick = subNameText ? `<div style="font-size:18px; color:${accent}; font-weight:700; margin-bottom:5px;">${subNameText}</div>` : '';
 
             return `
             <div class="vs-card" style="--team-accent: ${accent};" onclick="window.pickMinigameWinner('${choice}')">
-                <img src="${g.img}" onerror="this.src=''">
+                <img src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                 <div class="vs-info">
-                    <div class="vs-name">${g.realname}</div>
+                    <div class="vs-name">${mainName}</div>
                     ${showNick}
                     <div class="vs-team" style="color: ${accent};">${g.team}</div>
                 </div>
@@ -2752,8 +2759,13 @@
             const container = document.getElementById('minigame-container');
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
             const isFav = favSet.has(g.realname);
-            // 新增：獲勝畫面也要顯示綽號
-            const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:20px; color:${accent}; font-weight:700; text-align:center; margin-top:5px;">${g.nickname}</div>` : '';
+            
+            // ✨ 國籍智慧分流
+            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台");
+            const mainName = isTaiwanese ? ((g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname) : g.realname;
+            const subNameText = isTaiwanese ? '' : ((g.nickname && g.nickname !== g.realname) ? g.nickname : '');
+            
+            const showNick = subNameText ? `<div style="font-size:20px; color:${accent}; font-weight:700; text-align:center; margin-top:5px;">${subNameText}</div>` : '';
             
             container.innerHTML = `
                 <div class="game-title">👑 你的絕對本命誕生</div>
@@ -2761,10 +2773,10 @@
                 
                 <div class="card winner-card" style="border-bottom: 6px solid ${accent}; --team-accent: ${accent}; pointer-events: none;">
                     <div class="photo-area">
-                        <img src="${g.img}">
+                        <img src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                     </div>
                     <div class="info-section">
-                        <div style="font-size:28px; font-weight:900; color:${accent}; text-align:center;">${g.realname}</div>
+                        <div style="font-size:28px; font-weight:900; color:${accent}; text-align:center;">${mainName}</div>
                         ${showNick}
                         <div style="color:var(--text-sub); font-weight:700; text-align:center; margin-top:5px;">${g.team}</div>
                     </div>
