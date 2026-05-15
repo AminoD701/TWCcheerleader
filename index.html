@@ -1595,9 +1595,19 @@
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
         };
         // =========================================================================
-        // 🌟 夢幻陣容 4.0 (Dream Team) 戰術板核心引擎
+        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎
         // =========================================================================
         const dtConfigs = {
+            'original': {
+                name: '🌟 經典偶像戰隊 (5人)', count: 5, type: 'grid', defaultColor: '#ff0044',
+                roles: [
+                    { name: '💋 性感擔當 SEXY', color: '#ff0044' },
+                    { name: '✨ 顏值擔當 VISUAL', color: '#9c27b0' },
+                    { name: '💃 舞蹈擔當 DANCER', color: '#00e676' },
+                    { name: '🎀 可愛擔當 CUTE', color: '#ff4081' },
+                    { name: '⚡ 活力擔當 ENERGY', color: '#ff9800' }
+                ]
+            },
             'baseball': { 
                 name: '⚾ 棒球鑽石陣容 (9人)', count: 9, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
                 roles: [
@@ -1633,6 +1643,7 @@
                     { name: '後排主攻 WS', abbr: 'WS', top: '68%', left: '25%' }   
                 ]
             }
+        };
         let dtState = { active: false, rosterType: 'original', rule: 'free', selectedTeam: '全部啦啦隊', roster: [], isPosterMode: false };
 
         window.renderDreamTeamStart = function() {
