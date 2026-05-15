@@ -797,39 +797,50 @@
         .court-basketball { background-image: url('./basketball-bg.png'); } 
         .court-volleyball { background-image: url('./volleyball-bg.png'); }
 
-        /* 女孩戰術頭像 (Token) - 尺寸大幅升級！ */
+        /* 女孩戰術頭像 (Token) - 終極美化放大版！ */
         .dt-token {
             position: absolute; transform: translate(-50%, -50%);
-            display: flex; flex-direction: column; align-items: center; width: 100px; z-index: 10; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; width: 110px; z-index: 10; cursor: pointer; transition: 0.2s;
         }
-        .dt-token-img-wrap {
-            position: relative; width: 75px; height: 75px; border-radius: 50%;
-            background: #111; border: 4px solid var(--event-accent);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.9); overflow: visible;
-        }
-        .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
-        .dt-token-empty { font-size: 28px; color: #555; line-height: 67px; text-align: center; }
         
-        /* 守備位置小標籤 (縮寫) */
-        .dt-token-abbr {
-            position: absolute; top: -6px; right: -6px; background: #000; color: #fff;
-            font-size: 13px; font-weight: 900; padding: 2px 8px; border-radius: 12px;
-            border: 2px solid var(--event-accent); font-family: var(--sport-font); box-shadow: 2px 2px 0px #000;
+        /* 圓形頭像框：放大 + 電競光暈特效 */
+        .dt-token-img-wrap {
+            position: relative; width: 90px; height: 90px; border-radius: 50%;
+            background: #111; border: 3px solid var(--event-accent);
+            box-shadow: 0 0 15px var(--event-accent), 0 8px 20px rgba(0,0,0,0.8); /* 專屬色發光 + 深色落影 */
+            overflow: visible; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .dt-token:hover .dt-token-img-wrap { transform: scale(1.1); box-shadow: 0 0 25px var(--event-accent), 0 10px 25px rgba(0,0,0,0.9); }
+        .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
+        .dt-token-empty { font-size: 32px; color: #555; line-height: 84px; text-align: center; }
+        
+        /* 🚨 已將礙眼的 dt-token-abbr (右上角縮寫) 徹底刪除 */
+
+        /* 稱號與名字區塊：電競轉播字卡風格 */
+        .dt-token-info { text-align: center; margin-top: 8px; width: 140px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 上層職位小標 */
+        .dt-token-role { 
+            font-size: 11px; color: #000; font-weight: 900; background: var(--event-accent); 
+            padding: 2px 8px; border-radius: 12px; white-space: nowrap; 
+            margin-bottom: -6px; z-index: 2; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;
+        }
+        /* 下層名字大標 (漸層底色) */
+        .dt-token-name { 
+            font-size: 15px; color: #fff; font-weight: 900; text-shadow: 1px 1px 3px #000; white-space: nowrap; 
+            background: linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 8px 12px 3px; 
+            border-radius: 6px; border: 1px solid var(--event-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
 
-        /* 稱號與名字區塊 */
-        .dt-token-info { text-align: center; margin-top: 6px; width: 130px; }
-        .dt-token-role { font-size: 12px; color: var(--event-accent); font-weight: 900; background: rgba(0,0,0,0.85); padding: 3px 6px; border-radius: 4px; white-space: nowrap; margin-bottom: 3px; border: 1px solid rgba(255,255,255,0.1);}
-        .dt-token-name { font-size: 14px; color: #fff; font-weight: 900; text-shadow: 1px 1px 4px #000; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px;}
-
-        /* 手機版縮放優化 */
+        /* 戰術板手機版縮放優化 */
         @media (max-width: 768px) {
-            .dt-token { width: 85px; }
-            .dt-token-img-wrap { width: 65px; height: 65px; border-width: 3px;}
-            .dt-token-empty { line-height: 59px; font-size: 24px;}
-            .dt-token-info { width: 110px; }
-            .dt-token-name { font-size: 13px; }
-            .dt-token-abbr { font-size: 11px; padding: 1px 6px;}
+            .dt-token { width: 90px; }
+            .dt-token-img-wrap { width: 75px; height: 75px; border-width: 2px;}
+            .dt-token-empty { line-height: 71px; font-size: 26px;}
+            .dt-token-info { width: 110px; margin-top: 6px;}
+            .dt-token-role { font-size: 9px; padding: 2px 6px; margin-bottom: -5px;}
+            .dt-token-name { font-size: 13px; padding: 6px 8px 2px; }
         }
 
         /* 手機版縮放優化 */
@@ -1719,13 +1730,13 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         return `
                         <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
-                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"><div class="dt-token-abbr">${role.abbr}</div></div>
+                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"></div>
                             <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
                         </div>`;
                     }
                     return `
                     <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:#555;" onclick="window.openDtSelector(${index})">
-                        <div class="dt-token-img-wrap" style="border-style:dashed;"><div class="dt-token-empty">➕</div><div class="dt-token-abbr" style="background:#333;">${role.abbr}</div></div>
+                        <div class="dt-token-img-wrap" style="border-style:dashed;"><div class="dt-token-empty">➕</div></div>
                         <div class="dt-token-info"><div class="dt-token-role" style="color:#aaa;">${role.name}</div></div>
                     </div>`;
                 }).join('');
