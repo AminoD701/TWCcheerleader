@@ -701,8 +701,74 @@
                 font-size: 11px !important; /* 手機版字體更小 */
             }
         }
-    </style>
-</head>
+        /* 上面是你原本寫的 footer 等等其他樣式... */
+        .footer-content strong { color: #fff; letter-spacing: 1px; }
+
+        /* =========================================
+           📱 終極手機版體驗優化補丁 (直接貼在這裡！)
+        ========================================= */
+        @media (max-width: 768px) {
+            /* --- 1. 追星護照：我的最愛網格極限瘦身 --- */
+            #passport-container .nickname {
+                font-size: 10px !important; 
+                white-space: nowrap !important; 
+                overflow: hidden !important;
+                text-overflow: ellipsis !important; 
+                line-height: 1.1 !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            #passport-container .photo-area {
+                height: 60px !important; 
+            }
+
+            /* --- 2. 殘酷二選一：女孩照片最大化 --- */
+            #minigame-container .vs-team {
+                display: none !important; 
+            }
+            #minigame-container .vs-info {
+                padding: 30px 10px 10px !important; 
+            }
+            #minigame-container .vs-name {
+                font-size: 26px !important; 
+                margin-bottom: 0 !important;
+            }
+            #minigame-container .vs-card {
+                height: 42vh !important; 
+                min-height: 280px !important;
+            }
+
+            /* 🏆 最終獲勝「命定本命卡」：霸氣全螢幕 + 發光特效 */
+            #minigame-container .winner-card {
+                width: 100% !important;
+                height: 65vh !important; 
+                min-height: 450px !important;
+                box-shadow: 0 0 40px var(--team-accent) !important; 
+                border-width: 4px !important;
+            }
+            #minigame-container .winner-card .photo-area {
+                height: 82% !important; 
+                border-bottom: 4px solid var(--team-accent) !important;
+            }
+            #minigame-container .winner-card img {
+                object-position: top center !important;
+            }
+            #minigame-container .winner-card .info-section {
+                height: 18% !important;
+                padding: 10px !important;
+                justify-content: center !important;
+                background: linear-gradient(135deg, #111, #1a1a24) !important;
+            }
+            #minigame-container .winner-card .info-section > div:first-child {
+                font-size: 32px !important; 
+                margin-bottom: 0 !important;
+            }
+            #minigame-container .winner-card .info-section > div:last-child {
+                display: none !important; 
+            }
+        }
+        
+    </style>  </head>
 <body class="no-scroll">
 
     <div class="sports-bg-slider">
