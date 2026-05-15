@@ -1783,8 +1783,12 @@
             });
             let pool = Array.from(uniqueMap.values());
             
-            // 規則過濾
-            if (dtState.rule === 'same') pool = pool.filter(g => g.combinedTeam.includes(dtState.selectedTeam));
+            // 🛠️ 修正：脫外套比對法 (處理球隊名稱帶有 _籃球 等後綴的問題)
+            if (dtState.rule === 'same') {
+                let baseTeamName = dtState.selectedTeam.split('_')[0]; // 把 "Passion Sisters_籃球" 變成 "Passion Sisters"
+                pool = pool.filter(g => g.combinedTeam.includes(baseTeamName));
+            }
+            
             pool.sort((a,b) => (a.team||"").localeCompare((b.team||""), 'zh-TW'));
             
             const cfg = dtConfigs[dtState.rosterType];
@@ -1854,7 +1858,11 @@
                 const cardSport = card.getAttribute('data-sport');
                 
                 const matchQ = q === "" || q.split(/\s+/).every(word => searchData.includes(word));
-                const matchTeam = fTeam === "" || cardTeam.includes(fTeam);
+                
+                // 🛠️ 修正：過濾器也要脫外套比對
+                let baseFTeam = fTeam.split('_')[0];
+                const matchTeam = fTeam === "" || cardTeam.includes(baseFTeam);
+                
                 const matchSport = fSport === "" || cardSport.includes(fSport);
                 
                 if (matchQ && matchTeam && matchSport) {
