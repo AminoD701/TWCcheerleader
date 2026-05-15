@@ -708,18 +708,23 @@
            📱 終極手機版體驗優化補丁 (直接貼在這裡！)
         ========================================= */
         @media (max-width: 768px) {
-            /* --- 1. 追星護照：我的最愛網格極限瘦身 --- */
+            /* --- 1. 追星護照：我的最愛網格 (黃金 3 欄比例版) --- */
+            #passport-container .grid-container {
+                grid-template-columns: repeat(3, 1fr) !important; /* ✨ 關鍵：強制改為一排 3 格 */
+                gap: 8px !important; /* 讓卡片之間有一點呼吸空間 */
+                padding: 10px !important;
+            }
+            #passport-container .photo-area {
+                height: 115px !important; /* 照片高度配合 3 欄的寬度拉長，變回完美的微長方形 */
+            }
             #passport-container .nickname {
-                font-size: 10px !important; 
+                font-size: 13px !important; /* 空間變大了，字體可以稍微調回看得清楚的大小 */
                 white-space: nowrap !important; 
                 overflow: hidden !important;
                 text-overflow: ellipsis !important; 
-                line-height: 1.1 !important;
+                line-height: 1.2 !important;
                 display: block !important;
                 width: 100% !important;
-            }
-            #passport-container .photo-area {
-                height: 60px !important; 
             }
 
             /* --- 2. 殘酷二選一：女孩照片最大化 --- */
@@ -1897,15 +1902,19 @@
                      const teams = c.mT.filter(t => t);
                      const lookupTeam = teams[0] || "全部啦啦隊";
                      const accent = (teamThemes[lookupTeam] || {accent:"#fff"}).accent;
+                     
+                     // ✨ 新增：判斷是否有綽號，而且不等於本名
+                     const showNick = (c.nickname && c.nickname !== c.realname) ? c.nickname : '';
+
                      return `
                      <div class="card" style="border-bottom: 6px solid ${accent};" onclick="window.openModal('${c.realname}')">
                         <div class="photo-area">
                             <div class="fav-btn active" onclick="window.toggleFavorite('${c.realname}', event, this)"><svg class="fav-icon"><use xlink:href="#icon-heart"></use></svg></div>
-                            <img src="${c.img}" loading="lazy">
+                            <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
                         </div>
-                        <div class="info-section">
-                            <div style="font-size:22px; font-weight:900; color:${accent}">${c.realname}</div>
-                            <div style="color:var(--text-sub); font-weight:700; margin-top:5px;">${teams.join(' / ')}</div>
+                        <div class="info-section" style="padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${c.realname}</div>
+                            ${showNick ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${showNick}</div>` : ''}
                         </div>
                      </div>`;
                  }).join('') + `</div>`;
