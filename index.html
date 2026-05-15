@@ -41,6 +41,8 @@
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@400;700;900&display=swap');
@@ -1694,9 +1696,7 @@
             let boardAccent = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || cfg.defaultColor) : cfg.defaultColor;
             let modeSubtitle = dtState.rule === 'same' ? `🛡️ ${dtState.selectedTeam} 專屬陣容` : '🌍 跨隊明星大亂鬥';
 
-            // 根據類型渲染：保留原本的 Grid，或是新的 Court
             if (cfg.type === 'grid') {
-                // 原本的經典網格模式
                 let slotsHtml = dtState.roster.map((girl, index) => {
                     const rConf = cfg.roles[index];
                     if (girl) {
@@ -1719,11 +1719,10 @@
                     <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle}</div>
                     <div class="dt-slots-grid">${slotsHtml}</div>
                     <div style="margin-top: 30px; display:flex; flex-direction:column; align-items:center;">
-                        <button class="nav-btn" style="background:${isFull ? '#ff0044' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>${isFull ? '📸 生成戰隊海報' : '請先選滿 5 位女孩'}</button>
+                        <button class="nav-btn" style="background:${isFull ? '#ff0044' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>${isFull ? '📸 完成編制，檢視海報' : '請先選滿 5 位女孩'}</button>
                         <div style="color:var(--text-sub); font-size:13px; font-weight:700; margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
                     </div>`;
             } else {
-                // 新增的運動戰術板模式
                 let tokensHtml = dtState.roster.map((girl, index) => {
                     const role = cfg.roles[index];
                     if (girl) {
@@ -1745,19 +1744,20 @@
                 if (dtState.isPosterMode) {
                     container.innerHTML = `
                         <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">陣容部署完畢</div>
-                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 手機請直接截圖下方戰術板分享！</div>
-                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
+                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 點擊下方按鈕即可將戰術板存入手機！</div>
+                        
+                        <div id="capture-area" class="dt-tactical-board" style="--event-accent:${boardAccent};">
                             <div class="court-bg ${cfg.courtClass}"></div>
-                            
                             <div style="position:absolute; bottom:20px; left:20px; z-index:5; font-family:var(--sport-font); font-size:22px; font-weight:900; color:rgba(255,255,255,0.95); text-shadow:2px 2px 4px #000, 0 0 10px #000; text-align:left; line-height:1.2;">
                                 DREAM TEAM<br><span style="font-size:13px; color:${boardAccent}; font-family:var(--tc-font);">${modeSubtitle}</span>
                             </div>
-                            
                             ${tokensHtml}
                         </div>
-                        <div style="margin-top:30px; display:flex; justify-content:center; gap:15px;">
+                        
+                        <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <button id="download-btn" class="nav-btn" style="background:#00e676; color:#000; border-color:#00e676; font-size:16px; padding:12px 20px;" onclick="window.downloadDtPoster()">📥 一鍵下載海報</button>
                             <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
-                            <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重建新戰隊</button>
+                            <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重建</button>
                         </div>`;
                     if(typeof createConfetti === 'function') createConfetti();
                 } else {
@@ -1770,7 +1770,7 @@
                         </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
                             <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
-                                ${isFull ? '📸 完成佈陣，生成戰術海報 (截圖用)' : '教練，場上還有空缺！'}
+                                ${isFull ? '📸 完成佈陣，檢視戰術板' : '教練，場上還有空缺！'}
                             </button>
                             <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
                         </div>`;
@@ -1793,7 +1793,6 @@
             renderDreamTeamStart(); 
         };
 
-        // ================= 狀態 3：選人與進階篩選 =================
         window.openDtSelector = function(slotIndex) {
             let uniqueMap = new Map();
             dbGirls.filter(g => g.img).forEach(g => {
@@ -1806,20 +1805,15 @@
             });
             let pool = Array.from(uniqueMap.values());
             
-            // 🛠️ 修正：脫外套比對法 (處理球隊名稱帶有 _籃球 等後綴的問題)
             if (dtState.rule === 'same') {
-                let baseTeamName = dtState.selectedTeam.split('_')[0]; // 把 "Passion Sisters_籃球" 變成 "Passion Sisters"
+                let baseTeamName = dtState.selectedTeam.split('_')[0]; 
                 pool = pool.filter(g => g.combinedTeam.includes(baseTeamName));
             }
 
-            // ✨ 新增：不可重複選擇邏輯 (僅限棒球、籃球、排球)
             if (dtState.rosterType !== 'original') {
-                // 抓出「除了目前點擊的這個位置以外」，場上已經被指派的女孩名單
                 let alreadyPickedNames = dtState.roster
                     .map((g, idx) => (g !== null && idx !== slotIndex) ? g.realname : null)
                     .filter(name => name !== null);
-                
-                // 從候選池中把這些「已經在場上」的女孩剔除
                 pool = pool.filter(g => !alreadyPickedNames.includes(g.realname));
             }
             
@@ -1829,7 +1823,6 @@
             const roleColor = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || '#fff') : (cfg.type === 'grid' ? cfg.roles[slotIndex].color : cfg.defaultColor);
             const roleName = cfg.roles[slotIndex].name;
 
-            // 建立卡片 HTML
             let listHtml = pool.map(g => {
                 const searchKeywords = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
@@ -1842,7 +1835,6 @@
                 </div>`;
             }).join('');
 
-            // 進階篩選器 UI (僅限大亂鬥模式顯示)
             let filtersHtml = '';
             if (dtState.rule === 'free') {
                 const allTeams = Object.keys(teamThemes).filter(t => t !== "全部啦啦隊");
@@ -1871,7 +1863,7 @@
                         <input type="text" id="dtSearchInput" placeholder="🔍 姓名搜尋..." oninput="window.filterDtGirls()" style="width:100%; padding:10px; border-radius:6px; border:2px solid var(--border-color); background:#111; color:#fff; font-size:15px; outline:none;">
                     </div>
                     <div class="dt-selector-grid" id="dt-selector-grid" ontouchmove="document.getElementById('dtSearchInput').blur()" style="flex:1; overflow-y:auto; padding-bottom: 20px;">
-                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩可選了。</div>'}
+                        ${listHtml || '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">沒有符合條件的女孩。</div>'}
                     </div>
                 </div>`;
             
@@ -1892,11 +1884,8 @@
                 const cardSport = card.getAttribute('data-sport');
                 
                 const matchQ = q === "" || q.split(/\s+/).every(word => searchData.includes(word));
-                
-                // 🛠️ 修正：過濾器也要脫外套比對
                 let baseFTeam = fTeam.split('_')[0];
                 const matchTeam = fTeam === "" || cardTeam.includes(baseFTeam);
-                
                 const matchSport = fSport === "" || cardSport.includes(fSport);
                 
                 if (matchQ && matchTeam && matchSport) {
@@ -1922,7 +1911,6 @@
         window.generateDtPoster = function() {
             const cfg = dtConfigs[dtState.rosterType];
             if (cfg.type === 'grid') {
-                // 原版 5 人戰隊海報模式
                 const container = document.getElementById('dreamteam-container');
                 let posterItems = dtState.roster.map((g, index) => {
                     const rConf = cfg.roles[index]; 
@@ -1937,21 +1925,62 @@
                 const modeSubtitle = dtState.rule === 'same' ? `${dtState.selectedTeam} 專屬陣容` : '跨隊大亂鬥陣容';
                 container.innerHTML = `
                     <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044; margin-bottom:5px;">專屬戰隊已集結</div>
-                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 手機請直接截圖下方海報分享給朋友！</div>
-                    <div class="dt-poster" style="border-color:#ff0044;">
+                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 點擊下方按鈕即可將海報存入手機！</div>
+                    
+                    <div id="capture-area" class="dt-poster" style="border-color:#ff0044;">
                         <div class="dt-poster-title" style="text-shadow: 4px 4px 0 #ff0044;">DREAM TEAM</div><div class="dt-poster-sub">${modeSubtitle}</div>
                         <div class="dt-poster-grid">${posterItems}</div>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+                    
+                    <div style="display:flex; justify-content:center; gap:10px; margin-top:30px; flex-wrap:wrap;">
+                        <button id="download-btn" class="nav-btn" style="background:#00e676; color:#000; border-color:#00e676; font-size:16px; padding:12px 20px;" onclick="window.downloadDtPoster()">📥 一鍵下載海報</button>
                         <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="window.renderDreamTeamStart()">🔙 返回修改</button>
                         <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重組戰隊</button>
                     </div>`;
                 if(typeof createConfetti === 'function') createConfetti();
             } else {
-                // 球場模式截圖：隱藏多餘按鈕並切換標誌
                 dtState.isPosterMode = true;
                 renderDreamTeamStart();
             }
+        };
+
+        // ✨ 終極黑科技：一鍵生成並下載圖片
+        window.downloadDtPoster = function() {
+            const captureArea = document.getElementById('capture-area');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            if(!captureArea) return;
+            
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = "⏳ 圖片生成中...";
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = "0.7";
+
+            html2canvas(captureArea, {
+                useCORS: true,           
+                allowTaint: true,
+                scale: 2,                
+                backgroundColor: "#0a0c0f" 
+            }).then(canvas => {
+                let link = document.createElement('a');
+                let fileName = dtState.rosterType === 'original' ? 'DreamTeam_Idol' : `DreamTeam_${dtState.selectedTeam}`;
+                link.download = `${fileName}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+                
+                downloadBtn.innerHTML = "✅ 下載成功！";
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.disabled = false;
+                    downloadBtn.style.opacity = "1";
+                }, 2000);
+            }).catch(err => {
+                console.error("生成圖片失敗:", err);
+                alert("圖片生成失敗，請嘗試手動截圖！");
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+                downloadBtn.style.opacity = "1";
+            });
         };
 
         // =========================================================================
