@@ -1703,7 +1703,7 @@
                         const dName = (girl.nickname && girl.nickname !== girl.realname) ? girl.nickname : girl.realname;
                         return `
                         <div class="dt-slot filled" style="--event-accent: ${rConf.color};" onclick="window.openDtSelector(${index})">
-                            <div class="dt-role-badge">${rConf.name}</div><img src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
+                            <div class="dt-role-badge">${rConf.name}</div><img crossOrigin="anonymous" src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
                         </div>`;
                     } else {
                         return `
@@ -1730,7 +1730,7 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         return `
                         <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
-                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"></div>
+                            <div class="dt-token-img-wrap"><img crossOrigin="anonymous" src="${window.getCdnUrl(girl.img)}"></div>
                             <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
                         </div>`;
                     }
@@ -1918,7 +1918,7 @@
                     const dName = isTW ? (g.nickname || g.realname) : g.realname;
                     return `
                     <div class="dt-poster-item" style="--event-accent: ${rConf.color};">
-                        <img src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
+                        <img crossOrigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                         <div class="dt-poster-info"><div class="dt-poster-role" style="color:${rConf.color};">${rConf.name.split(' ')[1]}</div><div class="dt-poster-name">${dName}</div></div>
                     </div>`;
                 }).join('');
@@ -1944,7 +1944,7 @@
             }
         };
 
-        // ✨ 終極黑科技：一鍵生成並下載圖片
+        // ✨ 終極黑科技：一鍵生成並下載圖片 (修復跨域崩潰問題)
         window.downloadDtPoster = function() {
             const captureArea = document.getElementById('capture-area');
             const downloadBtn = document.getElementById('download-btn');
@@ -1957,9 +1957,9 @@
             downloadBtn.style.opacity = "0.7";
 
             html2canvas(captureArea, {
-                useCORS: true,           
-                allowTaint: true,
-                scale: 2,                
+                useCORS: true,           // 允許跨域讀取外部照片
+                // allowTaint: true,     // ❌ 必須拿掉這行！這行會導致畫布污染，導致下載失敗
+                scale: 2,                // 輸出為 2 倍高畫質圖片
                 backgroundColor: "#0a0c0f" 
             }).then(canvas => {
                 let link = document.createElement('a');
@@ -1976,7 +1976,7 @@
                 }, 2000);
             }).catch(err => {
                 console.error("生成圖片失敗:", err);
-                alert("圖片生成失敗，請嘗試手動截圖！");
+                alert("圖片生成失敗，可能是部分照片來源的安全限制。請直接用手機截圖！");
                 downloadBtn.innerHTML = originalText;
                 downloadBtn.disabled = false;
                 downloadBtn.style.opacity = "1";
