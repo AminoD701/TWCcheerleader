@@ -1625,15 +1625,14 @@
             'volleyball': { 
                 name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
                 roles: [
-                    { name: '主攻手 WS',   abbr: 'WS', top: '22%', left: '25%' },  // 前排左 (貼網)
-                    { name: '攔中手 MB',   abbr: 'MB', top: '22%', left: '50%' },  // 前排中 (貼網)
-                    { name: '副攻手 OP',   abbr: 'OP', top: '22%', left: '75%' },  // 前排右 (貼網)
-                    { name: '舉球員 S',    abbr: 'S',  top: '62%', left: '72%' },  // 後排右
-                    { name: '自由人 L',    abbr: 'L',  top: '82%', left: '50%' },  // 後排中 (底線)
-                    { name: '後排主攻 WS', abbr: 'WS', top: '62%', left: '28%' }   // 後排左
+                    { name: '主攻手 WS',   abbr: 'WS', top: '42%', left: '25%' },  // 移回我方前排 (網子與三米線之間)
+                    { name: '攔中手 MB',   abbr: 'MB', top: '42%', left: '50%' },  
+                    { name: '副攻手 OP',   abbr: 'OP', top: '42%', left: '75%' },  
+                    { name: '舉球員 S',    abbr: 'S',  top: '68%', left: '75%' },  // 退到三米線後方
+                    { name: '自由人 L',    abbr: 'L',  top: '88%', left: '50%' },  // 鎮守最後方底線
+                    { name: '後排主攻 WS', abbr: 'WS', top: '68%', left: '25%' }   
                 ]
             }
-        };
         let dtState = { active: false, rosterType: 'original', rule: 'free', selectedTeam: '全部啦啦隊', roster: [], isPosterMode: false };
 
         window.renderDreamTeamStart = function() {
