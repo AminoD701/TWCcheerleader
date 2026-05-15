@@ -1624,7 +1624,7 @@
                 name: '⚾ 棒球鑽石陣容 (9人)', count: 9, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
                 roles: [
                     { name: '左外野手 LF', abbr: 'LF', top: '25%', left: '20%' },
-                    { name: '中外野手 CF', abbr: 'CF', top: '15%', left: '50%' },
+                    { name: '中外野手 CF', abbr: 'CF', top: '22%', left: '50%' }, /* ✨ 從 15% 往下移到 22% */
                     { name: '右外野手 RF', abbr: 'RF', top: '25%', left: '80%' },
                     { name: '游擊手 SS', abbr: 'SS', top: '45%', left: '35%' },
                     { name: '二壘手 2B', abbr: '2B', top: '45%', left: '65%' },
@@ -1637,22 +1637,22 @@
             'basketball': { 
                 name: '🏀 籃球先發五人 (5人)', count: 5, type: 'court', courtClass: 'court-basketball', defaultColor: '#03a9f4',
                 roles: [
-                    { name: '控球後衛 PG', abbr: 'PG', top: '80%', left: '50%' },  // 最下方
-                    { name: '得分後衛 SG', abbr: 'SG', top: '58%', left: '78%' },  // 右側稍微往下，避開 PF
-                    { name: '小前鋒 SF',   abbr: 'SF', top: '58%', left: '22%' },  // 左側稍微往下，避開 C
-                    { name: '大前鋒 PF',   abbr: 'PF', top: '35%', left: '76%' },  // 右上角，靠近禁區
-                    { name: '中鋒 C',      abbr: 'C',  top: '18%', left: '50%' }   // 禁區籃下，最高點
+                    { name: '控球後衛 PG', abbr: 'PG', top: '80%', left: '50%' },  
+                    { name: '得分後衛 SG', abbr: 'SG', top: '58%', left: '78%' },  
+                    { name: '小前鋒 SF',   abbr: 'SF', top: '58%', left: '22%' },  
+                    { name: '大前鋒 PF',   abbr: 'PF', top: '35%', left: '76%' },  
+                    { name: '中鋒 C',      abbr: 'C',  top: '25%', left: '50%' }   /* ✨ 從 18% 往下移到 25% */
                 ]
             },
             'volleyball': { 
                 name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
                 roles: [
-                    { name: '主攻手 WS',   abbr: 'WS', top: '36%', left: '25%' },  // 前排稍微往下移，不擋文字
+                    { name: '主攻手 WS',   abbr: 'WS', top: '36%', left: '25%' },  
                     { name: '攔中手 MB',   abbr: 'MB', top: '36%', left: '50%' },  
                     { name: '副攻手 OP',   abbr: 'OP', top: '36%', left: '75%' },  
-                    { name: '舉球員 S',    abbr: 'S',  top: '65%', left: '75%' },  // 後排右
-                    { name: '自由人 L',    abbr: 'L',  top: '86%', left: '50%' },  // 壓在底線
-                    { name: '後排主攻 WS', abbr: 'WS', top: '65%', left: '25%' }   // 後排左
+                    { name: '舉球員 S',    abbr: 'S',  top: '65%', left: '75%' },  
+                    { name: '自由人 L',    abbr: 'L',  top: '86%', left: '50%' },  
+                    { name: '後排主攻 WS', abbr: 'WS', top: '65%', left: '25%' }   
                 ]
             }
         };
