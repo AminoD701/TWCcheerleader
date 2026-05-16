@@ -1010,10 +1010,17 @@
         .fortune-girl { font-size: clamp(16px, 5vw, 18px); font-weight: 900; color: #111; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .fortune-desc { font-size: 14px; color: #444; font-weight: 700; line-height: 1.6; }
 
+        /* 4. 拍立得運勢卡片 (UR 閃卡升級版) ... (省略) ... */
+        .fortune-girl { font-size: clamp(16px, 5vw, 18px); font-weight: 900; color: #111; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .fortune-desc { font-size: 14px; color: #444; font-weight: 700; line-height: 1.6; }
+
+        /* ✨ 把這段手機版設定，確實放在 CSS 的最後面！ */
         @media (max-width: 768px) {
-            .floating-gacha-btn { bottom: 85px; right: 20px; left: auto; } /* 確保把 left 覆蓋掉，改用 right */
+            .floating-gacha-btn { bottom: 85px; right: 20px; left: auto; } 
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
+    </style> 
+</head>
     </style>  </head>
 <body class="no-scroll">
 
