@@ -411,6 +411,66 @@
         .back-btn:hover { background: var(--schedule-accent); transform: skewX(-5deg) translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.5); }
 
         /* =========================================
+           🔮 每日運勢抽卡系統專屬樣式 (修復補丁)
+        ========================================= */
+        .gacha-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.5s; padding: 20px; box-sizing: border-box; }
+        .gacha-overlay.show { display: flex; opacity: 1; }
+
+        .gacha-animation { position: relative; width: 85vw; max-width: 320px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
+        .gacha-animation::before { content: ''; position: absolute; width: 110%; height: 110%; border-radius: 50%; background: radial-gradient(circle, transparent 30%, rgba(156, 39, 176, 0.5) 50%, rgba(0, 229, 255, 0.4) 70%, transparent 90%); animation: aura-spin 6s linear infinite, aura-pulse 2s ease-in-out infinite alternate; z-index: 0; filter: blur(12px); pointer-events: none; }
+        .magic-circle-outer { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(255, 215, 0, 0.3); border-top: 3px solid #ffd700; border-bottom: 3px solid #ffd700; border-radius: 50%; animation: spin 5s linear infinite; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.3); z-index: 1; }
+        .magic-circle-outer::before { content: ''; position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px; border: 2px dashed rgba(255, 215, 0, 0.6); border-radius: 50%; }
+        .magic-circle-inner { position: absolute; width: 85%; height: 85%; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M 50 5 L 76.5 86.4 L 7.3 36.1 L 92.7 36.1 L 23.5 86.4 Z' fill='none' stroke='%23ffd700' stroke-width='1.5'/%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23ffd700' stroke-width='1'/%3E%3Ccircle cx='50' cy='50' r='20' fill='none' stroke='%23ffd700' stroke-width='0.5' stroke-dasharray='2,3'/%3E%3C/svg%3E"); background-size: contain; background-position: center; background-repeat: no-repeat; animation: spin-reverse 4s linear infinite; filter: drop-shadow(0 0 12px #ffd700) drop-shadow(0 0 4px #fff); }
+        .magic-core { position: absolute; width: 5%; height: 5%; background: #fff; border-radius: 50%; box-shadow: 0 0 60px 30px #fff, 0 0 100px 50px #ffd700; opacity: 0; z-index: 3; }
+        .gacha-overlay.show .magic-core { animation: magic-burst 2.5s ease-in forwards; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes aura-spin { 100% { transform: rotate(360deg); } }
+        @keyframes aura-pulse { 0% { opacity: 0.4; } 100% { opacity: 1; filter: blur(15px) hue-rotate(45deg); } }
+        @keyframes magic-burst { 0% { transform: scale(0.2); opacity: 0; box-shadow: 0 0 20px 10px #fff; } 60% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 40px 20px #fff, 0 0 60px 30px #ffd700; } 90% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 80px 40px #fff, 0 0 150px 60px #ffd700; } 100% { transform: scale(20); opacity: 1; box-shadow: 0 0 300px 300px #fff; } }
+
+        .gacha-result { display: none; flex-direction: column; align-items: center; transform: scale(0.5) translateY(50px); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%; z-index: 10; }
+        .gacha-result.reveal { transform: scale(1) translateY(0); opacity: 1; }
+        
+        .polaroid-card { background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); padding: 15px 15px 25px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(255, 215, 0, 0.3); max-width: 320px; width: 90vw; text-align: center; transform: rotate(-2deg); border: 4px solid #fff; position: relative; overflow: hidden; }
+        .polaroid-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg) translate(-50%, -50%); animation: shine 4s infinite; pointer-events: none; }
+        @keyframes shine { 0% { left: -50%; } 100% { left: 150%; } }
+        
+        .polaroid-img-wrap { width: 100%; aspect-ratio: 4/5; background: #111; overflow: hidden; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ddd; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .polaroid-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+        
+        .fortune-title { font-family: var(--sport-font); font-size: clamp(22px, 8vw, 28px); font-weight: 900; color: #d32f2f; margin: -10px auto 12px; border: 3px solid #d32f2f; padding: 4px 20px; border-radius: 8px; display: inline-block; transform: rotate(-5deg); box-shadow: 2px 2px 0px rgba(211, 47, 47, 0.2); letter-spacing: 2px; }
+        .fortune-girl { font-size: clamp(16px, 5vw, 18px); font-weight: 900; color: #111; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fortune-desc { font-size: 14px; color: #444; font-weight: 700; line-height: 1.6; }
+
+        /* ✨ 每日運勢抽卡 (頂部發光按鈕版) */
+        .gacha-top-btn {
+            background: linear-gradient(45deg, #673ab7, #9c27b0) !important;
+            border-color: #e040fb !important;
+            color: #fff !important;
+            box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important;
+            animation: gacha-glow 2s infinite alternate;
+            padding: 12px 20px !important;
+        }
+        .gacha-top-btn:hover {
+            border-color: #fff !important;
+            transform: skewX(-5deg) translateY(-2px) !important;
+            box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important;
+        }
+        @keyframes gacha-glow {
+            0% { filter: brightness(1); box-shadow: 4px 4px 0px rgba(156,39,176,0.5); }
+            100% { filter: brightness(1.2); box-shadow: 4px 4px 12px rgba(224,64,251,0.9); }
+        }
+
+        /* ✨ 照片右下角的專屬備註標籤 (例如：練習生) */
+        .photo-note-tag {
+            position: absolute; bottom: 12px; right: 12px; background: rgba(0, 0, 0, 0.75);
+            color: var(--team-accent, #ffeb3b); padding: 4px 10px; border-radius: 4px;
+            font-size: 11px; font-weight: 900; letter-spacing: 1px; z-index: 10;
+            backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.6); pointer-events: none;
+        }/* =========================================
            ✨ 手機版專屬優化
         ========================================= */
         @media (max-width: 768px) {
