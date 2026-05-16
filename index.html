@@ -677,6 +677,63 @@
             .dt-selector-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         /* =========================================
+           🏟️ 夢幻陣容：擴充賽制戰術板與篩選器
+        ========================================= */
+        /* 設定大廳卡片 */
+        .dt-setup-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 20px; }
+        .dt-setup-label { font-size: 14px; color: var(--text-sub); font-weight: 900; margin-bottom: 8px; display: block; }
+        .dt-setup-select { width: 100%; padding: 12px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 16px; font-weight: 700; outline: none; margin-bottom: 20px; }
+
+        /* 選人彈窗的進階篩選區 */
+        .dt-modal-filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .dt-modal-filters select { flex: 1; min-width: 120px; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 14px; font-weight: 700; outline: none; }
+
+        /* ✨ 戰術板浮水印響應式設定 */
+        .dt-watermark {
+            position: absolute; bottom: 15px; left: 15px; z-index: 5; text-align: left; line-height: 1.2;
+            text-shadow: 2px 2px 4px #000, 0 0 10px #000; pointer-events: none;
+        }
+        .dt-watermark-title { font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: rgba(255,255,255,0.95); }
+        .dt-watermark-sub { font-family: var(--tc-font); font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+        .dt-tactical-board {
+            position: relative; width: 100%; max-width: 650px; aspect-ratio: 3 / 4; margin: 0 auto;
+            background-color: #0a0c0f; border: 3px solid var(--event-accent);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+        }
+
+        /* 🏟️ 球場底圖設定 */
+        .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; z-index: 1; pointer-events: none; }
+
+        /* 女孩戰術頭像 (Token) */
+        .dt-token {
+            position: absolute; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; width: 110px; z-index: 10; cursor: pointer; transition: 0.2s;
+        }
+        .dt-token:hover { z-index: 50; }
+        .dt-token-img-wrap {
+            position: relative; width: 90px; height: 90px; border-radius: 50%;
+            background: #111; border: 3px solid var(--event-accent);
+            box-shadow: 0 0 15px var(--event-accent), 0 8px 20px rgba(0,0,0,0.8); 
+            overflow: visible; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .dt-token:hover .dt-token-img-wrap { transform: scale(1.1); box-shadow: 0 0 25px var(--event-accent), 0 10px 25px rgba(0,0,0,0.9); }
+        .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
+        .dt-token-empty { font-size: 32px; color: #555; line-height: 84px; text-align: center; }
+
+        .dt-token-info { text-align: center; margin-top: 8px; width: 140px; display: flex; flex-direction: column; align-items: center; }
+        .dt-token-role { 
+            font-size: 11px; color: #000; font-weight: 900; background: var(--event-accent); 
+            padding: 2px 8px; border-radius: 12px; white-space: nowrap; 
+            margin-bottom: -6px; z-index: 2; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;
+        }
+        .dt-token-name { 
+            font-size: 15px; color: #fff; font-weight: 900; text-shadow: 1px 1px 3px #000; white-space: nowrap; 
+            background: linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 8px 12px 3px; 
+            border-radius: 6px; border: 1px solid var(--event-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
+        }
+        /* =========================================
            📂 電競風收納下拉選單 (Dropdown)
         ========================================= */
         .dropdowns-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
