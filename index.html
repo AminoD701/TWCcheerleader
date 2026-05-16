@@ -1566,6 +1566,11 @@
                 </div>`;
             }).join('') || '<div style="color:var(--text-sub); margin-left: 5px;">本月暫無壽星</div>';
         }
+        window.toggleHub = function(show) {
+            document.getElementById('hub-overlay').classList.toggle('active', show);
+            if(show) document.body.classList.add('no-scroll');
+            else document.body.classList.remove('no-scroll');
+        };
 
         // =========================================================================
         // ⚡ 極速無重整互動邏輯 (Async UI Update)
