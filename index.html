@@ -1754,7 +1754,7 @@
             });
         };
         // =========================================================================
-        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎 (完美不卡位座標版)
+        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎 (防打架加寬座標版)
         // =========================================================================
         const dtConfigs = {
             'original': {
@@ -1771,12 +1771,12 @@
                 name: '⚾ 棒球鑽石陣容 (9人)', count: 9, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
                 roles: [
                     { name: '左外野手 LF', abbr: 'LF', top: '25%', left: '20%' },
-                    { name: '中外野手 CF', abbr: 'CF', top: '22%', left: '50%' }, /* ✨ 從 15% 往下移到 22% */
+                    { name: '中外野手 CF', abbr: 'CF', top: '22%', left: '50%' }, 
                     { name: '右外野手 RF', abbr: 'RF', top: '25%', left: '80%' },
                     { name: '游擊手 SS', abbr: 'SS', top: '45%', left: '35%' },
                     { name: '二壘手 2B', abbr: '2B', top: '45%', left: '65%' },
-                    { name: '三壘手 3B', abbr: '3B', top: '60%', left: '25%' },
-                    { name: '一壘手 1B', abbr: '1B', top: '60%', left: '75%' },
+                    { name: '三壘手 3B', abbr: '3B', top: '60%', left: '15%' }, /* ✨ 從 25% 大幅往外側推到 15% */
+                    { name: '一壘手 1B', abbr: '1B', top: '60%', left: '85%' }, /* ✨ 從 75% 大幅往外側推到 85% */
                     { name: '投手 P',   abbr: 'P',  top: '65%', left: '50%' },
                     { name: '捕手 C',   abbr: 'C',  top: '88%', left: '50%' }
                 ]
@@ -1788,7 +1788,7 @@
                     { name: '得分後衛 SG', abbr: 'SG', top: '58%', left: '78%' },  
                     { name: '小前鋒 SF',   abbr: 'SF', top: '58%', left: '22%' },  
                     { name: '大前鋒 PF',   abbr: 'PF', top: '35%', left: '76%' },  
-                    { name: '中鋒 C',      abbr: 'C',  top: '33%', left: '50%' }   /* ✨ 從 18% 往下移到 33% */
+                    { name: '中鋒 C',      abbr: 'C',  top: '33%', left: '50%' }   
                 ]
             },
             'volleyball': { 
@@ -1821,13 +1821,11 @@
                             <option value="basketball">🏀 籃球陣容 (5人)</option>
                             <option value="volleyball">🏐 排球陣容 (6人)</option>
                         </select>
-                        
                         <label class="dt-setup-label">2. 招募限制</label>
                         <select id="dt-setup-rule" class="dt-setup-select" onchange="document.getElementById('dt-setup-team-box').style.display = this.value === 'same' ? 'block' : 'none'">
                             <option value="free">🌍 跨隊大亂鬥</option>
                             <option value="same">🛡️ 單一球隊專屬</option>
                         </select>
-                        
                         <div id="dt-setup-team-box" style="display:none;">
                             <label class="dt-setup-label">3. 指定球隊</label>
                             <select id="dt-setup-team" class="dt-setup-select">${teamOptions}</select>
@@ -1836,13 +1834,12 @@
                     </div>`;
                 return;
             }
+
             // ================= 狀態 2：排兵布陣中 =================
             let cfg = dtConfigs[dtState.rosterType];
             let isFull = dtState.roster.every(slot => slot !== null);
             let boardAccent = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || cfg.defaultColor) : cfg.defaultColor;
             let modeSubtitle = dtState.rule === 'same' ? `🛡️ ${dtState.selectedTeam} 專屬陣容` : '🌍 跨隊明星大亂鬥';
-            
-            // ✨ 救命關鍵：解析正確的底圖名稱 (確保抓取 png 檔案)
             let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
@@ -1893,14 +1890,16 @@
                 if (dtState.isPosterMode) {
                     container.innerHTML = `
                         <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">陣容部署完畢</div>
-                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 教練，請直接手機截圖下方戰術板分享！</div>
+                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，請直接手機截圖分享！</div>
                         
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
+                            <img src="./${bgImgFile}" class="court-bg">
+                            
                             <div class="dt-watermark">
                                 <div class="dt-watermark-title">DREAM TEAM</div>
                                 <div class="dt-watermark-sub" style="color:${boardAccent};">${modeSubtitle}</div>
                             </div>
+                            
                             ${tokensHtml}
                         </div>
                         
@@ -1914,7 +1913,7 @@
                         <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
                         <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
+                            <img src="./${bgImgFile}" class="court-bg">
                             ${tokensHtml}
                         </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
@@ -2074,7 +2073,7 @@
                 const modeSubtitle = dtState.rule === 'same' ? `${dtState.selectedTeam} 專屬陣容` : '跨隊大亂鬥陣容';
                 container.innerHTML = `
                     <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044; margin-bottom:5px;">專屬戰隊已集結</div>
-                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 教練，請直接手機截圖下方海報分享！</div>
+                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 手機請直接截圖下方海報分享！</div>
                     
                     <div class="dt-poster" style="border-color:#ff0044;">
                         <div class="dt-poster-title" style="text-shadow: 4px 4px 0 #ff0044;">DREAM TEAM</div><div class="dt-poster-sub">${modeSubtitle}</div>
