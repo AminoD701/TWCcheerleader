@@ -904,6 +904,42 @@
                 padding: 15px; 
             }
         }
+        /* =========================================
+           🔮 每日運勢抽卡系統專屬樣式 (極致手機版優化)
+        ========================================= */
+        /* 1. 左下角小小的抽卡按鈕 */
+        .floating-gacha-btn { position: fixed; bottom: 100px; left: 30px; width: 45px; height: 45px; background: #673ab7; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.6); transition: 0.3s; border: 2px solid #fff; }
+        .floating-gacha-btn:hover { transform: scale(1.15) rotate(15deg); background: #9c27b0; box-shadow: 0 6px 20px rgba(156, 39, 176, 0.8); }
+        
+        /* 2. 全螢幕黑暗遮罩 (加入安全內距避免手機邊緣切邊) */
+        .gacha-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.5s; padding: 20px; box-sizing: border-box;}
+        .gacha-overlay.show { display: flex; opacity: 1; }
+
+        /* 3. 純 CSS 魔法召喚陣特效 (動態縮放) */
+        .gacha-animation { position: relative; width: 80vw; max-width: 300px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
+        .magic-circle-outer { position: absolute; width: 100%; height: 100%; border: 4px dashed #ffeb3b; border-radius: 50%; animation: spin 4s linear infinite; box-shadow: 0 0 30px #ffeb3b, inset 0 0 30px #ffeb3b; filter: drop-shadow(0 0 10px #ffeb3b); }
+        .magic-circle-inner { position: absolute; width: 70%; height: 70%; border: 6px dotted #00e676; border-radius: 50%; animation: spin-reverse 3s linear infinite; box-shadow: 0 0 20px #00e676; }
+        .magic-core { position: absolute; width: 20%; height: 20%; background: #fff; border-radius: 50%; box-shadow: 0 0 50px 20px #fff; animation: pulse-glow 1s ease-in-out infinite alternate; }
+        
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-glow { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.2); opacity: 1; } }
+
+        /* 4. 拍立得運勢卡片 (動態寬度) */
+        .gacha-result { display: none; flex-direction: column; align-items: center; transform: scale(0.5) translateY(50px); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%;}
+        .gacha-result.reveal { transform: scale(1) translateY(0); opacity: 1; }
+        .polaroid-card { background: #fff; padding: 15px 15px 25px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-width: 320px; width: 100%; text-align: center; transform: rotate(-2deg); border: 1px solid #ddd; }
+        .polaroid-img-wrap { width: 100%; aspect-ratio: 4/5; background: #111; overflow: hidden; margin-bottom: 15px; border-radius: 4px; border: 1px solid #eee; }
+        .polaroid-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+        
+        /* ✨ 防折行：字體動態調整大小 */
+        .fortune-title { font-family: var(--sport-font); font-size: clamp(24px, 8vw, 32px); font-weight: 900; color: #ff0044; margin-bottom: 5px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1); letter-spacing: 2px;}
+        .fortune-girl { font-size: clamp(16px, 5vw, 18px); font-weight: 900; color: #111; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .fortune-desc { font-size: 14px; color: #555; font-weight: 700; line-height: 1.6; }
+
+        @media (max-width: 768px) {
+            .floating-gacha-btn { bottom: 95px; left: 20px; } /* 避開手機版左下角的數據中心按鈕 */
+            .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } /* 調整「運勢感應中」的文字位置 */
+        }
     </style>  </head>
 <body class="no-scroll">
 
@@ -925,6 +961,30 @@
         </div>
     </div>
 
+    <div class="floating-gacha-btn" onclick="window.startGacha()" title="每日運勢抽卡">
+        <span style="font-size:22px;">🔮</span>
+    </div>
+
+    <div id="gacha-overlay" class="gacha-overlay">
+        <div id="gacha-animation" class="gacha-animation">
+            <div class="magic-circle-outer"></div>
+            <div class="magic-circle-inner"></div>
+            <div class="magic-core"></div>
+            <div style="position:absolute; bottom:-60px; color:#fff; font-weight:900; letter-spacing:2px; font-family:var(--sport-font); width:100%; text-align:center;">運勢感應中...</div>
+        </div>
+        
+        <div id="gacha-result" class="gacha-result">
+            <div class="polaroid-card">
+                <div class="polaroid-img-wrap">
+                    <img id="gacha-img" src="" alt="Girl Image">
+                </div>
+                <div class="fortune-title" id="gacha-fortune-title">大吉</div>
+                <div class="fortune-girl" id="gacha-girl-name">女孩姓名</div>
+                <div class="fortune-desc" id="gacha-fortune-desc">今天運氣爆棚！</div>
+            </div>
+            <button class="enter-btn" style="margin-top:30px; font-size:16px; padding:10px 30px; background:#fff; color:#000;" onclick="window.closeGacha()">收下祝福 💖</button>
+        </div>
+    </div>
     <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
         <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
     </div>
@@ -3167,6 +3227,72 @@
                 alert("❌ 傳送失敗，請檢查網路連線或稍後再試！");
                 btn.disabled = false; btn.innerHTML = originalText; btn.style.opacity = "1";
             });
+        };
+        // =========================================================================
+        // 🔮 每日運勢抽卡系統引擎
+        // =========================================================================
+        const fortunePool = [
+            { title: "大吉 🌟", desc: "今天運氣爆棚！做什麼都超級順利，快去買張彩券吧！女孩為你強力應援！" },
+            { title: "中吉 ✨", desc: "安穩又充滿小確幸的一天，記得保持微笑，好運就會緊緊跟隨喔！" },
+            { title: "小吉 🌸", desc: "一步一腳印，默默的努力今天會有意想不到的回報！繼續加油！" },
+            { title: "戀愛運爆發 💖", desc: "今天散發著無敵的魅力，走在路上都會自帶光芒，自信展現自己吧！" },
+            { title: "事業運高漲 💼", desc: "工作或學習效率滿分！難題都能迎刃而解，連女孩都為你的表現驚呼！" },
+            { title: "元氣滿滿 ⚡", desc: "活力充沛的一天！跟著啦啦隊女孩一起把能量釋放出來，擊退所有煩惱！" },
+            { title: "財運亨通 💰", desc: "今天對於數字特別敏銳，可能有意外之財降臨喔！好運加持中！" }
+        ];
+
+        window.startGacha = function() {
+            if(dbGirls.length === 0) { alert("資料還在準備中，請稍後再試！"); return; }
+
+            const todayStr = new Date().toDateString();
+            const lastDraw = localStorage.getItem('cheer_gacha_date');
+            
+            // ⚠️ 每日防呆鎖：(總教練測試時，可以在下面這行前面加上 // 註解掉，就能無限抽卡)
+            if (lastDraw === todayStr) { 
+                alert("教練，今天已經為您應援過囉！明天再來抽取新的幸運祝福吧！"); 
+                return; 
+            }
+
+            // 1. 顯示全螢幕遮罩與召喚陣，隱藏結果卡
+            const overlay = document.getElementById('gacha-overlay');
+            const animBox = document.getElementById('gacha-animation');
+            const resBox = document.getElementById('gacha-result');
+            
+            overlay.classList.add('show');
+            animBox.style.display = 'flex';
+            resBox.style.display = 'none';
+            resBox.classList.remove('reveal'); 
+
+            // 2. 啟動 2.5 秒召喚陣動畫，然後揭曉結果
+            setTimeout(() => {
+                // 隨機抽選女孩(只抽有照片的)與運勢
+                const validGirls = dbGirls.filter(g => g.img);
+                const girl = validGirls[Math.floor(Math.random() * validGirls.length)];
+                const fortune = fortunePool[Math.floor(Math.random() * fortunePool.length)];
+                
+                // 填入資料
+                document.getElementById('gacha-img').src = window.getCdnUrl(girl.img);
+                document.getElementById('gacha-fortune-title').innerText = fortune.title;
+                const dName = (girl.nickname && girl.nickname !== girl.realname) ? `${girl.realname} (${girl.nickname})` : girl.realname;
+                document.getElementById('gacha-girl-name').innerHTML = `${dName} <span style="font-size:12px; color:#888;">/ ${girl.team}</span>`;
+                document.getElementById('gacha-fortune-desc').innerText = fortune.desc;
+
+                // 切換顯示
+                animBox.style.display = 'none';
+                resBox.style.display = 'flex';
+                
+                // 動畫彈出效果
+                setTimeout(() => resBox.classList.add('reveal'), 50);
+                
+                // 存入紀錄
+                localStorage.setItem('cheer_gacha_date', todayStr);
+                if(typeof createConfetti === 'function') createConfetti();
+
+            }, 2500); 
+        };
+
+        window.closeGacha = function() {
+            document.getElementById('gacha-overlay').classList.remove('show');
         };
 
         window.onload = loadData;
