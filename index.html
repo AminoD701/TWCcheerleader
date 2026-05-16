@@ -1464,19 +1464,22 @@
         }
 
         // =========================================================================
-        // 🎁 數據驚喜中心計算邏輯 (國籍智慧命名版)
+        // 🎁 數據驚喜中心計算邏輯 (台/港/馬 智慧命名版)
         // =========================================================================
         function calculateHubStats() {
             const today = new Date();
             const curMonth = today.getMonth() + 1;
             const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
             
+            // ✨ 建立共用的國籍判斷小幫手 (包含台、臺、港、馬)
+            const isLocalTarget = (natStr) => {
+                const n = natStr || "";
+                return n.includes("台") || n.includes("臺") || n.includes("港") || n.includes("馬");
+            };
+
             if (dbGirls.length > 0) {
                 const luckyGirl = dbGirls[seed % dbGirls.length];
-                
-                // ✨ 智慧分流：台灣顯示綽號，外籍顯示本名
-                const isTW_Lucky = (luckyGirl.nat || "").includes("台") || (luckyGirl.nat || "").includes("臺");
-                const luckyName = isTW_Lucky ? (luckyGirl.nickname || luckyGirl.realname) : luckyGirl.realname;
+                const luckyName = isLocalTarget(luckyGirl.nat) ? (luckyGirl.nickname || luckyGirl.realname) : luckyGirl.realname;
 
                 document.getElementById('lucky-girl-content').innerHTML = `
                     <div class="lucky-girl-box" onclick="toggleHub(false); window.openModal('${luckyGirl.uid}')">
@@ -1498,11 +1501,9 @@
                 let mvpGirl = girlMap.get(mvpName);
                 let targetId = mvpGirl ? mvpGirl.uid : mvpName;
                 
-                // ✨ MVP 智慧分流命名
                 let displayMvpName = mvpName;
                 if (mvpGirl) {
-                    const isTW_MVP = (mvpGirl.nat || "").includes("台") || (mvpGirl.nat || "").includes("臺");
-                    displayMvpName = isTW_MVP ? (mvpGirl.nickname || mvpGirl.realname) : mvpGirl.realname;
+                    displayMvpName = isLocalTarget(mvpGirl.nat) ? (mvpGirl.nickname || mvpGirl.realname) : mvpGirl.realname;
                 }
 
                 document.getElementById('mvp-content').innerHTML = `
@@ -1548,9 +1549,7 @@
                 if(p.length >= 3) day = parseInt(p[2]);
                 else if(p.length === 2) day = parseInt(p[1]);
 
-                // ✨ 壽星智慧分流命名
-                const isTW_BD = (g.nat || "").includes("台") || (g.nat || "").includes("臺");
-                const bdName = isTW_BD ? (g.nickname || g.realname) : g.realname;
+                const bdName = isLocalTarget(g.nat) ? (g.nickname || g.realname) : g.realname;
 
                 return `
                 <div class="birthday-item" onclick="toggleHub(false); window.openModal('${g.uid}')">
@@ -1560,12 +1559,6 @@
                 </div>`;
             }).join('') || '<div style="color:var(--text-sub); margin-left: 5px;">本月暫無壽星</div>';
         }
-
-        window.toggleHub = function(show) {
-            document.getElementById('hub-overlay').classList.toggle('active', show);
-            if(show) document.body.classList.add('no-scroll');
-            else document.body.classList.remove('no-scroll');
-        };
 
         // =========================================================================
         // ⚡ 極速無重整互動邏輯 (Async UI Update)
@@ -1930,7 +1923,7 @@
                 let tokensHtml = dtState.roster.map((girl, index) => {
                     const role = cfg.roles[index];
                     if (girl) {
-                        const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺");
+                        const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         return `
                         <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
@@ -2118,7 +2111,7 @@
                 const container = document.getElementById('dreamteam-container');
                 let posterItems = dtState.roster.map((g, index) => {
                     const rConf = cfg.roles[index]; 
-                    const isTW = (g.nat || "").includes("台") || (g.nat || "").includes("臺");
+                    const isTW = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                     const dName = isTW ? (g.nickname || g.realname) : g.realname;
                     return `
                     <div class="dt-poster-item" style="--event-accent: ${rConf.color};">
@@ -3136,7 +3129,7 @@
         function createMinigameCard(g, choice) {
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
             
-            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台");
+            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
             const mainName = isTaiwanese ? ((g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname) : g.realname;
             const subNameText = isTaiwanese ? '' : ((g.nickname && g.nickname !== g.realname) ? g.nickname : '');
             
@@ -3165,7 +3158,7 @@
             const accent = (teamThemes[g.team] || {accent:"#fff"}).accent;
             const isFav = favSet.has(g.uid);
             
-            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台");
+            const isTaiwanese = (g.nat || "").includes("臺") || (g.nat || "").includes("台") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
             const mainName = isTaiwanese ? ((g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname) : g.realname;
             const subNameText = isTaiwanese ? '' : ((g.nickname && g.nickname !== g.realname) ? g.nickname : '');
             
