@@ -1455,7 +1455,7 @@
         }
 
         // =========================================================================
-        // 🎁 數據驚喜中心計算邏輯
+        // 🎁 數據驚喜中心計算邏輯 (國籍智慧命名版)
         // =========================================================================
         function calculateHubStats() {
             const today = new Date();
@@ -1464,11 +1464,16 @@
             
             if (dbGirls.length > 0) {
                 const luckyGirl = dbGirls[seed % dbGirls.length];
+                
+                // ✨ 智慧分流：台灣顯示綽號，外籍顯示本名
+                const isTW_Lucky = (luckyGirl.nat || "").includes("台") || (luckyGirl.nat || "").includes("臺");
+                const luckyName = isTW_Lucky ? (luckyGirl.nickname || luckyGirl.realname) : luckyGirl.realname;
+
                 document.getElementById('lucky-girl-content').innerHTML = `
                     <div class="lucky-girl-box" onclick="toggleHub(false); window.openModal('${luckyGirl.uid}')">
                         <img src="${luckyGirl.img}" class="lucky-img">
                         <div class="lucky-info">
-                            <div class="lucky-name">${luckyGirl.realname}</div>
+                            <div class="lucky-name">${luckyName}</div>
                             <div class="lucky-team">${luckyGirl.team}</div>
                         </div>
                     </div>`;
@@ -1483,10 +1488,17 @@
                 let mvpCount = sorted[0][1];
                 let mvpGirl = girlMap.get(mvpName);
                 let targetId = mvpGirl ? mvpGirl.uid : mvpName;
+                
+                // ✨ MVP 智慧分流命名
+                let displayMvpName = mvpName;
+                if (mvpGirl) {
+                    const isTW_MVP = (mvpGirl.nat || "").includes("台") || (mvpGirl.nat || "").includes("臺");
+                    displayMvpName = isTW_MVP ? (mvpGirl.nickname || mvpGirl.realname) : mvpGirl.realname;
+                }
 
                 document.getElementById('mvp-content').innerHTML = `
                 <div class="mvp-box" onclick="toggleHub(false); window.openModal('${targetId}')" title="點擊查看她的專屬檔案">
-                    <div class="mvp-text">本月最勤奮女孩：<span class="mvp-highlight">${mvpName}</span></div>
+                    <div class="mvp-text">本月最勤奮女孩：<span class="mvp-highlight">${displayMvpName}</span></div>
                     <div class="mvp-text">目前已排定 <span class="mvp-highlight">${mvpCount}</span> 場應援！🔥</div>
                     <div style="font-size:11px; color:var(--text-sub); margin-top:8px;">👉 點擊查看她的專屬檔案</div>
                 </div>`;
@@ -1527,10 +1539,14 @@
                 if(p.length >= 3) day = parseInt(p[2]);
                 else if(p.length === 2) day = parseInt(p[1]);
 
+                // ✨ 壽星智慧分流命名
+                const isTW_BD = (g.nat || "").includes("台") || (g.nat || "").includes("臺");
+                const bdName = isTW_BD ? (g.nickname || g.realname) : g.realname;
+
                 return `
                 <div class="birthday-item" onclick="toggleHub(false); window.openModal('${g.uid}')">
                     <img src="${g.img}" class="birthday-img">
-                    <div class="birthday-name">${g.realname}</div>
+                    <div class="birthday-name">${bdName}</div>
                     <div class="birthday-date">${curMonth}/${String(day).padStart(2,'0')}</div>
                 </div>`;
             }).join('') || '<div style="color:var(--text-sub); margin-left: 5px;">本月暫無壽星</div>';
