@@ -908,6 +908,39 @@
            🔮 每日運勢抽卡系統專屬樣式 (極致手機版優化)
         ========================================= */
         /* 1. 右下角小小的抽卡按鈕 (移至右側，疊在置頂按鈕上方) */
+        /* ✨ 每日一抽提示標籤 (會上下呼吸浮動) */
+        .gacha-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            background: #ff0044;
+            color: #fff;
+            font-family: var(--tc-font);
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 8px;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+            pointer-events: none;
+            letter-spacing: 1px;
+            animation: gacha-bounce 2s infinite ease-in-out;
+        }
+        /* 氣泡下方的小三角形 */
+        .gacha-label::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: #ff0044 transparent transparent transparent;
+        }
+        @keyframes gacha-bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
         .floating-gacha-btn { position: fixed; bottom: 95px; right: 30px; width: 45px; height: 45px; background: #673ab7; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.6); transition: 0.3s; border: 2px solid #fff; }
         .floating-gacha-btn:hover { transform: scale(1.15) rotate(-15deg); background: #9c27b0; box-shadow: 0 6px 20px rgba(156, 39, 176, 0.8); }
         
@@ -1044,6 +1077,7 @@
 
     <div class="floating-gacha-btn" onclick="window.startGacha()" title="每日運勢抽卡">
         <span style="font-size:22px;">🔮</span>
+        <div class="gacha-label">每日一抽</div>
     </div>
 
     <div id="gacha-overlay" class="gacha-overlay">
@@ -3361,7 +3395,22 @@
             
             overlay.classList.add('show');
 
-             // 今天還沒抽過：播放召喚陣動畫！
+            // ⚠️ 每日防呆鎖：恢復正常上線模式
+            if (lastDrawDate === todayStr) { 
+                // 已經抽過：直接讀取記憶，跳過動畫，顯示今天的卡片！
+                const savedUid = localStorage.getItem('cheer_gacha_girl');
+                const savedFortuneIdx = localStorage.getItem('cheer_gacha_fortune');
+                
+                // 防呆：如果找不到記憶中的女孩，隨機抓一個備用
+                let girl = girlMap.get(savedUid) || dbGirls.filter(g => g.img)[0];
+                let fortune = fortunePool[savedFortuneIdx] || fortunePool[0];
+                
+                enterBtn.innerText = "✨ 這是您今日的專屬卡片";
+                showGachaResult(girl, fortune, true); // 傳入 true 代表跳過召喚動畫
+                return; 
+            }
+
+            // 今天還沒抽過：播放召喚陣動畫！
             animBox.style.display = 'flex';
             resBox.style.display = 'none';
             resBox.classList.remove('reveal'); 
