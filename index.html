@@ -41,8 +41,6 @@
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@400;700;900&display=swap');
@@ -805,7 +803,19 @@
         .dt-modal-filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .dt-modal-filters select { flex: 1; min-width: 120px; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 14px; font-weight: 700; outline: none; }
 
-        /* 戰術板容器 (微調比例，讓排版更有呼吸空間) */
+        /* ✨ 戰術板浮水印響應式設定 */
+        .dt-watermark {
+            position: absolute; bottom: 15px; left: 15px; z-index: 5; text-align: left; line-height: 1.2;
+            text-shadow: 2px 2px 4px #000, 0 0 10px #000; pointer-events: none;
+        }
+        .dt-watermark-title { font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: rgba(255,255,255,0.95); }
+        .dt-watermark-sub { font-family: var(--tc-font); font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+        @media (max-width: 768px) {
+            .dt-watermark { bottom: 10px; left: 10px; }
+            .dt-watermark-title { font-size: 13px; } /* 手機版大幅縮小，不擋球員 */
+            .dt-watermark-sub { font-size: 9px; }
+        }
         .dt-tactical-board {
             position: relative; width: 100%; max-width: 650px; aspect-ratio: 3 / 4; margin: 0 auto;
             background-color: #0a0c0f; border: 3px solid var(--event-accent);
@@ -1697,9 +1707,6 @@
             let isFull = dtState.roster.every(slot => slot !== null);
             let boardAccent = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || cfg.defaultColor) : cfg.defaultColor;
             let modeSubtitle = dtState.rule === 'same' ? `🛡️ ${dtState.selectedTeam} 專屬陣容` : '🌍 跨隊明星大亂鬥';
-            
-            // ✨ 解析正確的底圖名稱
-            let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
                 let slotsHtml = dtState.roster.map((girl, index) => {
@@ -1708,7 +1715,7 @@
                         const dName = (girl.nickname && girl.nickname !== girl.realname) ? girl.nickname : girl.realname;
                         return `
                         <div class="dt-slot filled" style="--event-accent: ${rConf.color};" onclick="window.openDtSelector(${index})">
-                            <div class="dt-role-badge">${rConf.name}</div><img crossorigin="anonymous" src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
+                            <div class="dt-role-badge">${rConf.name}</div><img src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
                         </div>`;
                     } else {
                         return `
@@ -1735,7 +1742,7 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         return `
                         <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
-                            <div class="dt-token-img-wrap"><img crossorigin="anonymous" src="${window.getCdnUrl(girl.img)}"></div>
+                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"></div>
                             <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
                         </div>`;
                     }
@@ -1749,18 +1756,18 @@
                 if (dtState.isPosterMode) {
                     container.innerHTML = `
                         <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">陣容部署完畢</div>
-                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 點擊下方按鈕即可將戰術板存入手機！</div>
+                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 教練，請直接手機截圖下方戰術板分享！</div>
                         
-                        <div id="capture-area" class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
-                            <div style="position:absolute; bottom:20px; left:20px; z-index:5; font-family:var(--sport-font); font-size:22px; font-weight:900; color:rgba(255,255,255,0.95); text-shadow:2px 2px 4px #000, 0 0 10px #000; text-align:left; line-height:1.2;">
-                                DREAM TEAM<br><span style="font-size:13px; color:${boardAccent}; font-family:var(--tc-font);">${modeSubtitle}</span>
+                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
+                            <div class="court-bg ${cfg.courtClass}"></div>
+                            <div class="dt-watermark">
+                                <div class="dt-watermark-title">DREAM TEAM</div>
+                                <div class="dt-watermark-sub" style="color:${boardAccent};">${modeSubtitle}</div>
                             </div>
                             ${tokensHtml}
                         </div>
                         
                         <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-                            <button id="download-btn" class="nav-btn" style="background:#00e676; color:#000; border-color:#00e676; font-size:16px; padding:12px 20px;" onclick="window.downloadDtPoster()">📥 一鍵下載海報</button>
                             <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
                             <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重建</button>
                         </div>`;
@@ -1770,7 +1777,7 @@
                         <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
                         <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
+                            <div class="court-bg ${cfg.courtClass}"></div>
                             ${tokensHtml}
                         </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
@@ -1833,7 +1840,7 @@
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 return `
                 <div class="dt-pick-card" data-search="${searchKeywords}" data-team="${g.combinedTeam}" data-sport="${g.combinedSport}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
-                    <img crossorigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                    <img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>${showNick}
                     </div>
@@ -1923,22 +1930,21 @@
                     const dName = isTW ? (g.nickname || g.realname) : g.realname;
                     return `
                     <div class="dt-poster-item" style="--event-accent: ${rConf.color};">
-                        <img crossorigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
+                        <img src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                         <div class="dt-poster-info"><div class="dt-poster-role" style="color:${rConf.color};">${rConf.name.split(' ')[1]}</div><div class="dt-poster-name">${dName}</div></div>
                     </div>`;
                 }).join('');
                 const modeSubtitle = dtState.rule === 'same' ? `${dtState.selectedTeam} 專屬陣容` : '跨隊大亂鬥陣容';
                 container.innerHTML = `
                     <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044; margin-bottom:5px;">專屬戰隊已集結</div>
-                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 點擊下方按鈕即可將海報存入手機！</div>
+                    <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:10px;">👇 教練，請直接手機截圖下方海報分享！</div>
                     
-                    <div id="capture-area" class="dt-poster" style="border-color:#ff0044;">
+                    <div class="dt-poster" style="border-color:#ff0044;">
                         <div class="dt-poster-title" style="text-shadow: 4px 4px 0 #ff0044;">DREAM TEAM</div><div class="dt-poster-sub">${modeSubtitle}</div>
                         <div class="dt-poster-grid">${posterItems}</div>
                     </div>
                     
                     <div style="display:flex; justify-content:center; gap:10px; margin-top:30px; flex-wrap:wrap;">
-                        <button id="download-btn" class="nav-btn" style="background:#00e676; color:#000; border-color:#00e676; font-size:16px; padding:12px 20px;" onclick="window.downloadDtPoster()">📥 一鍵下載海報</button>
                         <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="window.renderDreamTeamStart()">🔙 返回修改</button>
                         <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重組戰隊</button>
                     </div>`;
