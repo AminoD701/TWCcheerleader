@@ -507,14 +507,15 @@
             max-height: 55vh; overflow-y: auto; padding-right: 5px; 
             align-items: start; /* 關鍵：避免卡片被高度無情拉扯 */
         }
+        /* ✨ 移除了 Flex 排版，改為 Block，徹底解決圖片被無情壓縮的問題 */
         .dt-pick-card { 
             background: #111; border: 2px solid var(--border-color); border-radius: 8px; 
-            overflow: hidden; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;
+            overflow: hidden; cursor: pointer; transition: 0.2s; display: block;
         }
         .dt-pick-card:hover { border-color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
         .dt-pick-card img { 
-            width: 100%; aspect-ratio: 1 / 1; height: auto !important; /* 關鍵：強制 1:1 正方形 */
-            object-fit: cover; object-position: top center; background: #252c36; 
+            width: 100%; aspect-ratio: 1 / 1; height: auto !important; 
+            object-fit: cover; object-position: top center; background: #252c36; display: block;
         }
         .dt-pick-name { 
             font-size: 13px; font-weight: 900; color: #fff; padding: 8px 4px; 
@@ -2037,7 +2038,9 @@
 
         window.openDtSelector = function(slotIndex) {
             let uniqueMap = new Map();
-            dbGirls.filter(g => g.img).forEach(g => {
+            
+            // ✨ 修復 1：移除 .filter(g => g.img)，讓沒有照片的女孩也能上陣！
+            dbGirls.forEach(g => {
                 if(!uniqueMap.has(g.uid)) uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "", combinedSport: g.sport || "" });
                 else { 
                     let e = uniqueMap.get(g.uid); 
@@ -2048,8 +2051,9 @@
             let pool = Array.from(uniqueMap.values());
             
             if (dtState.rule === 'same') {
-                let baseTeamName = dtState.selectedTeam.split('_')[0]; 
-                pool = pool.filter(g => g.combinedTeam.includes(baseTeamName));
+                // ✨ 修復 2：無差別轉小寫，解決 Little witches 大小寫比對錯誤
+                let baseTeamName = dtState.selectedTeam.split('_')[0].toLowerCase(); 
+                pool = pool.filter(g => g.combinedTeam.toLowerCase().includes(baseTeamName));
             }
 
             if (dtState.rosterType !== 'original') {
@@ -2122,11 +2126,12 @@
             let hasVisible = false;
             document.querySelectorAll('#dt-selector-grid .dt-pick-card').forEach(card => {
                 const searchData = card.getAttribute('data-search');
-                const cardTeam = card.getAttribute('data-team');
+                // ✨ 修復 3：篩選器也全面轉小寫！
+                const cardTeam = (card.getAttribute('data-team') || "").toLowerCase();
                 const cardSport = card.getAttribute('data-sport');
                 
                 const matchQ = q === "" || q.split(/\s+/).every(word => searchData.includes(word));
-                let baseFTeam = fTeam.split('_')[0];
+                let baseFTeam = fTeam.split('_')[0].toLowerCase();
                 const matchTeam = fTeam === "" || cardTeam.includes(baseFTeam);
                 const matchSport = fSport === "" || cardSport.includes(fSport);
                 
