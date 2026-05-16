@@ -936,46 +936,12 @@
                 padding: 15px; 
             }
         }
-        /* =========================================
-           🔮 每日運勢抽卡系統專屬樣式 (極致手機版優化)
-        ========================================= */
-        /* 1. 右下角小小的抽卡按鈕 (移至右側，疊在置頂按鈕上方) */
-        /* ✨ 每日一抽提示標籤 (會上下呼吸浮動) */
-        .gacha-label {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            background: #ff0044;
-            color: #fff;
-            font-family: var(--tc-font);
-            font-size: 11px;
-            font-weight: 900;
-            padding: 3px 8px;
-            border-radius: 8px;
-            white-space: nowrap;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.6);
-            pointer-events: none;
-            letter-spacing: 1px;
-            animation: gacha-bounce 2s infinite ease-in-out;
-        }
-        /* 氣泡下方的小三角形 */
-        .gacha-label::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px 5px 0;
-            border-style: solid;
-            border-color: #ff0044 transparent transparent transparent;
-        }
+       
         @keyframes gacha-bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-5px); }
         }
-        .floating-gacha-btn { position: fixed; bottom: 95px; right: 30px; width: 45px; height: 45px; background: #673ab7; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.6); transition: 0.3s; border: 2px solid #fff; }
-        .floating-gacha-btn:hover { transform: scale(1.15) rotate(-15deg); background: #9c27b0; box-shadow: 0 6px 20px rgba(156, 39, 176, 0.8); }
-        
+                
         /* 2. 全螢幕黑暗遮罩 (加入安全內距避免手機邊緣切邊) */
         .gacha-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.5s; padding: 20px; box-sizing: border-box;}
         .gacha-overlay.show { display: flex; opacity: 1; }
@@ -1079,14 +1045,32 @@
         .fortune-girl { font-size: clamp(16px, 5vw, 18px); font-weight: 900; color: #111; margin-bottom: 10px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .fortune-desc { font-size: 14px; color: #444; font-weight: 700; line-height: 1.6; }
 
-        /* ✨ 把這段手機版設定，確實放在 CSS 的最後面！ */
+/* ✨ 每日運勢抽卡 (頂部按鈕版) */
+        .gacha-top-btn {
+            background: linear-gradient(45deg, #673ab7, #9c27b0) !important;
+            border-color: #e040fb !important;
+            color: #fff !important;
+            box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important;
+            animation: gacha-glow 2s infinite alternate;
+            flex: none !important; /* 避免按鈕被拉太長 */
+            padding: 12px 25px !important;
+        }
+        .gacha-top-btn:hover {
+            border-color: #fff !important;
+            transform: skewX(-5deg) translateY(-2px) !important;
+            box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important;
+        }
+        @keyframes gacha-glow {
+            0% { filter: brightness(1); box-shadow: 4px 4px 0px rgba(156,39,176,0.5); }
+            100% { filter: brightness(1.2); box-shadow: 4px 4px 12px rgba(224,64,251,0.9); }
+        }
+
         @media (max-width: 768px) {
-            .floating-gacha-btn { bottom: 85px; right: 20px; left: auto; } 
+            .gacha-top-btn { padding: 10px 20px !important; font-size: 14px !important; }
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
     </style> 
 </head>
-    </style>  </head>
 <body class="no-scroll">
 
     <div class="sports-bg-slider">
@@ -1105,11 +1089,6 @@
                 <span id="enter-text" style="display:inline-block; transform: skewX(10deg);">資料載入中 LOADING...</span>
             </button>
         </div>
-    </div>
-
-    <div class="floating-gacha-btn" onclick="window.startGacha()" title="每日運勢抽卡">
-        <span style="font-size:22px;">🔮</span>
-        <div class="gacha-label">每日一抽</div>
     </div>
 
     <div id="gacha-overlay" class="gacha-overlay">
@@ -1224,9 +1203,12 @@
                         <span id="team-btn-text">全部啦啦隊</span> 
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
-                    <div class="dropdown-menu" id="team-menu">
-                        </div>
+                    <div class="dropdown-menu" id="team-menu"></div>
                 </div>
+
+                <button class="dropdown-btn gacha-top-btn" onclick="window.startGacha()">
+                    <span>🔮 每日一抽</span>
+                </button>
 
             </div>
             
@@ -1237,12 +1219,10 @@
                 <button class="sub-btn" onclick="window.setSport('排球', this)">排球 VOLLEYBALL</button>
                 <button class="sub-btn" onclick="window.setSport('其他', this)">其他 OTHERS</button>
             </div>
-        </div>
 
             <div class="team-tabs" id="tabs-container"></div>
         </div>
     </header>
-
     <div class="sticky-filter-wrapper" id="filter-bar">
         <div class="filters">
             <input type="text" id="searchInput" placeholder="搜尋姓名、綽號或活動..." oninput="window.debounceSearch()">
