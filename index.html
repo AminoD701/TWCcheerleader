@@ -2558,7 +2558,9 @@
                             <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
                         </div>
-                        ${noteText ? `<div class="note-box">${noteText}</div>` : ''}
+                        
+                        <div class="note-box" style="${noteText ? '' : 'visibility: hidden; pointer-events: none;'}">${noteText || '&nbsp;'}</div>
+                        
                     </div>
                 </div>`;
             }).join('');
