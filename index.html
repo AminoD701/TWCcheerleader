@@ -503,12 +503,31 @@
         .dt-name { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: #fff; z-index: 2; text-shadow: 2px 2px 4px #000; white-space: nowrap; }
         .dt-empty-icon { font-size: 40px; color: var(--text-sub); }
 
-        /* 選人彈窗 */
-        .dt-selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
-        .dt-pick-card { background: #111; border: 2px solid var(--border-color); border-radius: 6px; overflow: hidden; cursor: pointer; transition: 0.2s; }
-        .dt-pick-card:hover { border-color: #fff; transform: translateY(-2px); }
-        .dt-pick-card img { width: 100%; height: 90px; object-fit: cover; object-position: top center; }
-        .dt-pick-name { font-size: 13px; font-weight: 900; color: #fff; padding: 6px; text-align: center; white-space: nowrap; }
+        /* ✨ 強制修復：選人卡片的網格與比例 (防壓扁金鐘罩) */
+        .dt-selector-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; 
+            max-height: 55vh; overflow-y: auto; padding-right: 5px; 
+            align-items: start; /* 關鍵：避免卡片被高度無情拉扯 */
+        }
+        .dt-pick-card { 
+            background: #111; border: 2px solid var(--border-color); border-radius: 8px; 
+            overflow: hidden; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;
+        }
+        .dt-pick-card:hover { border-color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .dt-pick-card img { 
+            width: 100%; aspect-ratio: 1 / 1; height: auto !important; /* 關鍵：強制 1:1 正方形 */
+            object-fit: cover; object-position: top center; background: #252c36; 
+        }
+        .dt-pick-name { 
+            font-size: 13px; font-weight: 900; color: #fff; padding: 8px 4px; 
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* 針對手機版的進一步優化 */
+        @media (max-width: 768px) {
+            .dt-selector-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+            .dt-pick-name { font-size: 15px; padding: 10px 4px; }
+        }
 
         /* 電腦版海報模式 (傾斜特效) */
         .dt-poster { background: linear-gradient(135deg, #111, #2a2a35); padding: 30px; border-radius: 12px; border: 4px solid var(--event-accent); box-shadow: 0 15px 40px rgba(0,0,0,0.8); position: relative; overflow: hidden; margin-top: 30px; }
@@ -1930,7 +1949,7 @@
             }
         };
 
-        // ✨ 終極黑科技：一鍵生成並下載圖片 (修復跨域崩潰問題)
+        // ✨ 終極黑科技：一鍵生成圖片 (手機版長按儲存 / 電腦版自動下載)
         window.downloadDtPoster = function() {
             const captureArea = document.getElementById('capture-area');
             const downloadBtn = document.getElementById('download-btn');
@@ -1938,37 +1957,51 @@
             if(!captureArea) return;
             
             const originalText = downloadBtn.innerHTML;
-            downloadBtn.innerHTML = "⏳ 圖片生成中...";
+            downloadBtn.innerHTML = "⏳ 圖片高畫質生成中...";
             downloadBtn.disabled = true;
             downloadBtn.style.opacity = "0.7";
 
+            // 啟動 html2canvas 拍照引擎
             html2canvas(captureArea, {
                 useCORS: true,           // 允許跨域讀取外部照片
-                allowTaint: false,       // ❌ 絕對不能為 true，否則會污染畫布導致無法下載
-                backgroundColor: "#0a0c0f", 
-                scale: window.devicePixelRatio || 2 // ✨ 保證手機上的圖片下載依舊高畫質
+                scale: window.devicePixelRatio || 2, // 確保視網膜螢幕高畫質
+                backgroundColor: "#0a0c0f" 
             }).then(canvas => {
-                let link = document.createElement('a');
-                let fileName = dtState.rosterType === 'original' ? 'DreamTeam_Idol' : `DreamTeam_${dtState.selectedTeam}`;
-                link.download = `${fileName}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
+                // 將渲染好的畫面轉換成圖片資料
+                const imgData = canvas.toDataURL('image/png', 1.0);
                 
-                downloadBtn.innerHTML = "✅ 下載成功！";
-                setTimeout(() => {
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.disabled = false;
+                // 📱【手機版專屬對策】：把戰術板直接替換成「實體圖片」，讓粉絲長按儲存！
+                if (window.innerWidth <= 768) {
+                    captureArea.innerHTML = `<img src="${imgData}" style="width:100%; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,0.8); display:block;">`;
+                    
+                    downloadBtn.innerHTML = "✅ 生成完畢！請直接「長按上方圖片」儲存";
+                    downloadBtn.style.background = "#ff9800"; // 變成亮橘色提示
+                    downloadBtn.style.borderColor = "#ff9800";
                     downloadBtn.style.opacity = "1";
-                }, 2000);
+                } 
+                // 💻【電腦版對策】：維持一鍵自動下載檔案
+                else {
+                    let link = document.createElement('a');
+                    let fileName = dtState.rosterType === 'original' ? 'DreamTeam_Idol' : `DreamTeam_${dtState.selectedTeam}`;
+                    link.download = `${fileName}.png`;
+                    link.href = imgData;
+                    link.click();
+                    
+                    downloadBtn.innerHTML = "✅ 下載成功！";
+                    setTimeout(() => {
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        downloadBtn.style.opacity = "1";
+                    }, 3000);
+                }
             }).catch(err => {
                 console.error("生成圖片失敗:", err);
-                alert("部分女孩的照片可能有安全限制無法截圖 😢，請直接用手機截圖喔！");
+                alert("圖片生成失敗 😢，請直接用手機系統自帶的截圖功能喔！");
                 downloadBtn.innerHTML = originalText;
                 downloadBtn.disabled = false;
                 downloadBtn.style.opacity = "1";
             });
         };
-
         // =========================================================================
         // ⏳ 倒數計時器邏輯
         // =========================================================================
