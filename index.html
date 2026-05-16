@@ -1229,6 +1229,8 @@
                         <span>🔮 每日一抽</span>
                     </button>
                 </div>
+
+            </div>
             
             <div class="sub-nav" id="sub-nav-sports">
                 <button class="sub-btn active" onclick="window.setSport('全部', this)">全部 ALL</button>
@@ -2594,7 +2596,6 @@
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
                 let noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
-                return `
                 return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="window.openModal('${c.uid}')">
                     <div class="photo-area">
