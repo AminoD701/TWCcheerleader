@@ -793,42 +793,31 @@
             border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.8);
         }
 
-        /* 🏟️ 球場底圖設定 (強制對齊頂部，防止文字被裁切) */
-        .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: top center; z-index: 1; }
-        .court-baseball { background-image: url('./baseball-bg.png'); }     
-        .court-basketball { background-image: url('./basketball-bg.png'); } 
-        .court-volleyball { background-image: url('./volleyball-bg.png'); }
+        /* 🏟️ 球場底圖設定 (改由 JS 放入 img 標籤，提升截圖成功率) */
+        .court-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; z-index: 1; pointer-events: none; }
 
         /* 女孩戰術頭像 (Token) - 終極美化放大版！ */
         .dt-token {
             position: absolute; transform: translate(-50%, -50%);
             display: flex; flex-direction: column; align-items: center; width: 110px; z-index: 10; cursor: pointer; transition: 0.2s;
         }
-        
-        /* 圓形頭像框：放大 + 電競光暈特效 */
+        .dt-token:hover { z-index: 50; }
         .dt-token-img-wrap {
             position: relative; width: 90px; height: 90px; border-radius: 50%;
             background: #111; border: 3px solid var(--event-accent);
-            box-shadow: 0 0 15px var(--event-accent), 0 8px 20px rgba(0,0,0,0.8); /* 專屬色發光 + 深色落影 */
+            box-shadow: 0 0 15px var(--event-accent), 0 8px 20px rgba(0,0,0,0.8); 
             overflow: visible; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .dt-token:hover .dt-token-img-wrap { transform: scale(1.1); box-shadow: 0 0 25px var(--event-accent), 0 10px 25px rgba(0,0,0,0.9); }
-        .dt-token:hover { z-index: 50; } /* ✨ 確保滑鼠游標移過去時，卡片絕對在最上層，不會被別人的名字擋住 */
         .dt-token-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
         .dt-token-empty { font-size: 32px; color: #555; line-height: 84px; text-align: center; }
-        
-        /* 🚨 已將礙眼的 dt-token-abbr (右上角縮寫) 徹底刪除 */
 
-        /* 稱號與名字區塊：電競轉播字卡風格 */
         .dt-token-info { text-align: center; margin-top: 8px; width: 140px; display: flex; flex-direction: column; align-items: center; }
-        
-        /* 上層職位小標 */
         .dt-token-role { 
             font-size: 11px; color: #000; font-weight: 900; background: var(--event-accent); 
             padding: 2px 8px; border-radius: 12px; white-space: nowrap; 
             margin-bottom: -6px; z-index: 2; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px;
         }
-        /* 下層名字大標 (漸層底色) */
         .dt-token-name { 
             font-size: 15px; color: #fff; font-weight: 900; text-shadow: 1px 1px 3px #000; white-space: nowrap; 
             background: linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 8px 12px 3px; 
@@ -836,23 +825,17 @@
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
 
-        /* 戰術板手機版縮放優化 */
-        @media (max-width: 768px) {
-            .dt-token { width: 90px; }
-            .dt-token-img-wrap { width: 75px; height: 75px; border-width: 2px;}
-            .dt-token-empty { line-height: 71px; font-size: 26px;}
-            .dt-token-info { width: 110px; margin-top: 6px;}
-            .dt-token-role { font-size: 9px; padding: 2px 6px; margin-bottom: -5px;}
-            .dt-token-name { font-size: 13px; padding: 6px 8px 2px; }
-        }
+        /* ✨ 修正：選人彈窗的圖片比例，保證絕對是正方形，不切頭不扁平 */
+        .dt-pick-card img { width: 100%; aspect-ratio: 1 / 1; height: auto; object-fit: cover; object-position: top center; background: #252c36; }
 
-        /* 手機版縮放優化 */
+        /* ✨ 終極手機版縮放優化：縮小站位圖示，避免名字互相打架 */
         @media (max-width: 768px) {
-            .dt-token { width: 65px; }
-            .dt-token-img-wrap { width: 45px; height: 45px; }
-            .dt-token-empty { line-height: 39px; }
-            .dt-token-info { width: 90px; }
-            .dt-token-name { font-size: 11px; }
+            .dt-token { width: 68px; }
+            .dt-token-img-wrap { width: 54px; height: 54px; border-width: 2px;}
+            .dt-token-empty { line-height: 50px; font-size: 20px;}
+            .dt-token-info { width: 90px; margin-top: 4px;}
+            .dt-token-role { font-size: 9px; padding: 1px 5px; margin-bottom: -4px;}
+            .dt-token-name { font-size: 11px; padding: 4px 6px 1px; border-radius: 4px;}
         }
     </style>  </head>
 <body class="no-scroll">
@@ -1695,6 +1678,9 @@
             let isFull = dtState.roster.every(slot => slot !== null);
             let boardAccent = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || cfg.defaultColor) : cfg.defaultColor;
             let modeSubtitle = dtState.rule === 'same' ? `🛡️ ${dtState.selectedTeam} 專屬陣容` : '🌍 跨隊明星大亂鬥';
+            
+            // ✨ 解析正確的底圖名稱
+            let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
                 let slotsHtml = dtState.roster.map((girl, index) => {
@@ -1703,7 +1689,7 @@
                         const dName = (girl.nickname && girl.nickname !== girl.realname) ? girl.nickname : girl.realname;
                         return `
                         <div class="dt-slot filled" style="--event-accent: ${rConf.color};" onclick="window.openDtSelector(${index})">
-                            <div class="dt-role-badge">${rConf.name}</div><img crossOrigin="anonymous" src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
+                            <div class="dt-role-badge">${rConf.name}</div><img crossorigin="anonymous" src="${window.getCdnUrl(girl.img)}"><div class="dt-name">${dName}</div>
                         </div>`;
                     } else {
                         return `
@@ -1730,7 +1716,7 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         return `
                         <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
-                            <div class="dt-token-img-wrap"><img crossOrigin="anonymous" src="${window.getCdnUrl(girl.img)}"></div>
+                            <div class="dt-token-img-wrap"><img crossorigin="anonymous" src="${window.getCdnUrl(girl.img)}"></div>
                             <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
                         </div>`;
                     }
@@ -1747,7 +1733,7 @@
                         <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 點擊下方按鈕即可將戰術板存入手機！</div>
                         
                         <div id="capture-area" class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <div class="court-bg ${cfg.courtClass}"></div>
+                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
                             <div style="position:absolute; bottom:20px; left:20px; z-index:5; font-family:var(--sport-font); font-size:22px; font-weight:900; color:rgba(255,255,255,0.95); text-shadow:2px 2px 4px #000, 0 0 10px #000; text-align:left; line-height:1.2;">
                                 DREAM TEAM<br><span style="font-size:13px; color:${boardAccent}; font-family:var(--tc-font);">${modeSubtitle}</span>
                             </div>
@@ -1765,7 +1751,7 @@
                         <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
                         <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <div class="court-bg ${cfg.courtClass}"></div>
+                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
                             ${tokensHtml}
                         </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
@@ -1828,7 +1814,7 @@
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 return `
                 <div class="dt-pick-card" data-search="${searchKeywords}" data-team="${g.combinedTeam}" data-sport="${g.combinedSport}" onclick="window.pickDtGirl(${slotIndex}, '${g.realname}')">
-                    <img src="${window.getCdnUrl(g.img)}" style="background: #252c36; min-height: 90px;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                    <img crossorigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>${showNick}
                     </div>
@@ -1918,7 +1904,7 @@
                     const dName = isTW ? (g.nickname || g.realname) : g.realname;
                     return `
                     <div class="dt-poster-item" style="--event-accent: ${rConf.color};">
-                        <img crossOrigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
+                        <img crossorigin="anonymous" src="${window.getCdnUrl(g.img)}" onerror="this.onerror=null; this.src='${g.img}';">
                         <div class="dt-poster-info"><div class="dt-poster-role" style="color:${rConf.color};">${rConf.name.split(' ')[1]}</div><div class="dt-poster-name">${dName}</div></div>
                     </div>`;
                 }).join('');
@@ -1958,9 +1944,9 @@
 
             html2canvas(captureArea, {
                 useCORS: true,           // 允許跨域讀取外部照片
-                // allowTaint: true,     // ❌ 必須拿掉這行！這行會導致畫布污染，導致下載失敗
-                scale: 2,                // 輸出為 2 倍高畫質圖片
-                backgroundColor: "#0a0c0f" 
+                allowTaint: false,       // ❌ 絕對不能為 true，否則會污染畫布導致無法下載
+                backgroundColor: "#0a0c0f", 
+                scale: window.devicePixelRatio || 2 // ✨ 保證手機上的圖片下載依舊高畫質
             }).then(canvas => {
                 let link = document.createElement('a');
                 let fileName = dtState.rosterType === 'original' ? 'DreamTeam_Idol' : `DreamTeam_${dtState.selectedTeam}`;
@@ -1976,7 +1962,7 @@
                 }, 2000);
             }).catch(err => {
                 console.error("生成圖片失敗:", err);
-                alert("圖片生成失敗，可能是部分照片來源的安全限制。請直接用手機截圖！");
+                alert("部分女孩的照片可能有安全限制無法截圖 😢，請直接用手機截圖喔！");
                 downloadBtn.innerHTML = originalText;
                 downloadBtn.disabled = false;
                 downloadBtn.style.opacity = "1";
