@@ -620,7 +620,7 @@
            📂 電競風收納下拉選單 (Dropdown)
         ========================================= */
         .dropdowns-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
-        .dropdown-container { position: relative; width: 100%; max-width: 250px; flex: 1; min-width: 200px; }
+        .dropdown-container { position: relative; width: 100%; max-width: 250px; flex: 1; min-width: 140px; }
         .dropdown-btn { width: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 12px 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
         .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
@@ -1052,8 +1052,7 @@
             color: #fff !important;
             box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important;
             animation: gacha-glow 2s infinite alternate;
-            flex: none !important; /* 避免按鈕被拉太長 */
-            padding: 12px 25px !important;
+            padding: 12px 20px !important;
         }
         .gacha-top-btn:hover {
             border-color: #fff !important;
@@ -1206,11 +1205,11 @@
                     <div class="dropdown-menu" id="team-menu"></div>
                 </div>
 
-                <button class="dropdown-btn gacha-top-btn" onclick="window.startGacha()">
-                    <span>🔮 每日一抽</span>
-                </button>
-
-            </div>
+                <div class="dropdown-container">
+                    <button class="dropdown-btn gacha-top-btn" onclick="window.startGacha()">
+                        <span>🔮 每日一抽</span>
+                    </button>
+                </div>
             
             <div class="sub-nav" id="sub-nav-sports">
                 <button class="sub-btn active" onclick="window.setSport('全部', this)">全部 ALL</button>
