@@ -907,9 +907,9 @@
         /* =========================================
            🔮 每日運勢抽卡系統專屬樣式 (極致手機版優化)
         ========================================= */
-        /* 1. 左下角小小的抽卡按鈕 */
-        .floating-gacha-btn { position: fixed; bottom: 100px; left: 30px; width: 45px; height: 45px; background: #673ab7; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.6); transition: 0.3s; border: 2px solid #fff; }
-        .floating-gacha-btn:hover { transform: scale(1.15) rotate(15deg); background: #9c27b0; box-shadow: 0 6px 20px rgba(156, 39, 176, 0.8); }
+        /* 1. 右下角小小的抽卡按鈕 (移至右側，疊在置頂按鈕上方) */
+        .floating-gacha-btn { position: fixed; bottom: 95px; right: 30px; width: 45px; height: 45px; background: #673ab7; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100; cursor: pointer; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.6); transition: 0.3s; border: 2px solid #fff; }
+        .floating-gacha-btn:hover { transform: scale(1.15) rotate(-15deg); background: #9c27b0; box-shadow: 0 6px 20px rgba(156, 39, 176, 0.8); }
         
         /* 2. 全螢幕黑暗遮罩 (加入安全內距避免手機邊緣切邊) */
         .gacha-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.5s; padding: 20px; box-sizing: border-box;}
@@ -961,7 +961,7 @@
         .fortune-desc { font-size: 14px; color: #444; font-weight: 700; line-height: 1.6; }
 
         @media (max-width: 768px) {
-            .floating-gacha-btn { bottom: 95px; left: 20px; } 
+            .floating-gacha-btn { bottom: 85px; right: 20px; left: auto; } /* 確保把 left 覆蓋掉，改用 right */
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
     </style>  </head>
@@ -3278,8 +3278,8 @@
             
             overlay.classList.add('show');
 
-            // ⚠️ 檢查今天是否已經抽過了
-            if (lastDrawDate === todayStr) { 
+            // ⚠️ 無限抽卡測試模式：把這段防呆鎖直接註解掉！
+            /* if (lastDrawDate === todayStr) { 
                 // 已經抽過：直接讀取記憶，跳過動畫，顯示今天的卡片！
                 const savedUid = localStorage.getItem('cheer_gacha_girl');
                 const savedFortuneIdx = localStorage.getItem('cheer_gacha_fortune');
@@ -3292,6 +3292,7 @@
                 showGachaResult(girl, fortune, true); // 傳入 true 代表跳過召喚動畫
                 return; 
             }
+            */
 
             // 今天還沒抽過：播放召喚陣動畫！
             animBox.style.display = 'flex';
