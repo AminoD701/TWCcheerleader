@@ -1008,6 +1008,7 @@
                         <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
                         <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
                         <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
+                        <button class="dropdown-item" onclick="window.setMode('feedback')">💬 意見與資料回饋 FEEDBACK</button>
                     </div>
                 </div>
 
@@ -1066,6 +1067,7 @@
         <div id="passport-container"></div>
         <div id="minigame-container"></div>
         <div id="dreamteam-container" style="display:none;"></div>
+        <div id="feedback-container" style="display:none; max-width: 600px; margin: 30px auto 60px; padding: 0 20px;"></div>
     </main>
 
     <footer class="footer">
@@ -1498,7 +1500,8 @@
                 'schedule': '📅 應援班表 SCHEDULE',
                 'events': '✈️ 外籍行程 EVENTS',
                 'minigame': '🎮 殘酷二選一 GAME',
-                'dreamteam': '🌟 夢幻陣容 DREAM TEAM'
+                'dreamteam': '🌟 夢幻陣容 DREAM TEAM',
+                'feedback': '💬 意見與回饋 FEEDBACK' // ✨ 新增
             };
             
             // 更新按鈕上顯示的文字
@@ -1643,8 +1646,15 @@
         window.renderContent = function(skipScroll = false) {
             window.currentDisplayLimit = 24; 
 
-            const grid = document.getElementById('grid-container'), list = document.getElementById('event-container'), sched = document.getElementById('schedule-container'), passport = document.getElementById('passport-container'), game = document.getElementById('minigame-container'), dt = document.getElementById('dreamteam-container');
-            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = 'none';
+            const grid = document.getElementById('grid-container'), 
+                  list = document.getElementById('event-container'), 
+                  sched = document.getElementById('schedule-container'), 
+                  passport = document.getElementById('passport-container'), 
+                  game = document.getElementById('minigame-container'), 
+                  dt = document.getElementById('dreamteam-container'),
+                  fb = document.getElementById('feedback-container'); // ✨ 新增
+                  
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = 'none';
             
             if (!skipScroll) { window.scrollTo({top: 0}); }
             
@@ -1657,6 +1667,91 @@
             else if (currentMode === 'passport') { passport.style.display = 'block'; renderPassport(); }
             else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
+            else if (currentMode === 'feedback') { fb.style.display = 'block'; window.renderFeedbackStart(); } // ✨ 新增
+        };
+        // =========================================================================
+        // 💬 意見回饋與資料更正核心引擎 (直連 Google Sheet 安全防護版)
+        // =========================================================================
+        // ⚠️ 總教練，請先完成【步驟 4】取得你的 Google 部署網址後，貼到下面這行：
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRFwXP-k1P1cpYBu3eDh2fj518NqJ5wMeGpCkv1XnAbrfSt6afK-FmJtZMQGzTkfWdaA/exec"; 
+
+        window.renderFeedbackStart = function() {
+            const container = document.getElementById('feedback-container');
+            container.innerHTML = `
+                <div class="game-title" style="text-shadow: 3px 3px 0px #ff5722;">意見與資料回饋</div>
+                <div style="color:var(--text-sub); font-size:15px; font-weight:700; margin-bottom:20px; text-align:center;">啦啦隊資料有誤、需要補充，或對網站有新功能期望？歡迎回報！</div>
+                
+                <div class="dt-setup-card" style="border-color: var(--event-accent);">
+                    <form id="feedbackForm" onsubmit="window.submitFeedback(event)">
+                        <label class="dt-setup-label">1. 回饋類型</label>
+                        <select id="fb-type" class="dt-setup-select" required onchange="document.getElementById('fb-girl-box').style.display = this.value === '資料更正/補充' ? 'block' : 'none'">
+                            <option value="資料更正/補充">🚨 女孩資料更正 / 數據補充</option>
+                            <option value="功能建議">💡 網站全新功能期望 / 建議意見</option>
+                        </select>
+                        
+                        <div id="fb-girl-box">
+                            <label class="dt-setup-label">2. 女孩姓名 / 綽號</label>
+                            <input type="text" id="fb-girlName" placeholder="例如：潔米、Jessy" class="dt-setup-select" style="background:#111; color:#fff; font-family:var(--tc-font);">
+                        </div>
+                        
+                        <label class="dt-setup-label">3. 詳細回饋內容</label>
+                        <textarea id="fb-content" rows="5" placeholder="請詳細說明您想補充的資料或建議..." required style="width:100%; padding:12px; background:#111; color:#fff; border:2px solid var(--border-color); border-radius:4px; font-size:16px; font-weight:700; outline:none; margin-bottom:20px; font-family:var(--tc-font); resize:none;"></textarea>
+                        
+                        <label class="dt-setup-label">4. 您的聯絡方式 (選填，方便向您確認資料)</label>
+                        <input type="text" id="fb-contact" placeholder="例如：您的 Email 或 Line ID" class="dt-setup-select" style="background:#111; color:#fff; font-family:var(--tc-font);">
+                        
+                        <button type="submit" id="fb-submit-btn" class="enter-btn" style="width:100%; margin-top: 10px; background:var(--event-accent); color:#fff; box-shadow: 6px 6px 0px #b71540;">送出回饋資料 🚀</button>
+                    </form>
+                </div>
+            `;
+        };
+
+        window.submitFeedback = function(event) {
+            event.preventDefault();
+            const btn = document.getElementById('fb-submit-btn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = "⏳ 資料傳送中 TRANSMITTING...";
+            btn.style.opacity = "0.7";
+
+            // 封裝表單數據
+            const formData = {
+                type: document.getElementById('fb-type').value,
+                girlName: document.getElementById('fb-girlName').value || "無",
+                content: document.getElementById('fb-content').value,
+                contact: document.getElementById('fb-contact').value || "匿名粉絲"
+            };
+
+            if(GOOGLE_SCRIPT_URL.includes("XXXXX")) {
+                alert("❌ 總教練！您還沒有設定您的 Google 試算表部署網址喔！請看【步驟 4】說明。");
+                btn.disabled = false; btn.innerHTML = originalText; btn.style.opacity = "1";
+                return;
+            }
+
+            // 非同步 Fetch 傳送到 Google Apps Script 
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // 靜態網頁跨域安全防護
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            }).then(() => {
+                // 成功渲染
+                document.getElementById('feedback-container').innerHTML = `
+                    <div class="game-title" style="text-shadow: 3px 3px 0px #00e676;">👍 傳送成功！</div>
+                    <div class="dt-setup-card" style="border-color: #00e676; text-align:center; padding:40px 20px;">
+                        <div style="font-size:50px; margin-bottom:20px;">🎉</div>
+                        <div style="font-size:18px; font-weight:900; color:#fff; margin-bottom:15px;">報告總教練，回饋已寫入 Google Sheet 報表！</div>
+                        <div style="color:var(--text-sub); font-size:14px; font-weight:700; line-height:1.6; margin-bottom:30px;">非常感謝您的熱心回報，我們會盡快審查並更新資料庫。</div>
+                        <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555; width:150px;" onclick="window.setMode('girls')">返回女孩圖鑑</button>
+                    </div>
+                `;
+                if(typeof createConfetti === 'function') createConfetti();
+            }).catch(err => {
+                console.error("傳送失敗:", err);
+                alert("❌ 傳送失敗，請檢查網路連線或稍後再試！");
+                btn.disabled = false; btn.innerHTML = originalText; btn.style.opacity = "1";
+            });
         };
         // =========================================================================
         // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎 (完美不卡位座標版)
