@@ -866,6 +866,44 @@
             .dt-token-role { font-size: 9px; padding: 1px 5px; margin-bottom: -4px;}
             .dt-token-name { font-size: 11px; padding: 4px 6px 1px; border-radius: 4px;}
         }
+        /* =========================================
+           ✨ 終極手機版排版優化：防按鈕與選單折行
+        ========================================= */
+        @media (max-width: 768px) {
+            /* 1. 設定大廳的下拉選單框 */
+            .dt-setup-select { 
+                font-size: 14px; 
+                padding: 10px; 
+                text-overflow: ellipsis; 
+                white-space: nowrap; 
+            }
+            /* 2. 大廳的「確認編制」按鈕 */
+            .enter-btn { 
+                font-size: 16px !important; 
+                padding: 12px 10px !important; 
+                letter-spacing: 0px !important; 
+                white-space: nowrap !important; /* 強制不換行 */
+            }
+            /* 3. 最上方的「夢幻陣容 DREAM TEAM」下拉按鈕 */
+            .dropdown-btn { 
+                font-size: 13px !important; 
+                padding: 10px 12px !important; 
+                letter-spacing: 0px !important; 
+            }
+            /* 強制讓選單按鈕裡的文字空間不足時變成 ...，保護右邊的箭頭圖示不掉下去 */
+            .dropdown-btn span { 
+                white-space: nowrap; 
+                overflow: hidden; 
+                text-overflow: ellipsis; 
+            }
+            .dropdown-item { 
+                font-size: 13px !important; 
+                padding: 12px 15px !important; 
+            }
+            .dt-setup-card { 
+                padding: 15px; 
+            }
+        }
     </style>  </head>
 <body class="no-scroll">
 
@@ -1690,8 +1728,8 @@
                         </select>
                         <label class="dt-setup-label">2. 選擇球員招募限制</label>
                         <select id="dt-setup-rule" class="dt-setup-select" onchange="document.getElementById('dt-setup-team-box').style.display = this.value === 'same' ? 'block' : 'none'">
-                            <option value="free">🌍 夢幻明星隊 (不限球隊跨隊混搭)</option>
-                            <option value="same">🛡️ 專屬球隊陣容 (限從單一球隊挑選)</option>
+                            <option value="free">🌍 夢幻明星隊 (跨隊混搭)</option>
+                            <option value="same">🛡️ 專屬陣容 (限單一球隊)</option>
                         </select>
                         <div id="dt-setup-team-box" style="display:none;">
                             <label class="dt-setup-label">3. 指定招募球隊</label>
