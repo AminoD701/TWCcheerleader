@@ -3361,23 +3361,7 @@
             
             overlay.classList.add('show');
 
-            // ⚠️ 無限抽卡測試模式：把這段防呆鎖直接註解掉！
-            /* if (lastDrawDate === todayStr) { 
-                // 已經抽過：直接讀取記憶，跳過動畫，顯示今天的卡片！
-                const savedUid = localStorage.getItem('cheer_gacha_girl');
-                const savedFortuneIdx = localStorage.getItem('cheer_gacha_fortune');
-                
-                // 防呆：如果找不到記憶中的女孩，隨機抓一個備用
-                let girl = girlMap.get(savedUid) || dbGirls.filter(g => g.img)[0];
-                let fortune = fortunePool[savedFortuneIdx] || fortunePool[0];
-                
-                enterBtn.innerText = "✨ 這是您今日的專屬卡片";
-                showGachaResult(girl, fortune, true); // 傳入 true 代表跳過召喚動畫
-                return; 
-            }
-            */
-
-            // 今天還沒抽過：播放召喚陣動畫！
+             // 今天還沒抽過：播放召喚陣動畫！
             animBox.style.display = 'flex';
             resBox.style.display = 'none';
             resBox.classList.remove('reveal'); 
