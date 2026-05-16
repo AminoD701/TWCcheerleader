@@ -1768,21 +1768,22 @@
                 ]
             },
             'baseball': { 
-                name: '⚾ 棒球鑽石陣容 (9人)', count: 9, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
+                name: '⚾ 棒球陣容 (10人)', count: 10, type: 'court', courtClass: 'court-baseball', defaultColor: '#ff9800',
                 roles: [
-                    { name: '左外野手 LF', abbr: 'LF', top: '25%', left: '20%' },
-                    { name: '中外野手 CF', abbr: 'CF', top: '22%', left: '50%' }, 
-                    { name: '右外野手 RF', abbr: 'RF', top: '25%', left: '80%' },
-                    { name: '游擊手 SS', abbr: 'SS', top: '45%', left: '35%' },
-                    { name: '二壘手 2B', abbr: '2B', top: '45%', left: '65%' },
-                    { name: '三壘手 3B', abbr: '3B', top: '60%', left: '15%' }, /* ✨ 從 25% 大幅往外側推到 15% */
-                    { name: '一壘手 1B', abbr: '1B', top: '60%', left: '85%' }, /* ✨ 從 75% 大幅往外側推到 85% */
-                    { name: '投手 P',   abbr: 'P',  top: '65%', left: '50%' },
-                    { name: '捕手 C',   abbr: 'C',  top: '88%', left: '50%' }
+                    { name: '左外野手 LF', abbr: 'LF', top: '23%', left: '20%' }, /* 稍微往上移，騰出空間 */
+                    { name: '中外野手 CF', abbr: 'CF', top: '18%', left: '50%' }, 
+                    { name: '右外野手 RF', abbr: 'RF', top: '23%', left: '80%' },
+                    { name: '游擊手 SS', abbr: 'SS', top: '42%', left: '35%' },
+                    { name: '二壘手 2B', abbr: '2B', top: '42%', left: '65%' },
+                    { name: '三壘手 3B', abbr: '3B', top: '56%', left: '16%' }, 
+                    { name: '一壘手 1B', abbr: '1B', top: '56%', left: '84%' }, 
+                    { name: '投手 P',   abbr: 'P',  top: '68%', left: '50%' },
+                    { name: '捕手 C',   abbr: 'C',  top: '86%', left: '50%' },
+                    { name: '代打 PH',  abbr: 'PH', top: '82%', left: '22%' } /* ✨ 新增：放置於左下角打擊準備區 */
                 ]
             },
             'basketball': { 
-                name: '🏀 籃球先發五人 (5人)', count: 5, type: 'court', courtClass: 'court-basketball', defaultColor: '#03a9f4',
+                name: '🏀 籃球陣容 (5人)', count: 5, type: 'court', courtClass: 'court-basketball', defaultColor: '#03a9f4',
                 roles: [
                     { name: '控球後衛 PG', abbr: 'PG', top: '80%', left: '50%' },  
                     { name: '得分後衛 SG', abbr: 'SG', top: '58%', left: '78%' },  
@@ -1792,7 +1793,7 @@
                 ]
             },
             'volleyball': { 
-                name: '🏐 排球核心陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
+                name: '🏐 排球陣容 (6人)', count: 6, type: 'court', courtClass: 'court-volleyball', defaultColor: '#00e676',
                 roles: [
                     { name: '主攻手 WS',   abbr: 'WS', top: '36%', left: '25%' },  
                     { name: '攔中手 MB',   abbr: 'MB', top: '36%', left: '50%' },  
@@ -1817,8 +1818,7 @@
                         <label class="dt-setup-label">1. 選擇陣容</label>
                         <select id="dt-setup-type" class="dt-setup-select">
                             <option value="original">🌟 經典偶像戰隊 (5人)</option>
-                            <option value="baseball">⚾ 棒球陣容 (9人)</option>
-                            <option value="basketball">🏀 籃球陣容 (5人)</option>
+                            <option value="baseball">⚾ 棒球陣容 (10人)</option> <option value="basketball">🏀 籃球陣容 (5人)</option>
                             <option value="volleyball">🏐 排球陣容 (6人)</option>
                         </select>
                         <label class="dt-setup-label">2. 招募限制</label>
