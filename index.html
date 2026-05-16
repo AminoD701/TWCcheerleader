@@ -1707,6 +1707,9 @@
             let isFull = dtState.roster.every(slot => slot !== null);
             let boardAccent = dtState.rule === 'same' ? (teamThemes[dtState.selectedTeam]?.accent || cfg.defaultColor) : cfg.defaultColor;
             let modeSubtitle = dtState.rule === 'same' ? `🛡️ ${dtState.selectedTeam} 專屬陣容` : '🌍 跨隊明星大亂鬥';
+            
+            // ✨ 救命關鍵：解析正確的底圖名稱 (確保抓取 png 檔案)
+            let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
                 let slotsHtml = dtState.roster.map((girl, index) => {
@@ -1759,7 +1762,7 @@
                         <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 教練，請直接手機截圖下方戰術板分享！</div>
                         
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <div class="court-bg ${cfg.courtClass}"></div>
+                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
                             <div class="dt-watermark">
                                 <div class="dt-watermark-title">DREAM TEAM</div>
                                 <div class="dt-watermark-sub" style="color:${boardAccent};">${modeSubtitle}</div>
@@ -1777,7 +1780,7 @@
                         <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
                         <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
                         <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <div class="court-bg ${cfg.courtClass}"></div>
+                            <img src="./${bgImgFile}" class="court-bg" crossorigin="anonymous">
                             ${tokensHtml}
                         </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
