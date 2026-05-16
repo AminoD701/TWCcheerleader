@@ -3395,7 +3395,11 @@
             // 填入資料
             document.getElementById('gacha-img').src = window.getCdnUrl(girl.img);
             document.getElementById('gacha-fortune-title').innerText = fortune.title;
-            const dName = (girl.nickname && girl.nickname !== girl.realname) ? `${girl.realname} (${girl.nickname})` : girl.realname;
+            
+            // ✨ 抽卡智慧分流：台、港、馬顯示綽號，外籍顯示本名
+            const isLocal = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
+            const dName = isLocal ? (girl.nickname || girl.realname) : girl.realname;
+            
             document.getElementById('gacha-girl-name').innerHTML = `${dName} <span style="font-size:12px; color:#888;">/ ${girl.team}</span>`;
             document.getElementById('gacha-fortune-desc').innerText = fortune.desc;
 
