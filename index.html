@@ -915,33 +915,54 @@
         .gacha-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 999999; display: none; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.5s; padding: 20px; box-sizing: border-box;}
         .gacha-overlay.show { display: flex; opacity: 1; }
 
-        /* 3. 🌟 五芒星魔法召喚陣特效 (動態縮放 + 向量高畫質) */
-        .gacha-animation { position: relative; width: 85vw; max-width: 320px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
-        
-        /* 外層法陣：緩慢正轉，帶有古老符文感 (用虛線與雙框疊加) */
-        .magic-circle-outer { position: absolute; width: 100%; height: 100%; border: 3px solid rgba(255, 215, 0, 0.2); border-top: 3px solid #ffd700; border-bottom: 3px solid #ffd700; border-radius: 50%; animation: spin 5s linear infinite; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), inset 0 0 20px rgba(255, 215, 0, 0.2); }
-        .magic-circle-outer::before { content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed #ffd700; border-radius: 50%; opacity: 0.6; }
-        
-        /* 內層法陣：完美幾何五芒星，快速逆轉 */
-        .magic-circle-inner { 
-            position: absolute; width: 85%; height: 85%; 
-            /* ✨ 將 SVG 畫布直接寫入 CSS，保證零延遲、高畫質不破圖 */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M 50 5 L 76.5 86.4 L 7.3 36.1 L 92.7 36.1 L 23.5 86.4 Z' fill='none' stroke='%23ffd700' stroke-width='1.5'/%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23ffd700' stroke-width='1'/%3E%3Ccircle cx='50' cy='50' r='20' fill='none' stroke='%23ffd700' stroke-width='0.5' stroke-dasharray='2,3'/%3E%3C/svg%3E"); 
-            background-size: contain; background-position: center; background-repeat: no-repeat; 
-            animation: spin-reverse 4s linear infinite; filter: drop-shadow(0 0 12px #ffd700); 
+        /* 3. 🌟 五芒星魔法召喚陣特效 (絢爛流光 RGB 升級版) */
+        .gacha-animation { 
+            position: relative; width: 85vw; max-width: 320px; aspect-ratio: 1/1; 
+            display: flex; align-items: center; justify-content: center; 
+            /* ✨ 魔法流光：讓整個陣法在 3 秒內不斷流轉變換彩虹光譜 */
+            animation: color-shift 3s linear infinite; 
         }
         
-        /* 核心聚能發光：在卡片跳出前產生閃光爆發效果 */
-        .magic-core { position: absolute; width: 5%; height: 5%; background: #fff; border-radius: 50%; box-shadow: 0 0 60px 30px #fff, 0 0 100px 50px #ffd700; opacity: 0; }
+        /* 外層法陣：粉紫與青藍雙色交織的立體雙框 */
+        .magic-circle-outer { 
+            position: absolute; width: 100%; height: 100%; 
+            border: 3px solid rgba(0, 229, 255, 0.2); 
+            border-top: 3px solid #e040fb; /* 霓虹紫 */
+            border-bottom: 3px solid #00e5ff; /* 賽博藍 */
+            border-radius: 50%; animation: spin 5s linear infinite; 
+            box-shadow: 0 0 20px rgba(224, 64, 251, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.4); 
+        }
+        .magic-circle-outer::before { 
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; 
+            border: 2px dashed #ff4081; border-radius: 50%; opacity: 0.8; /* 螢光粉內虛線 */
+        }
+        
+        /* 內層法陣：直接改寫 SVG 代碼色彩 ➜ 桃紅星 + 青藍圈 + 內金圈 */
+        .magic-circle-inner { 
+            position: absolute; width: 85%; height: 85%; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M 50 5 L 76.5 86.4 L 7.3 36.1 L 92.7 36.1 L 23.5 86.4 Z' fill='none' stroke='%23ff4081' stroke-width='1.5'/%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%2300e5ff' stroke-width='1'/%3E%3Ccircle cx='50' cy='50' r='20' fill='none' stroke='%23ffd700' stroke-width='0.5' stroke-dasharray='2,3'/%3E%3C/svg%3E"); 
+            background-size: contain; background-position: center; background-repeat: no-repeat; 
+            animation: spin-reverse 4s linear infinite; 
+            filter: drop-shadow(0 0 10px #ff4081) drop-shadow(0 0 20px #00e5ff); /* 雙重霓虹發光 */
+        }
+        
+        /* 核心聚能發光：在卡片跳出前產生彩色大爆炸閃光 */
+        .magic-core { 
+            position: absolute; width: 5%; height: 5%; background: #fff; border-radius: 50%; 
+            box-shadow: 0 0 60px 30px #fff, 0 0 100px 50px #e040fb; opacity: 0; 
+        }
         .gacha-overlay.show .magic-core { animation: magic-burst 2.5s ease-in forwards; }
         
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        /* ✨ 色彩流動動畫核心：強制把陣法的顏色推移 360 度 */
+        @keyframes color-shift { 100% { filter: hue-rotate(360deg); } } 
+        
         @keyframes magic-burst { 
             0% { transform: scale(0.2); opacity: 0; box-shadow: 0 0 20px 10px #fff; } 
-            60% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 40px 20px #fff, 0 0 60px 30px #ffd700; } 
-            90% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 80px 40px #fff, 0 0 150px 60px #ffd700; } 
-            100% { transform: scale(20); opacity: 1; box-shadow: 0 0 300px 300px #fff; } 
+            60% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 40px 20px #fff, 0 0 60px 30px #00e5ff; } /* 聚氣成藍色 */
+            90% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 80px 40px #fff, 0 0 150px 60px #ff4081; } /* 爆發出粉色 */
+            100% { transform: scale(20); opacity: 1; box-shadow: 0 0 300px 300px #fff; } /* 最終白光吞噬 */
         }
 
         /* 4. 拍立得運勢卡片 (UR 閃卡升級版) */
