@@ -3121,47 +3121,97 @@
         let mgMatchCount = 0;
         let mgTotalMatches = 0;
 
-        window.renderMinigameStart = function() {
+window.renderMinigameStart = function() {
             const container = document.getElementById('minigame-container');
             container.innerHTML = `
-                <div class="game-title">殘酷二選一：找出你的絕對本命</div>
-                <div style="color:var(--text-sub); font-size:16px; font-weight:700;">選擇賽區，系統將隨機抽出女孩進行淘汰賽！</div>
-                <div class="game-mode-grid">
-                    <button class="game-mode-btn" onclick="window.startMinigame('tw')"><span>🇹🇼</span> 本土大戰<div style="font-size:14px; color:var(--text-sub);">台灣女孩</div></button>
-                    <button class="game-mode-btn" onclick="window.startMinigame('foreign')"><span>✈️</span> 外籍傭兵<div style="font-size:14px; color:var(--text-sub);">日韓等外籍常駐應援女孩</div></button>
-                    <button class="game-mode-btn" style="border-color:#9c27b0;" onclick="window.startMinigame('all')"><span>🌍</span> 終極大亂鬥<div style="font-size:14px; color:var(--text-sub);">全圖鑑隨機無差別</div></button>
+                <div class="game-title">殘酷二選一：絕對本命對決</div>
+                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:20px;">自由設定你的專屬淘汰賽！</div>
+                
+                <div class="dt-setup-card" style="border-color: #9c27b0; max-width: 600px; margin: 0 auto;">
+                    <label class="dt-setup-label">1. 選擇參賽陣營</label>
+                    <select id="mg-setup-type" class="dt-setup-select">
+                        <option value="all">🌍 全圖鑑大亂鬥 (不分賽事)</option>
+                        <option value="tw">🌏 台港馬聯軍 (華語圈女孩)</option>
+                        <option value="foreign">✈️ 駐台外援 (日韓等籍駐台女孩)</option>
+                        <option value="kbo">🇰🇷 韓國職棒 (KBO 專屬)</option>
+                        <option value="baseball">⚾ 專屬棒球女孩 (台灣)</option>
+                        <option value="basketball">🏀 專屬籃球女孩 (台灣)</option>
+                        <option value="volleyball">🏐 專屬排球女孩 (台灣)</option>
+                    </select>
+
+                    <label class="dt-setup-label">2. 選擇賽事規模 (人數)</label>
+                    <select id="mg-setup-round" class="dt-setup-select">
+                        <option value="128">🤯 128 強地獄拉力賽 (殺破重圍)</option>
+                        <option value="64">🔥 64 強史詩戰</option>
+                        <option value="32" selected>⚡ 32 強標準淘汰賽</option>
+                        <option value="16">⚔️ 16 強菁英賽</option>
+                        <option value="8">🚀 8 強閃電戰</option>
+                    </select>
+                    
+                    <button class="enter-btn" style="width:100%; margin-top: 15px; background:#9c27b0; color:#fff; box-shadow: 6px 6px 0px rgba(156,39,176,0.4);" onclick="window.startMinigame()">開始對決 ⚔️</button>
                 </div>
             `;
         };
 
-        window.startMinigame = function(type) {
+        window.startMinigame = function() {
+            const type = document.getElementById('mg-setup-type').value;
+            const targetSize = parseInt(document.getElementById('mg-setup-round').value);
+
             let uniqueMap = new Map();
             dbGirls.forEach(g => { 
                 if(!uniqueMap.has(g.uid)) {
-                    uniqueMap.set(g.uid, { ...g, allSports: (g.sport || "") });
+                    // ✨ 同時合併運動類型與所屬球隊，避免跨隊女孩被遺漏
+                    uniqueMap.set(g.uid, { ...g, allSports: (g.sport || ""), combinedTeam: (g.team || "") });
                 } else {
                     let e = uniqueMap.get(g.uid);
                     e.allSports += " " + (g.sport || ""); 
+                    e.combinedTeam += " " + (g.team || "");
                 }
             });
-            let pool = Array.from(uniqueMap.values());
+            
+            // 只抓有照片的女孩進入賽場
+            let pool = Array.from(uniqueMap.values()).filter(g => g.img);
 
-            if(type === 'tw') {
-                pool = pool.filter(g => (g.nat||"").includes("臺") || (g.nat||"").includes("台") || (g.team||"").toLowerCase().includes("luxygirls"));
+            // 定義 KBO 十大球團
+            const kboTeams = ["doosan bears", "kt wiz", "kia tigers", "kiwoom heroes", "hanwha eagles", "ssg landers", "samsung lions", "nc dinos", "lotte giants", "lg twins"];
+
+            // ✨ 依照玩家選擇的陣營進行精準篩選
+            if (type === 'tw') {
+                pool = pool.filter(g => (g.nat||"").includes("臺") || (g.nat||"").includes("台") || (g.nat||"").includes("港") || (g.nat||"").includes("馬") || (g.combinedTeam||"").toLowerCase().includes("luxygirls"));
             } else if (type === 'foreign') {
                 pool = pool.filter(g => {
-                    let isForeign = g.nat && !(g.nat||"").includes("臺") && !(g.nat||"").includes("台") && g.nat !== "未知" && g.nat !== "-";
-                    let isMainSport = g.allSports.includes("棒") || g.allSports.includes("籃") || g.allSports.includes("排");
-                    return isForeign && isMainSport;
+                    let isForeign = g.nat && !(g.nat||"").includes("臺") && !(g.nat||"").includes("台") && !(g.nat||"").includes("港") && !(g.nat||"").includes("馬") && g.nat !== "未知" && g.nat !== "-";
+                    // 確保駐台外援不會混到純 KBO 的女孩
+                    let isKBO = kboTeams.some(t => (g.combinedTeam || "").toLowerCase().includes(t));
+                    return isForeign && !isKBO;
                 });
-            } else if (type === 'all') {
-                pool = pool.filter(g => g.img);
+            } else if (type === 'kbo') {
+                // 只要球隊名稱包含任何一個 KBO 隊伍就入列
+                pool = pool.filter(g => kboTeams.some(t => (g.combinedTeam || "").toLowerCase().includes(t)));
+            } else if (type === 'baseball') {
+                pool = pool.filter(g => g.allSports.includes("棒"));
+            } else if (type === 'basketball') {
+                pool = pool.filter(g => g.allSports.includes("籃"));
+            } else if (type === 'volleyball') {
+                pool = pool.filter(g => g.allSports.includes("排"));
             }
 
+            // 打亂名單順序
             pool.sort(() => Math.random() - 0.5);
 
-            mgRound = pool.length >= 32 ? 32 : (pool.length >= 16 ? 16 : (pool.length >= 8 ? 8 : 0));
-            if(mgRound === 0) { alert("該賽區女孩數量不足以舉辦淘汰賽！(至少需要 8 人)"); return; }
+            // ✨ 智慧判定：根據目前篩選出的總人數，決定能舉辦的「最大賽事規模」
+            let actualSizes = [128, 64, 32, 16, 8];
+            let maxPossible = actualSizes.find(s => s <= pool.length) || 0;
+            
+            mgRound = Math.min(targetSize, maxPossible);
+            
+            if(mgRound === 0) { 
+                alert(`⚠️ 該賽區符合條件的女孩數量（目前僅 ${pool.length} 人），不足以舉辦 8 強賽！請換個賽區試試！`); 
+                return; 
+            }
+            if(mgRound < targetSize) {
+                alert(`⚠️ 該賽區女孩總數為 ${pool.length} 人，無法舉辦 ${targetSize} 強賽，系統已自動為您調整為「${mgRound} 強賽」！`);
+            }
 
             mgQueue = pool.slice(0, mgRound);
             mgNextQueue = [];
@@ -3193,7 +3243,13 @@
             if(!girlB) { mgNextQueue.push(girlA); renderMinigameMatch(); return; }
 
             window.currentMgMatch = { A: girlA, B: girlB };
-            let roundTitle = mgRound === 2 ? '🏆 終極決賽 FINAL' : `🔥 ${mgRound} 強賽`;
+            
+            // ✨ 動態變化的熱血賽程標題
+            let roundTitle = "";
+            if (mgRound === 2) roundTitle = '🏆 終極決賽 FINAL';
+            else if (mgRound === 4) roundTitle = '🔥 準決賽 (4強)';
+            else if (mgRound === 8) roundTitle = '🚀 8 強閃電戰';
+            else roundTitle = `⚔️ ${mgRound} 強淘汰賽`;
 
             container.innerHTML = `
                 <div class="game-title" style="margin-bottom:5px;">${roundTitle}</div>
