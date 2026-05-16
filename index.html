@@ -2427,7 +2427,7 @@
         // 個人詳細彈窗
         // =========================================================================
         window.openModal = function(id) {
-            const c = girlMap.get(id);
+            const c = girlMap.get(id) || dbGirls.find(g => (g.realname||"").trim() === id.trim() || (g.nickname||"").trim() === id.trim());
             if(!c) return;
             
             const allRows = dbGirls.filter(g => g.uid === c.uid);
@@ -2441,6 +2441,10 @@
             const cardAccent = themeConfig.accent;
             const noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
+            // ✨ 圖片防變身：強制抓取 CSV 裡「第一張有效的圖片」來跟外面的網格同步！
+            const validImgRow = allRows.find(g => g.img) || c;
+            const finalImgUrl = validImgRow.img ? window.getCdnUrl(validImgRow.img) : '';
+
             let tags = sports.filter(s => s).map(s => {
                 let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
                 return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
@@ -2451,12 +2455,23 @@
             const currentMonth = today.getMonth() + 1;
             const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
 
-            let herSchedules = dbSchedules.filter(s => 
-                (s.name === (c.realname||"").trim() || s.name === (c.nickname||"").trim()) && 
-                s.safeDate.year === currentYear && 
-                s.safeDate.month === currentMonth &&
-                s.safeDate.num >= todayNum
-            );
+            // ✨ 班表智慧過濾：如果是菜市場名，球隊必須完全符合才算數！
+            let herSchedules = dbSchedules.filter(s => {
+                if (s.safeDate.year !== currentYear || s.safeDate.month !== currentMonth || s.safeDate.num < todayNum) return false;
+                
+                const sName = s.name.trim();
+                const cNick = (c.nickname||"").trim();
+                const cReal = (c.realname||"").trim();
+                
+                if (cNick && sName === cNick) return true;
+                
+                if (sName === cReal) {
+                    const isSharedName = [...new Set(dbGirls.filter(g => g.realname === cReal).map(g => g.uid))].length > 1;
+                    if (isSharedName) return teams.includes(s.team); // 撞名時，球隊也要一樣！
+                    return true;
+                }
+                return false;
+            });
 
             let scheduleHtml = '';
             if (herSchedules.length > 0) {
@@ -2495,7 +2510,7 @@
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
 
             document.getElementById('modal-dynamic-content').innerHTML = `
-                ${c.img ? `<img src="${c.img}" class="modal-photo">` : ''}
+                ${finalImgUrl ? `<img src="${finalImgUrl}" class="modal-photo">` : ''}
                 <div class="modal-body">
                     <div class="sport-tags">${tags}</div>
                     
@@ -2665,10 +2680,13 @@
             
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
-                    const g = girlMap.get(n) || { realname: n, nickname: "", uid: n };
-                    const showReal = g.realname;
-                    const showNick = (g.nickname && g.nickname !== g.realname) ? g.nickname : "";
-                    return `<th onclick="window.openModal('${g.uid || n}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${g.img||''}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
+                    // ✨ 智慧防撞車：透過「球隊」＋「名字」雙重比對，精準抓到對的人！
+                    const bestMatch = dbGirls.find(g => (g.realname === n || g.nickname === n) && g.team === currentScheduleTeam) || girlMap.get(n) || { realname: n, nickname: "", uid: n };
+                    const showReal = bestMatch.realname;
+                    const showNick = (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname) ? bestMatch.nickname : "";
+                    const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
+                    
+                    return `<th onclick="window.openModal('${bestMatch.uid}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${imgUrl}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
             let currentMonthDesk = "";
@@ -2705,11 +2723,14 @@
                         <div class="timeline-roster">`;
                     
                     attendees.forEach(gn => {
-                        const g = girlMap.get(gn) || { realname: gn, nickname: "", uid: gn };
-                        const showReal = g.realname;
-                        const showNick = (g.nickname && g.nickname !== g.realname) ? g.nickname : "";
-                        mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${g.uid || showReal}')" style="align-items:center; display:flex;">
-                            <img src="${g.img||''}" loading="lazy">
+                        // ✨ 智慧防撞車 (手機版)
+                        const bestMatch = dbGirls.find(g => (g.realname === gn || g.nickname === gn) && g.team === currentScheduleTeam) || girlMap.get(gn) || { realname: gn, nickname: "", uid: gn };
+                        const showReal = bestMatch.realname;
+                        const showNick = (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname) ? bestMatch.nickname : "";
+                        const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
+                        
+                        mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${bestMatch.uid}')" style="align-items:center; display:flex;">
+                            <img src="${imgUrl}" loading="lazy">
                             <div style="display:flex; flex-direction:column; line-height:1.2;">
                                 <span>${showReal}</span>
                                 ${showNick ? `<span style="font-size:10px; color:var(--team-accent);">${showNick}</span>` : ''}
