@@ -1064,6 +1064,25 @@
             100% { filter: brightness(1.2); box-shadow: 4px 4px 12px rgba(224,64,251,0.9); }
         }
 
+        /* ✨ 照片右下角的專屬備註標籤 (例如：練習生) */
+        .photo-note-tag {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.75);
+            color: var(--team-accent, #ffeb3b);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
         @media (max-width: 768px) {
             .gacha-top-btn { padding: 10px 20px !important; font-size: 14px !important; }
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
@@ -2576,12 +2595,14 @@
                 let noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
                 return `
+                return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="window.openModal('${c.uid}')">
                     <div class="photo-area">
                         <div class="sport-tags">${sportTags}</div>
                         <div class="fav-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${c.uid}', event, this)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
+                        ${noteText ? `<div class="photo-note-tag">${noteText}</div>` : ''}
                         ${c.img?`<img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">`:''}
                     </div>
                     <div class="info-section">
@@ -2603,13 +2624,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="stats-grid">
+                        <div class="stats-grid" style="margin-bottom: 0;">
                             <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : '-'}</span></div>
                             <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
                         </div>
-                        <div class="note-box" style="${noteText ? '' : 'visibility: hidden; pointer-events: none;'}">${noteText || '&nbsp;'}</div>
                     </div>
                 </div>`;
             }).join('');
