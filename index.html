@@ -2074,8 +2074,8 @@ if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""],
             if (currentSport === "全部" && currentTeam === "全部啦啦隊") {
                 const mMap = new Map();
                 result.forEach(c => { 
-                    const k = c.uid; if (!k) return;
-                    if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); } 
+                    const k = c.uid; if (!k) return; // 👈 這裡改成 c.uid！
+                    if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); }
                     else { 
                         let e = mMap.get(k); 
                         if (!e.mS.includes(c.sport || "")) e.mS.push(c.sport || ""); 
