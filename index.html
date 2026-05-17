@@ -1255,6 +1255,76 @@
             .damage-text { font-size: 20px; }
             .damage-text.crit { font-size: 32px; }
         }
+            /* =========================================
+           🌪️ 應援陀螺大亂鬥 (Cheer-Blade) 專屬視覺與動畫
+        ========================================= */
+        .blade-arena {
+            position: relative; width: 100%; max-width: 600px; height: 350px; margin: 0 auto;
+            background: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800&auto=format&fit=crop') center/cover;
+            border: 4px solid var(--border-color); border-radius: 12px; overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 10px 30px rgba(0,0,0,0.8);
+        }
+        /* 讓背景變暗，凸顯會發光的女孩陀螺 */
+        .blade-arena::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 1; pointer-events: none;}
+        
+        /* 撞擊時的螢幕震動 */
+        .blade-arena.shake { animation: arena-shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        .blade-hud { position: absolute; top: 15px; width: 35%; text-align: left; z-index: 5; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); }
+        .player-hud { left: 15px; border-left: 4px solid var(--p-color); }
+        .enemy-hud { right: 15px; text-align: right; border-right: 4px solid var(--e-color); }
+        .blade-name { font-family: var(--sport-font); font-size: 16px; font-weight: 900; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;}
+        
+        .hp-bar-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        .hp-bar-fill { height: 100%; transition: width 0.2s ease-out; }
+        .hp-text { font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: #fff; margin-top: 4px; }
+
+        /* ✨ 真正的陀螺本體！圓形、發光、且持續狂轉 */
+        .blade-spinner {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 110px; height: 110px; border-radius: 50%; border: 5px solid #fff;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.8);
+            animation: blade-spin 0.3s linear infinite; /* 瘋狂自轉 */
+        }
+        .blade-spinner img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; }
+        
+        /* 旋轉殘影特效 */
+        .blade-spinner::after {
+            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%; border: 3px dashed inherit;
+            animation: blade-spin-reverse 0.5s linear infinite; pointer-events: none;
+        }
+
+        /* 雙方初始站位與專屬光暈 */
+        .player-blade { left: 10%; border-color: var(--p-color); box-shadow: 0 0 25px var(--p-color); }
+        .enemy-blade { right: 10%; border-color: var(--e-color); box-shadow: 0 0 25px var(--e-color); }
+
+        /* ✨ 衝鋒碰撞的軌跡動畫 */
+        .player-blade.clashing { animation: p-clash 0.3s cubic-bezier(.17,.89,.32,1.27), blade-spin 0.1s linear infinite; z-index: 20; }
+        .enemy-blade.clashing { animation: e-clash 0.3s cubic-bezier(.17,.89,.32,1.27), blade-spin 0.1s linear infinite; z-index: 20; }
+
+        .damage-text {
+            position: absolute; top: 35%; font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff;
+            text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000;
+            animation: float-up 0.8s ease-out forwards; z-index: 30; pointer-events: none;
+        }
+        .damage-text.crit { font-size: 48px; font-style: italic; text-shadow: 3px 3px 0px #fff; z-index: 35; }
+
+        @keyframes blade-spin { 100% { transform: translateY(-50%) rotate(360deg); } }
+        @keyframes blade-spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes p-clash { 0% { left: 10%; } 50% { left: 50%; transform: translate(-50%, -50%) scale(1.3); } 100% { left: 10%; } }
+        @keyframes e-clash { 0% { right: 10%; } 50% { right: 50%; transform: translate(50%, -50%) scale(1.3); } 100% { right: 10%; } }
+        @keyframes arena-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px) rotate(-2deg); } 50% { transform: translateX(15px) rotate(2deg); } 75% { transform: translateX(-15px); } }
+        @keyframes float-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.5); } }
+
+        @media(max-width: 768px) {
+            .blade-spinner { width: 75px; height: 75px; border-width: 3px; }
+            .blade-arena { height: 220px; }
+            .blade-name { font-size: 14px; }
+            .damage-text { font-size: 24px; }
+            .damage-text.crit { font-size: 36px; }
+        }
     </style> 
 </head>
 <body class="no-scroll">
@@ -3742,27 +3812,33 @@ window.renderMinigameStart = function() {
         // 🌪️ 應援陀螺大亂鬥 (Cheer-Blade) 遊戲引擎
         // =========================================================================
         let bladeBattleInterval;
-        
+        let bladeIsBattling = false;
+
         window.renderBladeStart = function() {
+            if(bladeBattleInterval) clearTimeout(bladeBattleInterval);
+            bladeIsBattling = false;
+
             const container = document.getElementById('blade-container');
             container.innerHTML = `
                 <div class="game-title" style="text-shadow: 3px 3px 0px #00e5ff;">應援陀螺大亂鬥</div>
-                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:20px;">選擇你的王牌女孩，與隨機對手進行激烈碰撞！</div>
+                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:20px;">選擇你的王牌女孩，化身陀螺進行激烈碰撞！</div>
                 <button class="enter-btn" style="background:#00e5ff; color:#000; box-shadow: 6px 6px 0px rgba(0, 229, 255, 0.4); margin-top:20px;" onclick="window.startBladeBattle()">🔥 隨機挑選戰士 進入競技場 🔥</button>
-                <div style="margin-top:30px; font-size:13px; color:#888;">遊戲規則：雙方基礎體力 1000，每次碰撞產生 100~300 隨機傷害，20% 機率爆擊！</div>
+                <div style="margin-top:30px; font-size:13px; color:#888;">遊戲規則：雙方基礎體力 1000，照片將化為陀螺瘋狂對撞，20% 機率爆發會心一擊！</div>
             `;
         };
 
         window.startBladeBattle = function() {
+            if(bladeIsBattling) return;
             const validGirls = dbGirls.filter(g => g.img);
             if(validGirls.length < 2) return alert("資料不足無法對戰！");
             
-            // 隨機抽兩位女孩
+            bladeIsBattling = true;
+
+            // 隨機抽兩位不同的女孩
             const player = validGirls[Math.floor(Math.random() * validGirls.length)];
             let enemy = validGirls[Math.floor(Math.random() * validGirls.length)];
             while(enemy.uid === player.uid) { enemy = validGirls[Math.floor(Math.random() * validGirls.length)]; }
 
-            // 設定戰鬥數值
             window.bladeState = {
                 p: { ...player, hp: 1000, max: 1000, color: (teamThemes[player.team]||{accent:"#00e5ff"}).accent },
                 e: { ...enemy, hp: 1000, max: 1000, color: (teamThemes[enemy.team]||{accent:"#ff0044"}).accent },
@@ -3770,62 +3846,57 @@ window.renderMinigameStart = function() {
             };
 
             renderBladeArena();
-            
-            // 延遲 1 秒後開始瘋狂對撞
-            setTimeout(() => { executeBladeClash(); }, 1500);
+            setTimeout(() => { executeBladeClash(); }, 1500); // 暖身 1.5 秒後開撞
         };
 
         function renderBladeArena() {
             const container = document.getElementById('blade-container');
             const st = window.bladeState;
-            
-            // 確保 HP 不低於 0
             const pPct = Math.max(0, (st.p.hp / st.p.max) * 100);
             const ePct = Math.max(0, (st.e.hp / st.e.max) * 100);
 
             container.innerHTML = `
-                <div class="game-title" style="font-size:24px; margin-bottom:20px;">ROUND ${st.round}</div>
+                <div class="game-title" style="font-size:24px; margin-bottom:20px;">ROUND <span id="round-text">${st.round}</span></div>
                 
-                <div class="blade-arena">
+                <div class="blade-arena" style="--p-color:${st.p.color}; --e-color:${st.e.color};">
                     <div class="blade-hud player-hud">
-                        <div class="blade-name" style="color:${st.p.color}">${st.p.realname}</div>
-                        <div class="hp-bar-bg"><div class="hp-bar-fill" style="width:${pPct}%; background:${st.p.color};"></div></div>
-                        <div class="hp-text">${Math.max(0, st.p.hp)} / ${st.p.max}</div>
+                        <div class="blade-name">${st.p.realname}</div>
+                        <div class="hp-bar-bg"><div class="hp-bar-fill" id="p-hp-fill" style="width:${pPct}%; background:var(--p-color);"></div></div>
+                        <div class="hp-text" id="p-hp-text">${Math.max(0, st.p.hp)} / ${st.p.max}</div>
                     </div>
                     
                     <div class="blade-hud enemy-hud">
-                        <div class="blade-name" style="color:${st.e.color}">${st.e.realname}</div>
-                        <div class="hp-bar-bg"><div class="hp-bar-fill" style="width:${ePct}%; background:${st.e.color};"></div></div>
-                        <div class="hp-text">${Math.max(0, st.e.hp)} / ${st.e.max}</div>
+                        <div class="blade-name">${st.e.realname}</div>
+                        <div class="hp-bar-bg"><div class="hp-bar-fill" id="e-hp-fill" style="width:${ePct}%; background:var(--e-color);"></div></div>
+                        <div class="hp-text" id="e-hp-text">${Math.max(0, st.e.hp)} / ${st.e.max}</div>
                     </div>
 
-                    <div id="blade-p" class="blade-spinner player-blade" style="border-color:${st.p.color}; box-shadow: 0 0 20px ${st.p.color};">
-                        <img src="${window.getCdnUrl(st.p.img)}">
-                    </div>
-                    
-                    <div id="blade-e" class="blade-spinner enemy-blade" style="border-color:${st.e.color}; box-shadow: 0 0 20px ${st.e.color};">
-                        <img src="${window.getCdnUrl(st.e.img)}">
-                    </div>
+                    <div id="blade-p" class="blade-spinner player-blade"><img src="${window.getCdnUrl(st.p.img)}"></div>
+                    <div id="blade-e" class="blade-spinner enemy-blade"><img src="${window.getCdnUrl(st.e.img)}"></div>
                 </div>
             `;
         }
 
         function executeBladeClash() {
             const st = window.bladeState;
-            if(st.p.hp <= 0 || st.e.hp <= 0) return; // 戰鬥已結束
+            if(st.p.hp <= 0 || st.e.hp <= 0) return;
 
             st.round++;
+            document.getElementById('round-text').innerText = st.round;
             
             const bP = document.getElementById('blade-p');
             const bE = document.getElementById('blade-e');
             const arena = document.querySelector('.blade-arena');
 
-            // 觸發碰撞動畫
+            // ⚠️ 魔法黑科技：移除 class 再加回來，強制重置 CSS 碰撞動畫
+            bP.classList.remove('clashing');
+            bE.classList.remove('clashing');
+            void bP.offsetWidth; 
             bP.classList.add('clashing');
             bE.classList.add('clashing');
 
             setTimeout(() => {
-                // 碰撞瞬間計算傷害
+                // 產生傷害 (碰撞瞬間)
                 const dmgToE = Math.floor(Math.random() * 150) + 50;
                 const isCritP = Math.random() < 0.2;
                 const finalDmgE = isCritP ? Math.floor(dmgToE * 1.5) : dmgToE;
@@ -3837,37 +3908,40 @@ window.renderMinigameStart = function() {
                 st.e.hp -= finalDmgE;
                 st.p.hp -= finalDmgP;
 
-                // 產生飄浮傷害數字
-                showDamageText(arena, finalDmgE, isCritP, 'right');
-                showDamageText(arena, finalDmgP, isCritE, 'left');
+                // 飄浮傷害數字
+                showDamageText(arena, finalDmgE, isCritP, 'right', 'e-color');
+                showDamageText(arena, finalDmgP, isCritE, 'left', 'p-color');
 
-                // 震動特效
+                // 螢幕震動
                 arena.classList.add('shake');
                 setTimeout(() => arena.classList.remove('shake'), 300);
 
-                // 更新血條
-                renderBladeArena();
+                // 更新血條 (不重繪整個畫面，避免中斷旋轉動畫)
+                document.getElementById('p-hp-fill').style.width = Math.max(0, (st.p.hp / st.p.max) * 100) + '%';
+                document.getElementById('p-hp-text').innerText = `${Math.max(0, st.p.hp)} / ${st.p.max}`;
+                document.getElementById('e-hp-fill').style.width = Math.max(0, (st.e.hp / st.e.max) * 100) + '%';
+                document.getElementById('e-hp-text').innerText = `${Math.max(0, st.e.hp)} / ${st.e.max}`;
 
-                // 判斷勝負
                 if(st.p.hp <= 0 || st.e.hp <= 0) {
-                    setTimeout(() => finishBladeBattle(), 1000);
+                    setTimeout(() => finishBladeBattle(), 1000); // 延遲 1 秒播結算
                 } else {
-                    // 繼續下一回合
-                    bladeBattleInterval = setTimeout(executeBladeClash, 1200);
+                    bladeBattleInterval = setTimeout(executeBladeClash, 1200); // 1.2 秒後進行下一次碰撞
                 }
-            }, 150); // 動畫交會點大約在 150ms
+            }, 150); // 動畫交會點大約在 150ms 處
         }
 
-        function showDamageText(arena, dmg, isCrit, side) {
+        function showDamageText(arena, dmg, isCrit, side, colorVar) {
             const div = document.createElement('div');
             div.className = `damage-text ${isCrit ? 'crit' : ''}`;
             div.innerText = `-${dmg}`;
-            div.style[side] = '20%';
+            div.style[side] = '25%';
+            if(isCrit) div.style.color = `var(--${colorVar})`;
             arena.appendChild(div);
-            setTimeout(() => div.remove(), 1000);
+            setTimeout(() => div.remove(), 800);
         }
 
         function finishBladeBattle() {
+            bladeIsBattling = false;
             const st = window.bladeState;
             const container = document.getElementById('blade-container');
             const winner = st.p.hp > st.e.hp ? st.p : st.e;
@@ -3877,14 +3951,14 @@ window.renderMinigameStart = function() {
                 <div class="game-title" style="color: #ffd700; text-shadow: 3px 3px 0px #b8860b;">🏆 戰鬥結束！勝者誕生</div>
                 <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:30px;">經歷了 ${st.round} 回合的激烈碰撞！</div>
                 
-                <div class="dt-token-img-wrap" style="width:150px; height:150px; margin:0 auto; border-color:${winner.color}; box-shadow: 0 0 30px ${winner.color}; animation: none;">
-                    <img src="${window.getCdnUrl(winner.img)}">
+                <div style="width:180px; height:180px; margin:0 auto; border-radius:50%; border: 6px solid ${winner.color}; box-shadow: 0 0 40px ${winner.color}; overflow: hidden; animation: destiny-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                    <img src="${window.getCdnUrl(winner.img)}" style="width:100%; height:100%; object-fit:cover; object-position:top center;">
                 </div>
-                <div style="font-size:32px; font-weight:900; color:${winner.color}; margin-top:15px;">${winner.realname}</div>
-                <div style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:5px;">擊敗了 ${loser.realname}</div>
+                <div style="font-size:36px; font-weight:900; color:${winner.color}; margin-top:20px; text-shadow: 2px 2px 4px #000;">${winner.realname}</div>
+                <div style="font-size:16px; color:var(--text-sub); font-weight:700; margin-top:5px;">擊碎了 ${loser.realname} 的陀螺</div>
 
                 <div style="margin-top:40px;">
-                    <button class="enter-btn" style="background:#00e5ff; color:#000;" onclick="window.startBladeBattle()">🔄 再戰一局</button>
+                    <button class="enter-btn" style="background:#00e5ff; color:#000; box-shadow: 6px 6px 0px rgba(0, 229, 255, 0.4);" onclick="window.renderBladeStart()">🔄 返回競技場大廳</button>
                 </div>
             `;
             if(typeof createConfetti === 'function') createConfetti();
