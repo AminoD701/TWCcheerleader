@@ -933,9 +933,10 @@
                 background: linear-gradient(135deg, #111, #1a1a24) !important;
             }
             #minigame-container .winner-card .info-section > div:first-child {
-                font-size: 32px !important; 
-                margin-bottom: 0 !important;
-            }
+                font-size: 32px !important; 
+                margin-bottom: 0 !important;
+            }
+        } 
         /* =========================================
            🏟️ 夢幻戰隊：擴充賽制戰術板與篩選器
         ========================================= */
@@ -3186,10 +3187,9 @@
             }).join('');
 
             const addressRaw = (e.address || "").trim();
-            const addressDisplay = addressRaw 
-                ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
-                : "請見球團官網";
-
+            const addressDisplay = addressRaw 
+    ? `<a href="https://maps.google.com/?q=${encodeURIComponent(addressRaw)}" ... >${addressRaw}</a>`
+    : "請見球團官網";
             let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"");
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
