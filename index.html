@@ -732,7 +732,7 @@
             background: linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 8px 12px 3px; 
             border-radius: 6px; border: 1px solid var(--event-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.8);
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
-        }
+        }    
         /* =========================================
            📂 電競風收納下拉選單 (Dropdown)
         ========================================= */
@@ -1309,6 +1309,53 @@
     </svg>
 
     <header class="header">
+        <h1 class="title">TAIWAN CHEERLEADER DATABASE</h1>
+        <div class="controls-container">
+            <div class="dropdowns-row">
+                
+                <div class="dropdown-container">
+                    <button class="dropdown-btn" onclick="window.toggleDropdown('mode-menu', event)">
+                        <span id="mode-btn-text">👧 女孩圖鑑 ROSTER</span> 
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu" id="mode-menu">
+                        <button class="dropdown-item active" onclick="window.setMode('girls')">👧 女孩圖鑑 ROSTER</button>
+                        <button class="dropdown-item" onclick="window.setMode('passport')">🛂 追星護照 MY PASSPORT</button>
+                        <button class="dropdown-item" onclick="window.setMode('schedule')">📅 應援班表 SCHEDULE</button>
+                        <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
+                        <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
+                        <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
+                        <button class="dropdown-item" onclick="window.setMode('feedback')">💬 意見回饋 FEEDBACK</button>
+                    </div>
+                </div>
+
+                <div class="dropdown-container" id="team-dropdown-wrapper" style="display:none;">
+                    <button class="dropdown-btn" onclick="window.toggleDropdown('team-menu', event)">
+                        <span id="team-btn-text">全部啦啦隊</span> 
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu" id="team-menu"></div>
+                </div>
+
+                <div class="dropdown-container">
+                    <button class="dropdown-btn gacha-top-btn" onclick="window.startGacha()">
+                        <span>🔮 每日一抽</span>
+                    </button>
+                </div>
+
+            </div>
+            
+            <div class="sub-nav" id="sub-nav-sports">
+                <button class="sub-btn active" onclick="window.setSport('全部', this)">全部 ALL</button>
+                <button class="sub-btn" onclick="window.setSport('棒球', this)">棒球 BASEBALL</button>
+                <button class="sub-btn" onclick="window.setSport('籃球', this)">籃球 BASKETBALL</button>
+                <button class="sub-btn" onclick="window.setSport('排球', this)">排球 VOLLEYBALL</button>
+                <button class="sub-btn" onclick="window.setSport('其他', this)">其他 OTHERS</button>
+            </div>
+
+            <div class="team-tabs" id="tabs-container"></div>
+        </div>
+    </header>
     <div class="sticky-filter-wrapper" id="filter-bar">
         <div class="filters">
             <input type="text" id="searchInput" placeholder="搜尋姓名、綽號或活動..." oninput="window.debounceSearch()">
