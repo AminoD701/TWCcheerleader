@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>台灣啦啦隊資料庫 | </title>
 
-    <link rel="manifest" href="manifest.json">
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
         // ⚡ GitHub 轉 jsDelivr 極速加速器 (強化精準解析版)
@@ -3468,12 +3466,6 @@ window.renderMinigameStart = function() {
         window.scrollToTop = function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => {});
-            });
-        }
 
         // =========================================================================
         // 💬 意見回饋與資料更正核心引擎 (直連 Google Sheet 安全防護版)
