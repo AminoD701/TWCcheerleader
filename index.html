@@ -1917,8 +1917,8 @@
                             <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
                         </div>
                         <div class="info-section" style="padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${c.realname}</div>
-                            ${showNick ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${showNick}</div>` : ''}
+                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) ? (c.nickname || c.realname) : c.realname }</div>
+                            ${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) && c.nickname && c.nickname !== c.realname ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${c.realname}</div>` : ''}
                         </div>
                      </div>`;
                  }).join('') + `</div>`;
@@ -2146,10 +2146,10 @@
                         <div class="header-info">
                             <div>
                                 <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                    <div class="nickname" style="color:${cardAccent}">${c.realname}</div>
-                                    ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
-                                </div>
-                                ${(c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : ''}
+                                    <div class="nickname" style="color:${cardAccent}">${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) ? (c.nickname || c.realname) : c.realname }</div>
+                                ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
+                            </div>
+                            ${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) && c.nickname && c.nickname !== c.realname ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.realname}</div>` : ''}
                             </div>
                             <div class="number">${displayNum}</div>
                         </div>
@@ -2262,8 +2262,8 @@
                     
                     <div class="modal-header-info">
                         <div>
-                            <div class="modal-nickname" style="color:${cardAccent}">${c.realname}</div>
-                            ${(c.nickname && c.nickname !== c.realname) ? `<div class="modal-realname">${c.nickname}</div>` : ''}
+                            <div class="modal-nickname" style="color:${cardAccent}">${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) ? (c.nickname || c.realname) : c.realname }</div>
+                            ${ ((c.nat||"").includes("台") || (c.nat||"").includes("臺") || (c.nat||"").includes("港") || (c.nat||"").includes("馬")) && c.nickname && c.nickname !== c.realname ? `<div class="modal-realname">${c.realname}</div>` : ''}
                         </div>
                         <div class="modal-number">${nums.join(' ') || "-"}</div>
                     </div>
