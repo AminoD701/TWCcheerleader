@@ -1937,7 +1937,7 @@
             const wrapper = document.getElementById('team-dropdown-wrapper');
             const container = document.getElementById('team-menu');
             
-            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || (currentMode === 'girls' && currentSport === "全部")) { 
+            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || currentMode === 'defense' || (currentMode === 'girls' && currentSport === "全部")) { 
                 wrapper.style.display = 'none'; return; 
             }
             
@@ -2033,9 +2033,10 @@
                   passport = document.getElementById('passport-container'), 
                   game = document.getElementById('minigame-container'), 
                   dt = document.getElementById('dreamteam-container'),
-                  fb = document.getElementById('feedback-container');
+                  fb = document.getElementById('feedback-container'),
+                  df = document.getElementById('defense-container'); // 👈 新增防衛戰容器
                   
-            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = 'none';
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = df.style.display = 'none';
             
             if (!skipScroll) { window.scrollTo({top: 0}); }
             
@@ -2049,6 +2050,7 @@
             else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
             else if (currentMode === 'feedback') { fb.style.display = 'block'; window.renderFeedbackStart(); }
+            else if (currentMode === 'defense') { df.style.display = 'block'; window.renderDefenseStart(); } // 👈 顯示防衛戰畫面
         };
 
         // =========================================================================
@@ -3755,7 +3757,12 @@ window.renderMinigameStart = function() {
         };
 
         window.initDefenseGame = function() {
-            tdGame = { running: true, energy: 100, hp: 5, score: 0, lanes: [{ girl: null }, { girl: null }, { girl: null }], monsters: [], bullets: [], pendingGirl: null };
+            tdGame = { 
+                running: true, energy: 100, hp: 5, score: 0, 
+                lanes: [{ girl: null }, { girl: null }, { girl: null }], 
+                monsters: [], bullets: [], pendingGirl: null,
+                cost: { draw: 50, upg2: 100, upg3: 200 } // 👈 就是這裡！把升級與抽卡的費用補回來！
+            };
             renderDefenseArena();
             tdGame.loopId = setInterval(gameLoop, 50);
             tdGame.spawnerId = setInterval(spawnMonster, 2000); // 每2秒生怪
