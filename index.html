@@ -1201,45 +1201,45 @@
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
         /* =========================================
-           🛡️ 應援防衛戰 (Cheer Defense) 專屬樣式
+           🎴 本命翻翻樂 (Memory Match) 專屬樣式
         ========================================= */
-        .td-header { display: flex; justify-content: space-between; background: #111; padding: 15px 20px; border-radius: 8px; border: 2px solid var(--schedule-accent); margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
-        .td-stat { font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: #fff; }
-        .td-stat span { color: var(--schedule-accent); font-size: 24px; margin-left: 10px; }
+        .memory-board {
+            display: grid; gap: 10px; max-width: 600px; margin: 0 auto; perspective: 1000px;
+        }
+        .memory-card {
+            aspect-ratio: 3 / 4; background: transparent; cursor: pointer; position: relative;
+            transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .memory-card.flipped { transform: rotateY(180deg); }
+        .memory-card.matched { transform: rotateY(180deg) scale(0.95); opacity: 0.6; pointer-events: none; filter: grayscale(50%); }
         
-        .td-arena { position: relative; width: 100%; height: 400px; background: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1000&auto=format&fit=crop') center/cover; border: 4px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
-        .td-arena::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.65); z-index: 1; pointer-events: none;}
+        .memory-card-front, .memory-card-back {
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            backface-visibility: hidden; border-radius: 8px; border: 2px solid var(--border-color);
+            overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        /* 卡片背面 (蓋著的時候) */
+        .memory-card-back {
+            background: repeating-linear-gradient(45deg, #1a1a24, #1a1a24 10px, #222230 10px, #222230 20px);
+            display: flex; align-items: center; justify-content: center; font-size: 32px; color: #e040fb;
+            border-color: #e040fb;
+        }
+        /* 卡片正面 (翻開女孩照片) */
+        .memory-card-front {
+            background: #252c36; transform: rotateY(180deg); border-color: #fff;
+        }
+        .memory-card-front img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
         
-        .td-lane { flex: 1; position: relative; border-bottom: 2px dashed rgba(255,255,255,0.1); z-index: 2; display: flex; align-items: center; }
-        .td-lane:last-child { border-bottom: none; }
-        
-        /* 放置區 */
-        .td-slot { width: 80px; height: 80px; border: 3px dashed #888; border-radius: 8px; margin-left: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; position: relative; background: rgba(0,0,0,0.5); z-index: 10;}
-        .td-slot:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
-        .td-slot.active { border-color: var(--schedule-accent); animation: glow 1s infinite alternate; }
-        .td-slot.filled { border-style: solid; border-color: var(--team-accent, #fff); cursor: pointer; }
-        
-        /* 女孩卡與等級框 */
-        .td-girl-img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
-        .td-lvl-badge { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 900; background: #111; border: 2px solid currentColor; padding: 2px 8px; border-radius: 10px; white-space: nowrap; box-shadow: 0 2px 5px #000;}
-        
-        /* 怪物與子彈 (絕對定位) */
-        .td-monster { position: absolute; font-size: 45px; transform: translate(-50%, -50%); transition: left 0.1s linear; z-index: 5; text-shadow: 0 5px 10px rgba(0,0,0,0.8); }
-        .td-monster .m-hp { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 6px; background: #333; border border: 1px solid #000; border-radius: 3px; overflow: hidden; }
-        .td-monster .m-hp-fill { height: 100%; background: #ff4757; width: 100%; transition: 0.1s; }
-        
-        .td-bullet { position: absolute; font-size: 24px; transform: translate(-50%, -50%); z-index: 4; text-shadow: 0 0 10px #ff0044; }
-
-        .dmg-float { position: absolute; font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: #ff4757; text-shadow: 2px 2px 0 #000; animation: floatUp 0.6s ease-out forwards; z-index: 20; pointer-events: none; }
-
-        @keyframes glow { 0% { box-shadow: 0 0 5px var(--schedule-accent); } 100% { box-shadow: 0 0 20px var(--schedule-accent); } }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -100px) scale(1.5); } }
+        .mem-header { display: flex; justify-content: space-between; background: #111; padding: 15px 20px; border-radius: 8px; border: 2px solid #e040fb; margin: 0 auto 20px; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .mem-stat { font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: #fff; }
+        .mem-stat span { color: #e040fb; font-size: 22px; margin-left: 8px; }
 
         @media(max-width: 768px) {
-            .td-arena { height: 300px; }
-            .td-slot { width: 60px; height: 60px; }
-            .td-monster { font-size: 35px; }
-            .td-bullet { font-size: 18px; }
+            .memory-board { gap: 6px; }
+            .memory-card-back { font-size: 24px; }
+            .mem-header { padding: 10px 15px; }
+            .mem-stat { font-size: 14px; }
+            .mem-stat span { font-size: 18px; }
         }
     </style> 
 </head>
@@ -1366,7 +1366,7 @@
                         <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
                         <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
                         <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
-                        <button class="dropdown-item" onclick="window.setMode('defense')">🛡️ 應援防衛戰 DEFENSE</button>
+                        <button class="dropdown-item" onclick="window.setMode('memory')">🎴 本命翻翻樂 MEMORY</button>
                         <button class="dropdown-item" onclick="window.setMode('feedback')">💬 意見回饋 FEEDBACK</button>
                     </div>
                 </div>
@@ -1429,7 +1429,7 @@
         <div id="passport-container"></div>
         <div id="minigame-container"></div>
         <div id="dreamteam-container" style="display:none;"></div>
-        <div id="defense-container" style="display:none; max-width: 1000px; margin: 30px auto 60px; padding: 0 10px; text-align: center;"></div>
+        <div id="memory-container" style="display:none; max-width: 1000px; margin: 30px auto 60px; padding: 0 10px; text-align: center;"></div>
         <div id="feedback-container" style="display:none; max-width: 600px; margin: 30px auto 60px; padding: 0 20px;"></div>
     </main>
 
@@ -1878,7 +1878,7 @@
                 'minigame': '🎮 殘酷二選一 GAME',
                 'dreamteam': '🌟 夢幻陣容 DREAM TEAM',
                 'feedback': '💬 意見回饋 FEEDBACK',
-                'defense': '🛡️ 應援防衛戰 DEFENSE'
+                'memory': '🎴 本命翻翻樂 MEMORY'
             };
             
             document.getElementById('mode-btn-text').innerText = modeNames[mode] || '選擇功能';
@@ -1904,12 +1904,12 @@
             document.getElementById('extra-filters').style.display = showSubNav ? 'flex' : 'none';
             
             // 隱藏篩選器
-            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || currentMode === 'defense') ? 'none' : 'block';
+            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || currentMode === 'memory') ? 'none' : 'block';
             
             updateTeamTabs();
             
             // 控制區塊顯示
-            const containers = ['grid-container', 'event-container', 'schedule-container', 'passport-container', 'minigame-container', 'dreamteam-container', 'feedback-container', 'defense-container'];
+            const containers = ['grid-container', 'event-container', 'schedule-container', 'passport-container', 'minigame-container', 'dreamteam-container', 'feedback-container', 'memory-container'];
             containers.forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = 'none'; });
             window.scrollTo({top: 0});
             
@@ -1920,7 +1920,7 @@
             else if (currentMode === 'minigame') { document.getElementById('minigame-container').style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { document.getElementById('dreamteam-container').style.display = 'block'; renderDreamTeamStart(); }
             else if (currentMode === 'feedback') { document.getElementById('feedback-container').style.display = 'block'; window.renderFeedbackStart(); }
-            else if (currentMode === 'defense') { document.getElementById('defense-container').style.display = 'block'; window.renderDefenseStart(); }
+            else if (currentMode === 'memory') { document.getElementById('memory-container').style.display = 'block'; window.renderMemoryStart(); }
         };
 
         window.setSport = function(sport, btn) {
@@ -3726,310 +3726,145 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 🛡️ 應援防衛戰 (Cheer Defense) 遊戲引擎
+        // 🎴 本命翻翻樂 (Memory Match) 遊戲引擎
         // =========================================================================
-        let tdGame = {
-            running: false, energy: 100, hp: 5, score: 0,
-            lanes: [ { girl: null }, { girl: null }, { girl: null } ],
-            monsters: [], bullets: [],
-            loopId: null, spawnerId: null, pendingGirl: null,
-            cost: { draw: 50, upg2: 100, upg3: 200 }
-        };
+        let memState = { cards: [], flippedIndices: [], matchedCount: 0, isLocked: false, moves: 0, startTime: 0, timerId: null };
 
-        window.renderDefenseStart = function() {
-            if(tdGame.running) stopDefenseGame();
-            const container = document.getElementById('defense-container');
+        window.renderMemoryStart = function() {
+            if(memState.timerId) clearInterval(memState.timerId);
+            const container = document.getElementById('memory-container');
             container.innerHTML = `
-                <div class="game-title" style="text-shadow: 3px 3px 0px #00e676;">應援防衛戰：守護舞台</div>
-                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:20px;">黑粉與疲勞怪正在逼近！招募女孩，升級戰力，守住最後的防線！</div>
+                <div class="game-title" style="text-shadow: 3px 3px 0px #e040fb;">本命翻翻樂</div>
+                <div style="color:var(--text-sub); font-size:16px; font-weight:700; margin-bottom:20px;">考驗你的真愛記憶！找出所有成對的女孩吧！</div>
                 
-                <div class="dt-setup-card" style="border-color: #00e676; max-width: 600px; margin: 0 auto; text-align:center;">
-                    <div style="font-size:14px; color:#ddd; margin-bottom:10px; text-align:left;">
-                        🔹 規則說明：<br>
-                        1. 點擊「招募女孩」消耗 50 應援力。<br>
-                        2. 點擊防守路線上的空位進行佈署。<br>
-                        3. 再次點擊已佈署的女孩可進行「升級/轉職」，提升射速與傷害！<br>
-                        4. 漏掉 5 隻怪物即遊戲結束。
-                    </div>
-                    <button class="enter-btn" style="width:100%; margin-top: 15px; background:#00e676; color:#000; box-shadow: 6px 6px 0px rgba(0, 230, 118, 0.4);" onclick="window.initDefenseGame()">🚀 進入戰場</button>
+                <div class="dt-setup-card" style="border-color: #e040fb; max-width: 400px; margin: 0 auto; text-align:center;">
+                    <label class="dt-setup-label" style="text-align:left;">選擇難度：</label>
+                    <select id="mem-difficulty" class="dt-setup-select">
+                        <option value="6">🟢 簡單 (3x4 網格, 6位女孩)</option>
+                        <option value="8" selected>🟡 中等 (4x4 網格, 8位女孩)</option>
+                        <option value="12">🔴 困難 (4x6 網格, 12位女孩)</option>
+                    </select>
+                    <button class="enter-btn" style="width:100%; margin-top: 15px; background:#e040fb; color:#fff; box-shadow: 6px 6px 0px rgba(224, 64, 251, 0.4);" onclick="window.initMemoryGame()">開始挑戰 🎴</button>
                 </div>
             `;
         };
 
-        window.initDefenseGame = function() {
-            tdGame = { 
-                running: true, energy: 100, hp: 5, score: 0, 
-                lanes: [{ girl: null }, { girl: null }, { girl: null }], 
-                monsters: [], bullets: [], pendingGirl: null,
-                cost: { draw: 50, upg2: 100, upg3: 200 } // 👈 就是這裡！把升級與抽卡的費用補回來！
+        window.initMemoryGame = function() {
+            const pairsCount = parseInt(document.getElementById('mem-difficulty').value);
+            const validGirls = dbGirls.filter(g => g.img);
+            if(validGirls.length < pairsCount) return alert("圖鑑資料不足！");
+
+            // 1. 隨機選出指定數量的女孩
+            let shuffled = [...validGirls].sort(() => 0.5 - Math.random());
+            let selectedGirls = shuffled.slice(0, pairsCount);
+            
+            // 2. 複製一份，變成成對的牌組，並洗牌
+            let deck = [...selectedGirls, ...selectedGirls];
+            deck.sort(() => 0.5 - Math.random());
+
+            memState = {
+                cards: deck, flippedIndices: [], matchedCount: 0, isLocked: false, moves: 0,
+                startTime: Date.now(),
+                timerId: setInterval(updateMemoryTimer, 1000)
             };
-            renderDefenseArena();
-            tdGame.loopId = setInterval(gameLoop, 50);
-            tdGame.spawnerId = setInterval(spawnMonster, 2000); // 每2秒生怪
+
+            renderMemoryBoard(pairsCount);
         };
 
-        function stopDefenseGame() {
-            tdGame.running = false;
-            clearInterval(tdGame.loopId);
-            clearInterval(tdGame.spawnerId);
+        function updateMemoryTimer() {
+            const timerEl = document.getElementById('mem-timer');
+            if(timerEl) {
+                const secs = Math.floor((Date.now() - memState.startTime) / 1000);
+                timerEl.innerText = `${Math.floor(secs/60).toString().padStart(2,'0')}:${(secs%60).toString().padStart(2,'0')}`;
+            }
         }
 
-        function renderDefenseArena() {
-            const container = document.getElementById('defense-container');
+        function renderMemoryBoard(pairsCount) {
+            const container = document.getElementById('memory-container');
+            // 決定網格排版 (簡單3欄，其餘4欄)
+            const cols = pairsCount === 6 ? 3 : 4; 
+            
             container.innerHTML = `
-                <div class="td-header">
-                    <div class="td-stat">⚡ 應援力 <span id="td-energy">${tdGame.energy}</span></div>
-                    <div class="td-stat" style="font-size:16px; padding-top:4px;">擊殺: <span id="td-score" style="color:#fff; font-size:18px;">${tdGame.score}</span></div>
-                    <div class="td-stat">❤️ 舞台血量 <span id="td-hp" style="color:#ff4757;">${tdGame.hp}</span></div>
+                <div class="mem-header">
+                    <div class="mem-stat">⏱️ 時間 <span id="mem-timer">00:00</span></div>
+                    <div class="mem-stat">🔄 步數 <span id="mem-moves">0</span></div>
                 </div>
-                
-                <div class="td-arena" id="td-arena">
-                    ${[0,1,2].map(i => `
-                        <div class="td-lane" id="lane-${i}">
-                            <div class="td-slot" id="slot-${i}" onclick="window.clickSlot(${i})">
-                                <div style="color:#aaa; font-size:24px;">➕</div>
-                            </div>
+                <div class="memory-board" style="grid-template-columns: repeat(${cols}, 1fr);">
+                    ${memState.cards.map((g, idx) => `
+                        <div class="memory-card" id="mem-card-${idx}" onclick="window.flipMemCard(${idx})">
+                            <div class="memory-card-back">❓</div>
+                            <div class="memory-card-front"><img src="${window.getCdnUrl(g.img)}"></div>
                         </div>
                     `).join('')}
                 </div>
-                
-                <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
-                    <button id="btn-draw" class="enter-btn" style="background:#ff9800; color:#000; padding:12px 20px; font-size:16px;" onclick="window.drawDefender()">
-                        抽卡招募 (消耗 ${tdGame.cost.draw})
-                    </button>
-                    <button class="enter-btn" style="background:#333; color:#fff; padding:12px 20px; font-size:16px; box-shadow:none;" onclick="window.renderDefenseStart()">退出</button>
-                </div>
-                <div id="td-msg" style="color:var(--schedule-accent); font-weight:900; margin-top:10px; height:20px;"></div>
+                <button class="enter-btn" style="background:#333; color:#fff; padding:10px 20px; font-size:14px; margin-top:30px; box-shadow:none;" onclick="window.renderMemoryStart()">放棄挑戰</button>
             `;
-            updateSlots();
         }
 
-        // ================= 核心邏輯 =================
-        window.drawDefender = function() {
-            if(!tdGame.running) return;
-            if(tdGame.pendingGirl) return showMsg("請先將手上的女孩配置到場上！", "#ff4757");
-            if(tdGame.energy < tdGame.cost.draw) return showMsg("⚡ 應援力不足！", "#ff4757");
+        window.flipMemCard = function(idx) {
+            if(memState.isLocked) return;
+            const cardEl = document.getElementById(`mem-card-${idx}`);
             
-            const validGirls = dbGirls.filter(g => g.img);
-            const g = validGirls[Math.floor(Math.random() * validGirls.length)];
-            
-            tdGame.energy -= tdGame.cost.draw;
-            updateHUD();
-            
-            tdGame.pendingGirl = { ...g, lvl: 1, damage: 20, fireRate: 30, fireCooldown: 0 };
-            showMsg(`🎉 抽到了 ${g.realname}！請點擊空位佈署。`, "#00e676");
-            
-            document.querySelectorAll('.td-slot').forEach(s => {
-                if(!s.classList.contains('filled')) s.classList.add('active');
-            });
-        };
+            // 已經翻開或已經配對成功的卡片，點擊無效
+            if(cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
 
-        window.clickSlot = function(laneIdx) {
-            if(!tdGame.running) return;
-            const slotData = tdGame.lanes[laneIdx];
+            // 翻牌特效
+            cardEl.classList.add('flipped');
+            memState.flippedIndices.push(idx);
 
-            // 佈署女孩
-            if(tdGame.pendingGirl) {
-                if(slotData.girl !== null) return showMsg("這裡已經有人了！", "#ff4757");
-                
-                slotData.girl = { ...tdGame.pendingGirl, color: (teamThemes[tdGame.pendingGirl.team]||{accent:"#fff"}).accent };
-                tdGame.pendingGirl = null;
-                showMsg(`${slotData.girl.realname} 佈署完成！開始應援！`, "#00e676");
-                document.querySelectorAll('.td-slot').forEach(s => s.classList.remove('active'));
-                updateSlots();
-                return;
-            }
-
-            // 升級女孩
-            if(slotData.girl !== null) {
-                const g = slotData.girl;
-                let cost = g.lvl === 1 ? tdGame.cost.upg2 : (g.lvl === 2 ? tdGame.cost.upg3 : 0);
-                
-                if(g.lvl >= 3) return showMsg("已達最高金卡等級！", "#ffeb3b");
-                if(tdGame.energy < cost) return showMsg(`升級需要 ${cost} 應援力！`, "#ff4757");
-
-                tdGame.energy -= cost;
-                g.lvl++;
-                if(g.lvl === 2) { g.damage = 40; g.fireRate = 20; g.color = "#c0c0c0"; } // 銀卡
-                if(g.lvl === 3) { g.damage = 80; g.fireRate = 10; g.color = "#ffd700"; } // 金卡
-                
-                updateHUD();
-                updateSlots();
-                showMsg(`⭐ ${g.realname} 升級至 Lv.${g.lvl}！`, g.color);
+            // 翻了兩張就開始判定
+            if(memState.flippedIndices.length === 2) {
+                memState.moves++;
+                document.getElementById('mem-moves').innerText = memState.moves;
+                memState.isLocked = true; // 鎖定盤面，防止連點
+                checkMemMatch();
             }
         };
 
-        function updateSlots() {
-            tdGame.lanes.forEach((lane, i) => {
-                const slotEl = document.getElementById(`slot-${i}`);
-                if(lane.girl) {
-                    let lvlName = lane.girl.lvl === 1 ? "銅卡" : (lane.girl.lvl === 2 ? "銀卡" : "✨金卡✨");
-                    slotEl.className = "td-slot filled";
-                    slotEl.style.borderColor = lane.girl.color;
-                    slotEl.innerHTML = `
-                        <img src="${window.getCdnUrl(lane.girl.img)}" class="td-girl-img">
-                        <div class="td-lvl-badge" style="color:${lane.girl.color}">${lvlName}</div>
-                    `;
+        function checkMemMatch() {
+            const [idx1, idx2] = memState.flippedIndices;
+            const match = memState.cards[idx1].uid === memState.cards[idx2].uid;
+
+            setTimeout(() => {
+                const c1 = document.getElementById(`mem-card-${idx1}`);
+                const c2 = document.getElementById(`mem-card-${idx2}`);
+
+                if(match) {
+                    // 配對成功：變成半透明且不可點擊
+                    c1.classList.add('matched');
+                    c2.classList.add('matched');
+                    memState.matchedCount += 2;
+                    
+                    if(memState.matchedCount === memState.cards.length) {
+                        setTimeout(finishMemoryGame, 500); // 延遲一下播結算
+                    }
                 } else {
-                    slotEl.className = "td-slot";
-                    slotEl.style.borderColor = "#888";
-                    slotEl.innerHTML = `<div style="color:#aaa; font-size:24px;">➕</div>`;
+                    // 配對失敗：翻蓋回去
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
                 }
-            });
+                
+                memState.flippedIndices = [];
+                memState.isLocked = false; // 解鎖盤面
+            }, 800); // 留 0.8 秒給玩家看清楚牌面
         }
 
-        // ================= 遊戲循環引擎 =================
-        function gameLoop() {
-            if(!tdGame.running) return;
-            const arena = document.getElementById('td-arena');
-            const arenaWidth = arena.clientWidth;
-
-            // 1. 女孩發射子彈
-            tdGame.lanes.forEach((lane, i) => {
-                if(lane.girl) {
-                    if(lane.girl.fireCooldown > 0) lane.girl.fireCooldown--;
-                    else {
-                        // 檢查該路線有沒有怪物
-                        if(tdGame.monsters.some(m => m.lane === i)) {
-                            spawnBullet(i, lane.girl);
-                            lane.girl.fireCooldown = lane.girl.fireRate;
-                        }
-                    }
-                }
-            });
-
-            // 2. 移動子彈
-            tdGame.bullets.forEach((b, i) => {
-                b.x += 15; // 子彈速度
-                if(b.x > arenaWidth) b.dead = true;
-                if(b.el) b.el.style.left = b.x + 'px';
-            });
-
-            // 3. 移動怪物
-            tdGame.monsters.forEach((m, i) => {
-                m.x -= m.speed; // 怪物速度
-                if(m.x <= 50) { // 碰到舞台底線
-                    m.dead = true;
-                    tdGame.hp--;
-                    updateHUD();
-                    arena.style.boxShadow = "inset 0 0 50px rgba(255,0,0,0.8)";
-                    setTimeout(()=> arena.style.boxShadow = "inset 0 0 50px rgba(0,0,0,0.8)", 200);
-                    if(tdGame.hp <= 0) gameOver();
-                }
-                if(m.el) m.el.style.left = m.x + 'px';
-            });
-
-            // 4. 碰撞偵測 (子彈打怪物)
-            tdGame.bullets.forEach(b => {
-                if(b.dead) return;
-                tdGame.monsters.forEach(m => {
-                    if(m.dead || b.dead) return;
-                    if(b.lane === m.lane && Math.abs(b.x - m.x) < 40) { // 撞到了
-                        b.dead = true;
-                        m.hp -= b.damage;
-                        showDmg(b.x, m.lane, b.damage);
-                        
-                        if(m.hp <= 0) {
-                            m.dead = true;
-                            tdGame.energy += 15; // 殺怪賺錢
-                            tdGame.score++;
-                            updateHUD();
-                        } else {
-                            // 更新怪物血條
-                            if(m.el) m.el.querySelector('.m-hp-fill').style.width = Math.max(0, (m.hp/m.maxHp)*100) + '%';
-                        }
-                    }
-                });
-            });
-
-            // 5. 清理死亡物件
-            tdGame.bullets.filter(b => b.dead).forEach(b => b.el.remove());
-            tdGame.bullets = tdGame.bullets.filter(b => !b.dead);
+        function finishMemoryGame() {
+            clearInterval(memState.timerId);
+            const secs = Math.floor((Date.now() - memState.startTime) / 1000);
+            const container = document.getElementById('memory-container');
             
-            tdGame.monsters.filter(m => m.dead).forEach(m => m.el.remove());
-            tdGame.monsters = tdGame.monsters.filter(m => !m.dead);
-        }
-
-        function spawnMonster() {
-            if(!tdGame.running) return;
-            const arena = document.getElementById('td-arena');
-            const lane = Math.floor(Math.random() * 3);
-            const emojis = ["🧟‍♂️", "👾", "👺", "🦇", "🕷️"];
-            
-            // 隨時間增加怪物血量與速度
-            const diffMultiplier = 1 + (tdGame.score * 0.1);
-            
-            let m = {
-                lane: lane,
-                x: arena.clientWidth + 50,
-                hp: 50 * diffMultiplier,
-                maxHp: 50 * diffMultiplier,
-                speed: (Math.random() * 2 + 1) * (1 + tdGame.score*0.02),
-                dead: false,
-                el: document.createElement('div')
-            };
-            
-            m.el.className = "td-monster";
-            m.el.style.top = (lane * 33.33 + 16.66) + '%';
-            m.el.innerHTML = `
-                <div class="m-hp"><div class="m-hp-fill"></div></div>
-                ${emojis[Math.floor(Math.random()*emojis.length)]}
-            `;
-            arena.appendChild(m.el);
-            tdGame.monsters.push(m);
-        }
-
-        function spawnBullet(laneIdx, girl) {
-            const arena = document.getElementById('td-arena');
-            let b = {
-                lane: laneIdx,
-                x: 100, // 從格子旁邊發射
-                damage: girl.damage,
-                dead: false,
-                el: document.createElement('div')
-            };
-            
-            b.el.className = "td-bullet";
-            b.el.innerText = "💖";
-            b.el.style.top = (laneIdx * 33.33 + 16.66) + '%';
-            arena.appendChild(b.el);
-            tdGame.bullets.push(b);
-        }
-
-        function updateHUD() {
-            if(document.getElementById('td-energy')) document.getElementById('td-energy').innerText = tdGame.energy;
-            if(document.getElementById('td-score')) document.getElementById('td-score').innerText = tdGame.score;
-            if(document.getElementById('td-hp')) document.getElementById('td-hp').innerText = tdGame.hp;
-        }
-
-        function showMsg(text, color) {
-            const msgEl = document.getElementById('td-msg');
-            if(msgEl) {
-                msgEl.innerText = text;
-                msgEl.style.color = color;
-            }
-        }
-
-        function showDmg(x, lane, dmg) {
-            const arena = document.getElementById('td-arena');
-            const d = document.createElement('div');
-            d.className = "dmg-float";
-            d.innerText = `-${dmg}`;
-            d.style.left = x + 'px';
-            d.style.top = (lane * 33.33 + 10) + '%';
-            arena.appendChild(d);
-            setTimeout(() => d.remove(), 600);
-        }
-
-        function gameOver() {
-            stopDefenseGame();
-            const container = document.getElementById('defense-container');
             container.innerHTML = `
-                <div class="game-title" style="color: #ff4757; text-shadow: 3px 3px 0px #b71540;">💥 防線崩潰！</div>
-                <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:10px;">總教練，舞台被酸民佔領了...</div>
-                <div style="font-size:36px; font-family:var(--sport-font); font-weight:900; color:var(--schedule-accent); margin-bottom:30px;">總擊殺數：${tdGame.score}</div>
-                <button class="enter-btn" style="background:#ff4757; color:#fff; box-shadow: 6px 6px 0px #b71540;" onclick="window.initDefenseGame()">🔄 重新挑戰</button>
+                <div class="game-title" style="color: #e040fb; text-shadow: 3px 3px 0px #4a148c;">🎉 挑戰成功！</div>
+                <div class="dt-setup-card" style="border-color: #e040fb; text-align:center; padding:40px 20px; max-width:400px; margin:0 auto;">
+                    <div style="font-size:50px; margin-bottom:15px;">💖</div>
+                    <div style="font-size:18px; font-weight:900; color:#fff; margin-bottom:20px;">你的真愛記憶力太神了！</div>
+                    <div style="font-size:24px; font-family:var(--sport-font); color:var(--text-sub); margin-bottom:10px;">消耗步數：<span style="color:#e040fb;">${memState.moves} 步</span></div>
+                    <div style="font-size:24px; font-family:var(--sport-font); color:var(--text-sub); margin-bottom:30px;">耗費時間：<span style="color:#e040fb;">${Math.floor(secs/60).toString().padStart(2,'0')}:${(secs%60).toString().padStart(2,'0')}</span></div>
+                    <button class="enter-btn" style="background:#e040fb; color:#fff; width:100%;" onclick="window.renderMemoryStart()">🔄 再次挑戰</button>
+                </div>
             `;
+            if(typeof createConfetti === 'function') createConfetti();
         }
         window.onload = loadData;
     </script>
