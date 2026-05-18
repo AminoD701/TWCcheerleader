@@ -2813,7 +2813,22 @@
                             <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : '-'}</span></div>
                             <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
-                            <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
+                            <div class="stat-box">
+                                <span class="stat-label">生日 DOB</span>
+                                <span class="stat-value">
+                                    ${(() => {
+                                        if(!c.dob) return "-";
+                                        // 將 1998/05/21 或 1998年05月21日 統一轉換，並只抓取最後的「月/日」
+                                        let cleanDob = String(c.dob).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
+                                        let parts = cleanDob.split('/').filter(x => x !== '');
+                                        if (parts.length >= 3) {
+                                            // 只要有 3 個元素（有年份），就只取後面兩個（月、日）
+                                            return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
+                                        }
+                                        return c.dob; // 如果原本就只有月日，直接顯示
+                                    })()}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>`;
