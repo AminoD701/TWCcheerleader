@@ -2487,10 +2487,15 @@
                                 }).join('') + `</div>`;
                             }
 
+                            // 完美抓取主辦單位資訊
+                            const hostStr = matchedEvent.host || "未定";
+
+                            // 組裝時間地點與主辦單位資訊（加入 🏢 主辦單位圖示，排版更具結構感）
                             extraInfoHtml = `
                                 <div style="font-size:13px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:6px; font-weight:700;">
                                     <div style="display:flex; align-items:flex-start; gap:6px;">📍 <span style="line-height:1.4;">${locStr}</span></div>
                                     <div style="display:flex; align-items:center; gap:6px;">⏰ <span>${timeStr}</span></div>
+                                    <div style="display:flex; align-items:center; gap:6px;">🏢 <span style="font-family:var(--tc-font);">${hostStr}</span></div>
                                 </div>
                                 ${avatarsHtml}
                             `;
