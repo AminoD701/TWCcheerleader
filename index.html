@@ -2447,21 +2447,61 @@
             displaySchedules.sort((a,b) => a.dateNum - b.dateNum);
 
             let schedHtml = '';
-            if (displaySchedules.length === 0) {
-                schedHtml = `<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding: 20px;">
-                    ${window.passportSelectedDateNum ? '這天目前沒有安排追星行程。' : '本月尚未安排未來的行程。'}<br>
-                    💡 請至女孩專屬頁面或外籍行程點擊「➕ 加行程」即可加入月曆！
-                </div>`;
             } else {
-                schedHtml = displaySchedules.map(s => `
-                    <div class="timeline-item">
-                        <div>
+                schedHtml = displaySchedules.map(s => {
+                    let extraInfoHtml = '';
+
+                    // 判斷是否為「活動/外籍行程」(一日店長等)，這類 ID 會以 'event|' 開頭
+                    if (s.id.startsWith('event|')) {
+                        const parts = s.id.split('|');
+                        const eDateNum = parseInt(parts[1]);
+                        const eName = parts[2];
+                        
+                        // 反查原始事件資料庫
+                        const matchedEvent = dbEvents.find(e => e.safeDate.num === eDateNum && e.eventname === eName);
+
+                        if (matchedEvent) {
+                            const timeStr = matchedEvent.time || "時間未定";
+                            const locStr = matchedEvent.address || "地點請見官網";
+                            const attendGirls = (matchedEvent.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
+                            
+                            // 渲染女孩小頭像與姓名標籤
+                            let avatarsHtml = '';
+                            if (attendGirls.length > 0) {
+                                avatarsHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">` + attendGirls.map(n => {
+                                    const g = girlMap.get(n);
+                                    if (g) {
+                                        return `<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); padding:4px 12px 4px 4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.openModal('${g.uid}')">
+                                                    <img src="${window.getCdnUrl(g.img)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; object-position:top center;">
+                                                    <span style="font-size:13px; color:#fff; font-weight:900;">${g.nickname || g.realname}</span>
+                                                </div>`;
+                                    }
+                                    return `<span style="font-size:12px; color:var(--text-sub); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:10px;">${n}</span>`;
+                                }).join('') + `</div>`;
+                            }
+
+                            // 組裝時間地點資訊
+                            extraInfoHtml = `
+                                <div style="font-size:13px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:6px; font-weight:700;">
+                                    <div style="display:flex; align-items:flex-start; gap:6px;">📍 <span style="line-height:1.4;">${locStr}</span></div>
+                                    <div style="display:flex; align-items:center; gap:6px;">⏰ <span>${timeStr}</span></div>
+                                </div>
+                                ${avatarsHtml}
+                            `;
+                        }
+                    }
+
+                    return `
+                    <div class="timeline-item" style="align-items: flex-start;">
+                        <div style="flex: 1;">
                             <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:var(--schedule-accent);">${s.dateStr}</div>
-                            <div style="font-size:15px; font-weight:700; color:#fff; margin-top:4px;">${s.title}</div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:6px; line-height:1.3;">${s.title}</div>
+                            ${extraInfoHtml}
                         </div>
-                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="background:var(--fav-accent); color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer;">移除</button>
+                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="background:var(--fav-accent); color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer; margin-top:4px;">移除</button>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             let favGirlsRaw = dbGirls.filter(g => favSet.has(g.uid));
