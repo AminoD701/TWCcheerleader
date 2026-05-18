@@ -1196,7 +1196,22 @@
             pointer-events: none;
         }
 
-        @media (max-width: 768px) {
+        /* =========================================
+           ✨ 追星護照：專屬行事曆捲動區塊優化
+           ========================================= */
+        .schedule-scroll-box {
+            margin-top: 20px;
+            max-height: 400px; /* 約顯示 3~4 個行程的完美高度 */
+            overflow-y: auto;
+            padding-right: 8px; /* 預留捲動軸的呼吸空間 */
+        }
+        
+        /* 訂製電競風捲動軸 */
+        .schedule-scroll-box::-webkit-scrollbar { width: 6px; }
+        .schedule-scroll-box::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        .schedule-scroll-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; transition: 0.3s; }
+        .schedule-scroll-box:hover::-webkit-scrollbar-thumb { background: var(--schedule-accent); }
+            @media (max-width: 768px) {
             .gacha-top-btn { padding: 10px 20px !important; font-size: 14px !important; }
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
@@ -2688,7 +2703,7 @@
                         ${gridHtml}
                     </div>
 
-                    <div style="margin-top: 20px;">
+                    <div class="schedule-scroll-box">
                         ${schedHtml}
                     </div>
                 </div>
