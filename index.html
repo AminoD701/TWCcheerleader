@@ -2871,8 +2871,8 @@
                 let isSaved = schedSet.has(key);
                 let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
                 
-                // ✨ 優化：把行程標題改成包含女孩名字（例如：丹丹 (Fubon Angels) 應援），這樣月曆上顯示會更明確
-                let scheduleTitle = `${s.name} (${s.team}) 應援`;
+                // ✨ 終極進化：標題同時包含女孩姓名、球隊與「球種」，雙棲球隊也能一秒分辨！
+                let scheduleTitle = `${s.name} (${s.team} · ${s.sport}) 應援`;
                 
                 dateBoxes += `
                 <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
