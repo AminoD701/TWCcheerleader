@@ -2866,18 +2866,22 @@
                 let dateBoxes = '';
 
                 herSchedules.forEach(s => {
-                    let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
-                    let isSaved = schedSet.has(key);
-                    let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
-                    
-                    dateBoxes += `
-                    <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
-                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
-                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
-                        <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${s.team} 應援', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
-                    </div>`;
-                });
+                // 🛠️ 修正：將女孩姓名 (s.name) 加進 key 中，確保同一天同球隊的不同女孩完全獨立分開！
+                let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
+                let isSaved = schedSet.has(key);
+                let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
+                
+                // ✨ 優化：把行程標題改成包含女孩名字（例如：丹丹 (Fubon Angels) 應援），這樣月曆上顯示會更明確
+                let scheduleTitle = `${s.name} (${s.team}) 應援`;
+                
+                dateBoxes += `
+                <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
+                    <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
+                </div>`;
+            });
 
                 scheduleHtml = `
                     <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
