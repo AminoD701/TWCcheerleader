@@ -2491,6 +2491,7 @@
                             }
 
                             // 組裝時間地點資訊
+                            // 組裝時間地點資訊
                             extraInfoHtml = `
                                 <div style="font-size:13px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:6px; font-weight:700;">
                                     <div style="display:flex; align-items:flex-start; gap:6px;">📍 <span style="line-height:1.4;">${locStr}</span></div>
@@ -2498,6 +2499,25 @@
                                 </div>
                                 ${avatarsHtml}
                             `;
+                        }
+                    } else if (s.id) {
+                        // ✨ 處理一般應援班表 (利用剛剛擴充的 ID 格式: dateNum|team|sport|name 來反查女孩)
+                        const parts = s.id.split('|');
+                        if (parts.length >= 4) {
+                            const gName = parts[3];
+                            const g = girlMap.get(gName);
+                            if (g) {
+                                // 智慧國籍分流：台港馬顯示綽號(若無則本名)，其餘外籍顯示本名
+                                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                                
+                                extraInfoHtml = `
+                                    <div style="display:flex; align-items:center; gap:10px; margin-top:12px; background:rgba(255,255,255,0.05); padding:6px 14px 6px 6px; border-radius:30px; width:fit-content; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:0.2s;" onclick="window.openModal('${g.uid}')" onmouseover="this.style.borderColor='var(--schedule-accent)'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)';">
+                                        <img src="${window.getCdnUrl(g.img)}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; object-position:top center; border:1px solid var(--border-color);">
+                                        <span style="font-size:14px; color:#fff; font-weight:900; letter-spacing:1px;">${dName}</span>
+                                    </div>
+                                `;
+                            }
                         }
                     }
 
