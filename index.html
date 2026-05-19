@@ -2813,6 +2813,11 @@
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
                 let noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
+                // ✨ 智慧國籍分流：台港馬顯示綽號(若無則本名)，且不顯示副標題本名；外籍則顯示本名
+                const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬");
+                const mainName = isLocal ? (c.nickname || c.realname) : c.realname;
+                const subNameHtml = (!isLocal && c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : '';
+
                 return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="window.openModal('${c.uid}')">
                     <div class="photo-area">
@@ -2827,10 +2832,10 @@
                         <div class="header-info">
                             <div>
                                 <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                    <div class="nickname" style="color:${cardAccent}">${c.realname}</div>
+                                    <div class="nickname" style="color:${cardAccent}">${mainName}</div>
                                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
                                 </div>
-                                ${(c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : ''}
+                                ${subNameHtml}
                             </div>
                             <div class="number">${displayNum}</div>
                         </div>
@@ -2851,14 +2856,13 @@
                                 <span class="stat-value">
                                     ${(() => {
                                         if(!c.dob) return "-";
-                                        // 將 1998/05/21 或 1998年05月21日 統一轉換，並只抓取最後的「月/日」
+                                        // 隱藏出生年份，僅顯示月/日
                                         let cleanDob = String(c.dob).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
                                         let parts = cleanDob.split('/').filter(x => x !== '');
                                         if (parts.length >= 3) {
-                                            // 只要有 3 個元素（有年份），就只取後面兩個（月、日）
                                             return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
                                         }
-                                        return c.dob; // 如果原本就只有月日，直接顯示
+                                        return c.dob; 
                                     })()}
                                 </span>
                             </div>
