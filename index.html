@@ -822,22 +822,11 @@
         #passport-container .realname,
         #passport-container .data-grid,
         #passport-container .stats-grid,
+        #passport-container .fav-btn,
         #passport-container .sport-tags,
         #passport-container .ig-link,
         #passport-container .note-box {
             display: none !important;
-        }
-        /* ✨ 讓追星護照裡的愛心按鈕縮小，完美貼合小卡片 */
-        #passport-container .fav-btn {
-            width: 24px !important;
-            height: 24px !important;
-            top: 5px !important;
-            right: 5px !important;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
-        }
-        #passport-container .fav-btn .fav-icon {
-            width: 12px !important;
-            height: 12px !important;
         }
 
         /* 4. 名字置中、縮小、防斷行 */
@@ -947,11 +936,9 @@
                 font-size: 32px !important; 
                 margin-bottom: 0 !important;
             }
-        } 
-
         /* =========================================
            🏟️ 夢幻戰隊：擴充賽制戰術板與篩選器
-           ========================================= */
+        ========================================= */
         /* 設定大廳卡片 */
         .dt-setup-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 20px; }
         .dt-setup-label { font-size: 14px; color: var(--text-sub); font-weight: 900; margin-bottom: 8px; display: block; }
@@ -1209,22 +1196,7 @@
             pointer-events: none;
         }
 
-        /* =========================================
-           ✨ 追星護照：專屬行事曆捲動區塊優化
-           ========================================= */
-        .schedule-scroll-box {
-            margin-top: 20px;
-            max-height: 400px; /* 約顯示 3~4 個行程的完美高度 */
-            overflow-y: auto;
-            padding-right: 8px; /* 預留捲動軸的呼吸空間 */
-        }
-        
-        /* 訂製電競風捲動軸 */
-        .schedule-scroll-box::-webkit-scrollbar { width: 6px; }
-        .schedule-scroll-box::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
-        .schedule-scroll-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; transition: 0.3s; }
-        .schedule-scroll-box:hover::-webkit-scrollbar-thumb { background: var(--schedule-accent); }
-            @media (max-width: 768px) {
+        @media (max-width: 768px) {
             .gacha-top-btn { padding: 10px 20px !important; font-size: 14px !important; }
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
@@ -2481,91 +2453,15 @@
                     💡 請至女孩專屬頁面或外籍行程點擊「➕ 加行程」即可加入月曆！
                 </div>`;
             } else {
-                schedHtml = displaySchedules.map(s => {
-                    let extraInfoHtml = '';
-                    let displayTitle = s.title; // 預設使用存檔的標題
-
-                    // ✨ 安全防護：加上 s.id 的存在檢查
-                    if (s.id && s.id.startsWith('event|')) {
-                        const parts = s.id.split('|');
-                        const eDateNum = parseInt(parts[1]);
-                        const eName = parts[2];
-                        
-                        const matchedEvent = dbEvents.find(e => e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim());
-
-                        if (matchedEvent) {
-                            const timeStr = matchedEvent.time || "TBA";
-                            const addressRaw = (matchedEvent.address || "").trim();
-                            const locStr = addressRaw 
-                                ? `<a href="https://www.google.com/maps/search/?api=1&query=$?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
-                                : "請見球團官網";
-                            const attendGirls = (matchedEvent.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
-                            
-                            let avatarsHtml = '';
-                            if (attendGirls.length > 0) {
-                                avatarsHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">` + attendGirls.map(n => {
-                                    const g = girlMap.get(n);
-                                    if (g) {
-                                        return `<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); padding:4px 12px 4px 4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.openModal('${g.uid}')">
-                                                    <img src="${window.getCdnUrl(g.img)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; object-position:top center;">
-                                                    <span style="font-size:13px; color:#fff; font-weight:900;">${g.nickname || g.realname}</span>
-                                                </div>`;
-                                    }
-                                    return `<span style="font-size:12px; color:var(--text-sub); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:10px;">${n}</span>`;
-                                }).join('') + `</div>`;
-                            }
-
-                            // 完美抓取主辦單位資訊
-                            const hostStr = matchedEvent.host || "未定";
-
-                            // 組裝時間地點與主辦單位資訊（加入 🏢 主辦單位圖示，排版更具結構感）
-                            extraInfoHtml = `
-                                <div style="font-size:13px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:6px; font-weight:700;">
-                                    <div style="display:flex; align-items:flex-start; gap:6px;">📍 <span style="line-height:1.4;">${locStr}</span></div>
-                                    <div style="display:flex; align-items:center; gap:6px;">⏰ <span>${timeStr}</span></div>
-                                    <div style="display:flex; align-items:center; gap:6px;">🏢 <span style="font-family:var(--tc-font);">${hostStr}</span></div>
-                                </div>
-                                ${avatarsHtml}
-                            `;
-                        }
-                    } else if (s.id) {
-                        // ✨ 處理一般應援班表
-                        const parts = s.id.split('|');
-                        if (parts.length >= 4) {
-                            const team = parts[1];
-                            const sport = parts[2];
-                            const gName = parts[3];
-                            const g = girlMap.get(gName);
-                            
-                            // 強制覆蓋標題，隱藏本名，只顯示「球隊 · 球種 應援」！(直接兼容舊的存檔)
-                            displayTitle = `${team} · ${sport} 應援`;
-
-                            if (g) {
-                                // 智慧國籍分流：台港馬顯示綽號(若無則本名)，其餘外籍顯示本名
-                                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                                
-                                extraInfoHtml = `
-                                    <div style="display:flex; align-items:center; gap:10px; margin-top:12px; background:rgba(255,255,255,0.05); padding:6px 14px 6px 6px; border-radius:30px; width:fit-content; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:0.2s;" onclick="window.openModal('${g.uid}')" onmouseover="this.style.borderColor='var(--schedule-accent)'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)';">
-                                        <img src="${window.getCdnUrl(g.img)}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; object-position:top center; border:1px solid var(--border-color);">
-                                        <span style="font-size:14px; color:#fff; font-weight:900; letter-spacing:1px;">${dName}</span>
-                                    </div>
-                                `;
-                            }
-                        }
-                    }
-
-                    return `
-                    <div class="timeline-item" style="align-items: flex-start;">
-                        <div style="flex: 1;">
+                schedHtml = displaySchedules.map(s => `
+                    <div class="timeline-item">
+                        <div>
                             <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:var(--schedule-accent);">${s.dateStr}</div>
-                            <div style="font-size:16px; font-weight:900; color:#fff; margin-top:6px; line-height:1.3;">${displayTitle}</div>
-                            ${extraInfoHtml}
+                            <div style="font-size:15px; font-weight:700; color:#fff; margin-top:4px;">${s.title}</div>
                         </div>
-                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="background:var(--fav-accent); color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer; margin-top:4px;">移除</button>
+                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="background:var(--fav-accent); color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer;">移除</button>
                     </div>
-                    `;
-                }).join('');
+                `).join('');
             }
 
             let favGirlsRaw = dbGirls.filter(g => favSet.has(g.uid));
@@ -2589,10 +2485,7 @@
                      const lookupTeam = teams[0] || "全部啦啦隊";
                      const accent = (teamThemes[lookupTeam] || {accent:"#fff"}).accent;
                      
-                     // ✨ 智慧國籍分流：台港馬顯示綽號(若無則本名)，外籍顯示本名
-                     const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬");
-                     const mainName = isLocal ? (c.nickname || c.realname) : c.realname;
-                     const subNameHtml = (!isLocal && c.nickname && c.nickname !== c.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${c.nickname}</div>` : '';
+                     const showNick = (c.nickname && c.nickname !== c.realname) ? c.nickname : '';
 
                      return `
                      <div class="card" style="border-bottom: 6px solid ${accent};" onclick="window.openModal('${c.uid}')">
@@ -2601,8 +2494,8 @@
                             <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
                         </div>
                         <div class="info-section" style="padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${mainName}</div>
-                            ${subNameHtml}
+                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${c.realname}</div>
+                            ${showNick ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${showNick}</div>` : ''}
                         </div>
                      </div>`;
                  }).join('') + `</div>`;
@@ -2719,7 +2612,7 @@
                         ${gridHtml}
                     </div>
 
-                    <div class="schedule-scroll-box">
+                    <div style="margin-top: 20px;">
                         ${schedHtml}
                     </div>
                 </div>
@@ -2828,37 +2721,12 @@
                     </div>
                     <div class="info-section">
                         <div class="header-info">
-                            let sportTags = sports.map(s => {
-                    let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
-                    return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
-                }).join('');
-                
-                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
-                let noteText = (c.note || c['備註'] || c.備註 || "").trim();
-
-                // ✨ 智慧國籍分流：台港馬顯示綽號(若無則本名)，且不顯示副標題本名；外籍則顯示本名
-                const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬");
-                const mainName = isLocal ? (c.nickname || c.realname) : c.realname;
-                const subNameHtml = (!isLocal && c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : '';
-
-                return `
-                <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}" onclick="window.openModal('${c.uid}')">
-                    <div class="photo-area">
-                        <div class="sport-tags">${sportTags}</div>
-                        <div class="fav-btn ${isFav ? 'active' : ''}" onclick="window.toggleFavorite('${c.uid}', event, this)">
-                            <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
-                        </div>
-                        ${noteText ? `<div class="photo-note-tag">${noteText}</div>` : ''}
-                        ${c.img?`<img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">`:''}
-                    </div>
-                    <div class="info-section">
-                        <div class="header-info">
                             <div>
                                 <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                    <div class="nickname" style="color:${cardAccent}">${mainName}</div>
+                                    <div class="nickname" style="color:${cardAccent}">${c.realname}</div>
                                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
                                 </div>
-                                ${subNameHtml}
+                                ${(c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : ''}
                             </div>
                             <div class="number">${displayNum}</div>
                         </div>
@@ -2874,22 +2742,7 @@
                             <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : '-'}</span></div>
                             <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
-                            <div class="stat-box">
-                                <span class="stat-label">生日 DOB</span>
-                                <span class="stat-value">
-                                    ${(() => {
-                                        if(!c.dob) return "-";
-                                        // 將 1998/05/21 或 1998年05月21日 統一轉換，並只抓取最後的「月/日」
-                                        let cleanDob = String(c.dob).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
-                                        let parts = cleanDob.split('/').filter(x => x !== '');
-                                        if (parts.length >= 3) {
-                                            // 只要有 3 個元素（有年份），就只取後面兩個（月、日）
-                                            return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
-                                        }
-                                        return c.dob; // 如果原本就只有月日，直接顯示
-                                    })()}
-                                </span>
-                            </div>
+                            <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -2963,22 +2816,18 @@
                 let dateBoxes = '';
 
                 herSchedules.forEach(s => {
-                // 🛠️ 修正：將女孩姓名 (s.name) 加進 key 中，確保同一天同球隊的不同女孩完全獨立分開！
-                let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
-                let isSaved = schedSet.has(key);
-                let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
-                
-                // ✨ 修正：拿掉女孩本名，讓標題更純粹 (女孩姓名會以高質感小標籤顯示在下方)
-                let scheduleTitle = `${s.team} · ${s.sport} 應援`;
-                
-                dateBoxes += `
-                <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
-                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
-                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
-                    <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
-                </div>`;
-            });
+                    let key = s.safeDate.num + '|' + s.team + '|' + s.sport;
+                    let isSaved = schedSet.has(key);
+                    let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
+                    
+                    dateBoxes += `
+                    <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
+                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
+                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                        <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
+                        <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${s.team} 應援', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
+                    </div>`;
+                });
 
                 scheduleHtml = `
                     <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
