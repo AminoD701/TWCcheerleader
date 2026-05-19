@@ -822,11 +822,22 @@
         #passport-container .realname,
         #passport-container .data-grid,
         #passport-container .stats-grid,
-        #passport-container .fav-btn,
         #passport-container .sport-tags,
         #passport-container .ig-link,
         #passport-container .note-box {
             display: none !important;
+        }
+        /* ✨ 讓追星護照裡的愛心按鈕縮小，完美貼合小卡片 */
+        #passport-container .fav-btn {
+            width: 24px !important;
+            height: 24px !important;
+            top: 5px !important;
+            right: 5px !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
+        }
+        #passport-container .fav-btn .fav-icon {
+            width: 12px !important;
+            height: 12px !important;
         }
 
         /* 4. 名字置中、縮小、防斷行 */
