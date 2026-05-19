@@ -2745,7 +2745,20 @@
                 const ms = currentSport === "全部" || (c.sport || "").includes(currentSport);
                 const mt = currentTeam === "全部啦啦隊" || (c.team || "").trim() === currentTeam;
                 const mS = search === "" || (c.nickname || "").toLowerCase().includes(search) || (c.realname || "").toLowerCase().includes(search);
-                const mN = nat === 'all' || (c.nat || "").includes(nat);
+                
+                // ✨ 國籍篩選智慧升級：精準抓出「其他」國籍與混血女孩
+                const mN = (() => {
+                    if (nat === 'all') return true;
+                    const nStr = c.nat || "";
+                    if (nat === '臺灣') return nStr.includes("臺") || nStr.includes("台");
+                    if (nat === '其他') {
+                        // 只要國籍欄位「沒有」明確寫著純粹的台灣、韓國、日本，就會被掃進「其他」！
+                        // 這樣馬來西亞、香港、台日混血就會完美現身了！
+                        return !nStr.includes("臺灣") && !nStr.includes("台灣") && !nStr.includes("韓國") && !nStr.includes("日本");
+                    }
+                    return nStr.includes(nat);
+                })();
+
                 const cz = (c.zodiac || "").trim().replace("魔羯","摩羯").replace("白羊","牡羊");
                 return ms && mt && mS && mN && (zodiac === 'all' || cz === zodiac);
             });
