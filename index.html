@@ -2698,20 +2698,6 @@
             window.currentDisplayLimit = window.currentDisplayLimit || 24;
 
             let htmlContent = result.slice(0, window.currentDisplayLimit).map(c => {
-                const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
-                const sports = (c.mS || [c.sport || ""]);
-                const cardAccent = (teamThemes[`${teams[0]}_${currentSport==="全部"?"":currentSport}`] || teamThemes[teams[0]] || teamThemes["全部啦啦隊"]).accent;
-                
-                const isFav = favSet.has(c.uid);
-                
-                let sportTags = sports.map(s => {
-                    let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
-                    return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
-                }).join('');
-                
-                let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
-                let noteText = (c.note || c['備註'] || c.備註 || "").trim();
-
                 // ✨ 智慧國籍分流：台港馬顯示綽號(若無則本名)，且不顯示副標題本名；外籍則顯示本名
                 const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬");
                 const mainName = isLocal ? (c.nickname || c.realname) : c.realname;
@@ -2736,6 +2722,8 @@
                                 </div>
                                 ${subNameHtml}
                             </div>
+                            <div class="number">${displayNum}</div>
+                        </div>
                         <div class="data-grid">
                             <div class="data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; align-items: center;">
                                 <span class="data-label">球隊 UNIT</span>
@@ -2748,7 +2736,21 @@
                             <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
                             <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : '-'}</span></div>
                             <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
-                            <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
+                            <div class="stat-box">
+                                <span class="stat-label">生日 DOB</span>
+                                <span class="stat-value">
+                                    ${(() => {
+                                        if(!c.dob) return "-";
+                                        // 隱藏出生年份，僅顯示月/日
+                                        let cleanDob = String(c.dob).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
+                                        let parts = cleanDob.split('/').filter(x => x !== '');
+                                        if (parts.length >= 3) {
+                                            return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
+                                        }
+                                        return c.dob; 
+                                    })()}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>`;
