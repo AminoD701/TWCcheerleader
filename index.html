@@ -3300,7 +3300,10 @@
                 return Array.from(map.values());
             }
 
-            const slotsHtml = events.map(e => {
+            const buildDateCard = (group, isExp) => {
+                const { date, events } = group;
+                
+                const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                     
                     // ✨ 全新排版：將每個女孩變成獨立的「大照片 + 名字」區塊
