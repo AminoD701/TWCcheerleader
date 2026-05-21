@@ -1228,6 +1228,49 @@
             .gacha-top-btn { padding: 10px 20px !important; font-size: 14px !important; }
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
+        /* =========================================
+           🧋 珍奶抖內浮動按鈕
+           ========================================= */
+        .floating-boba-btn {
+            position: fixed;
+            bottom: 160px; /* 避開抽卡按鈕 */
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #AD5138;
+            color: #F8E0BE;
+            padding: 10px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 900;
+            font-family: var(--tc-font);
+            box-shadow: 0 4px 15px rgba(173, 81, 56, 0.5);
+            z-index: 90;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid #F8E0BE;
+        }
+        .floating-boba-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(173, 81, 56, 0.8);
+            color: #fff;
+            background-color: #c45b3e;
+        }
+        .floating-boba-btn img {
+            height: 24px;
+            width: auto;
+        }
+        
+        /* 手機版微調 */
+        @media (max-width: 768px) {
+            .floating-boba-btn {
+                bottom: 140px;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+            .floating-boba-btn img { height: 20px; }
+        }
     </style> 
 </head>
 <body class="no-scroll">
@@ -1269,6 +1312,13 @@
             </div>
             <button class="enter-btn" style="margin-top:30px; font-size:16px; padding:10px 30px; background:#fff; color:#000;" onclick="window.closeGacha()">收下祝福 💖</button>
         </div>
+    </div>
+    <a href="https://dinosaur071.bobaboba.me" target="_blank" class="floating-boba-btn" title="贊助總教練">
+        <img src="https://s3.ap-southeast-1.amazonaws.com/media.anyonelab.com/images/boba/boba-embed-icon.png" alt="boba-icon"/>
+        <span>請我喝珍奶</span>
+    </a>
+    <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
+        <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
     </div>
     <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
         <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
@@ -1346,10 +1396,6 @@
                         <span id="mode-btn-text">👧 女孩圖鑑 ROSTER</span> 
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
-                    <button class="dropdown-item" onclick="window.open('https://dinosaur071.bobaboba.me', '_blank')" style="background: #AD5138; color: #F8E0BE; border-top: 2px dashed #F8E0BE; justify-content: center; font-size: 16px; letter-spacing: 1px;">
-                            <img src="https://s3.ap-southeast-1.amazonaws.com/media.anyonelab.com/images/boba/boba-embed-icon.png" alt="boba" style="width: 24px; height: 24px;">
-                            請我喝珍奶 DONATE
-                        </button>
                     <div class="dropdown-menu" id="mode-menu">
                         <button class="dropdown-item active" onclick="window.setMode('girls')">👧 女孩圖鑑 ROSTER</button>
                         <button class="dropdown-item" onclick="window.setMode('passport')">🛂 追星護照 MY PASSPORT</button>
