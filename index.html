@@ -3300,28 +3300,38 @@
                 return Array.from(map.values());
             }
 
-            const buildDateCard = (group, isExp) => {
-                const { date, events } = group;
-                
-                const slotsHtml = events.map(e => {
+            const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
-                    const displayGirls = attendGirls.slice(0, 3);
-                    const avatarsHtml = displayGirls.map(n => {
-                        const g = girlMap.get(n);
-                        return g 
-                            ? `<img src="${g.img}" class="event-mini-avatar" loading="lazy">` 
-                            : `<div class="event-mini-avatar default-avatar" style="width:36px;height:36px;margin-left:-8px;"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`;
-                    }).join('');
                     
-                    const moreBadge = attendGirls.length > 3 
-                        ? `<div class="event-mini-avatar" style="display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;background:#333;">+${attendGirls.length-3}</div>` 
-                        : '';
+                    // ✨ 全新排版：將每個女孩變成獨立的「大照片 + 名字」區塊
+                    const girlsHtml = attendGirls.map(n => {
+                        const g = girlMap.get(n);
+                        let dName = n;
+                        // 預設無照片時的替代頭像 (放大版)
+                        let imgHtml = `<div style="width:60px; height:60px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; border:2px solid var(--border-color);"><svg viewBox="0 0 24 24" style="width:28px; height:28px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
+                        
+                        if (g) {
+                            // 智慧國籍分流：台港馬顯示綽號，外籍顯示本名
+                            const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                            dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                            
+                            // 放大頭像 (由原本的 36px 升級為 60px)
+                            imgHtml = `<img src="${window.getCdnUrl(g.img)}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--event-accent); margin:0 auto 8px; display:block; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" loading="lazy">`;
+                        }
+
+                        return `
+                        <div style="display:flex; flex-direction:column; align-items:center; flex: 1 1 45%; padding: 5px 0;">
+                            ${imgHtml}
+                            <span style="font-size:15px; font-weight:900; color:#fff; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
+                        </div>`;
+                    }).join('');
 
                     return `
-                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})">
-                        <div class="event-slot-title">${e.eventname || "活動賽事"}</div>
-                        <div class="event-mini-avatars">
-                            ${avatarsHtml}${moreBadge}
+                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="padding: 15px 10px; display:flex; flex-wrap:wrap; justify-content:center; gap: 8px;">
+                        ${girlsHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700; padding:10px 0;">名單確認中</div>'}
+                        
+                        <div style="width:100%; font-size:12px; color:var(--text-sub); font-weight:700; margin-top:4px; text-align:center; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            📍 ${e.eventname || "活動賽事"}
                         </div>
                     </div>`;
                 }).join('');
