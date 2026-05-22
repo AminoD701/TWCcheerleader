@@ -2315,7 +2315,7 @@
                 filtersHtml = `
                     <div class="dt-modal-filters">
                         <select id="dtFilterSport" onchange="window.updateDtTeamDropdown()">
-                            <option value="">全部球種</option><option value="棒球">棒球</option><option value="籃球">籃球</option><option value="排球">排球</option>
+                            <option value="">全部球種</option><option value="棒球">棒球</option><option value="籃球">籃球</option><option value="排球">排球</option><option value="其他">其他</option>
                         </select>
                         <select id="dtFilterTeam" onchange="window.filterDtGirls()">
                             <option value="">全部球隊</option>
@@ -2357,7 +2357,13 @@
             // 智慧蒐集符合該「球種」的所有真實球隊
             let validTeams = new Set();
             dbGirls.filter(g => g.img).forEach(g => {
-                if (fSport === "" || (g.sport && g.sport.includes(fSport))) {
+                // ✨ 智慧判斷：如果選了「其他」，就抓出所有「不包含」棒、籃、排的球隊
+                const isMatchSport = fSport === "" || 
+                    (fSport === "其他" 
+                        ? (!g.sport || (!g.sport.includes("棒") && !g.sport.includes("籃") && !g.sport.includes("排"))) 
+                        : (g.sport && g.sport.includes(fSport)));
+                
+                if (isMatchSport) {
                     if (g.team && g.team.trim() !== "") validTeams.add(g.team.trim());
                 }
             });
@@ -2392,7 +2398,12 @@
                 const matchQ = q === "" || q.split(/\s+/).every(word => searchData.includes(word));
                 let baseFTeam = fTeam.split('_')[0].toLowerCase();
                 const matchTeam = fTeam === "" || cardTeam.includes(baseFTeam);
-                const matchSport = fSport === "" || cardSport.includes(fSport);
+                
+                // ✨ 卡片過濾也同步支援「其他」的排除法邏輯
+                const matchSport = fSport === "" || 
+                    (fSport === "其他" 
+                        ? (!cardSport.includes("棒") && !cardSport.includes("籃") && !cardSport.includes("排")) 
+                        : cardSport.includes(fSport));
                 
                 if (matchQ && matchTeam && matchSport) {
                     card.style.display = 'block'; hasVisible = true;
