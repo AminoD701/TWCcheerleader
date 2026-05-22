@@ -2305,10 +2305,16 @@
 
             let filtersHtml = '';
             if (dtState.rule === 'free') {
-                const allTeams = Object.keys(teamThemes).filter(t => t !== "全部啦啦隊");
+                // 初始化時，抓出所有真實存在的球隊名稱，避免出現帶有 _棒球 結尾的系統變數
+                let initialTeams = new Set();
+                dbGirls.filter(g => g.img).forEach(g => {
+                    if (g.team && g.team.trim() !== "") initialTeams.add(g.team.trim());
+                });
+                const allTeams = Array.from(initialTeams).sort();
+                
                 filtersHtml = `
                     <div class="dt-modal-filters">
-                        <select id="dtFilterSport" onchange="window.filterDtGirls()">
+                        <select id="dtFilterSport" onchange="window.updateDtTeamDropdown()">
                             <option value="">全部球種</option><option value="棒球">棒球</option><option value="籃球">籃球</option><option value="排球">排球</option>
                         </select>
                         <select id="dtFilterTeam" onchange="window.filterDtGirls()">
@@ -2340,6 +2346,37 @@
             document.body.classList.add('no-scroll');
         };
 
+        // ✨ 新增：夢幻戰隊專屬「連動式球隊選單」
+        window.updateDtTeamDropdown = function() {
+            const fSport = document.getElementById('dtFilterSport').value;
+            const teamSelect = document.getElementById('dtFilterTeam');
+            if (!teamSelect) return;
+            
+            const currentVal = teamSelect.value; // 記住目前選的球隊
+            
+            // 智慧蒐集符合該「球種」的所有真實球隊
+            let validTeams = new Set();
+            dbGirls.filter(g => g.img).forEach(g => {
+                if (fSport === "" || (g.sport && g.sport.includes(fSport))) {
+                    if (g.team && g.team.trim() !== "") validTeams.add(g.team.trim());
+                }
+            });
+            const teamsArray = Array.from(validTeams).sort();
+            
+            // 重建球隊下拉選單
+            teamSelect.innerHTML = `<option value="">全部球隊</option>` + 
+                teamsArray.map(t => `<option value="${t}">${t}</option>`).join('');
+                
+            // 如果原本選的球隊在新的球種裡還活著，就保留；否則重置為「全部」
+            if (teamsArray.includes(currentVal)) {
+                teamSelect.value = currentVal;
+            } else {
+                teamSelect.value = "";
+            }
+            
+            // 聯動完成後，自動觸發一次卡片過濾
+            window.filterDtGirls();
+        };
         window.filterDtGirls = function() {
             const q = document.getElementById('dtSearchInput').value.toLowerCase().trim();
             const fSport = document.getElementById('dtFilterSport') ? document.getElementById('dtFilterSport').value : "";
