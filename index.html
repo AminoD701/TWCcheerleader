@@ -2021,11 +2021,16 @@
             const showSubNav = (currentMode === 'girls')
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             
-            // ✨ 智慧切換吸頂列：女孩圖鑑顯示搜尋列，情報大廳顯示分類按鈕
+            // ✨ 智慧切換吸頂列：女孩圖鑑與外籍行程顯示搜尋列，情報大廳顯示黃框分類按鈕
             if (currentMode === 'girls' || currentMode === 'events') {
                 document.getElementById('filter-bar').style.display = 'block';
                 document.getElementById('standard-filters').style.display = 'flex';
                 document.getElementById('news-filters').style.display = 'none';
+                
+                // ✨ 加上這行防呆：讓國籍、星座、排序的下拉選單「只在女孩圖鑑」出現！
+                if (document.getElementById('extra-filters')) {
+                    document.getElementById('extra-filters').style.display = (currentMode === 'girls') ? 'flex' : 'none';
+                }
             } else if (currentMode === 'news') {
                 document.getElementById('filter-bar').style.display = 'block';
                 document.getElementById('standard-filters').style.display = 'none';
