@@ -3967,39 +3967,47 @@ window.renderMinigameStart = function() {
                 return;
             }
 
-            // ✨ 1. 動態抓取試算表中的所有「分類標籤(tag)」
-            let uniqueTags = [...new Set(dbNews.map(n => (n.tag || "情報").trim()))].filter(t => t);
+            // ✨ 智慧讀取欄位小幫手：不管試算表寫英文還是中文都能抓到！
+            const getField = (n, keys, defaultVal = "") => {
+                for (let k of keys) { if (n[k]) return n[k].trim(); }
+                return defaultVal;
+            };
+
+            // 1. 動態抓取試算表中的所有「分類標籤」
+            let uniqueTags = [...new Set(dbNews.map(n => getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報')))].filter(t => t !== "");
             
-            // 建立上方分類按鈕的 HTML
             let tagsHtml = `
             <div class="sub-nav" style="border-top:none; margin-top:0; padding-top:0; margin-bottom:25px;">
                 <button class="sub-btn ${window.currentNewsTag === '全部' ? 'active' : ''}" onclick="window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub();">全部 ALL</button>
                 ${uniqueTags.map(t => `<button class="sub-btn ${window.currentNewsTag === t ? 'active' : ''}" onclick="window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub();">${t}</button>`).join('')}
             </div>`;
 
-            // ✨ 2. 先依照玩家點擊的分類篩選，並記下它們在試算表的「原始順序(_idx)」
+            // 2. 依照分類篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
-                let t = (n.tag || "情報").trim();
+                let t = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
                 return window.currentNewsTag === "全部" || t === window.currentNewsTag;
             });
 
-            // ✨ 3. 終極排序邏輯：
-            // 第一關：比「日期」，越新的排越上面
-            // 第二關：如果日期一模一樣，就比「試算表行數」，寫在越下面(越晚新增)的排越上面！
+            // 3. 排序：日期越新越上面，同日期則試算表越下方(越晚新增)的越上面
             let sortedNews = filteredNews.sort((a, b) => {
-                let dateA = new Date(String(a.date).replace(/-/g, '/')).getTime() || 0;
-                let dateB = new Date(String(b.date).replace(/-/g, '/')).getTime() || 0;
+                let dA = getField(a, ['date', '日期']);
+                let dB = getField(b, ['date', '日期']);
+                let dateA = new Date(dA.replace(/-/g, '/')).getTime() || 0;
+                let dateB = new Date(dB.replace(/-/g, '/')).getTime() || 0;
                 if (dateA !== dateB) return dateB - dateA; 
                 return b._idx - a._idx; 
             });
             
-            // 控制加載數量
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
 
             let cardsHtml = displayList.map(n => {
-                const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
-                const summary = n.content ? (n.content.slice(0, 55) + '...') : '';
-                const tagText = n.tag || "情報";
+                const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+                const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
+                const rawContent = getField(n, ['content', '內文', '內容']);
+                const summary = rawContent ? (rawContent.slice(0, 55) + '...') : '';
+                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
+                const titleText = getField(n, ['title', '標題'], '無標題');
+                const dateText = getField(n, ['date', '日期'], '-');
 
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
@@ -4013,10 +4021,10 @@ window.renderMinigameStart = function() {
                     <div class="news-info-wrap">
                         <div>
                             <div class="news-header-meta">
-                                <span class="news-date">📅 ${n.date || "-"}</span>
+                                <span class="news-date">📅 ${dateText}</span>
                                 <span class="news-tag">${tagText}</span>
                             </div>
-                            <div class="news-title-text">${n.title}</div>
+                            <div class="news-title-text">${titleText}</div>
                             <div class="news-summary-text">${summary}</div>
                         </div>
                         <div class="news-click-prompt" style="margin-top: 10px;">
@@ -4040,12 +4048,23 @@ window.renderMinigameStart = function() {
             container.innerHTML = html;
         };
 
-        // 📰 點擊卡片跳出全文詳細內容彈窗
         window.openNewsModal = function(absoluteIndex) {
-            const n = dbNews[absoluteIndex]; // ✨ 透過原始 ID 抓取，保證不管怎麼排序都不會點錯篇！
+            const n = dbNews[absoluteIndex]; 
             if (!n) return;
 
-            const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
+            const getField = (n, keys, defaultVal = "") => {
+                for (let k of keys) { if (n[k]) return n[k].trim(); }
+                return defaultVal;
+            };
+
+            const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+            const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
+            const titleText = getField(n, ['title', '標題'], '無標題');
+            const contentText = getField(n, ['content', '內文', '內容'], '暫無內文');
+            const dateText = getField(n, ['date', '日期'], '-');
+            const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
+            const linkText = getField(n, ['link', '連結', '相關連結']);
+
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
 
             document.documentElement.style.setProperty('--modal-accent', themeColor);
@@ -4058,13 +4077,13 @@ window.renderMinigameStart = function() {
                     </div>` : ''}
                     <div style="padding: 25px;">
                         <div class="news-header-meta" style="margin-bottom: 12px;">
-                            <span class="news-date">📅 ${n.date || "-"}</span>
-                            <span class="news-tag" style="color:${themeColor}">${n.tag || "情報"}</span>
+                            <span class="news-date">📅 ${dateText}</span>
+                            <span class="news-tag" style="color:${themeColor}">${tagText}</span>
                         </div>
-                        <div class="modal-news-title" style="color:${themeColor}">${n.title}</div>
-                        <div class="modal-news-text">${n.content || "暫無內文"}</div>
+                        <div class="modal-news-title" style="color:${themeColor}">${titleText}</div>
+                        <div class="modal-news-text">${contentText}</div>
                         
-                        ${n.link ? `<a href="${n.link}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:25px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
+                        ${linkText ? `<a href="${linkText}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:25px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
                     </div>
                 </div>
             `;
