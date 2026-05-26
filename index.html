@@ -1752,6 +1752,29 @@
             updateTeamTabs();
             calculateHubStats();
             window.renderContent();
+
+            // ✨ 終極防線：傳送門雷達監聽
+            // 當網站一啟動，自動偵測網址參數，如果是球迷點分享連結進來的，一秒帶他去新聞大廳並彈出全文！
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetMode = urlParams.get('mode');
+            const targetNewsId = urlParams.get('newsId');
+
+            if (targetMode === 'news' && targetNewsId !== null) {
+                const absoluteIndex = parseInt(targetNewsId);
+                // 防呆：確認這篇新聞真實存在於試算表裡
+                if (dbNews && dbNews[absoluteIndex]) {
+                    // 1. 強制把轉載頁面藏起來，解除 no-scroll 狀態
+                    const landing = document.getElementById('landing-page');
+                    if (landing) { landing.style.display = 'none'; }
+                    document.body.classList.remove('no-scroll');
+
+                    // 2. 智慧切換到新聞模式，並直接觸發彈窗！
+                    window.setMode('news');
+                    setTimeout(() => {
+                        window.openNewsModal(absoluteIndex);
+                    }, 300); // 給網頁 300 毫秒的絲滑緩衝時間
+                }
+            }
         }
 
         // =========================================================================
@@ -4104,7 +4127,11 @@ window.renderMinigameStart = function() {
                         <div class="modal-news-title" style="color:${themeColor}">${titleText}</div>
                         <div class="modal-news-text">${contentText}</div>
                         
-                        ${linkText ? `<a href="${linkText}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:25px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
+                        <button onclick="window.shareNews(${absoluteIndex}, '${titleText}')" class="modal-ig-btn" style="background: color-mix(in srgb, ${themeColor} 20%, #15191e); border-color: ${themeColor}; margin-top: 25px; cursor: pointer;">
+                            <span style="color:#fff; font-family:var(--tc-font); display:flex; align-items:center; gap:8px;">📢 一鍵分享這篇新聞給球迷 / 複製連結</span>
+                        </button>
+
+                        ${linkText ? `<a href="${linkText}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:12px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
                     </div>
                 </div>
             `;
@@ -4112,7 +4139,37 @@ window.renderMinigameStart = function() {
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll'); 
         };
-        
+        // =========================================================================
+        // 📢 新聞 CMS 一鍵分享核心引擎 (原生態智慧分享機制)
+        // =========================================================================
+        window.shareNews = function(index, title) {
+            // 自動組裝帶有新聞 ID 的專屬傳送門網址
+            const shareUrl = `${window.location.origin}${window.location.pathname}?mode=news&newsId=${index}`;
+            const shareText = `【台灣啦啦隊資料庫 · 每日情報】\n🔥 教練室發布熱門快訊：${title}\n\n👇 點擊立刻查閱完整報導：`;
+
+            // 如果手機支援原生分享 (例如 iPhone Safari、Android Chrome)
+            if (navigator.share) {
+                navigator.share({
+                    title: '台灣啦啦隊資料庫 | 每日情報',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(err => console.log('分享取消或失敗:', err));
+            } else {
+                // 如果是電腦版，自動觸發高階剪貼簿複製
+                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                    alert('📋 網址與標題已完美複製到您的剪貼簿！\n趕快貼到 LINE、Threads 或 FB 分享給其他球迷吧！');
+                }).catch(() => {
+                    // 防呆 fallback：如果剪貼簿權限被擋
+                    const dummy = document.createElement('input');
+                    document.body.appendChild(dummy);
+                    dummy.value = `${shareText}\n${shareUrl}`;
+                    dummy.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(dummy);
+                    alert('📋 分享網址已複製成功！');
+                });
+            }
+        };
         window.onload = loadData;
     </script>
 </body>
