@@ -2591,13 +2591,18 @@
                     let extraInfoHtml = '';
                     let displayTitle = s.title; // 預設使用存檔的標題
 
-                    // ✨ 安全防護：加上 s.id 的存在檢查
                     if (s.id && s.id.startsWith('event|')) {
                         const parts = s.id.split('|');
                         const eDateNum = parseInt(parts[1]);
                         const eName = parts[2];
+                        const eGirls = parts[3] || ""; // ✨ 1. 讀取女孩識別碼
                         
-                        const matchedEvent = dbEvents.find(e => e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim());
+                        // ✨ 2. 雙重條件比對：除了日期和活動名，還要比對女孩名單，防止撞車！(兼容舊存檔)
+                        const matchedEvent = dbEvents.find(e => {
+                            let matchDateName = e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim();
+                            if (eGirls) return matchDateName && (e.girls || "").trim() === eGirls.trim();
+                            return matchDateName; 
+                        });
 
                         if (matchedEvent) {
                             const timeStr = matchedEvent.time || "TBA";
@@ -2612,9 +2617,13 @@
                                 avatarsHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">` + attendGirls.map(n => {
                                     const g = girlMap.get(n);
                                     if (g) {
+                                        // ✨ 3. 智慧國籍分流補丁：修正外籍女孩顯示綽號的 Bug
+                                        const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                                        const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+
                                         return `<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); padding:4px 12px 4px 4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.openModal('${g.uid}')">
                                                     <img src="${window.getCdnUrl(g.img)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; object-position:top center;">
-                                                    <span style="font-size:13px; color:#fff; font-weight:900;">${g.nickname || g.realname}</span>
+                                                    <span style="font-size:13px; color:#fff; font-weight:900;">${dName}</span>
                                                 </div>`;
                                     }
                                     return `<span style="font-size:12px; color:var(--text-sub); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:10px;">${n}</span>`;
@@ -3449,7 +3458,7 @@
                 ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
                 : "請見球團官網";
 
-            let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"");
+            let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"") + '|' + (e.girls||"");
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="display:block; width:100%; padding:16px; margin-top:20px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入專屬行程 (點擊移除)':'➕ 加入我的專屬行事曆'}</button>`;
