@@ -1229,47 +1229,67 @@
             .gacha-animation > div:last-child { bottom: -45px !important; font-size: 14px; } 
         }
         /* =========================================
-           🧋 珍奶抖內浮動按鈕
+           🧋 珍奶抖內浮動按鈕 (角落圓形收納版)
            ========================================= */
         .floating-boba-btn {
             position: fixed;
-            bottom: 160px; /* 避開抽卡按鈕 */
-            right: 20px;
+            bottom: 150px; /* 乖乖待在抽卡按鈕的上方 */
+            right: 30px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
             background-color: #AD5138;
             color: #F8E0BE;
-            padding: 10px 18px;
-            border-radius: 30px;
+            height: 45px;
+            border-radius: 50px;
             text-decoration: none;
             font-weight: 900;
             font-family: var(--tc-font);
             box-shadow: 0 4px 15px rgba(173, 81, 56, 0.5);
             z-index: 90;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* ✨ 魔法核心：平時限制最大寬度，隱藏文字 */
+            max-width: 45px; 
+            padding: 0 10px; 
+            overflow: hidden;
             border: 2px solid #F8E0BE;
+            transition: max-width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s, background-color 0.3s;
         }
-        .floating-boba-btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(173, 81, 56, 0.8);
-            color: #fff;
-            background-color: #c45b3e;
+        .floating-boba-btn span {
+            white-space: nowrap;
+            margin-left: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
         .floating-boba-btn img {
-            height: 24px;
-            width: auto;
+            width: 21px;
+            height: 21px;
+            flex-shrink: 0;
+            transition: 0.3s;
+        }
+        /* 電腦版：滑鼠移上去才絲滑展開文字 */
+        .floating-boba-btn:hover {
+            max-width: 150px; 
+            background-color: #c45b3e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(173, 81, 56, 0.8);
+        }
+        .floating-boba-btn:hover span {
+            opacity: 1;
+        }
+        .floating-boba-btn:hover img {
+            transform: rotate(-10deg) scale(1.1);
         }
         
-        /* 手機版微調 */
+        /* 手機版微調：強制只顯示圓形小圖示，不再展開，極致節省空間 */
         @media (max-width: 768px) {
             .floating-boba-btn {
                 bottom: 140px;
-                padding: 8px 14px;
-                font-size: 13px;
+                right: 20px;
             }
-            .floating-boba-btn img { height: 20px; }
+            .floating-boba-btn:hover { 
+                max-width: 45px; 
+                transform: scale(1.05); 
+            }
         }
         /* =========================================
            📰 每日情報 (CMS) 專屬收納樣式
