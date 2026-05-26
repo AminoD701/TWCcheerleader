@@ -4004,12 +4004,25 @@ window.renderMinigameStart = function() {
 
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
-            // ✨ 終極修正：將圖片「放進」滾動區塊(.modal-body)內
-            // 這樣圖片就會跟著文章一起往上捲動，徹底釋放手機閱讀空間！
+            // ✨ 終極修正：將圖片「放進」滾動區塊(.modal-body)內，並解除裁切限制！
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div class="modal-body" style="padding: 0;">
-                    ${imgUrl ? `<img src="${imgUrl}" style="width: 100%; height: 280px; object-fit: cover; display: block; border-bottom: 4px solid ${themeColor};">` : ''}
+                    ${imgUrl ? `
+                    <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center;">
+                        <img src="${imgUrl}" style="max-width: 100%; height: auto; max-height: 65vh; display: inline-block; vertical-align: middle;">
+                    </div>` : ''}
                     <div style="padding: 25px;">
+                        <div class="news-header-meta" style="margin-bottom: 12px;">
+                            <span class="news-date">📅 ${n.date || "-"}</span>
+                            <span class="news-tag" style="color:${themeColor}">${n.tag || "情報"}</span>
+                        </div>
+                        <div class="modal-news-title" style="color:${themeColor}">${n.title}</div>
+                        <div class="modal-news-text">${n.content || "暫無內文"}</div>
+                        
+                        ${n.link ? `<a href="${n.link}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:25px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
+                    </div>
+                </div>
+            `;
                         <div class="news-header-meta" style="margin-bottom: 12px;">
                             <span class="news-date">📅 ${n.date || "-"}</span>
                             <span class="news-tag" style="color:${themeColor}">${n.tag || "情報"}</span>
