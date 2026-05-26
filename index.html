@@ -1271,6 +1271,35 @@
             }
             .floating-boba-btn img { height: 20px; }
         }
+        /* =========================================
+           📰 每日情報 (CMS) 專屬收納樣式
+           ========================================= */
+        .news-list-container { max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: none; flex-direction: column; gap: 20px; }
+        .news-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; align-items: stretch; transition: 0.2s; box-shadow: 6px 6px 0px rgba(0,0,0,0.5); cursor: pointer; position: relative; height: 160px; }
+        .news-card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0px rgba(0,0,0,0.7); border-color: #fff; }
+        .news-img-wrap { width: 220px; height: 100%; background: #111; overflow: hidden; flex-shrink: 0; border-right: 2px solid var(--border-color); }
+        .news-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: 0.3s; }
+        .news-card:hover .news-img-wrap img { transform: scale(1.04); }
+        .news-info-wrap { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+        .news-header-meta { display: flex; align-items: center; gap: 12px; }
+        .news-date { font-family: var(--sport-font); font-size: 14px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; }
+        .news-tag { font-size: 11px; font-weight: 900; background: rgba(255,255,255,0.05); color: var(--event-accent); border: 1px solid currentColor; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; line-height: 1.2; text-transform: uppercase; }
+        .news-title-text { font-size: 20px; font-weight: 900; color: #fff; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+        .news-summary-text { font-size: 13px; color: var(--text-sub); font-weight: 700; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; }
+        .news-click-prompt { font-size: 11px; color: var(--event-accent); font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; margin-top: auto; }
+        
+        /* 📰 新聞專屬獨立彈窗排版 */
+        .modal-news-title { font-size: 24px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.3; margin-bottom: 8px; border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; }
+        .modal-news-text { font-size: 15px; color: #cbd5e1; font-weight: 700; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+
+        /* 手機版：圖片改為上方，高度自適應，防止資訊硬擠 */
+        @media (max-width: 768px) {
+            .news-card { flex-direction: column; height: auto; }
+            .news-img-wrap { width: 100%; height: 180px; border-right: none; border-bottom: 2px solid var(--border-color); }
+            .news-info-wrap { padding: 15px; gap: 10px; }
+            .news-title-text { font-size: 17px; margin-top: 4px; }
+            .news-summary-text { display: none; } /* 手機版直接隱藏摘要，畫面極度乾淨 */
+        }
     </style> 
 </head>
 <body class="no-scroll">
@@ -1403,6 +1432,7 @@
                         <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
                         <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
                         <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
+                        <button class="dropdown-item" onclick="window.setMode('news')">📰 每日情報 INTEL</button>
                         <button class="dropdown-item" onclick="window.setMode('feedback')">💬 意見回饋 FEEDBACK</button>
                     </div>
                 </div>
@@ -1462,6 +1492,7 @@
         <div class="grid-container" id="grid-container"></div>
         <div class="event-list-container" id="event-container" style="display:none;"></div>
         <div class="schedule-matrix-container" id="schedule-container" style="display:none;"></div>
+        <div class="news-list-container" id="news-container" style="display:none;"></div>
         <div id="passport-container"></div>
         <div id="minigame-container"></div>
         <div id="dreamteam-container" style="display:none;"></div>
@@ -1542,7 +1573,7 @@
             return { num: parseInt(`${String(y).padStart(4,'0')}${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`), mmdd: parseInt(`${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`) };
         }
 
-        let dbGirls = [], dbEvents = [], dbSchedules = [];
+        let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = []; 
         let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
@@ -1554,24 +1585,6 @@
             const spinner = document.getElementById('loading-spinner');
             const text = document.getElementById('enter-text');
             if(btn) {
-                btn.disabled = false;
-                if(spinner) spinner.style.display = 'none';
-                if(text) text.innerHTML = '進入賽季 ENTER SEASON';
-            }
-        }
-
-        // =========================================================================
-        // 🛡️ 終極防護版：資料載入與錯誤處理
-        // =========================================================================
-        // =========================================================================
-        // 🚀 極速平行載入引擎 (解決手機轉圈卡死問題)
-        // =========================================================================
-        function enableEnterButton() {
-            const btn = document.getElementById('enter-btn');
-            const spinner = document.getElementById('loading-spinner');
-            const text = document.getElementById('enter-text');
-            if(btn) {
-                // 強制恢復解鎖狀態與正確的點擊功能，防止被前面的錯誤機制綁架
                 btn.onclick = () => {
                     document.getElementById('landing-page').style.opacity = '0';
                     setTimeout(() => {
@@ -1588,7 +1601,6 @@
             }
         }
 
-        // 將 Papa.parse 包裝成 Promise，讓三個試算表可以「同時」下載
         function fetchCSV(url) {
             return new Promise((resolve, reject) => {
                 Papa.parse(url, {
@@ -1603,7 +1615,6 @@
         }
 
         async function loadData() {
-            // 1. 嘗試極速讀取手機快取
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
                 if (cached) {
@@ -1612,6 +1623,7 @@
                         dbGirls = parsed.dbGirls || []; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
+                        dbNews = parsed.dbNews || []; 
                         if (dbGirls.length > 0) {
                             buildGirlMap(); init(); enableEnterButton(); return; 
                         }
@@ -1619,25 +1631,21 @@
                 }
             } catch(e) { }
 
-            // 2. 快取失效，開始從 Google 抓資料 (平行下載大幅提升速度)
             const t = new Date().getTime();
             const baseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
 
             try {
-                // 這裡會「同時」發出三個請求，載入時間直接縮短 3 倍！
-                const [girlsData, eventsData, schedulesData] = await Promise.all([
+                const [girlsData, eventsData, schedulesData, newsData] = await Promise.all([
                     fetchCSV(`${baseUrl}&gid=0&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=925411186&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`)
+                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`),
+                    // 🚨 總教練：請把下方的 12345678 換成您新分頁的 GID 數字！
+                    fetchCSV(`${baseUrl}&gid=12345678&t=${t}`) 
                 ]);
 
-                // 處理女孩資料
                 dbGirls = girlsData.filter(i => i.realname);
-
-                // 處理活動資料
                 dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
-
-                // 處理班表資料
+                
                 let flat = [];
                 schedulesData.forEach(row => {
                     let sport = (row.sport || "").trim();
@@ -1652,16 +1660,15 @@
                 });
                 dbSchedules = flat;
 
-                // 全部資料處理完畢，順利解鎖大門！
+                dbNews = newsData.filter(n => n.title);
+
                 buildGirlMap(); 
                 init(); 
                 enableEnterButton();
                 
-                // 將最新資料存入手機快取
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules })); } catch(e) {}
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews })); } catch(e) {}
 
             } catch (err) {
-                // 如果真的遇到斷網或 Google 伺服器掛掉，才會顯示紅色的重試按鈕
                 const btn = document.getElementById('enter-btn');
                 const text = document.getElementById('enter-text');
                 const spinner = document.getElementById('loading-spinner');
@@ -1912,6 +1919,7 @@
                 'events': '✈️ 外籍行程 EVENTS',
                 'minigame': '🎮 殘酷二選一 GAME',
                 'dreamteam': '🌟 夢幻陣容 DREAM TEAM',
+                'news': '📰 每日情報 INTEL', // 👈 增加這行
                 'feedback': '💬 意見回饋 FEEDBACK'
             };
             
@@ -2045,7 +2053,7 @@
         };
 
         window.renderContent = function(skipScroll = false) {
-            window.currentDisplayLimit = 24; 
+            window.currentDisplayLimit = window.currentDisplayLimit || 10; // 新聞預設載入 10 則
 
             const grid = document.getElementById('grid-container'), 
                   list = document.getElementById('event-container'), 
@@ -2053,9 +2061,10 @@
                   passport = document.getElementById('passport-container'), 
                   game = document.getElementById('minigame-container'), 
                   dt = document.getElementById('dreamteam-container'),
-                  fb = document.getElementById('feedback-container');
+                  fb = document.getElementById('feedback-container'),
+                  news = document.getElementById('news-container'); // 👈 抓取新盒子
                   
-            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = 'none';
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = news.style.display = 'none';
             
             if (!skipScroll) { window.scrollTo({top: 0}); }
             
@@ -2069,8 +2078,8 @@
             else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
             else if (currentMode === 'feedback') { fb.style.display = 'block'; window.renderFeedbackStart(); }
+            else if (currentMode === 'news') { news.style.display = 'flex'; renderNewsHub(); } // 👈 觸發新聞渲染
         };
-
         // =========================================================================
         // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎
         // =========================================================================
@@ -3915,7 +3924,91 @@ window.renderMinigameStart = function() {
         window.closeGacha = function() {
             document.getElementById('gacha-overlay').classList.remove('show');
         };
+// =========================================================================
+        // 📰 每日動態情報牆核心渲染引擎 (CMS) 貼在這裡 👇
+        // =========================================================================
+        window.renderNewsHub = function() {
+            const container = document.getElementById('news-container');
+            
+            if (!dbNews || dbNews.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前教練室尚未發布任何情報 📝</div>`;
+                return;
+            }
 
+            // 按時間由新到舊排序
+            let sortedNews = [...dbNews].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+            
+            // 防亂核心：控制首頁加載數量
+            let displayList = sortedNews.slice(0, window.currentDisplayLimit);
+
+            let html = displayList.map((n, index) => {
+                const imgUrl = n.img ? window.getCdnUrl(n.img) : 'https://via.placeholder.com/400x300/1c2128/ffffff?text=TAIWAN+CHEERLEADER';
+                const summary = n.content ? (n.content.slice(0, 45) + '...') : '';
+                const tagText = n.tag || "情報";
+
+                return `
+                <div class="news-card" onclick="window.openNewsModal(${index})">
+                    <div class="news-img-wrap">
+                        <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/1c2128/ffffff?text=NO+IMAGE'">
+                    </div>
+                    <div class="news-info-wrap">
+                        <div>
+                            <div class="news-header-meta">
+                                <span class="news-date">📅 ${n.date || "-"}</span>
+                                <span class="news-tag">${tagText}</span>
+                            </div>
+                            <div class="news-title-text">${n.title}</div>
+                            <div class="news-summary-text">${summary}</div>
+                        </div>
+                        <div class="news-click-prompt">
+                            READ ARTICLE ➔
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // 如果還有更多文章，亮出「加載更多」防爆按鈕
+            if (sortedNews.length > window.currentDisplayLimit) {
+                html += `
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="window.currentDisplayLimit += 10; renderNewsHub();" class="enter-btn" style="display: inline-flex; font-size: 15px; padding: 12px 30px;">
+                        查看更多歷史情報 LOAD MORE 🔽
+                    </button>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        };
+
+        // 📰 點擊卡片跳出乾淨帥氣的「全文詳細內容彈窗」
+        window.openNewsModal = function(index) {
+            let sortedNews = [...dbNews].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+            const n = sortedNews[index];
+            if (!n) return;
+
+            const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
+
+            document.documentElement.style.setProperty('--modal-accent', themeColor);
+
+            document.getElementById('modal-dynamic-content').innerHTML = `
+                ${imgUrl ? `<img src="${imgUrl}" class="modal-photo" style="height: 280px; object-fit: cover;">` : ''}
+                <div class="modal-body" style="padding: 25px;">
+                    <div class="news-header-meta" style="margin-bottom: 12px;">
+                        <span class="news-date">📅 ${n.date || "-"}</span>
+                        <span class="news-tag" style="color:${themeColor}">${n.tag || "情報"}</span>
+                    </div>
+                    <div class="modal-news-title" style="color:${themeColor}">${n.title}</div>
+                    <div class="modal-news-text">${n.content || "暫無內文"}</div>
+                    
+                    ${n.link ? `<a href="${n.link}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:25px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
+                </div>
+            `;
+
+            document.getElementById('girl-modal').classList.add('active');
+            document.body.classList.add('no-scroll'); 
+        };
+        
         window.onload = loadData;
     </script>
 </body>
