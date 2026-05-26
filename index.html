@@ -1632,7 +1632,7 @@
             } catch(e) { }
 
             const t = new Date().getTime();
-            const baseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv";
+            const baseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${t}`;
 
             try {
                 const [girlsData, eventsData, schedulesData, newsData] = await Promise.all([
@@ -3923,8 +3923,8 @@ window.renderMinigameStart = function() {
         window.closeGacha = function() {
             document.getElementById('gacha-overlay').classList.remove('show');
         };
-// =========================================================================
-        // 📰 每日動態情報牆核心渲染引擎 (CMS) 貼在這裡 👇
+        // =========================================================================
+        // 📰 每日動態情報牆核心渲染引擎 (CMS) - 支援無圖防呆與即時刷新
         // =========================================================================
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
@@ -3937,19 +3937,25 @@ window.renderMinigameStart = function() {
             // 按時間由新到舊排序
             let sortedNews = [...dbNews].sort((a, b) => String(b.date).localeCompare(String(a.date)));
             
-            // 防亂核心：控制首頁加載數量
+            // 控制首頁加載數量
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
 
             let html = displayList.map((n, index) => {
-                const imgUrl = n.img ? window.getCdnUrl(n.img) : 'https://via.placeholder.com/400x300/1c2128/ffffff?text=TAIWAN+CHEERLEADER';
-                const summary = n.content ? (n.content.slice(0, 45) + '...') : '';
+                const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
+                const summary = n.content ? (n.content.slice(0, 55) + '...') : '';
                 const tagText = n.tag || "情報";
 
+                // ✨ 智慧排版補丁：如果有圖片就渲染圖片區塊，沒圖片就整塊拔掉！
+                const imgHtml = imgUrl 
+                    ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
+                    : '';
+                
+                // ✨ 智慧樣式補丁：沒圖片時，卡片高度改為自適應(auto)，且拿掉固定高度限制，防止排版死板
+                const cardStyle = imgUrl ? '' : 'height: auto; min-height: 110px;';
+
                 return `
-                <div class="news-card" onclick="window.openNewsModal(${index})">
-                    <div class="news-img-wrap">
-                        <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/1c2128/ffffff?text=NO+IMAGE'">
-                    </div>
+                <div class="news-card" onclick="window.openNewsModal(${index})" style="${cardStyle}">
+                    ${imgHtml}
                     <div class="news-info-wrap">
                         <div>
                             <div class="news-header-meta">
@@ -3959,14 +3965,13 @@ window.renderMinigameStart = function() {
                             <div class="news-title-text">${n.title}</div>
                             <div class="news-summary-text">${summary}</div>
                         </div>
-                        <div class="news-click-prompt">
+                        <div class="news-click-prompt" style="margin-top: 10px;">
                             READ ARTICLE ➔
                         </div>
                     </div>
                 </div>`;
             }).join('');
 
-            // 如果還有更多文章，亮出「加載更多」防爆按鈕
             if (sortedNews.length > window.currentDisplayLimit) {
                 html += `
                 <div style="text-align: center; margin-top: 20px;">
