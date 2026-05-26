@@ -1963,7 +1963,7 @@
             currentScheduleSport = null; 
             if(document.getElementById('team-btn-text')) document.getElementById('team-btn-text').innerText = "全部啦啦隊";
 
-            const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
+            const showSubNav = (currentMode === 'girls')
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             
             // ✨ 智慧切換吸頂列：女孩圖鑑顯示搜尋列，情報大廳顯示分類按鈕
@@ -2519,13 +2519,13 @@
             if(upcoming.length === 0) {
                 titleEl.innerText = "目前沒有即將到來的行程";
                 timerEl.innerText = "快去加入行事曆吧！";
-                timerEl.style.fontSize = "20px";
+                timerEl.style.fontSize = "15px";
                 return;
             }
             
             const nextEvent = upcoming[0];
             titleEl.innerText = `⏳ 距離 ${nextEvent.title} 還有：`;
-            timerEl.style.fontSize = "32px";
+            timerEl.style.fontSize = "22px";
             
             const y = Math.floor(nextEvent.dateNum / 10000);
             const m = Math.floor((nextEvent.dateNum % 10000) / 100) - 1;
@@ -2833,26 +2833,31 @@
             }
 
             const allTeamNames = Object.keys(teamThemes).filter(t => t !== "全部啦啦隊");
-            let themeSelectHtml = `
-                <div class="passport-section-title">🎨 我的本命主場 (THEME)</div>
-                <select onchange="window.changeHomeTeam(this.value)" style="width:100%; padding:12px; background:var(--bg-card); color:#fff; border:2px solid var(--border-color); border-radius:4px; font-family:var(--tc-font); font-weight:700; font-size:16px; outline:none; cursor:pointer;">
-                    <option value="none">預設綜合主題</option>
-                    ${allTeamNames.map(t => `<option value="${t}" ${myHomeTeam === t ? 'selected' : ''}>${t}</option>`).join('')}
-                </select>
-                <div style="font-size:12px; color:var(--text-sub); margin-top:8px;">💡 設定後，全站的按鈕與特效將變成你的球隊專屬應援色！</div>
+            
+            // ✨ 濃縮版：將本命主場與倒數計時縮小並排，大幅節省空間 (電腦版並排，手機版自動堆疊)
+            let topDashboardHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 15px 0 25px;">
+                    <div style="background:var(--bg-card); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center;">
+                        <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:#fff; margin-bottom:8px;">🎨 我的本命主場 (THEME)</div>
+                        <select onchange="window.changeHomeTeam(this.value)" style="width:100%; padding:8px; background:#111; color:#fff; border:1px solid var(--border-color); border-radius:4px; font-family:var(--tc-font); font-weight:700; font-size:14px; outline:none; cursor:pointer;">
+                            <option value="none">預設綜合主題</option>
+                            ${allTeamNames.map(t => `<option value="${t}" ${myHomeTeam === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                        <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">💡 全站特效將變成你的球隊專屬應援色！</div>
+                    </div>
+
+                    <div style="background:var(--bg-card); padding:15px; border-radius:8px; text-align:center; border:2px dashed var(--event-accent); display:flex; flex-direction:column; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                        <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:6px;" id="countdown-title">計算中...</div>
+                        <div style="font-family:var(--sport-font); font-size:22px; font-weight:900; color:var(--event-accent); line-height:1.2;" id="countdown-timer">-- : -- : --</div>
+                    </div>
+                </div>
             `;
 
             container.innerHTML = `
-                ${themeSelectHtml}
-                
-                <div class="passport-section-title" style="margin-top:40px;">期待下次相遇 (COUNTDOWN)</div>
-                <div style="background:var(--bg-card); padding:20px; border-radius:8px; text-align:center; border:2px dashed var(--event-accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-                    <div style="font-size:14px; color:var(--text-sub); font-weight:700; margin-bottom:10px;" id="countdown-title">計算中...</div>
-                    <div style="font-family:var(--sport-font); font-size:32px; font-weight:900; color:var(--event-accent); line-height:1.2;" id="countdown-timer">-- : -- : --</div>
-                </div>
+                ${topDashboardHtml}
 
                 <div style="max-width: 480px; margin: 0 auto;">
-                    <div class="passport-section-title" style="margin-top:40px;">
+                    <div class="passport-section-title" style="margin-top:20px;">
                         <span>🗓️ 我的專屬月曆 (MY CALENDAR)</span>
                     </div>
                     
