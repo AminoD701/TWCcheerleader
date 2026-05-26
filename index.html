@@ -1966,8 +1966,8 @@
             const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             
-            // ✨ 智慧切換吸頂列：女孩圖鑑顯示搜尋列，情報大廳顯示分類按鈕
-            if (currentMode === 'girls') {
+            // ✨ 智慧切換吸頂列：女孩圖鑑/外籍行程顯示搜尋列，情報大廳顯示分類按鈕
+            if (currentMode === 'girls' || currentMode === 'events') {
                 document.getElementById('filter-bar').style.display = 'block';
                 document.getElementById('standard-filters').style.display = 'flex';
                 document.getElementById('news-filters').style.display = 'none';
@@ -3986,8 +3986,9 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 1. 動態抓取試算表標籤，並直接塞進上方的吸頂列！
+            // ✨ 1. 動態抓取試算表標籤，並直接塞進上方的黃框吸頂列中！
             let uniqueTags = [...new Set(dbNews.map(n => getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報')))].filter(t => t !== "");
+            const newsFilters = document.getElementById('news-filters');
             if(newsFilters) {
                 newsFilters.innerHTML = `
                     <button class="sub-btn ${window.currentNewsTag === '全部' ? 'active' : ''}" onclick="window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部 ALL</button>
