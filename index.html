@@ -1964,7 +1964,9 @@
             const showSubNav = (currentMode === 'girls' || currentMode === 'passport');
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             document.getElementById('extra-filters').style.display = showSubNav ? 'flex' : 'none';
-            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback') ? 'none' : 'block';
+            document.getElementById('filter-bar').style.display = (currentMode === 'schedule' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || currentMode === 'news') ? 'none' : 'block';
+            
+            if(currentMode === 'news') window.currentNewsTag = "全部";
             
             updateTeamTabs();
             window.renderContent();
@@ -3953,8 +3955,10 @@ window.renderMinigameStart = function() {
             document.getElementById('gacha-overlay').classList.remove('show');
         };
         // =========================================================================
-        // 📰 每日動態情報牆核心渲染引擎 (CMS) - 支援無圖防呆與即時刷新
+        // 📰 每日動態情報牆核心渲染引擎 (CMS) - 支援無圖防呆、動態分類與精準排序
         // =========================================================================
+        window.currentNewsTag = "全部"; // 預設顯示全部新聞
+
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
             
@@ -3963,27 +3967,48 @@ window.renderMinigameStart = function() {
                 return;
             }
 
-            // 按時間由新到舊排序
-            let sortedNews = [...dbNews].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+            // ✨ 1. 動態抓取試算表中的所有「分類標籤(tag)」
+            let uniqueTags = [...new Set(dbNews.map(n => (n.tag || "情報").trim()))].filter(t => t);
             
-            // 控制首頁加載數量
+            // 建立上方分類按鈕的 HTML
+            let tagsHtml = `
+            <div class="sub-nav" style="border-top:none; margin-top:0; padding-top:0; margin-bottom:25px;">
+                <button class="sub-btn ${window.currentNewsTag === '全部' ? 'active' : ''}" onclick="window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub();">全部 ALL</button>
+                ${uniqueTags.map(t => `<button class="sub-btn ${window.currentNewsTag === t ? 'active' : ''}" onclick="window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub();">${t}</button>`).join('')}
+            </div>`;
+
+            // ✨ 2. 先依照玩家點擊的分類篩選，並記下它們在試算表的「原始順序(_idx)」
+            let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
+                let t = (n.tag || "情報").trim();
+                return window.currentNewsTag === "全部" || t === window.currentNewsTag;
+            });
+
+            // ✨ 3. 終極排序邏輯：
+            // 第一關：比「日期」，越新的排越上面
+            // 第二關：如果日期一模一樣，就比「試算表行數」，寫在越下面(越晚新增)的排越上面！
+            let sortedNews = filteredNews.sort((a, b) => {
+                let dateA = new Date(String(a.date).replace(/-/g, '/')).getTime() || 0;
+                let dateB = new Date(String(b.date).replace(/-/g, '/')).getTime() || 0;
+                if (dateA !== dateB) return dateB - dateA; 
+                return b._idx - a._idx; 
+            });
+            
+            // 控制加載數量
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
 
-            let html = displayList.map((n, index) => {
+            let cardsHtml = displayList.map(n => {
                 const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
                 const summary = n.content ? (n.content.slice(0, 55) + '...') : '';
                 const tagText = n.tag || "情報";
 
-                // ✨ 智慧排版補丁：如果有圖片就渲染圖片區塊，沒圖片就整塊拔掉！
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
                     : '';
                 
-                // ✨ 智慧樣式補丁：沒圖片時，卡片高度改為自適應(auto)，且拿掉固定高度限制，防止排版死板
                 const cardStyle = imgUrl ? '' : 'height: auto; min-height: 110px;';
 
                 return `
-                <div class="news-card" onclick="window.openNewsModal(${index})" style="${cardStyle}">
+                <div class="news-card" onclick="window.openNewsModal(${n._idx})" style="${cardStyle}">
                     ${imgHtml}
                     <div class="news-info-wrap">
                         <div>
@@ -4001,6 +4026,8 @@ window.renderMinigameStart = function() {
                 </div>`;
             }).join('');
 
+            let html = tagsHtml + `<div style="display:flex; flex-direction:column; gap:20px;">${cardsHtml || '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>'}</div>`;
+
             if (sortedNews.length > window.currentDisplayLimit) {
                 html += `
                 <div style="text-align: center; margin-top: 20px;">
@@ -4013,10 +4040,9 @@ window.renderMinigameStart = function() {
             container.innerHTML = html;
         };
 
-        // 📰 點擊卡片跳出乾淨帥氣的「全文詳細內容彈窗」
-        window.openNewsModal = function(index) {
-            let sortedNews = [...dbNews].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-            const n = sortedNews[index];
+        // 📰 點擊卡片跳出全文詳細內容彈窗
+        window.openNewsModal = function(absoluteIndex) {
+            const n = dbNews[absoluteIndex]; // ✨ 透過原始 ID 抓取，保證不管怎麼排序都不會點錯篇！
             if (!n) return;
 
             const imgUrl = n.img ? window.getCdnUrl(n.img) : '';
@@ -4024,7 +4050,6 @@ window.renderMinigameStart = function() {
 
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
-            // ✨ 終極修正：將圖片「放進」滾動區塊(.modal-body)內，並解除裁切限制！
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div class="modal-body" style="padding: 0;">
                     ${imgUrl ? `
