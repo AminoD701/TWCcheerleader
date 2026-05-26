@@ -4022,14 +4022,16 @@ window.renderMinigameStart = function() {
                 const titleText = getField(n, ['title', '標題'], '無標題');
                 const dateText = getField(n, ['date', '日期'], '-');
 
+                // ✨ 終極對稱補丁：有圖片就秀圖片，沒圖片時生成「高質感電競風封面」，保證卡片大小絕對一致！
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
-                    : '';
-                
-                const cardStyle = imgUrl ? '' : 'height: auto; min-height: 110px;';
+                    : `<div class="news-img-wrap" style="background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; text-align:center;">
+                           <div style="font-family:var(--sport-font); font-size:48px; font-weight:900; color:#252c36; line-height:1; letter-spacing:2px; transform:skewX(-10deg);">NEWS</div>
+                           <div style="font-size:13px; color:var(--text-sub); font-weight:900; margin-top:12px; letter-spacing:2px; border-bottom:2px dashed #252c36; padding-bottom:4px;">${tagText}</div>
+                       </div>`;
 
                 return `
-                <div class="news-card" onclick="window.openNewsModal(${n._idx})" style="${cardStyle}">
+                <div class="news-card" onclick="window.openNewsModal(${n._idx})">
                     ${imgHtml}
                     <div class="news-info-wrap">
                         <div>
