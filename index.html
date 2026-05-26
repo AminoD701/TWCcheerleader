@@ -1764,9 +1764,44 @@
 
         function init() {
             applyGlobalTheme();
-            updateTeamTabs();
             calculateHubStats();
-            window.renderContent();
+
+            // ✨ 1. 讀取網址參數 (看看是不是點分享連結進來的)
+            const urlParams = new URLSearchParams(window.location.search);
+            let targetMode = urlParams.get('mode');
+            const targetNewsId = urlParams.get('newsId');
+
+            // ✨ 2. 如果網址沒有指定模式，就去問瀏覽器「剛剛停在哪一頁」(預設是女孩圖鑑 girls)
+            if (!targetMode) {
+                targetMode = sessionStorage.getItem('cheer_current_tab') || 'girls';
+            }
+
+            // ✨ 3. 自動幫球迷切換到該分頁！(這會一併觸發 updateTeamTabs 和 renderContent)
+            window.setMode(targetMode);
+
+            // ✨ 4. 終極防線：如果球迷是點「新聞專屬連結」進來的，打開彈窗後，立刻把網址清乾淨！
+            if (targetMode === 'news' && targetNewsId !== null) {
+                const absoluteIndex = parseInt(targetNewsId);
+                if (dbNews && dbNews[absoluteIndex]) {
+                    // 隱藏登入載入畫面
+                    const landing = document.getElementById('landing-page');
+                    if (landing) { landing.style.display = 'none'; }
+                    document.body.classList.remove('no-scroll');
+
+                    // 延遲一下下，絲滑彈出新聞視窗
+                    setTimeout(() => {
+                        window.openNewsModal(absoluteIndex);
+                    }, 300);
+                    
+                    // 💥 殺手鐧：立刻把網址上的 &newsId=XXX 抹除掉！
+                    // 這樣球迷看完新聞按 F5 重新整理時，只會停在新聞大廳，絕對不會再被關回這篇新聞裡！
+                    if (window.history && window.history.replaceState) {
+                        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?mode=news";
+                        window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+                    }
+                }
+            }
+        }
 
             // ✨ 終極防線：傳送門雷達監聽
             // 當網站一啟動，自動偵測網址參數，如果是球迷點分享連結進來的，一秒帶他去新聞大廳並彈出全文！
@@ -2000,6 +2035,14 @@
             currentScheduleTeam = null; 
             currentScheduleSport = null; 
             if(document.getElementById('team-btn-text')) document.getElementById('team-btn-text').innerText = "全部啦啦隊";
+            // ✨ 1. 記憶目前的分頁 (存入瀏覽器短暫記憶，重整時就能回到這裡)
+            sessionStorage.setItem('cheer_current_tab', mode);
+            
+            // ✨ 2. 動態修改網址，保持乾淨 (切換分頁時網址會變成 ?mode=xxx)
+            if (window.history && window.history.replaceState) {
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?mode=" + mode;
+                window.history.replaceState({path: newUrl}, '', newUrl);
+            }
 
             const showSubNav = (currentMode === 'girls')
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
