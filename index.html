@@ -1294,19 +1294,34 @@
         /* =========================================
            📰 每日情報 (CMS) 專屬收納樣式
            ========================================= */
-        .news-list-container { max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: none; flex-direction: column; gap: 20px; }
-        .news-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; align-items: stretch; transition: 0.2s; box-shadow: 6px 6px 0px rgba(0,0,0,0.5); cursor: pointer; position: relative; height: 160px; }
-        .news-card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0px rgba(0,0,0,0.7); border-color: #fff; }
-        .news-img-wrap { width: 220px; height: 100%; background: #111; overflow: hidden; flex-shrink: 0; border-right: 2px solid var(--border-color); }
-        .news-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: 0.3s; }
-        .news-card:hover .news-img-wrap img { transform: scale(1.04); }
-        .news-info-wrap { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+        .news-list-container { max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 20px; display: none; flex-direction: column; gap: 25px; }
+        
+        /* ✨ 高度從 160px 霸氣拉高到 220px */
+        .news-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; align-items: stretch; transition: 0.2s; box-shadow: 6px 6px 0px rgba(0,0,0,0.5); cursor: pointer; position: relative; height: 220px; }
+        .news-card:hover { transform: translate(-4px, -4px); box-shadow: 10px 10px 0px rgba(0,0,0,0.7); border-color: #fff; }
+        
+        /* ✨ 圖片寬度從 220px 放大到 320px，保持完美比例 */
+        .news-img-wrap { width: 320px; height: 100%; background: #111; overflow: hidden; flex-shrink: 0; border-right: 2px solid var(--border-color); }
+        .news-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: 0.4s; }
+        .news-card:hover .news-img-wrap img { transform: scale(1.05); }
+        
+        /* ✨ 內縮排版加大呼吸空間 */
+        .news-info-wrap { flex: 1; padding: 25px 35px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
         .news-header-meta { display: flex; align-items: center; gap: 12px; }
-        .news-date { font-family: var(--sport-font); font-size: 14px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; }
-        .news-tag { font-size: 11px; font-weight: 900; background: rgba(255,255,255,0.05); color: var(--event-accent); border: 1px solid currentColor; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; line-height: 1.2; text-transform: uppercase; }
-        .news-title-text { font-size: 20px; font-weight: 900; color: #fff; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
-        .news-summary-text { font-size: 13px; color: var(--text-sub); font-weight: 700; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; }
-        .news-click-prompt { font-size: 11px; color: var(--event-accent); font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; margin-top: auto; }
+        
+        /* ✨ 標籤與日期字體適度加大 */
+        .news-date { font-family: var(--sport-font); font-size: 16px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.5px; }
+        .news-tag { font-size: 13px; font-weight: 900; background: rgba(255,255,255,0.05); color: var(--event-accent); border: 1px solid currentColor; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; line-height: 1.2; text-transform: uppercase; }
+        
+        /* ✨ 標題從 20px 暴增到 26px，展現新聞氣勢 */
+        .news-title-text { font-size: 26px; font-weight: 900; color: #fff; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+        
+        /* ✨ 摘要變大，並改為「允許顯示兩行」的完美截斷，不再只有短短一行 */
+        .news-summary-text { font-size: 15px; color: var(--text-sub); font-weight: 700; line-height: 1.6; margin-top: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* ✨ 按鈕加入滑鼠懸浮右移小動畫 */
+        .news-click-prompt { font-size: 13px; color: var(--event-accent); font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; margin-top: auto; transition: 0.2s; }
+        .news-card:hover .news-click-prompt { transform: translateX(5px); }
         
         /* 📰 新聞專屬獨立彈窗排版 */
         .modal-news-title { font-size: 24px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.3; margin-bottom: 8px; border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; }
