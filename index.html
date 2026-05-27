@@ -2319,47 +2319,63 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 全新：專屬前三名頒獎台渲染邏輯
-                // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
-                const displayOrder = [1, 0, 2]; 
-                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:8px; height: 350px; padding: 20px 10px 0; position:relative;">`;
+                // ✨ 全新：專屬前三名頒獎台渲染邏輯 (選秀節目電競高質感版)
+                const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
+                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:12px; height: 420px; padding: 20px 10px 0; position:relative;">`;
                 
                 if(dtState.isPosterMode) {
                     podiumHtml += `
-                    <div class="dt-watermark" style="top:15px; left:15px; bottom:auto;">
-                        <div class="dt-watermark-title">TOP 3 RANKING</div>
-                        <div class="dt-watermark-sub" style="color:${boardAccent};">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
+                    <div class="dt-watermark" style="top:10px; left:10px; bottom:auto; z-index:20;">
+                        <div class="dt-watermark-title" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">TOP 3 RANKING</div>
+                        <div class="dt-watermark-sub" style="color:${boardAccent}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
                     </div>`;
                 }
+
+                // 👑 專屬皇冠 SVG
+                const crownSvg = `<svg viewBox="0 0 24 24" style="width:45px; height:45px; fill:#ffd700; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.9)); position:absolute; top:-34px; left:50%; transform:translateX(-50%) rotate(8deg); z-index:15;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
                 displayOrder.forEach(idx => {
                     const role = cfg.roles[idx];
                     const girl = dtState.roster[idx];
+                    const isFirst = (idx === 0); // 1號位 (中間冠軍)
                     
                     let girlHtml = '';
                     if (girl) {
                         const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
+                        
+                        // ✨ 升級立體浮空頭像與名牌
                         girlHtml = `
-                            <div style="width:80px; height:80px; border-radius:50%; border:3px solid ${role.color}; box-shadow: 0 0 20px ${role.color}; margin: 0 auto -15px; position:relative; z-index:2; background:#111; overflow:hidden;">
-                                <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; object-fit:cover; object-position:top center;">
+                            <div style="position:relative; margin-bottom:-20px; z-index:10; display:flex; flex-direction:column; align-items:center;">
+                                ${isFirst ? crownSvg : ''}
+                                <div style="width:${isFirst?'110px':'85px'}; height:${isFirst?'110px':'85px'}; border-radius:50%; padding:3px; background:linear-gradient(135deg, #111, #333); border:2px solid ${role.color}; box-shadow: 0 10px 25px rgba(0,0,0,0.9), 0 0 20px ${role.color}80; overflow:visible; position:relative;">
+                                    <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">
+                                </div>
+                                <div style="margin-top:-14px; position:relative; z-index:12;">
+                                    <span style="display:inline-block; font-size:${isFirst?'16px':'14px'}; font-weight:900; color:#fff; letter-spacing:1px; background:linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 4px 16px; border-radius:30px; border: 1px solid ${role.color}; box-shadow: 0 5px 15px rgba(0,0,0,0.9); text-shadow: 1px 1px 3px #000;">${dName}</span>
+                                </div>
                             </div>
-                            <div style="font-size:16px; font-weight:900; color:#fff; text-shadow: 1px 1px 3px #000; z-index:3; position:relative; margin-bottom: 8px; background: rgba(0,0,0,0.8); padding:4px 12px; border-radius:10px; border: 1px solid ${role.color};">${dName}</div>
                         `;
                     } else {
                         girlHtml = `
-                            <div style="width:80px; height:80px; border-radius:50%; border:2px dashed ${role.color}; background:rgba(0,0,0,0.5); margin: 0 auto -15px; position:relative; z-index:2; display:flex; align-items:center; justify-content:center;">
-                                <div style="font-size:24px; color:${role.color};">➕</div>
+                            <div style="position:relative; margin-bottom:-20px; z-index:10; display:flex; flex-direction:column; align-items:center;">
+                                <div style="width:${isFirst?'110px':'85px'}; height:${isFirst?'110px':'85px'}; border-radius:50%; background:rgba(0,0,0,0.6); border:2px dashed ${role.color}; display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 20px rgba(0,0,0,0.6);">
+                                    <span style="font-size:30px; color:${role.color}; opacity:0.8;">➕</span>
+                                </div>
+                                <div style="margin-top:-14px; position:relative; z-index:12;">
+                                    <span style="display:inline-block; font-size:12px; font-weight:700; color:#aaa; background:#111; padding: 4px 14px; border-radius:30px; border: 1px solid #555;">點擊選擇</span>
+                                </div>
                             </div>
-                            <div style="font-size:12px; font-weight:700; color:#aaa; z-index:3; position:relative; margin-bottom: 8px; background: rgba(0,0,0,0.6); padding:4px 10px; border-radius:10px;">點擊選擇</div>
                         `;
                     }
 
                     podiumHtml += `
-                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.2s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})"`}>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'"`}>
                         ${girlHtml}
-                        <div style="width:100%; height:${role.height}; background: linear-gradient(180deg, ${role.color} 0%, rgba(17,20,24,0.95) 15%, #050505 100%); border: 2px solid ${role.color}; border-bottom: none; border-radius: 8px 8px 0 0; display:flex; justify-content:center; align-items:flex-start; padding-top:10px; box-shadow: inset 0 5px 15px rgba(255,255,255,0.3);">
-                            <span style="font-family:var(--sport-font); font-size:48px; font-weight:900; color:#fff; text-shadow: 2px 2px 0px #000; line-height:1;">${role.rank}</span>
+                        <div style="width:100%; height:${role.height}; background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(5,5,5,0.95) 80%); border-top: 4px solid ${role.color}; border-radius: 12px 12px 0 0; position:relative; display:flex; justify-content:center; padding-top:20px; box-shadow: 0 -15px 40px rgba(0,0,0,0.8), inset 0 15px 25px rgba(255,255,255,0.05); overflow:hidden;">
+                            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:70%; height:25px; background:radial-gradient(ellipse, ${role.color} 0%, transparent 70%); opacity:0.35;"></div>
+                            
+                            <span style="font-family:var(--sport-font); font-size:${isFirst?'110px':'80px'}; font-weight:900; line-height:0.8; color:transparent; -webkit-text-stroke: 2px rgba(255,255,255,0.4); filter:drop-shadow(0 0 15px ${role.color}); position:relative; z-index:2; opacity:0.9;">${role.rank}</span>
                         </div>
                     </div>`;
                 });
