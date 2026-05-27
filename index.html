@@ -1443,9 +1443,9 @@
         .poster-rank-3 .poster-rank-badge { background: #cd7f32; top: -12px; width: 24px; height: 24px; font-size: 15px; border: 2px solid #8b4513; }
         .poster-rank-3 .poster-name { font-size: 14px; }
 
-        /* 4~10名下方網格 */
-        .poster-rest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; padding: 0 10px; }
-        .poster-rank-rest { border-color: #555; }
+        /* 4~10名下方網格 (升級為 Flex 自動置中陣型) */
+        .poster-rest-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px; }
+        .poster-rank-rest { flex: 0 0 calc(20% - 10px); max-width: 100px; border-color: #555; }
         .poster-rank-rest .poster-img-wrap { aspect-ratio: 4 / 5; border-bottom: 2px solid #555; }
         .poster-rank-rest .poster-info { padding: 5px 2px; }
         .poster-rank-rest .poster-name { font-size: 12px; }
@@ -1453,7 +1453,10 @@
         .poster-rank-rest .poster-rank-badge { top: 0; left: 0; transform: none; border-radius: 0 0 6px 0; width: 20px; height: 20px; font-size: 12px; border: none; background: #333; color: #fff; box-shadow: none; border-right: 1px solid #000; border-bottom: 1px solid #000; }
 
         @media (max-width: 768px) {
-            .poster-rest-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 5px; }
+            /* ✨ 魔法在此：一排 4 個，剩下的 3 個會自動在正下方完美置中！ */
+            .poster-rest-grid { gap: 6px; padding: 0; }
+            .poster-rank-rest { flex: 0 0 calc(25% - 6px); max-width: 85px; }
+            
             .poster-rank-1 { width: 38%; }
             .poster-rank-2 { width: 31%; margin-bottom: -10px;}
             .poster-rank-3 { width: 28%; margin-bottom: -15px;}
@@ -2699,9 +2702,9 @@
                         const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                         let rankClass = `poster-rank-${rank}`;
                         if (rank > 3) rankClass = 'poster-rank-rest';
-
-                        const crown = rank === 1 ? `<div style="position:absolute; top:-35px; left:50%; transform:translateX(-50%); font-size:28px; z-index:10; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8));">👑</div>` : '';
-
+                        // ✨ 高質感 SVG 向量金冠，取代會變形的系統表情符號
+                        const svgCrown = `<svg viewBox="0 0 24 24" style="width:40px; height:40px; fill:#ffd700; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.8)); position:absolute; top:-32px; left:50%; transform:translateX(-50%); z-index:10;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+                        const crown = rank === 1 ? svgCrown : '';
                         return `
                         <div class="poster-card ${rankClass}" onclick="window.openModal('${g.uid}')">
                             ${crown}
