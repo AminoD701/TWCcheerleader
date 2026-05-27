@@ -2331,12 +2331,47 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 羅馬神話殿堂級頒獎台
-                const displayOrder = [1, 0, 2]; 
+                // ✨ 終極完美殿堂版：經典實體羅馬柱 + 巨大化防壓扁頭像 + 左右漸層金桂冠 + 漂浮星塵背景
+                const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
                 
-                // ✨ 高度壓縮黑魔法：將整體高度的 clamp 下限壓緊，避免手機版被拉成油條
+                // 🌿 總教練的專屬金桂冠 SVG 復活代碼
+                const laurelBranchSvg = `
+                <svg viewBox="0 0 100 250" style="width:100%; height:100%; fill:url(#gold-grad-revived); filter:drop-shadow(0 0 12px rgba(255,215,0,0.3));">
+                    <defs>
+                        <linearGradient id="gold-grad-revived" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffeb3b" />
+                            <stop offset="50%" stop-color="#d4af37" />
+                            <stop offset="100%" stop-color="#996515" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M50,250 Q40,150 50,10" stroke="url(#gold-grad-revived)" stroke-width="2" fill="none" />
+                    <path d="M48,220 Q20,210 30,180 Q40,190 47,200 Z" />
+                    <path d="M46,180 Q10,160 20,130 Q35,140 45,160 Z" />
+                    <path d="M45,130 Q5,100 20,70 Q35,90 44,110 Z" />
+                    <path d="M47,80 Q15,40 30,10 Q40,30 48,60 Z" />
+                    <path d="M52,230 Q80,220 70,190 Q60,200 53,210 Z" />
+                    <path d="M54,190 Q90,170 80,140 Q65,150 55,170 Z" />
+                    <path d="M55,140 Q95,110 80,80 Q65,100 56,120 Z" />
+                    <path d="M53,90 Q85,50 70,20 Q60,40 52,70 Z" />
+                    <path d="M50,10 Q40,-10 50,-20 Q60,-10 50,10 Z" />
+                </svg>`;
+
+                // 建立背景與桂冠結構 (使用 clamp 鎖定手機版比例，絕不拉長)
                 let podiumHtml = `
-                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 60%); pointer-events:none; z-index:1;"></div>
+                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 65%); pointer-events:none; z-index:1;"></div>
+                
+                <div style="position:absolute; top:20%; left:18%; width:5px; height:5px; background:#fff; border-radius:50%; box-shadow:0 0 8px #fff; opacity:0.6; z-index:2;"></div>
+                <div style="position:absolute; top:30%; right:15%; width:8px; height:8px; background:#ffd700; border-radius:50%; box-shadow:0 0 12px #ffd700; opacity:0.4; z-index:2;"></div>
+                <div style="position:absolute; top:55%; left:12%; width:6px; height:6px; background:#ffeb3b; border-radius:50%; box-shadow:0 0 10px #ffeb3b; opacity:0.5; z-index:2;"></div>
+
+                <div style="position:absolute; bottom:clamp(-10px, -1vh, 20px); left:clamp(-30px, -3vw, 15px); width:clamp(120px, 24vw, 240px); height:clamp(220px, 42vh, 500px); opacity:0.35; transform:rotate(-12deg); pointer-events:none; z-index:5;">
+                    ${laurelBranchSvg}
+                </div>
+                
+                <div style="position:absolute; bottom:clamp(-10px, -1vh, 20px); right:clamp(-30px, -3vw, 15px); width:clamp(120px, 24vw, 240px); height:clamp(220px, 42vh, 500px); opacity:0.35; transform:rotate(12deg) scaleX(-1); pointer-events:none; z-index:5;">
+                    ${laurelBranchSvg}
+                </div>
+
                 <div style="display:flex; justify-content:center; align-items:flex-end; gap:clamp(4px, 2vw, 25px); height: clamp(280px, 45vh, 650px); padding: 0 5px; position:relative; z-index:10; max-width: 900px; margin: 0 auto;">`;
                 
                 if(dtState.isPosterMode) {
@@ -2347,7 +2382,7 @@
                     </div>`;
                 }
 
-                // 👑 冠軍專屬大金皇冠 (縮小以適應手機版緊湊空間)
+                // 👑 冠軍專屬大金皇冠
                 const crownSvg = `<svg viewBox="0 0 24 24" style="width:clamp(35px, 7vw, 70px); height:clamp(35px, 7vw, 70px); fill:#ffd700; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.9)); position:absolute; top:calc(-1 * clamp(25px, 5vw, 55px)); left:50%; transform:translateX(-50%); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
                 displayOrder.forEach(idx => {
@@ -2355,7 +2390,7 @@
                     const girl = dtState.roster[idx];
                     const isFirst = (idx === 0);
                     
-                    // ✨ 強制壓縮手機版的柱子高度與頭像大小
+                    // 壓實手機高度，放大頭像與名牌
                     const pHeight = isFirst ? 'clamp(90px, 16vh, 240px)' : (idx === 1 ? 'clamp(65px, 11vh, 160px)' : 'clamp(40px, 6vh, 100px)');
                     const avSize = isFirst ? 'clamp(70px, 18vw, 170px)' : 'clamp(55px, 14vw, 130px)';
                     const nameSize = isFirst ? 'clamp(13px, 3vw, 26px)' : 'clamp(11px, 2.5vw, 20px)';
@@ -2369,7 +2404,7 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-12px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                            <div style="position:relative; margin-bottom:calc(-1 * clamp(8px, 1.5vh, 20px)); z-index:15; display:flex; flex-direction:column; align-items:center; transform: scale(1.15); transform-origin: bottom center;">
                                 ${isFirst ? crownSvg : ''}
                                 <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:clamp(3px, 1vw, 5px); background:linear-gradient(135deg, #fff, #ddd); border:3px solid ${baseColor}; box-shadow: 0 10px 20px rgba(0,0,0,0.8); overflow:hidden; position:relative; z-index:10;">
                                     <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">
@@ -2381,12 +2416,12 @@
                         `;
                     } else {
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-12px; z-index:15; display:flex; flex-direction:column; align-items:center;">
-                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(255,255,255,0.1); border:3px dashed ${baseColor}; display:flex; align-items:center; justify-content:center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                            <div style="position:relative; margin-bottom:calc(-1 * clamp(8px, 1.5vh, 20px)); z-index:15; display:flex; flex-direction:column; align-items:center; transform: scale(1.15); transform-origin: bottom center;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(255,255,255,0.1); border:4px dashed ${baseColor}; display:flex; align-items:center; justify-content:center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
                                     <span style="font-size:clamp(24px, 5vw, 50px); color:${baseColor}; opacity:0.8;">➕</span>
                                 </div>
                                 <div style="margin-top:-12px; position:relative; z-index:20;">
-                                    <span style="display:inline-block; font-size:clamp(11px, 2vw, 16px); font-weight:700; color:#444; background:#ddd; padding: 4px clamp(10px, 2vw, 30px); border-radius:30px; border: 2px solid #aaa; box-shadow: 0 4px 10px rgba(0,0,0,0.6);">點擊指派</span>
+                                    <span style="display:inline-block; font-size:clamp(11px, 2vw, 16px); font-weight:700; color:#444; background:#ddd; padding: 4px clamp(10px, 2vw, 30px); border-radius:30px; border: 2px solid #aaa; box-shadow: 0 4px 10px rgba(0,0,0,0.6); white-space:nowrap;">點擊指派</span>
                                 </div>
                             </div>
                         `;
@@ -2418,7 +2453,6 @@
 
                 let displayTitle = dtState.customTitle || cfg.name;
                 
-                // ✨ 將標題上下 margin 壓縮，節省手機版垂直空間
                 let stageHtml = `
                     <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 30%, #1a1a24 0%, #050505 80%); box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
                         <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, ${boardAccent}, transparent); padding: clamp(8px, 1.5vh, 15px) 10px; margin-top: clamp(15px, 3vh, 35px); margin-bottom: clamp(10px, 2vh, 20px); text-align:center;">
@@ -2448,8 +2482,8 @@
                         
                         ${stageHtml}
                         
-                        <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:12px;">
-                            <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:12px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
+                        <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
+                            <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
                                 ${isFull ? '📸 頒獎典禮，檢視海報' : '請選滿前 3 名女孩'}
                             </button>
                             <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
