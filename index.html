@@ -1346,59 +1346,102 @@
         .vote-team-tag { display: inline-block; padding: 6px 14px; background: #1a1e24; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-sub); font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .vote-team-tag.active { background: #ffd700; color: #000; border-color: #ffd700; }
         /* =========================================================================
-           📢 全局宣傳跑馬燈 (Marquee)
+           📢 全局宣傳跑馬燈 (質感升級版 News Ticker)
            ========================================================================= */
         .marquee-wrapper {
             width: 100%;
-            background: linear-gradient(90deg, rgba(17, 20, 24, 0.95) 0%, rgba(255, 215, 0, 0.15) 50%, rgba(17, 20, 24, 0.95) 100%);
-            border-top: 1px solid rgba(255, 215, 0, 0.3);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-            padding: 8px 0;
+            background: rgba(10, 12, 16, 0.85);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 0;
             overflow: hidden;
             position: relative;
             cursor: pointer;
             z-index: 30;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-            transition: 0.3s;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        /* ✨ 質感升級：左側加入 LATEST 霓虹標籤，製造突發新聞的專業感 */
+        .marquee-wrapper::before {
+            content: 'LATEST';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0044, #ff4757);
+            color: #fff;
+            font-family: var(--sport-font);
+            font-weight: 900;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 2;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
         }
         .marquee-wrapper:hover {
-            background: linear-gradient(90deg, rgba(17, 20, 24, 0.95) 0%, rgba(255, 215, 0, 0.3) 50%, rgba(17, 20, 24, 0.95) 100%);
-            border-color: rgba(255, 215, 0, 0.8);
+            background: rgba(17, 20, 24, 0.95);
+            border-top: 1px solid rgba(255, 0, 68, 0.4);
+            border-bottom: 1px solid rgba(255, 0, 68, 0.4);
         }
         .marquee-content {
             display: inline-block;
             white-space: nowrap;
-            padding-left: 100%; /* 確保文字從畫面最右側進場 */
+            padding-left: 100%; 
             font-family: var(--tc-font);
             font-size: 14px;
-            font-weight: 900;
-            color: #ffd700;
-            letter-spacing: 1.5px;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 1px;
             animation: marquee-scroll 25s linear infinite;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
         }
-        /* 滑鼠移上去時，文字暫停並變白反光，提醒使用者可點擊 */
         .marquee-wrapper:hover .marquee-content {
             animation-play-state: paused;
             color: #fff;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
         }
+        /* ✨ 強調文字改成簡約的紅底虛線，取代俗氣的全金字 */
         .marquee-highlight {
-            color: #ff0044;
-            font-family: var(--sport-font);
-            font-size: 16px;
-            margin: 0 5px;
+            color: #ff4757;
+            font-weight: 900;
+            margin: 0 4px;
+            border-bottom: 1px dashed #ff4757;
         }
         @keyframes marquee-scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
-        
-        /* 手機版稍微調快速度並縮小字體 */
+
+        /* =========================================================================
+           🏆 應援大賞 RWD 絕對網格 (電腦 5 / 手機 3)
+           ========================================================================= */
+        .vote-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 0;
+            padding: 0;
+            width: 100%;
+        }
+
         @media (max-width: 768px) {
-            .marquee-wrapper { padding: 6px 0; margin-bottom: 15px; }
+            .marquee-wrapper { padding: 8px 0; margin-bottom: 15px; }
+            .marquee-wrapper::before { font-size: 11px; padding: 0 10px; }
             .marquee-content { font-size: 13px; animation-duration: 20s; }
+            
+            /* ✨ 手機版強制 3 排，並極限微調卡片內邊距，防止字體打架破版 */
+            .vote-grid-layout {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .vote-grid-layout .vote-card { padding: 8px !important; }
+            .vote-grid-layout .vote-img-box { margin-bottom: 6px !important; }
+            .vote-grid-layout .vote-card > div:nth-child(2) { font-size: 13px !important; } /* 女孩名字縮小 */
+            .vote-grid-layout .vote-card > div:nth-child(3) { font-size: 9px !important; padding: 2px 4px !important; margin-bottom: 6px !important; } /* 隊伍標籤縮小 */
+            .vote-grid-layout .vote-card > div:nth-child(4) { font-size: 11px !important; margin-bottom: 8px !important; } /* 票數縮小 */
+            .vote-grid-layout .vote-btn-active, .vote-grid-layout .vote-btn-disabled { font-size: 11px !important; padding: 6px !important; }
         }
     </style> 
 </head>
@@ -1631,7 +1674,7 @@
                     </select>
             </div>
 
-            <div id="vote-grid" class="grid-container" style="margin-top:0; padding:0; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;">
+            <div id="vote-grid" class="vote-grid-layout">
                 </div>
         </div>
     </main>
