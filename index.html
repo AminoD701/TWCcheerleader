@@ -1550,7 +1550,7 @@
             <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:25px; letter-spacing:1px;">🔥 賽期：2026/05/27 ~ 2026/06/27 · 每人每日限投一票</div>
             
             <div id="vote-category-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; margin-bottom: 10px;">
-                <div id="vote-tab-korea_pro" class="vote-team-tag active" onclick="window.switchVoteCategory('korea_pro')">🇰🇷 韓國啦啦隊 (台灣職聯)</div>
+                <div id="vote-tab-korea_pro" class="vote-team-tag active" onclick="window.switchVoteCategory('korea_pro')">🇯🇵🇰🇷 日韓外援 (台灣職聯)</div>
                 <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">🇹🇼 本土應援 (台港馬)</div>
                 <div id="vote-tab-baseball" class="vote-team-tag" onclick="window.switchVoteCategory('baseball')">⚾ 棒球大賞 (CPBL)</div>
                 <div id="vote-tab-volleyball" class="vote-team-tag" onclick="window.switchVoteCategory('volleyball')">🏐 排球大賞 (企排)</div>
@@ -2307,7 +2307,8 @@
 
             // 🎯 ✨ 總教練特製：核心 6 大類別嚴格過濾演算法
             let regionGirls = girlsWithVotes.filter(g => {
-                const isKorean = (g.nat || "").includes("韓");
+                // ✨ 升級：將韓國與日本合併為「日韓外援」
+                const isKoreanOrJapanese = (g.nat || "").includes("韓") || (g.nat || "").includes("日");
                 const isLuxy = (g.combinedTeam || "").includes("LuxyGirls");
                 const isBaseball = (g.combinedSport || "").includes("棒");
                 const isVolleyball = (g.combinedSport || "").includes("排");
@@ -2317,8 +2318,8 @@
                 const isPLG = plgTeams.some(t => (g.combinedTeam || "").includes(t));
 
                 switch(voteState.currentCategory) {
-                    case 'korea_pro':   return isKorean && !isLuxy; // 1. 韓國啦啦隊 (排除Luxy)
-                    case 'local_pro':   return !isKorean && !isLuxy; // 2. 本土啦啦隊 (排除Luxy)
+                    case 'korea_pro':   return isKoreanOrJapanese && !isLuxy; // 1. 日韓外援 (排除Luxy)
+                    case 'local_pro':   return !isKoreanOrJapanese && !isLuxy; // 2. 本土啦啦隊 (排除Luxy與日韓外援)
                     case 'baseball':    return isBaseball; // 3. 棒球聯盟
                     case 'volleyball':  return isVolleyball; // 4. 排球聯盟
                     case 'tpbl':        return isTPBL; // 5. TPBL 籃球
