@@ -2540,7 +2540,9 @@
                 const showNick = (g.nickname && g.nickname !== g.realname) ? `<div style="font-size:11px; color:var(--text-sub); font-weight:normal; margin-top:2px;">${g.nickname}</div>` : '';
                 return `
                 <div class="dt-pick-card" data-search="${searchKeywords}" data-team="${g.combinedTeam}" data-sport="${g.combinedSport}" onclick="window.pickDtGirl(${slotIndex}, '${g.uid}')">
-                    <img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                    <div style="width: 100%; aspect-ratio: 1 / 1; position: relative; overflow: hidden; background: #252c36;">
+                        <img src="${window.getCdnUrl(g.img)}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                    </div>
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>${showNick}
                     </div>
