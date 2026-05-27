@@ -1335,18 +1335,6 @@
             .news-title-text { font-size: 17px; margin-top: 4px; }
             .news-summary-text { display: none; } /* 手機版直接隱藏摘要，畫面極度乾淨 */
         }
-        /* ========== 🏆 投票大廳專屬樣式 (開始) ========== */
-        .vote-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.2s; position: relative; }
-        .vote-card:hover { border-color: #ffd700; transform: translateY(-3px); }
-        .vote-img-box { width: 100%; aspect-ratio: 1/1; border-radius: 50%; overflow: hidden; border: 3px solid var(--border-color); margin-bottom: 12px; box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
-        /* 使用 object-position: top center 確保護臉不斬首 */
-        .vote-img-box img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-        .vote-btn-active { width: 100%; padding: 8px; background: linear-gradient(135deg, #ff0044, #ff4757); color: #fff; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; margin-top: auto; box-shadow: 0 4px 10px rgba(255,0,68,0.3); transition: 0.2s; }
-        .vote-btn-active:hover { transform: scale(1.03); filter: brightness(1.1); }
-        .vote-btn-disabled { width: 100%; padding: 8px; background: #2d3436; color: #7f8c8d; border: 1px solid #4a4a4a; border-radius: 6px; font-weight: 700; cursor: not-allowed; margin-top: auto; }
-        .vote-team-tag { display: inline-block; padding: 6px 14px; background: #1a1e24; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-sub); font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .vote-team-tag.active { background: #ffd700; color: #000; border-color: #ffd700; }
-        /* ========== 🏆 投票大廳專屬樣式 (結束) ========== */
     </style> 
 </head>
 <body class="no-scroll">
@@ -1473,14 +1461,13 @@
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div class="dropdown-menu" id="mode-menu">
-                        <button class="dropdown-item" onclick="window.setMode('news')">📰 每日情報 INTEL</button>
                         <button class="dropdown-item active" onclick="window.setMode('girls')">👧 女孩圖鑑 ROSTER</button>
                         <button class="dropdown-item" onclick="window.setMode('passport')">🛂 追星護照 MY PASSPORT</button>
                         <button class="dropdown-item" onclick="window.setMode('schedule')">📅 應援班表 SCHEDULE</button>
                         <button class="dropdown-item" onclick="window.setMode('events')">✈️ 外籍行程 EVENTS</button>
                         <button class="dropdown-item" onclick="window.setMode('minigame')">🎮 殘酷二選一 GAME</button>
                         <button class="dropdown-item" onclick="window.setMode('dreamteam')">🌟 夢幻陣容 DREAM TEAM</button>
-                        <button class="nav-btn" id="btn-vote" onclick="window.setMode('vote')">🏆 應援大賞</button>
+                        <button class="dropdown-item" onclick="window.setMode('news')">📰 每日情報 INTEL</button>
                         <button class="dropdown-item" onclick="window.setMode('feedback')">💬 意見回饋 FEEDBACK</button>
                     </div>
                 </div>
@@ -1555,25 +1542,6 @@
             <p style="font-family: var(--sport-font); margin-top: 10px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2026</p>
         </div>
     </footer>
-    <div id="vote-container" class="main-content-container" style="display: none; padding: 0 15px; margin-bottom: 60px;">
-    <div class="game-title" style="text-shadow: 3px 3px 0px #ffd700; margin-bottom: 5px;">第一屆·全民應援大賞</div>
-    <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:25px; letter-spacing:1px;">🔥 賽期一個月 · 每人每日限投一票 (本地/外籍分賽道決戰)</div>
-    
-    <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto 20px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 30px; border: 1px solid var(--border-color);">
-        <button id="vote-tab-local" style="flex: 1; padding: 10px; border: none; border-radius: 25px; background: var(--event-accent); color: #fff; font-weight: 900; cursor: pointer; transition: 0.2s;" onclick="window.switchVoteRegion('local')">🇹🇼/🇭🇰/🇲🇾 本土應援區</button>
-        <button id="vote-tab-korea" style="flex: 1; padding: 10px; border: none; border-radius: 25px; background: transparent; color: var(--text-sub); font-weight: 900; cursor: pointer; transition: 0.2s;" onclick="window.switchVoteRegion('korea')">🇰🇷 韓援降臨區</button>
-    </div>
-
-    <div style="max-width: 600px; margin: 0 auto 20px;">
-        <input type="text" id="vote-search-input" placeholder="🔍 輸入女孩姓名、綽號、或球隊快速尋找..." style="width: 100%; padding: 12px 15px; background: #15191e; border: 2px solid var(--border-color); border-radius: 8px; color: #fff; font-weight: 700; margin-bottom: 12px; font-size: 15px;" oninput="window.filterVoteList()">
-        
-        <div id="vote-team-tags" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; -webkit-overflow-scrolling: touch;">
-            </div>
-    </div>
-
-    <div id="vote-grid" class="girls-grid" style="max-width: 900px; margin: 0 auto;">
-        </div>
-</div>
 
     <script>
         // =========================================================================
@@ -1805,141 +1773,6 @@
             applyGlobalTheme();
             if (currentMode === 'passport') window.renderContent(true);
         };
-        // ========== 🏆 全民應援大賞 智慧分流與防灌票引擎 (開始) ==========
-        let voteState = { currentRegion: 'local', selectedTeam: '全部' };
-
-        // 攔截並擴充原本的分頁切換邏輯
-        const originalSetMode = window.setMode;
-        window.setMode = function(mode) {
-            if (originalSetMode) originalSetMode(mode);
-            
-            // 隱藏/顯示投票大廳
-            const voteBox = document.getElementById('vote-container');
-            if (voteBox) {
-                if (mode === 'vote') {
-                    voteBox.style.display = 'block';
-                    window.initVoteHall();
-                } else {
-                    voteBox.style.display = 'none';
-                }
-            }
-        };
-
-        // 初始化投票大廳
-        window.initVoteHall = function() {
-            if (!window.dbGirls) return;
-            
-            // 1. 抓取資料庫，自動生成橫向球隊快選標籤
-            const teams = ['全部', ...new Set(window.dbGirls.map(g => g.combinedTeam).filter(Boolean))];
-            const tagsBox = document.getElementById('vote-team-tags');
-            if (tagsBox) {
-                tagsBox.innerHTML = teams.map(t => {
-                    const isActive = t === voteState.selectedTeam ? 'active' : '';
-                    return `<div class="vote-team-tag ${isActive}" onclick="window.selectVoteTeam('${t}')">${t}</div>`;
-                }).join('');
-            }
-            
-            window.renderVoteGrid();
-        };
-
-        // 切換賽道 (本土 vs 韓國)
-        window.switchVoteRegion = function(region) {
-            voteState.currentRegion = region;
-            
-            const localBtn = document.getElementById('vote-tab-local');
-            const koreaBtn = document.getElementById('vote-tab-korea');
-            
-            if (region === 'local') {
-                localBtn.style.background = 'var(--event-accent)'; localBtn.style.color = '#fff';
-                koreaBtn.style.background = 'transparent'; koreaBtn.style.color = 'var(--text-sub)';
-            } else {
-                koreaBtn.style.background = 'var(--event-accent)'; koreaBtn.style.color = '#fff';
-                localBtn.style.background = 'transparent'; localBtn.style.color = 'var(--text-sub)';
-            }
-            
-            window.renderVoteGrid();
-        };
-
-        // 球隊標籤點擊事件
-        window.selectVoteTeam = function(team) {
-            voteState.selectedTeam = team;
-            // 刷新標籤亮燈狀態
-            const tags = document.querySelectorAll('.vote-team-tag');
-            tags.forEach(tag => {
-                if (tag.innerText === team) tag.classList.add('active');
-                else tag.classList.remove('active');
-            });
-            window.renderVoteGrid();
-        };
-
-        // 渲染女孩投票卡片 (智慧過濾)
-        window.renderVoteGrid = function() {
-            const grid = document.getElementById('vote-grid');
-            const searchKeyword = document.getElementById('vote-search-input')?.value.toLowerCase() || '';
-            if (!grid) return;
-
-            // 檢查今天有沒有投過票 (讀取短暫記憶)
-            const todayStr = new Date().toISOString().split('T')[0]; 
-            const hasVotedToday = localStorage.getItem('cheer_vote_date') === todayStr;
-
-            // 智慧篩選名單
-            let filtered = window.dbGirls.filter(g => {
-                // 篩選一：區分本土與韓援
-                const isKorean = (g.nat || "").includes("韓");
-                if (voteState.currentRegion === 'korea' && !isKorean) return false;
-                if (voteState.currentRegion === 'local' && isKorean) return false;
-
-                // 篩選二：球隊標籤過濾
-                if (voteState.selectedTeam !== '全部' && g.combinedTeam !== voteState.selectedTeam) return false;
-
-                // 篩選三：關鍵字搜尋
-                if (searchKeyword) {
-                    const matchStr = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
-                    if (!matchStr.includes(searchKeyword)) return false;
-                }
-                return true;
-            });
-
-            // 渲染卡片
-            grid.innerHTML = filtered.map(g => {
-                const dName = (g.nickname && g.nickname !== g.realname) ? g.nickname : g.realname;
-                
-                // 核心防呆：如果今天投過了，全部按鈕變反灰
-                const btnHtml = hasVotedToday 
-                    ? `<button class="vote-btn-disabled">明日再投 🔒</button>`
-                    : `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">投她一票 🗳️</button>`;
-
-                return `
-                <div class="vote-card">
-                    <div class="vote-img-box">
-                        <img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/150'">
-                    </div>
-                    <div style="font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 2px;">${g.realname}</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--event-accent); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; margin-bottom: 12px;">${g.combinedTeam}</div>
-                    ${btnHtml}
-                </div>`;
-            }).join('');
-        };
-
-        // 搜尋框輸入監聽
-        window.filterVoteList = function() {
-            window.renderVoteGrid();
-        };
-
-        // 執行投票與寫入本地記憶
-        window.submitVote = function(uid, name) {
-            const todayStr = new Date().toISOString().split('T')[0];
-            
-            // 寫入本地記憶鎖定，今日不可再投
-            localStorage.setItem('cheer_vote_date', todayStr);
-            
-            // 彈出慶祝提示
-            alert(`🎉 應援成功！\\n您今天寶貴的一票已經成功投給了【${name}】！\\n明天記得再回來幫她護盤喔！`);
-            
-            // 重新渲染，立刻把所有按鈕鎖死
-            window.renderVoteGrid();
-        };
-        // ========== 🏆 全民應援大賞 智慧分流與防灌票引擎 (結束) ==========
 
         function init() {
             applyGlobalTheme();
