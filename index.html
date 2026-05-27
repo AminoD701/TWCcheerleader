@@ -1415,15 +1415,15 @@
         }
 
         /* =========================================================================
-           🏆 應援大賞 終極 RWD 絕對網格 (完美置中 5 排 / 手機 3 排)
+           🏆 應援大賞 終極 RWD 絕對網格 (完美置中 5 排 / 手機 3 排防破版)
            ========================================================================= */
         #vote-grid {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important; /* 電腦版強制 5 欄 */
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important; /* 加入 minmax 防撐破 */
             gap: 15px !important;
             width: 100% !important;
-            max-width: 950px !important; /* ✨ 限制最大寬度，確保 5 張卡片完美置中不偏移 */
-            margin: 0 auto !important; /* ✨ 強制區塊置中 */
+            max-width: 950px !important;
+            margin: 0 auto !important; 
             padding: 0 10px !important;
             justify-content: center !important;
         }
@@ -1433,36 +1433,43 @@
             .marquee-wrapper::before { font-size: 11px; padding: 0 10px; }
             .marquee-content { font-size: 13px; animation-duration: 20s; }
             
-            /* ✨ 手機版強制 3 欄，並將間距壓緊 */
+            /* ✨ 手機版強制 3 欄，並啟用 minmax(0, 1fr) 防撐破黑魔法 */
             #vote-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 8px !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 6px !important;
                 padding: 0 5px !important;
             }
-            /* ✨ 極限壓縮手機版卡片內距與照片，避免 3排 擠到破版 */
+            
+            /* ✨ 卡片極限壓縮與防溢出鎖定 */
             #vote-grid .vote-card { 
                 padding: 8px 4px !important; 
+                min-width: 0 !important; /* 絕對防止內容撐開網格 */
             }
             #vote-grid .vote-img-box { 
                 width: 100% !important; 
-                max-width: 80px !important; /* 鎖死照片最大尺寸，保護版面 */
+                max-width: 75px !important; /* 照片微縮，釋放兩側壓力 */
                 margin: 0 auto 6px !important; 
             }
             #vote-grid .vote-card > div:nth-child(2) { 
-                font-size: 13px !important; /* 女孩名字 */
+                font-size: 12px !important; /* 女孩名字 */
             } 
             #vote-grid .vote-card > div:nth-child(3) { 
-                font-size: 9px !important; /* 隊伍標籤 */
+                font-size: 9px !important; 
                 padding: 2px 4px !important; 
                 margin-bottom: 6px !important; 
             } 
             #vote-grid .vote-card > div:nth-child(4) { 
-                font-size: 11px !important; /* 票數 */
+                font-size: 11px !important; 
                 margin-bottom: 8px !important; 
             } 
+            
+            /* ✨ 按鈕強制允許換行！字體縮小，絕對不把螢幕撐破 */
             #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { 
-                font-size: 11px !important; 
-                padding: 6px !important; 
+                font-size: 10px !important; 
+                padding: 6px 2px !important; 
+                white-space: normal !important; /* 解除不准換行的封印 */
+                line-height: 1.2 !important;
+                word-break: break-all !important;
             }
         }
     </style> 
