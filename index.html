@@ -2249,6 +2249,19 @@
         window.renderDreamTeamStart = function() {
             const container = document.getElementById('dreamteam-container');
             
+            // ✨ 隱藏/顯示干擾物黑魔法：當進入海報模式時，自動植入 CSS 把珍奶、數據中心和回頂端按鈕通通變不見！
+            let hideCss = document.getElementById('poster-hide-css');
+            if (dtState.isPosterMode) {
+                if (!hideCss) {
+                    hideCss = document.createElement('style');
+                    hideCss.id = 'poster-hide-css';
+                    hideCss.innerHTML = `.floating-boba-btn, .floating-hub-btn, .back-to-top { display: none !important; }`;
+                    document.head.appendChild(hideCss);
+                }
+            } else {
+                if (hideCss) hideCss.remove(); // 離開海報模式，按鈕乖乖回來
+            }
+            
             // ================= 狀態 1：賽前設定大廳 =================
             if (!dtState.active) {
                 const teamOptions = Object.keys(teamThemes).filter(t => t !== "全部啦啦隊").map(t => `<option value="${t}">${t}</option>`).join('');
@@ -2291,7 +2304,6 @@
             let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
-                // 原本的 5 人戰隊 Grid 渲染
                 let slotsHtml = dtState.roster.map((girl, index) => {
                     const rConf = cfg.roles[index];
                     if (girl) {
@@ -2319,68 +2331,34 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 羅馬神話殿堂級頒獎台：巨大化頭像 + 羅馬柱基座 + 古典羅馬金牌 + 金桂冠花草背景
-                const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
+                // ✨ 羅馬神話殿堂級頒獎台
+                const displayOrder = [1, 0, 2]; 
                 
-                // 🌿 精緻的 SVG 金桂冠 (代表勝利與榮耀的花草裝飾)
-                const laurelBranchSvg = `
-                <svg viewBox="0 0 100 250" style="width:100%; height:100%; fill:url(#gold-grad); filter:drop-shadow(0 0 12px rgba(255,215,0,0.3));">
-                    <defs>
-                        <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffeb3b" />
-                            <stop offset="50%" stop-color="#d4af37" />
-                            <stop offset="100%" stop-color="#996515" />
-                        </linearGradient>
-                    </defs>
-                    <path d="M50,250 Q40,150 50,10" stroke="url(#gold-grad)" stroke-width="2" fill="none" />
-                    <path d="M48,220 Q20,210 30,180 Q40,190 47,200 Z" />
-                    <path d="M46,180 Q10,160 20,130 Q35,140 45,160 Z" />
-                    <path d="M45,130 Q5,100 20,70 Q35,90 44,110 Z" />
-                    <path d="M47,80 Q15,40 30,10 Q40,30 48,60 Z" />
-                    <path d="M52,230 Q80,220 70,190 Q60,200 53,210 Z" />
-                    <path d="M54,190 Q90,170 80,140 Q65,150 55,170 Z" />
-                    <path d="M55,140 Q95,110 80,80 Q65,100 56,120 Z" />
-                    <path d="M53,90 Q85,50 70,20 Q60,40 52,70 Z" />
-                    <path d="M50,10 Q40,-10 50,-20 Q60,-10 50,10 Z" />
-                </svg>`;
-
-                // ✨ 豐富背景組合：神聖光暈 + 漂浮星塵 + 左右金桂冠
+                // ✨ 高度壓縮黑魔法：將整體高度的 clamp 下限壓緊，避免手機版被拉成油條
                 let podiumHtml = `
-                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 65%); pointer-events:none; z-index:1;"></div>
-                
-                <div style="position:absolute; top:15%; left:20%; width:6px; height:6px; background:#fff; border-radius:50%; box-shadow:0 0 10px #fff; opacity:0.6; filter:blur(1px); z-index:2;"></div>
-                <div style="position:absolute; top:35%; right:15%; width:10px; height:10px; background:#ffd700; border-radius:50%; box-shadow:0 0 15px #ffd700; opacity:0.3; filter:blur(2px); z-index:2;"></div>
-                <div style="position:absolute; top:65%; left:10%; width:8px; height:8px; background:#ffeb3b; border-radius:50%; box-shadow:0 0 12px #ffeb3b; opacity:0.4; z-index:2;"></div>
-
-                <div style="position:absolute; bottom:-2%; left:clamp(-20px, -2vw, 10px); width:clamp(100px, 22vw, 250px); height:clamp(250px, 50vh, 550px); opacity:0.4; transform:rotate(-15deg); pointer-events:none; z-index:5;">
-                    ${laurelBranchSvg}
-                </div>
-                
-                <div style="position:absolute; bottom:-2%; right:clamp(-20px, -2vw, 10px); width:clamp(100px, 22vw, 250px); height:clamp(250px, 50vh, 550px); opacity:0.4; transform:rotate(15deg) scaleX(-1); pointer-events:none; z-index:5;">
-                    ${laurelBranchSvg}
-                </div>
-
-                <div style="display:flex; justify-content:center; align-items:flex-end; gap:clamp(8px, 3vw, 25px); height: clamp(450px, 65vh, 650px); padding: 0 10px; position:relative; z-index:10; max-width: 900px; margin: 0 auto;">`;
+                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 60%); pointer-events:none; z-index:1;"></div>
+                <div style="display:flex; justify-content:center; align-items:flex-end; gap:clamp(4px, 2vw, 25px); height: clamp(280px, 45vh, 650px); padding: 0 5px; position:relative; z-index:10; max-width: 900px; margin: 0 auto;">`;
                 
                 if(dtState.isPosterMode) {
                     podiumHtml += `
-                    <div class="dt-watermark" style="top:15px; left:20px; bottom:auto; z-index:20;">
-                        <div class="dt-watermark-title" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-size:clamp(16px, 3vw, 24px);">TOP 3 RANKING</div>
-                        <div class="dt-watermark-sub" style="color:#fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size:clamp(11px, 2vw, 14px);">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
+                    <div class="dt-watermark" style="top:10px; left:15px; bottom:auto; z-index:20;">
+                        <div class="dt-watermark-title" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-size:clamp(14px, 3vw, 24px);">TOP 3 RANKING</div>
+                        <div class="dt-watermark-sub" style="color:#fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size:clamp(10px, 2vw, 14px); margin-top:0;">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
                     </div>`;
                 }
 
-                // 👑 冠軍專屬大金皇冠
-                const crownSvg = `<svg viewBox="0 0 24 24" style="width:clamp(45px, 9vw, 70px); height:clamp(45px, 9vw, 70px); fill:#ffd700; filter:drop-shadow(0 5px 8px rgba(0,0,0,0.9)); position:absolute; top:calc(-1 * clamp(35px, 7vw, 55px)); left:50%; transform:translateX(-50%); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+                // 👑 冠軍專屬大金皇冠 (縮小以適應手機版緊湊空間)
+                const crownSvg = `<svg viewBox="0 0 24 24" style="width:clamp(35px, 7vw, 70px); height:clamp(35px, 7vw, 70px); fill:#ffd700; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.9)); position:absolute; top:calc(-1 * clamp(25px, 5vw, 55px)); left:50%; transform:translateX(-50%); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
                 displayOrder.forEach(idx => {
                     const role = cfg.roles[idx];
                     const girl = dtState.roster[idx];
                     const isFirst = (idx === 0);
                     
-                    const pHeight = isFirst ? 'clamp(140px, 25vh, 240px)' : (idx === 1 ? 'clamp(100px, 18vh, 160px)' : 'clamp(60px, 11vh, 100px)');
-                    const avSize = isFirst ? 'clamp(100px, 22vw, 170px)' : 'clamp(80px, 17vw, 130px)';
-                    const nameSize = isFirst ? 'clamp(18px, 3.5vw, 26px)' : 'clamp(14px, 2.8vw, 20px)';
+                    // ✨ 強制壓縮手機版的柱子高度與頭像大小
+                    const pHeight = isFirst ? 'clamp(90px, 16vh, 240px)' : (idx === 1 ? 'clamp(65px, 11vh, 160px)' : 'clamp(40px, 6vh, 100px)');
+                    const avSize = isFirst ? 'clamp(70px, 18vw, 170px)' : 'clamp(55px, 14vw, 130px)';
+                    const nameSize = isFirst ? 'clamp(13px, 3vw, 26px)' : 'clamp(11px, 2.5vw, 20px)';
                     
                     const baseColor = role.color;
                     const romanNum = ['I', 'II', 'III'][idx];
@@ -2391,48 +2369,47 @@
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-15px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                            <div style="position:relative; margin-bottom:-12px; z-index:15; display:flex; flex-direction:column; align-items:center;">
                                 ${isFirst ? crownSvg : ''}
-                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:5px; background:linear-gradient(135deg, #fff, #ddd); border:4px solid ${baseColor}; box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.2); overflow:hidden; position:relative; z-index:10;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:clamp(3px, 1vw, 5px); background:linear-gradient(135deg, #fff, #ddd); border:3px solid ${baseColor}; box-shadow: 0 10px 20px rgba(0,0,0,0.8); overflow:hidden; position:relative; z-index:10;">
                                     <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">
                                 </div>
-                                <div style="margin-top:-16px; position:relative; z-index:20;">
-                                    <span style="display:inline-block; font-size:${nameSize}; font-weight:900; color:#111; letter-spacing:1px; background:linear-gradient(180deg, #fff, #e0e0e0); padding: 6px clamp(15px, 3vw, 30px); border-radius:30px; border: 3px solid ${baseColor}; box-shadow: 0 8px 15px rgba(0,0,0,0.7); white-space:nowrap;">${dName}</span>
+                                <div style="margin-top:-12px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:${nameSize}; font-weight:900; color:#111; letter-spacing:1px; background:linear-gradient(180deg, #fff, #e0e0e0); padding: 4px clamp(10px, 2vw, 30px); border-radius:30px; border: 2px solid ${baseColor}; box-shadow: 0 5px 10px rgba(0,0,0,0.7); white-space:nowrap;">${dName}</span>
                                 </div>
                             </div>
                         `;
                     } else {
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-15px; z-index:15; display:flex; flex-direction:column; align-items:center;">
-                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(255,255,255,0.1); border:4px dashed ${baseColor}; display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                                    <span style="font-size:clamp(30px, 6vw, 50px); color:${baseColor}; opacity:0.8;">➕</span>
+                            <div style="position:relative; margin-bottom:-12px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(255,255,255,0.1); border:3px dashed ${baseColor}; display:flex; align-items:center; justify-content:center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                                    <span style="font-size:clamp(24px, 5vw, 50px); color:${baseColor}; opacity:0.8;">➕</span>
                                 </div>
-                                <div style="margin-top:-16px; position:relative; z-index:20;">
-                                    <span style="display:inline-block; font-size:clamp(12px, 2.5vw, 16px); font-weight:700; color:#444; background:#ddd; padding: 6px clamp(15px, 3vw, 30px); border-radius:30px; border: 3px solid #aaa; box-shadow: 0 5px 15px rgba(0,0,0,0.6);">點擊指派</span>
+                                <div style="margin-top:-12px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:clamp(11px, 2vw, 16px); font-weight:700; color:#444; background:#ddd; padding: 4px clamp(10px, 2vw, 30px); border-radius:30px; border: 2px solid #aaa; box-shadow: 0 4px 10px rgba(0,0,0,0.6);">點擊指派</span>
                                 </div>
                             </div>
                         `;
                     }
 
-                    // ✨ 羅馬柱神話風獎台
                     podiumHtml += `
-                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'"`}>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'"`}>
                         ${girlHtml}
                         <div style="width:100%; display:flex; flex-direction:column; align-items:center; position:relative; z-index:10;">
                             
-                            <div style="width: 100%; height: clamp(12px, 2vh, 18px); background: linear-gradient(90deg, color-mix(in srgb, ${baseColor} 70%, #000), ${baseColor}, color-mix(in srgb, ${baseColor} 70%, #000)); border-radius: 4px; box-shadow: 0 6px 10px rgba(0,0,0,0.5); z-index: 3;"></div>
-                            <div style="width: 92%; height: clamp(8px, 1.5vh, 12px); background: color-mix(in srgb, ${baseColor} 60%, #000); border-radius: 0 0 4px 4px; z-index: 2;"></div>
+                            <div style="width: 100%; height: clamp(8px, 1.5vh, 18px); background: linear-gradient(90deg, color-mix(in srgb, ${baseColor} 70%, #000), ${baseColor}, color-mix(in srgb, ${baseColor} 70%, #000)); border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 3;"></div>
+                            <div style="width: 92%; height: clamp(5px, 1vh, 12px); background: color-mix(in srgb, ${baseColor} 60%, #000); border-radius: 0 0 4px 4px; z-index: 2;"></div>
                             
-                            <div style="width: 82%; height: ${pHeight}; background: repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 10%, transparent 10%, transparent 20%), linear-gradient(180deg, color-mix(in srgb, ${baseColor} 80%, #fff) 0%, color-mix(in srgb, ${baseColor} 30%, #000) 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 -5px 15px rgba(0,0,0,0.6); position:relative; border-left: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(0,0,0,0.5);">
+                            <div style="width: 82%; height: ${pHeight}; background: repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 10%, transparent 10%, transparent 20%), linear-gradient(180deg, color-mix(in srgb, ${baseColor} 80%, #fff) 0%, color-mix(in srgb, ${baseColor} 30%, #000) 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 -3px 10px rgba(0,0,0,0.6); position:relative; border-left: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(0,0,0,0.5);">
                                 
-                                <div style="width:clamp(45px, 9vw, 85px); height:clamp(45px, 9vw, 85px); border-radius:50%; background:radial-gradient(circle, ${baseColor} 0%, color-mix(in srgb, ${baseColor} 40%, #000) 100%); border: 3px double rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.6);">
-                                    <span style="font-family: 'Times New Roman', serif; font-size:clamp(22px, 5vw, 42px); font-weight:bold; color:#fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${romanNum}</span>
+                                <div style="width:clamp(30px, 6vw, 85px); height:clamp(30px, 6vw, 85px); border-radius:50%; background:radial-gradient(circle, ${baseColor} 0%, color-mix(in srgb, ${baseColor} 40%, #000) 100%); border: 2px double rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5);">
+                                    <span style="font-family: 'Times New Roman', serif; font-size:clamp(16px, 3.5vw, 42px); font-weight:bold; color:#fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${romanNum}</span>
                                 </div>
 
                             </div>
                             
-                            <div style="width: 92%; height: clamp(10px, 1.8vh, 15px); background: color-mix(in srgb, ${baseColor} 60%, #000); border-radius: 4px 4px 0 0; z-index: 2;"></div>
-                            <div style="width: 100%; height: clamp(16px, 2.5vh, 22px); background: linear-gradient(90deg, color-mix(in srgb, ${baseColor} 70%, #000), ${baseColor}, color-mix(in srgb, ${baseColor} 70%, #000)); border-radius: 4px; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); z-index: 3;"></div>
+                            <div style="width: 92%; height: clamp(6px, 1.2vh, 15px); background: color-mix(in srgb, ${baseColor} 60%, #000); border-radius: 4px 4px 0 0; z-index: 2;"></div>
+                            <div style="width: 100%; height: clamp(10px, 1.8vh, 22px); background: linear-gradient(90deg, color-mix(in srgb, ${baseColor} 70%, #000), ${baseColor}, color-mix(in srgb, ${baseColor} 70%, #000)); border-radius: 4px; box-shadow: 0 -3px 8px rgba(0,0,0,0.5); z-index: 3;"></div>
 
                         </div>
                     </div>`;
@@ -2441,11 +2418,11 @@
 
                 let displayTitle = dtState.customTitle || cfg.name;
                 
-                // ✨ 神話殿堂背景：深色質感 + 純白亮面橫幅
+                // ✨ 將標題上下 margin 壓縮，節省手機版垂直空間
                 let stageHtml = `
-                    <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 30%, #1a1a24 0%, #050505 80%); box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
-                        <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, ${boardAccent}, transparent); padding: 15px 10px; margin-top: 35px; margin-bottom: 20px; text-align:center;">
-                            <div style="font-family:var(--tc-font); font-size:clamp(22px, 5vw, 36px); font-weight:900; color:#fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); letter-spacing: 3px;">🏆 ${displayTitle}</div>
+                    <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 30%, #1a1a24 0%, #050505 80%); box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+                        <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, ${boardAccent}, transparent); padding: clamp(8px, 1.5vh, 15px) 10px; margin-top: clamp(15px, 3vh, 35px); margin-bottom: clamp(10px, 2vh, 20px); text-align:center;">
+                            <div style="font-family:var(--tc-font); font-size:clamp(18px, 4vw, 36px); font-weight:900; color:#fff; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); letter-spacing: 2px;">🏆 ${displayTitle}</div>
                         </div>
                         
                         ${podiumHtml}
@@ -2454,26 +2431,81 @@
 
                 if (dtState.isPosterMode) {
                     container.innerHTML = `
-                        <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">${displayTitle}</div>
-                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，快截圖分享你的專屬榜單！</div>
+                        <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000; font-size:24px; margin-bottom:5px;">${displayTitle}</div>
+                        <div style="color:var(--text-sub); font-size:14px; font-weight:900; margin-bottom:10px;">👇 介面已淨空，快截圖分享你的專屬榜單！</div>
                         
                         ${stageHtml}
                         
-                        <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                        <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                             <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
                             <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重新評選</button>
                         </div>`;
                     if(typeof createConfetti === 'function') createConfetti();
                 } else {
                     container.innerHTML = `
-                        <div class="game-title" style="margin-bottom:5px;">${displayTitle}</div>
-                        <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊頒獎台 ➕ 指派女孩)</div>
+                        <div class="game-title" style="margin-bottom:5px; font-size:24px;">${displayTitle}</div>
+                        <div style="color:var(--event-accent); font-size:13px; font-weight:900; margin-bottom:10px;">${modeSubtitle} (點擊頒獎台 ➕ 指派女孩)</div>
                         
                         ${stageHtml}
                         
+                        <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+                            <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:12px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
+                                ${isFull ? '📸 頒獎典禮，檢視海報' : '請選滿前 3 名女孩'}
+                            </button>
+                            <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
+                        </div>`;
+                }
+
+            } else {
+                // 原本的戰術板渲染
+                let tokensHtml = dtState.roster.map((girl, index) => {
+                    const role = cfg.roles[index];
+                    if (girl) {
+                        const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
+                        const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
+                        return `
+                        <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
+                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"></div>
+                            <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
+                        </div>`;
+                    }
+                    return `
+                    <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:#555;" onclick="window.openDtSelector(${index})">
+                        <div class="dt-token-img-wrap" style="border-style:dashed;"><div class="dt-token-empty">➕</div></div>
+                        <div class="dt-token-info"><div class="dt-token-role" style="color:#aaa;">${role.name}</div></div>
+                    </div>`;
+                }).join('');
+
+                if (dtState.isPosterMode) {
+                    container.innerHTML = `
+                        <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">陣容部署完畢</div>
+                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，請直接手機截圖分享！</div>
+                        
+                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
+                            <img src="./${bgImgFile}" class="court-bg">
+                            <div class="dt-watermark">
+                                <div class="dt-watermark-title">DREAM TEAM</div>
+                                <div class="dt-watermark-sub" style="color:${boardAccent};">${modeSubtitle}</div>
+                            </div>
+                            ${tokensHtml}
+                        </div>
+                        
+                        <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
+                            <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重建</button>
+                        </div>`;
+                    if(typeof createConfetti === 'function') createConfetti();
+                } else {
+                    container.innerHTML = `
+                        <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
+                        <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
+                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
+                            <img src="./${bgImgFile}" class="court-bg">
+                            ${tokensHtml}
+                        </div>
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
                             <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
-                                ${isFull ? '📸 頒獎典禮，檢視海報' : '請選滿前 3 名女孩'}
+                                ${isFull ? '📸 完成佈陣，檢視戰術板' : '教練，場上還有空缺！'}
                             </button>
                             <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
                         </div>`;
