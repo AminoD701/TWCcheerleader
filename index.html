@@ -2601,12 +2601,11 @@
 
             const pool = getVotePool();
 
-            // ✨ 核心升級：直接以「雲端真實票數」為主，徹底拔除單機假象
+            // ✨ 核心修復：絕對以「雲端真實票數」為主，完全捨棄本地舊紀錄的干擾！
             let girlsWithVotes = pool.map(g => {
                 const voteKey = currentCat + '_' + g.uid; 
-                const localVotes = parseInt(localStorage.getItem('my_votes_' + voteKey) || 0);
                 const realVotes = parseInt(window.globalVoteData[voteKey] || 0);
-                return { ...g, votes: Math.max(localVotes, realVotes) };
+                return { ...g, votes: realVotes }; 
             });
 
             const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
@@ -2710,7 +2709,7 @@
 
         window.filterVoteList = function() { window.renderVoteGrid(); };
 
-        // ✨ 把票真實送出給 Google 伺服器
+        // ✨ 把票真實送出給 Google 伺服器 (加入防誤按機制)
         window.submitVote = function(uid, name) {
             const now = new Date();
             const officialStart = new Date('2026-06-01T00:00:00+08:00');
@@ -2723,35 +2722,42 @@
                 alert("🔒 投票活動已結束！"); return;
             }
 
+            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
             const currentCat = voteState.currentCategory;
+
+            // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
+            const confirmMsg = phase === 'testing' 
+                ? `🛠️ 【測試模式】\n您確定要把票投給 ${catNames[currentCat]} 的【${name}】嗎？`
+                : `⚠️ 【投票確認】\n您確定要將今天 ${catNames[currentCat]} 的神聖一票投給【${name}】嗎？\n(投出後今日無法更改喔！)`;
+            
+            if (!confirm(confirmMsg)) {
+                return; // 粉絲點擊了「取消」，直接中斷執行
+            }
+
             const voteKey = currentCat + '_' + uid; 
             
+            // 正式賽期寫入防灌票鎖
             if (phase === 'official') {
                 const todayStr = now.toISOString().split('T')[0];
                 localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
             }
-            
-            let myVotes = parseInt(localStorage.getItem('my_votes_' + voteKey) || 0);
-            localStorage.setItem('my_votes_' + voteKey, myVotes + 1);
 
+            // 畫面直接 +1，給予即時回饋感
             window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
 
             if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                // 發送給 GAS，這裡移除了 mode: "no-cors" 的限制，採用標準 fetch 發送
                 fetch(VOTE_API_URL, {
                     method: "POST",
                     body: JSON.stringify({ uid: voteKey, voteKey: voteKey })
                 }).catch(e => console.log("寫入失敗", e));
             } else {
-                console.log("⚠️ 尚未設定 VOTE_API_URL，目前僅為畫面模擬加票");
+                console.log("⚠️ 尚未設定 VOTE_API_URL");
             }
 
-            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
-
             if (phase === 'testing') {
-                alert(`🛠️ [全網連線測試] 應援成功！\n您在【${catNames[currentCat]}】給【${name}】投了一票！\n(資料已上傳至雲端伺服器)`);
+                alert(`✅ [全網連線測試] 應援成功！\n資料已寫入雲端伺服器！`);
             } else {
-                alert(`🎉 應援連線成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投給了【${name}】！`);
+                alert(`🎉 應援連線成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投出！`);
             }
             
             window.renderVoteGrid(); 
