@@ -81,7 +81,7 @@
         .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } 
         @keyframes slideFade { 0% { opacity: 0; transform: scale(1.05); } 10% { opacity: 0.4; transform: scale(1); } 33% { opacity: 0.4; transform: scale(1); } 43% { opacity: 0; transform: scale(1.05); } 100% { opacity: 0; } }
 
-        .landing-page { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a1a24 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.5s ease; }
+        .landing-page { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505 radial-gradient(circle at center, #1a1a24 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.5s ease; }
         .landing-content { text-align: center; animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .landing-title { font-size: 3.5rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; text-shadow: 4px 4px 0px var(--event-accent); margin-bottom: 5px; transform: skewX(-5deg);}
         .landing-subtitle { font-family: var(--sport-font); font-size: 1.2rem; color: var(--text-sub); margin-bottom: 50px; letter-spacing: 4px; text-transform: uppercase; }
@@ -1621,11 +1621,23 @@
             const btn = document.getElementById('enter-btn');
             const spinner = document.getElementById('loading-spinner');
             const text = document.getElementById('enter-text');
+            const landing = document.getElementById('landing-page');
+
+            // ✨ 1. 開局先檢查：這趟是不是已經點過進入了？
+            if (sessionStorage.getItem('cheer_has_entered') === 'true') {
+                if (landing) landing.style.display = 'none';
+                document.body.classList.remove('no-scroll');
+                return; // 直接攔截，後面的按鈕動畫都不用跑了！
+            }
+
             if(btn) {
                 btn.onclick = () => {
-                    document.getElementById('landing-page').style.opacity = '0';
+                    // ✨ 2. 寫入記憶：告訴瀏覽器「我進來過了」，下次重整請直接放行
+                    sessionStorage.setItem('cheer_has_entered', 'true');
+                    
+                    if(landing) landing.style.opacity = '0';
                     setTimeout(() => {
-                        document.getElementById('landing-page').style.display = 'none';
+                        if(landing) landing.style.display = 'none';
                         document.body.classList.remove('no-scroll');
                     }, 500);
                 };
