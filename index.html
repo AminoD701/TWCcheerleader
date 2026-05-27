@@ -2588,10 +2588,13 @@
 
             const pool = getVotePool();
 
-            // ✨ 核心升級：不再抓取單機記憶，直接讀取全網真實票數庫 window.globalVoteData！
+            // ✨ 核心升級：將賽道與 UID 綁定，六大賽道票數絕對獨立！
             let girlsWithVotes = pool.map(g => {
-                const realVotes = parseInt(window.globalVoteData[g.uid] || 0);
-                return { ...g, votes: realVotes };
+                const voteKey = currentCat + '_' + g.uid; // 例如: baseball_李多慧
+                // 同時檢查本地備用與雲端真實票數
+                const localVotes = parseInt(localStorage.getItem('my_votes_' + voteKey) || 0);
+                const realVotes = parseInt(window.globalVoteData[voteKey] || 0);
+                return { ...g, votes: Math.max(localVotes, realVotes) };
             });
 
             const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
@@ -2709,6 +2712,7 @@
             }
 
             const currentCat = voteState.currentCategory;
+            const voteKey = currentCat + '_' + uid; // ✨ 建立該賽道專屬的獨立 Key
             
             // 寫入本地防灌票鎖 (正式賽期才鎖)
             if (phase === 'official') {
@@ -2716,8 +2720,12 @@
                 localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
             }
             
+            // ✨ 寫入本地備用票數
+            let myVotes = parseInt(localStorage.getItem('my_votes_' + voteKey) || 0);
+            localStorage.setItem('my_votes_' + voteKey, myVotes + 1);
+
             // ✨ 1. 本地畫面立刻 +1，讓粉絲感覺系統秒速反應
-            window.globalVoteData[uid] = (parseInt(window.globalVoteData[uid]) || 0) + 1;
+            window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
 
             // ✨ 2. 背景默默發送請求給您的 Google 伺服器，寫入真實資料庫
             if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
@@ -2725,7 +2733,8 @@
                     method: "POST",
                     mode: "no-cors", 
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid: uid })
+                    // ✨ 雙保險相容版：同時送出 uid 和 voteKey，確保後端絕對抓得到！
+                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey })
                 }).catch(e => console.log("寫入失敗", e));
             } else {
                 console.log("⚠️ 尚未設定 VOTE_API_URL，目前僅為畫面模擬加票");
