@@ -1363,7 +1363,6 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        /* ✨ 質感升級：左側加入 LATEST 霓虹標籤，製造突發新聞的專業感 */
         .marquee-wrapper::before {
             content: 'LATEST';
             position: absolute;
@@ -1402,7 +1401,6 @@
             animation-play-state: paused;
             color: #fff;
         }
-        /* ✨ 強調文字改成簡約的紅底虛線，取代俗氣的全金字 */
         .marquee-highlight {
             color: #ff4757;
             font-weight: 900;
@@ -1412,6 +1410,106 @@
         @keyframes marquee-scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
+        }
+
+        /* =========================================================================
+           🏆 應援大賞 UI 質感優化與終極 RWD 網格
+           ========================================================================= */
+        #vote-grid {
+            display: grid !important;
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            gap: 15px !important;
+            width: 100% !important;
+            max-width: 950px !important;
+            margin: 0 auto !important; 
+            padding: 0 10px !important;
+            justify-content: center !important;
+        }
+
+        /* ✨ 賽道標籤升級：現代感方圓角微光設計 */
+        #vote-category-tabs .vote-team-tag {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-sub);
+            transition: 0.3s;
+        }
+        #vote-category-tabs .vote-team-tag:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        #vote-category-tabs .vote-team-tag.active {
+            background: var(--event-accent);
+            color: #fff;
+            border-color: var(--event-accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            font-weight: 900;
+        }
+
+        /* ✨ 排行榜底板升級：深色玻璃透視漸層 */
+        #vote-leaderboard-container {
+            background: linear-gradient(180deg, rgba(17,20,24,0.9), rgba(10,12,16,0.95)) !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+        }
+
+        /* 📱 手機版極致排版與跑馬燈縮小 */
+        @media (max-width: 768px) {
+            /* ✨ 跑馬燈極限縮小，優化視覺空間 */
+            .marquee-wrapper { padding: 6px 0; margin-bottom: 12px; border-top-width: 1px; border-bottom-width: 1px; }
+            .marquee-wrapper::before { font-size: 9px; padding: 0 8px; letter-spacing: 1px; }
+            .marquee-content { font-size: 11px; animation-duration: 20s; padding-left: 100%; }
+            .marquee-highlight { font-size: 12px; }
+
+            /* ✨ 賽道標籤微縮，手機滑動更流暢 */
+            #vote-category-tabs .vote-team-tag { padding: 6px 12px; font-size: 12px; }
+
+            /* ✨ 手機版強制 3 欄，並啟用 minmax防撐破黑魔法 */
+            #vote-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 6px !important;
+                padding: 0 5px !important;
+            }
+            
+            /* ✨ 卡片質感升級：立體漸層光澤、精雕內邊距 */
+            #vote-grid .vote-card { 
+                padding: 8px 4px !important; 
+                min-width: 0 !important; 
+                border-radius: 6px !important;
+                background: linear-gradient(145deg, #1c2128, #111418) !important;
+                border-color: rgba(255,255,255,0.05) !important;
+            }
+            #vote-grid .vote-img-box { 
+                width: 100% !important; 
+                max-width: 70px !important; /* ✨ 照片調至完美比例的 70px */
+                margin: 0 auto 6px !important; 
+                border-width: 2px !important;
+            }
+            #vote-grid .vote-card > div:nth-child(2) { 
+                font-size: 12px !important; /* 女孩名字 */
+            } 
+            #vote-grid .vote-card > div:nth-child(3) { 
+                font-size: 9px !important; 
+                padding: 2px 4px !important; 
+                margin-bottom: 6px !important; 
+                background: rgba(0,0,0,0.3) !important;
+                border: 1px solid rgba(255,255,255,0.05) !important;
+            } 
+            #vote-grid .vote-card > div:nth-child(4) { 
+                font-size: 11px !important; 
+                margin-bottom: 8px !important; 
+                color: #cbd5e1 !important;
+            } 
+            
+            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { 
+                font-size: 10px !important; 
+                padding: 6px 2px !important; 
+                white-space: normal !important; 
+                line-height: 1.2 !important;
+                word-break: break-all !important;
+                border-radius: 4px !important;
+            }
         }
 
         /* =========================================================================
