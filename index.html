@@ -2695,18 +2695,17 @@
                 if (top10.length === 0) {
                     leaderboard.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub); font-weight:700;">尚無戰況資料</div>`;
                 } else {
-                    // 卡片製造機
+                   // 卡片製造機
                     const buildPosterCard = (g, rank) => {
                         if (!g) return '';
                         const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                         const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                         let rankClass = `poster-rank-${rank}`;
                         if (rank > 3) rankClass = 'poster-rank-rest';
+
                         // ✨ 極簡風：移除皇冠，純粹依靠金色邊框與版面大小展現第一名氣勢
                         return `
                         <div class="poster-card ${rankClass}" onclick="window.openModal('${g.uid}')">
-                            <div class="poster-rank-badge">${rank}</div>
-                            ${crown}
                             <div class="poster-rank-badge">${rank}</div>
                             <div class="poster-img-wrap"><img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/150'"></div>
                             <div class="poster-info">
