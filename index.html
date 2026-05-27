@@ -1549,9 +1549,13 @@
             <div class="game-title" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin-bottom: 5px; font-size: clamp(24px, 5vw, 36px);">🏆 第一屆·全民應援大賞</div>
             <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:25px; letter-spacing:1px;">🔥 賽期：2026/05/27 ~ 2026/06/27 · 每人每日限投一票</div>
             
-            <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto 20px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 30px; border: 1px solid var(--border-color);">
-                <button id="vote-tab-local" style="flex: 1; padding: 10px; border: none; border-radius: 25px; background: var(--event-accent); color: #fff; font-weight: 900; cursor: pointer; transition: 0.2s;" onclick="window.switchVoteRegion('local')">🇹🇼/🇭🇰/🇲🇾 本土應援區</button>
-                <button id="vote-tab-korea" style="flex: 1; padding: 10px; border: none; border-radius: 25px; background: transparent; color: var(--text-sub); font-weight: 900; cursor: pointer; transition: 0.2s;" onclick="window.switchVoteRegion('korea')">🇰🇷 韓援降臨區</button>
+            <div id="vote-category-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; margin-bottom: 10px;">
+                <div id="vote-tab-korea_pro" class="vote-team-tag active" onclick="window.switchVoteCategory('korea_pro')">🇰🇷 韓國啦啦隊 (台灣職聯)</div>
+                <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">🇹🇼 本土應援 (台港馬)</div>
+                <div id="vote-tab-baseball" class="vote-team-tag" onclick="window.switchVoteCategory('baseball')">⚾ 棒球大賞 (CPBL)</div>
+                <div id="vote-tab-volleyball" class="vote-team-tag" onclick="window.switchVoteCategory('volleyball')">🏐 排球大賞 (企排)</div>
+                <div id="vote-tab-tpbl" class="vote-team-tag" onclick="window.switchVoteCategory('tpbl')">🏀 TPBL 籃球大賞</div>
+                <div id="vote-tab-plg" class="vote-team-tag" onclick="window.switchVoteCategory('plg')">🏀 PLG 籃球大賞</div>
             </div>
 
             <div id="vote-leaderboard-container" style="margin-bottom: 30px; background: rgba(17,20,24,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
@@ -2225,31 +2229,26 @@
         // =========================================================================
         // 🏆 全民應援大賞 智慧分流、搜尋與排行榜引擎 (去重複 + 真實票數版)
         // =========================================================================
-        let voteState = { currentRegion: 'local', selectedTeam: '全部' };
+        let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
 
-        // ✨ 核心修復 1：消除跨隊女孩的影分身，並正確組合球隊名稱
+        // ✨ 消除跨隊影分身，並同時整合球隊與球種欄位
         function getVotePool() {
             let uniqueMap = new Map();
             dbGirls.forEach(g => {
                 if(!uniqueMap.has(g.uid)) {
-                    // 初始化 combinedTeam
-                    uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "" });
+                    uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "", combinedSport: g.sport || "" });
                 } else {
-                    // 如果已經存在，就把新球隊加進去 (例如: Fubon Angels / Braves)
                     let e = uniqueMap.get(g.uid);
-                    if (g.team && !e.combinedTeam.includes(g.team)) {
-                        e.combinedTeam += " / " + g.team;
-                    }
+                    if (g.team && !e.combinedTeam.includes(g.team)) e.combinedTeam += " / " + g.team;
+                    if (g.sport && !e.combinedSport.includes(g.sport)) e.combinedSport += " " + g.sport;
                 }
             });
-            // 只回傳有照片的女孩
             return Array.from(uniqueMap.values()).filter(g => g.img);
         }
 
         window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
-            // 抓出所有不重複的單一球隊名稱做為按鈕
             let rawTeams = new Set();
             dbGirls.forEach(g => { if(g.team) rawTeams.add(g.team.trim()); });
             const teams = ['全部', ...Array.from(rawTeams).sort()];
@@ -2264,23 +2263,20 @@
             window.renderVoteGrid();
         };
 
-        window.switchVoteRegion = function(region) {
-            voteState.currentRegion = region;
-            const localBtn = document.getElementById('vote-tab-local');
-            const koreaBtn = document.getElementById('vote-tab-korea');
-            if (region === 'local') {
-                localBtn.style.background = 'var(--event-accent)'; localBtn.style.color = '#fff';
-                koreaBtn.style.background = 'transparent'; koreaBtn.style.color = 'var(--text-sub)';
-            } else {
-                koreaBtn.style.background = 'var(--event-accent)'; koreaBtn.style.color = '#fff';
-                localBtn.style.background = 'transparent'; localBtn.style.color = 'var(--text-sub)';
-            }
+        // ✨ 切換六大賽道控制核心
+        window.switchVoteCategory = function(category) {
+            voteState.currentCategory = category;
+            const tabs = document.querySelectorAll('#vote-category-tabs .vote-team-tag');
+            tabs.forEach(tab => {
+                if (tab.id === 'vote-tab-' + category) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
             window.renderVoteGrid();
         };
 
         window.selectVoteTeam = function(team) {
             voteState.selectedTeam = team;
-            const tags = document.querySelectorAll('.vote-team-tag');
+            const tags = document.querySelectorAll('#vote-team-tags .vote-team-tag');
             tags.forEach(tag => {
                 if (tag.innerText === team) tag.classList.add('active');
                 else tag.classList.remove('active');
@@ -2297,23 +2293,44 @@
             const todayStr = new Date().toISOString().split('T')[0]; 
             const hasVotedToday = localStorage.getItem('cheer_vote_date') === todayStr;
 
-            // 取得去重複後的乾淨名單
+            // 取得乾淨、正確組合單一女孩的名單組合
             const pool = getVotePool();
 
-            // ✨ 核心修復 2：拔除假亂數，完全使用本地真實票數 (從 0 開始)
             let girlsWithVotes = pool.map(g => {
                 const myVotes = parseInt(localStorage.getItem('my_votes_' + g.uid) || 0);
                 return { ...g, votes: myVotes };
             });
 
-            // 分流賽道
+            // 🏀 職籃雙聯盟核心過濾清單
+            const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
+            const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
+
+            // 🎯 ✨ 總教練特製：核心 6 大類別嚴格過濾演算法
             let regionGirls = girlsWithVotes.filter(g => {
                 const isKorean = (g.nat || "").includes("韓");
-                return voteState.currentRegion === 'korea' ? isKorean : !isKorean;
+                const isLuxy = (g.combinedTeam || "").includes("LuxyGirls");
+                const isBaseball = (g.combinedSport || "").includes("棒");
+                const isVolleyball = (g.combinedSport || "").includes("排");
+                
+                // 檢查是否屬於職籃聯盟
+                const isTPBL = tpblTeams.some(t => (g.combinedTeam || "").includes(t));
+                const isPLG = plgTeams.some(t => (g.combinedTeam || "").includes(t));
+
+                switch(voteState.currentCategory) {
+                    case 'korea_pro':   return isKorean && !isLuxy; // 1. 韓國啦啦隊 (排除Luxy)
+                    case 'local_pro':   return !isKorean && !isLuxy; // 2. 本土啦啦隊 (排除Luxy)
+                    case 'baseball':    return isBaseball; // 3. 棒球聯盟
+                    case 'volleyball':  return isVolleyball; // 4. 排球聯盟
+                    case 'tpbl':        return isTPBL; // 5. TPBL 籃球
+                    case 'plg':         return isPLG; // 6. PLG 籃球
+                    default:            return true;
+                }
             });
 
-            // 渲染 TOP 10 橫向排行榜 (如果 0 票也會排，但大家都一樣時會依照原本陣列順序)
+            // 依照真實票數進行高低排序
             regionGirls.sort((a, b) => b.votes - a.votes);
+
+            // 渲染該類別的即時 TOP 10
             if (leaderboard) {
                 leaderboard.innerHTML = regionGirls.slice(0, 10).map((g, idx) => {
                     const rank = idx + 1;
@@ -2331,9 +2348,8 @@
                 }).join('');
             }
 
-            // 渲染下方女孩選擇網格 (含搜尋與球隊過濾)
+            // 複合尋找系統 (即時連動隊伍選單與關鍵字搜尋)
             let filtered = regionGirls.filter(g => {
-                // 修復：改用 includes 判斷，這樣跨隊女孩 (例如包含 Fubon Angels) 也能被正確篩選出
                 if (voteState.selectedTeam !== '全部' && !(g.combinedTeam || "").includes(voteState.selectedTeam)) return false;
                 if (searchKeyword) {
                     const matchStr = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
@@ -2343,7 +2359,7 @@
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub); font-weight: 700;">找不到符合條件的女孩 😢</div>`;
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub); font-weight: 700;">該賽區中找不到符合條件的女孩 😢</div>`;
                 return;
             }
 
@@ -2373,7 +2389,6 @@
             const todayStr = new Date().toISOString().split('T')[0];
             localStorage.setItem('cheer_vote_date', todayStr);
             
-            // 寫入本地記憶加票
             let myVotes = parseInt(localStorage.getItem('my_votes_' + uid) || 0);
             localStorage.setItem('my_votes_' + uid, myVotes + 1);
 
