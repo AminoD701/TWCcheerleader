@@ -2378,14 +2378,18 @@
                         `;
                     }
 
-                    // ✨ 實體積木感獎台：平台頂部 + 帶有星星的立體正面
+                    // ✨ 終極優化：透過負邊距讓女孩「踩」在獎台上，並放大頭像比例
                     podiumHtml += `
-                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'"`}>
-                        ${girlHtml}
-                        <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
-                            <div style="width:100%; height:clamp(15px, 3vh, 25px); background:color-mix(in srgb, ${baseColor} 80%, #fff); border-radius: 6px 6px 0 0; border: 2px solid #fff; border-bottom: none; box-shadow: inset 0 3px 5px rgba(255,255,255,0.6);"></div>
-                            <div style="width:95%; height:${pHeight}; background:linear-gradient(180deg, ${baseColor} 0%, color-mix(in srgb, ${baseColor} 40%, #000) 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(0,0,0,0.3); box-shadow: 0 -5px 15px rgba(0,0,0,0.5);">
-                                <span style="font-family:var(--sport-font); font-size:clamp(60px, 12vw, 100px); font-weight:900; color:rgba(255,255,255,0.9); line-height:0.8; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">${role.rank}</span>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s; position:relative; overflow:visible;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'"`}>
+                        
+                        <div style="position:relative; margin-bottom:calc(-1 * clamp(15px, 3vh, 25px)); z-index:15; display:flex; flex-direction:column; align-items:center; transform: scale(1.15); transform-origin: bottom center;">
+                            ${girlHtml}
+                        </div>
+
+                        <div style="width:100%; display:flex; flex-direction:column; align-items:center; position:relative; z-index:10;">
+                            <div style="width:100%; height:clamp(15px, 3vh, 25px); background:#f0f0f0; border-radius: 8px 8px 0 0; border: 2px solid #ccc; border-bottom: none; box-shadow: inset 0 4px 6px rgba(255,255,255,0.8);"></div>
+                            <div style="width:96%; height:${pHeight}; background:linear-gradient(180deg, color-mix(in srgb, ${baseColor} 90%, #fff) 0%, color-mix(in srgb, ${baseColor} 50%, #000) 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; border-left: 2px solid rgba(255,255,255,0.4); border-right: 2px solid rgba(0,0,0,0.2); box-shadow: 0 -8px 20px rgba(0,0,0,0.6);">
+                                <span style="font-family:var(--sport-font); font-size:clamp(65px, 13vw, 110px); font-weight:900; color:rgba(255,255,255,0.95); line-height:0.8; text-shadow: 0 4px 10px rgba(0,0,0,0.4);">${role.rank}</span>
                                 ${starSvg}
                             </div>
                         </div>
