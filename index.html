@@ -2186,7 +2186,7 @@
             else if (currentMode === 'news') { news.style.display = 'flex'; renderNewsHub(); } // 👈 觸發新聞渲染
         };
         // =========================================================================
-        // 🌟 夢幻陣容 4.0 (Dream Team) 多賽制擴充引擎
+        // 🌟 夢幻陣容 5.0 (Dream Team) 多賽制擴充引擎 ＋ 自訂頒獎台系統
         // =========================================================================
         const dtConfigs = {
             'original': {
@@ -2197,6 +2197,14 @@
                     { name: '💃 舞蹈擔當 DANCER', color: '#00e676' },
                     { name: '🎀 可愛擔當 CUTE', color: '#ff4081' },
                     { name: '⚡ 活力擔當 ENERGY', color: '#ff9800' }
+                ]
+            },
+            'podium': {
+                name: '🏆 自訂前三名頒獎台 (3人)', count: 3, type: 'podium', defaultColor: '#ffd700',
+                roles: [
+                    { name: '🥇 第 1 名 (Champion)', color: '#ffd700', height: '180px', rank: '1' },
+                    { name: '🥈 第 2 名 (Runner-up)', color: '#c0c0c0', height: '130px', rank: '2' },
+                    { name: '🥉 第 3 名 (Third Place)', color: '#cd7f32', height: '90px', rank: '3' }
                 ]
             },
             'baseball': { 
@@ -2236,7 +2244,7 @@
                 ]
             }
         };
-        let dtState = { active: false, rosterType: 'original', rule: 'free', selectedTeam: '全部啦啦隊', roster: [], isPosterMode: false };
+        let dtState = { active: false, rosterType: 'original', rule: 'free', selectedTeam: '全部啦啦隊', roster: [], isPosterMode: false, customTitle: '' };
 
         window.renderDreamTeamStart = function() {
             const container = document.getElementById('dreamteam-container');
@@ -2247,13 +2255,20 @@
                 container.innerHTML = `
                     <div class="game-title" style="text-shadow: 3px 3px 0px #ff0044;">夢幻戰隊總教練室</div>
                     <div class="dt-setup-card">
-                        <label class="dt-setup-label">1. 選擇陣容</label>
-                        <select id="dt-setup-type" class="dt-setup-select">
+                        <label class="dt-setup-label">1. 選擇陣容 / 主題</label>
+                        <select id="dt-setup-type" class="dt-setup-select" onchange="document.getElementById('dt-setup-title-box').style.display = this.value === 'podium' ? 'block' : 'none'">
                             <option value="original">🌟 經典偶像戰隊 (5人)</option>
+                            <option value="podium">🏆 自訂前三名頒獎台 (3人)</option>
                             <option value="baseball">⚾ 棒球陣容 (10人)</option>
                             <option value="basketball">🏀 籃球陣容 (5人)</option>
                             <option value="volleyball">🏐 排球陣容 (6人)</option>
                         </select>
+
+                        <div id="dt-setup-title-box" style="display:none; margin-bottom:20px;">
+                            <label class="dt-setup-label" style="color:#ffd700;">👑 頒獎主題 (由你決定！)</label>
+                            <input type="text" id="dt-setup-custom-title" placeholder="例如：最性感女孩、舞蹈最強、笑容最甜..." class="dt-setup-select" maxlength="15" style="margin-bottom:0; border-color:#ffd700;">
+                        </div>
+
                         <label class="dt-setup-label">2. 招募限制</label>
                         <select id="dt-setup-rule" class="dt-setup-select" onchange="document.getElementById('dt-setup-team-box').style.display = this.value === 'same' ? 'block' : 'none'">
                             <option value="free">🌍 跨隊大亂鬥</option>
@@ -2276,6 +2291,7 @@
             let bgImgFile = cfg.type === 'court' ? (cfg.courtClass === 'court-baseball' ? 'baseball-bg.png' : (cfg.courtClass === 'court-basketball' ? 'basketball-bg.png' : 'volleyball-bg.png')) : '';
 
             if (cfg.type === 'grid') {
+                // 原本的 5 人戰隊 Grid 渲染
                 let slotsHtml = dtState.roster.map((girl, index) => {
                     const rConf = cfg.roles[index];
                     if (girl) {
@@ -2301,7 +2317,90 @@
                         <button class="nav-btn" style="background:${isFull ? '#ff0044' : '#333'}; color:${isFull ? '#fff' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>${isFull ? '📸 完成編制，檢視海報' : '請先選滿 5 位女孩'}</button>
                         <div style="color:var(--text-sub); font-size:13px; font-weight:700; margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
                     </div>`;
+
+            } else if (cfg.type === 'podium') {
+                // ✨ 全新：專屬前三名頒獎台渲染邏輯
+                // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
+                const displayOrder = [1, 0, 2]; 
+                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:8px; height: 350px; padding: 20px 10px 0; position:relative;">`;
+                
+                if(dtState.isPosterMode) {
+                    podiumHtml += `
+                    <div class="dt-watermark" style="top:15px; left:15px; bottom:auto;">
+                        <div class="dt-watermark-title">TOP 3 RANKING</div>
+                        <div class="dt-watermark-sub" style="color:${boardAccent};">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
+                    </div>`;
+                }
+
+                displayOrder.forEach(idx => {
+                    const role = cfg.roles[idx];
+                    const girl = dtState.roster[idx];
+                    
+                    let girlHtml = '';
+                    if (girl) {
+                        const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
+                        const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
+                        girlHtml = `
+                            <div style="width:80px; height:80px; border-radius:50%; border:3px solid ${role.color}; box-shadow: 0 0 20px ${role.color}; margin: 0 auto -15px; position:relative; z-index:2; background:#111; overflow:hidden;">
+                                <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; object-fit:cover; object-position:top center;">
+                            </div>
+                            <div style="font-size:16px; font-weight:900; color:#fff; text-shadow: 1px 1px 3px #000; z-index:3; position:relative; margin-bottom: 8px; background: rgba(0,0,0,0.8); padding:4px 12px; border-radius:10px; border: 1px solid ${role.color};">${dName}</div>
+                        `;
+                    } else {
+                        girlHtml = `
+                            <div style="width:80px; height:80px; border-radius:50%; border:2px dashed ${role.color}; background:rgba(0,0,0,0.5); margin: 0 auto -15px; position:relative; z-index:2; display:flex; align-items:center; justify-content:center;">
+                                <div style="font-size:24px; color:${role.color};">➕</div>
+                            </div>
+                            <div style="font-size:12px; font-weight:700; color:#aaa; z-index:3; position:relative; margin-bottom: 8px; background: rgba(0,0,0,0.6); padding:4px 10px; border-radius:10px;">點擊選擇</div>
+                        `;
+                    }
+
+                    podiumHtml += `
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.2s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})"`}>
+                        ${girlHtml}
+                        <div style="width:100%; height:${role.height}; background: linear-gradient(180deg, ${role.color} 0%, rgba(17,20,24,0.95) 15%, #050505 100%); border: 2px solid ${role.color}; border-bottom: none; border-radius: 8px 8px 0 0; display:flex; justify-content:center; align-items:flex-start; padding-top:10px; box-shadow: inset 0 5px 15px rgba(255,255,255,0.3);">
+                            <span style="font-family:var(--sport-font); font-size:48px; font-weight:900; color:#fff; text-shadow: 2px 2px 0px #000; line-height:1;">${role.rank}</span>
+                        </div>
+                    </div>`;
+                });
+                podiumHtml += `</div>`;
+
+                let displayTitle = dtState.customTitle || cfg.name;
+
+                if (dtState.isPosterMode) {
+                    container.innerHTML = `
+                        <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">${displayTitle}</div>
+                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，快截圖分享你的專屬榜單！</div>
+                        
+                        <div class="dt-poster" style="border-color:${boardAccent}; background: #0a0c0f; padding: 20px 10px 0px; overflow:visible;">
+                            <div style="font-family:var(--tc-font); font-size:26px; font-weight:900; color:#fff; text-shadow: 2px 2px 0 ${boardAccent}; margin-bottom:5px; text-align:center;">🏆 ${displayTitle}</div>
+                            ${podiumHtml}
+                        </div>
+                        
+                        <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
+                            <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重新評選</button>
+                        </div>`;
+                    if(typeof createConfetti === 'function') createConfetti();
+                } else {
+                    container.innerHTML = `
+                        <div class="game-title" style="margin-bottom:5px;">${displayTitle}</div>
+                        <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊頒獎台 ➕ 指派女孩)</div>
+                        
+                        <div class="dt-poster" style="border-color:${boardAccent}; background: #0a0c0f; padding: 20px 10px 0px; overflow:visible;">
+                            ${podiumHtml}
+                        </div>
+                        
+                        <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
+                            <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
+                                ${isFull ? '📸 頒獎典禮，檢視海報' : '請選滿前 3 名女孩'}
+                            </button>
+                            <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
+                        </div>`;
+                }
+
             } else {
+                // 原本的戰術板渲染
                 let tokensHtml = dtState.roster.map((girl, index) => {
                     const role = cfg.roles[index];
                     if (girl) {
@@ -2361,6 +2460,12 @@
             dtState.rosterType = document.getElementById('dt-setup-type').value;
             dtState.rule = document.getElementById('dt-setup-rule').value;
             dtState.selectedTeam = document.getElementById('dt-setup-team').value;
+            
+            // ✨ 抓取使用者自訂的頒獎台標題
+            if(document.getElementById('dt-setup-custom-title')) {
+                dtState.customTitle = document.getElementById('dt-setup-custom-title').value.trim() || '我的私心排行榜';
+            }
+            
             dtState.roster = new Array(dtConfigs[dtState.rosterType].count).fill(null);
             dtState.active = true;
             dtState.isPosterMode = false;
@@ -2368,7 +2473,7 @@
         };
 
         window.resetDreamTeam = function() { 
-            dtState.active = false; dtState.roster = []; dtState.isPosterMode = false;
+            dtState.active = false; dtState.roster = []; dtState.isPosterMode = false; dtState.customTitle = '';
             renderDreamTeamStart(); 
         };
 
