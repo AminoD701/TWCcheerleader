@@ -1638,7 +1638,7 @@
         }
 
         let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = []; 
-        let currentMode = "girls", currentSport = "全部", currentTeam = "全部啦啦隊";
+        let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
         const CACHE_KEY = "tw_cheerleader_cache_v26";
@@ -1812,7 +1812,7 @@
 
             // ✨ 2. 如果網址沒有指定模式，就去問瀏覽器「剛剛停在哪一頁」(預設是女孩圖鑑 girls)
             if (!targetMode) {
-                targetMode = sessionStorage.getItem('cheer_current_tab') || 'girls';
+                targetMode = sessionStorage.getItem('cheer_current_tab') || 'news';
             }
 
             // ✨ 3. 自動幫球迷切換到該分頁！(這會一併觸發 updateTeamTabs 和 renderContent)
