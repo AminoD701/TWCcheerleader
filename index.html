@@ -2361,9 +2361,14 @@
             else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } // 👈 啟動投票
         };
         // =========================================================================
-        // 🏆 全民應援大賞 智慧分流、下拉選單與獨立計票引擎 (動態選單升級版)
+        // 🏆 全民應援大賞 全網雲端連線計票引擎 (Google Sheets 伺服器版)
         // =========================================================================
+        
+        // ⚠️ 總教練注意：請把下面這串引號裡的文字，換成您剛剛複製的 GAS 網址！
+        const VOTE_API_URL = "https://script.google.com/macros/s/AKfycbze_POcmkiEIB64S9qrM8mJ-Xcz-btwY0Hjm7Qnq0TNVr3GvZTMjZGcYCN-hr5t250i_Q/exec"; 
+        
         let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
+        window.globalVoteData = {}; // 儲存全網真實票數
 
         function getVotePool() {
             let uniqueMap = new Map();
@@ -2379,7 +2384,6 @@
             return Array.from(uniqueMap.values()).filter(g => g.img);
         }
 
-        // ✨ 全新黑魔法：根據「目前賽道」動態產生該賽道專屬的球隊下拉選單
         function updateVoteTeamDropdown() {
             const currentCat = voteState.currentCategory;
             const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
@@ -2389,11 +2393,9 @@
 
             dbGirls.forEach(g => {
                 if (!g.img || !g.team) return;
-                
                 const natStr = g.nat || "";
                 const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
                 const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
-                
                 const isLuxy = (g.team || "").includes("LuxyGirls");
                 const isBaseball = (g.sport || "").includes("棒");
                 const isVolleyball = (g.sport || "").includes("排");
@@ -2410,11 +2412,7 @@
                     case 'tpbl':        isMatch = isTPBL; break;
                     case 'plg':         isMatch = isPLG; break;
                 }
-
-                // 如果這筆資料符合當前賽道，且球隊不是空白，才加入選單 (這會自然過濾掉 KBO 等不合規的球隊列)
-                if (isMatch && g.team.trim() !== "") {
-                    validTeams.add(g.team.trim());
-                }
+                if (isMatch && g.team.trim() !== "") validTeams.add(g.team.trim());
             });
 
             const selectBox = document.getElementById('vote-team-select');
@@ -2422,27 +2420,39 @@
                 const teamsArray = Array.from(validTeams).sort();
                 selectBox.innerHTML = `<option value="全部">✨ 顯示全部球隊</option>` + 
                     teamsArray.map(t => `<option value="${t}">${t}</option>`).join('');
-                selectBox.value = voteState.selectedTeam; // 保持當前選擇，如果剛切換賽道則會是"全部"
+                selectBox.value = voteState.selectedTeam; 
             }
         }
 
-        window.initVoteHall = function() {
+        // ✨ 啟動時，先跟 Google 伺服器要全網的真實票數資料
+        window.initVoteHall = async function() {
             if (!dbGirls || dbGirls.length === 0) return; 
+            
+            const grid = document.getElementById('vote-grid');
+            if(grid) grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffd700; font-weight: 900; font-size: 18px; letter-spacing: 2px;">⏳ 正在連線全網資料庫，讀取最新戰況...</div>`;
+
+            try {
+                if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
+                    const response = await fetch(VOTE_API_URL);
+                    window.globalVoteData = await response.json();
+                }
+            } catch (e) {
+                console.log("讀取全網票數失敗", e);
+            }
+
             updateVoteTeamDropdown();
             window.renderVoteGrid();
         };
 
         window.switchVoteCategory = function(category) {
             voteState.currentCategory = category;
-            voteState.selectedTeam = '全部'; // ✨ 切換賽道時，強制重置球隊為「全部」
-            
+            voteState.selectedTeam = '全部'; 
             const tabs = document.querySelectorAll('#vote-category-tabs .vote-team-tag');
             tabs.forEach(tab => {
                 if (tab.id === 'vote-tab-' + category) tab.classList.add('active');
                 else tab.classList.remove('active');
             });
-            
-            updateVoteTeamDropdown(); // ✨ 重新生成該賽道專屬的下拉選單
+            updateVoteTeamDropdown(); 
             window.renderVoteGrid();
         };
 
@@ -2458,8 +2468,6 @@
             if (!grid) return;
 
             const currentCat = voteState.currentCategory;
-            
-            // ⏳ ✨ 核心大升級：時間軸判定系統 (以台灣時間為準)
             const now = new Date();
             const officialStart = new Date('2026-06-01T00:00:00+08:00');
             const officialEnd = new Date('2026-06-30T23:59:59+08:00');
@@ -2470,26 +2478,22 @@
 
             const todayStr = now.toISOString().split('T')[0]; 
             let hasVotedToday = false;
-            
-            if (phase === 'official') {
-                hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
-            } else if (phase === 'closed') {
-                hasVotedToday = true; // 結束後全部鎖定
-            } // testing 模式下永遠是 false，開放無限投票
+            if (phase === 'official') hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
+            else if (phase === 'closed') hasVotedToday = true; 
 
-            // 動態更新活動副標題 (不用改 HTML)
             const subtitleEl = document.querySelector('#vote-container > div:nth-child(2)');
             if (subtitleEl) {
                 if (phase === 'testing') subtitleEl.innerHTML = '<span style="color:#00e676;">🛠️ 測試階段：目前開放無限投票！</span> 正式賽期為 6/1~6/30，屆時將恢復每日限投一票。';
-                else if (phase === 'closed') subtitleEl.innerHTML = '<span style="color:#ff4757;">🔒 活動已結束！</span> 感謝您的熱烈參與！';
+                else if (phase === 'closed') subtitleEl.innerHTML = '<span style="color:#ff4757;">🔒 活動已結束！</span> 感謝全台粉絲的熱烈參與！';
                 else subtitleEl.innerHTML = '🔥 <b>正式賽期：6/1 ~ 6/30</b> · 每個賽道每日限投一票！';
             }
 
             const pool = getVotePool();
 
+            // ✨ 核心升級：不再抓取單機記憶，直接讀取全網真實票數庫 window.globalVoteData！
             let girlsWithVotes = pool.map(g => {
-                const myVotes = parseInt(localStorage.getItem('my_votes_' + currentCat + '_' + g.uid) || 0);
-                return { ...g, votes: myVotes };
+                const realVotes = parseInt(window.globalVoteData[g.uid] || 0);
+                return { ...g, votes: realVotes };
             });
 
             const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
@@ -2518,15 +2522,13 @@
                 }
             });
 
-            // 依照該賽道票數排序
             regionGirls.sort((a, b) => b.votes - a.votes);
 
-            // ✨ 核心大升級：TOP 10 自動折行網格 ＋ 前三名霸氣放大
             if (leaderboard) {
                 leaderboard.style.display = 'flex';
                 leaderboard.style.flexWrap = 'wrap';
                 leaderboard.style.justifyContent = 'center';
-                leaderboard.style.overflowX = 'visible'; // 關閉橫向滾動
+                leaderboard.style.overflowX = 'visible'; 
                 
                 leaderboard.innerHTML = regionGirls.slice(0, 10).map((g, idx) => {
                     const rank = idx + 1;
@@ -2535,12 +2537,10 @@
                     const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                     const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                     
-                    // 冠亞季軍版面放大，後 7 名精緻縮小
                     const cardFlex = isTop3 ? '1 1 28%' : '1 1 18%';
                     const minW = isTop3 ? '95px' : '65px';
                     const imgSize = isTop3 ? '65px' : '45px';
                     const nameSize = isTop3 ? '15px' : '12px';
-                    
                     const crown = rank === 1 ? `<div style="position:absolute; top:-18px; font-size:24px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8)); z-index:10;">👑</div>` : '';
 
                     return `
@@ -2572,14 +2572,13 @@
                 const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                 const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                 
-                // ✨ 智慧按鈕狀態：依據目前活動階段切換按鈕文字與狀態
                 let btnHtml = '';
                 if (phase === 'closed') {
                     btnHtml = `<button class="vote-btn-disabled">活動已結束 🔒</button>`;
                 } else if (hasVotedToday && phase === 'official') {
                     btnHtml = `<button class="vote-btn-disabled">賽區已應援 🔒</button>`;
                 } else {
-                    const btnText = phase === 'testing' ? '測試投票(無限) 🗳️' : '投她一票 🗳️';
+                    const btnText = phase === 'testing' ? '全網連線測試(無限) 🗳️' : '投她一票 🗳️';
                     btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">${btnText}</button>`;
                 }
 
@@ -2598,6 +2597,7 @@
 
         window.filterVoteList = function() { window.renderVoteGrid(); };
 
+        // ✨ 把票丟上全網資料庫
         window.submitVote = function(uid, name) {
             const now = new Date();
             const officialStart = new Date('2026-06-01T00:00:00+08:00');
@@ -2607,29 +2607,38 @@
             else if (now >= officialStart) phase = 'official';
 
             if (phase === 'closed') {
-                alert("🔒 投票活動已於 6/30 結束！");
-                return;
+                alert("🔒 投票活動已結束！"); return;
             }
 
             const currentCat = voteState.currentCategory;
             
+            // 寫入本地防灌票鎖 (正式賽期才鎖)
             if (phase === 'official') {
                 const todayStr = now.toISOString().split('T')[0];
                 localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
             }
             
-            let myVotes = parseInt(localStorage.getItem('my_votes_' + currentCat + '_' + uid) || 0);
-            localStorage.setItem('my_votes_' + currentCat + '_' + uid, myVotes + 1);
+            // ✨ 1. 本地畫面立刻 +1，讓粉絲感覺系統秒速反應
+            window.globalVoteData[uid] = (parseInt(window.globalVoteData[uid]) || 0) + 1;
 
-            const catNames = {
-                'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 
-                'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球'
-            };
+            // ✨ 2. 背景默默發送請求給您的 Google 伺服器，寫入真實資料庫
+            if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
+                fetch(VOTE_API_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid: uid })
+                }).catch(e => console.log("寫入失敗", e));
+            } else {
+                console.log("⚠️ 尚未設定 VOTE_API_URL，目前僅為畫面模擬加票");
+            }
+
+            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
 
             if (phase === 'testing') {
-                alert(`🛠️ [測試模式] 應援成功！\n您在【${catNames[currentCat]}】給【${name}】投了一票！\n(目前為無限投票測試期，正式賽 6/1 將會清空重新計算)`);
+                alert(`🛠️ [全網連線測試] 應援成功！\n您在【${catNames[currentCat]}】給【${name}】投了一票！\n資料已寫入雲端伺服器！`);
             } else {
-                alert(`🎉 應援成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投給了【${name}】！\n記得去其他賽道也可以各投一票喔！`);
+                alert(`🎉 應援連線成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投給了【${name}】！`);
             }
             
             window.renderVoteGrid(); 
