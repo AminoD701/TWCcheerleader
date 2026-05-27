@@ -1345,6 +1345,61 @@
         .vote-btn-disabled { width: 100%; padding: 8px; background: #2d3436; color: #7f8c8d; border: 1px solid #4a4a4a; border-radius: 6px; font-weight: 700; cursor: not-allowed; margin-top: auto; }
         .vote-team-tag { display: inline-block; padding: 6px 14px; background: #1a1e24; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-sub); font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .vote-team-tag.active { background: #ffd700; color: #000; border-color: #ffd700; }
+        /* =========================================================================
+           📢 全局宣傳跑馬燈 (Marquee)
+           ========================================================================= */
+        .marquee-wrapper {
+            width: 100%;
+            background: linear-gradient(90deg, rgba(17, 20, 24, 0.95) 0%, rgba(255, 215, 0, 0.15) 50%, rgba(17, 20, 24, 0.95) 100%);
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 8px 0;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            z-index: 30;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .marquee-wrapper:hover {
+            background: linear-gradient(90deg, rgba(17, 20, 24, 0.95) 0%, rgba(255, 215, 0, 0.3) 50%, rgba(17, 20, 24, 0.95) 100%);
+            border-color: rgba(255, 215, 0, 0.8);
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%; /* 確保文字從畫面最右側進場 */
+            font-family: var(--tc-font);
+            font-size: 14px;
+            font-weight: 900;
+            color: #ffd700;
+            letter-spacing: 1.5px;
+            animation: marquee-scroll 25s linear infinite;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+        }
+        /* 滑鼠移上去時，文字暫停並變白反光，提醒使用者可點擊 */
+        .marquee-wrapper:hover .marquee-content {
+            animation-play-state: paused;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+        .marquee-highlight {
+            color: #ff0044;
+            font-family: var(--sport-font);
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* 手機版稍微調快速度並縮小字體 */
+        @media (max-width: 768px) {
+            .marquee-wrapper { padding: 6px 0; margin-bottom: 15px; }
+            .marquee-content { font-size: 13px; animation-duration: 20s; }
+        }
     </style> 
 </head>
 <body class="no-scroll">
@@ -1537,6 +1592,11 @@
     </div>
 
     <main id="main-content">
+        <div class="marquee-wrapper" onclick="window.setMode('vote')" title="點擊前往應援大賞！">
+            <div class="marquee-content">
+                🏆【第一屆·全民應援大賞】震撼登場！🔥 目前為測試階段，開放<span class="marquee-highlight">無限投票</span>體驗！正式賽將於 <span class="marquee-highlight">6/1 ~ 6/30</span> 全面開戰，屆時將恢復每日限投一票。快點擊此處前往【應援大賞 VOTE】為你的專屬本命女孩護盤啦！🚀
+            </div>
+        </div>
         <div class="grid-container" id="grid-container"></div>
         <div class="event-list-container" id="event-container" style="display:none;"></div>
         <div class="schedule-matrix-container" id="schedule-container" style="display:none;"></div>
