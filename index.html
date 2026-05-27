@@ -2229,7 +2229,7 @@
             else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } // 👈 啟動投票
         };
         // =========================================================================
-        // 🏆 全民應援大賞 智慧分流、下拉選單與獨立計票引擎 (六大賽道獨立計算)
+        // 🏆 全民應援大賞 智慧分流、下拉選單與獨立計票引擎 (動態選單升級版)
         // =========================================================================
         let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
 
@@ -2247,31 +2247,70 @@
             return Array.from(uniqueMap.values()).filter(g => g.img);
         }
 
-        window.initVoteHall = function() {
-            if (!dbGirls || dbGirls.length === 0) return; 
+        // ✨ 全新黑魔法：根據「目前賽道」動態產生該賽道專屬的球隊下拉選單
+        function updateVoteTeamDropdown() {
+            const currentCat = voteState.currentCategory;
+            const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
+            const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
             
-            let rawTeams = new Set();
-            dbGirls.forEach(g => { if(g.team) rawTeams.add(g.team.trim()); });
-            const teams = ['全部', ...Array.from(rawTeams).sort()];
-            
-            // ✨ 動態渲染下拉選單
+            let validTeams = new Set();
+
+            dbGirls.forEach(g => {
+                if (!g.img || !g.team) return;
+                
+                const natStr = g.nat || "";
+                const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
+                const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
+                
+                const isLuxy = (g.team || "").includes("LuxyGirls");
+                const isBaseball = (g.sport || "").includes("棒");
+                const isVolleyball = (g.sport || "").includes("排");
+                const isTPBL = tpblTeams.some(t => (g.team || "").includes(t));
+                const isPLG = plgTeams.some(t => (g.team || "").includes(t));
+                const isInProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
+
+                let isMatch = false;
+                switch(currentCat) {
+                    case 'korea_pro':   isMatch = isKoreanOrJapanese && isInProLeague; break;
+                    case 'local_pro':   isMatch = !isKoreanOrJapanese && !isLuxy; break;
+                    case 'baseball':    isMatch = isBaseball; break;
+                    case 'volleyball':  isMatch = isVolleyball; break;
+                    case 'tpbl':        isMatch = isTPBL; break;
+                    case 'plg':         isMatch = isPLG; break;
+                }
+
+                // 如果這筆資料符合當前賽道，且球隊不是空白，才加入選單 (這會自然過濾掉 KBO 等不合規的球隊列)
+                if (isMatch && g.team.trim() !== "") {
+                    validTeams.add(g.team.trim());
+                }
+            });
+
             const selectBox = document.getElementById('vote-team-select');
             if (selectBox) {
-                selectBox.innerHTML = teams.map(t => {
-                    const isSelected = t === voteState.selectedTeam ? 'selected' : '';
-                    return `<option value="${t}" ${isSelected}>${t === '全部' ? '✨ 顯示全部球隊' : t}</option>`;
-                }).join('');
+                const teamsArray = Array.from(validTeams).sort();
+                selectBox.innerHTML = `<option value="全部">✨ 顯示全部球隊</option>` + 
+                    teamsArray.map(t => `<option value="${t}">${t}</option>`).join('');
+                selectBox.value = voteState.selectedTeam; // 保持當前選擇，如果剛切換賽道則會是"全部"
             }
+        }
+
+        window.initVoteHall = function() {
+            if (!dbGirls || dbGirls.length === 0) return; 
+            updateVoteTeamDropdown();
             window.renderVoteGrid();
         };
 
         window.switchVoteCategory = function(category) {
             voteState.currentCategory = category;
+            voteState.selectedTeam = '全部'; // ✨ 切換賽道時，強制重置球隊為「全部」
+            
             const tabs = document.querySelectorAll('#vote-category-tabs .vote-team-tag');
             tabs.forEach(tab => {
                 if (tab.id === 'vote-tab-' + category) tab.classList.add('active');
                 else tab.classList.remove('active');
             });
+            
+            updateVoteTeamDropdown(); // ✨ 重新生成該賽道專屬的下拉選單
             window.renderVoteGrid();
         };
 
@@ -2286,14 +2325,12 @@
             const searchKeyword = document.getElementById('vote-search-input')?.value.toLowerCase().trim() || '';
             if (!grid) return;
 
-            // ✨ 核心大升級：判斷「今天」在「這個賽道」是否投過票
             const currentCat = voteState.currentCategory;
             const todayStr = new Date().toISOString().split('T')[0]; 
             const hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
 
             const pool = getVotePool();
 
-            // ✨ 核心大升級：讀取女孩在「這個賽道」的專屬票數
             let girlsWithVotes = pool.map(g => {
                 const myVotes = parseInt(localStorage.getItem('my_votes_' + currentCat + '_' + g.uid) || 0);
                 return { ...g, votes: myVotes };
@@ -2384,11 +2421,8 @@
         window.submitVote = function(uid, name) {
             const currentCat = voteState.currentCategory;
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // ✨ 1. 將防灌票紀錄綁定「賽道」，解鎖 6 票權力
             localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
             
-            // ✨ 2. 將女孩的加票數綁定「賽道」，棒球跟外援區得票獨立計算
             let myVotes = parseInt(localStorage.getItem('my_votes_' + currentCat + '_' + uid) || 0);
             localStorage.setItem('my_votes_' + currentCat + '_' + uid, myVotes + 1);
 
