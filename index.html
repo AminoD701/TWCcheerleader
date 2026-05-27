@@ -2319,9 +2319,9 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 終極舞台升級版：電競/選秀總決賽超高質感琉璃發光頒獎台
+                // ✨ 終極實體感頒獎台：完美還原經典「冠亞季軍」階梯式獎台，自動適應電腦與手機比例
                 const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
-                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:16px; height: 480px; padding: 0 10px; position:relative; z-index:10;">`;
+                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:clamp(4px, 2vw, 20px); height: clamp(400px, 60vh, 550px); padding: 0 10px; position:relative; z-index:10; max-width: 850px; margin: 0 auto;">`;
                 
                 if(dtState.isPosterMode) {
                     podiumHtml += `
@@ -2331,55 +2331,63 @@
                     </div>`;
                 }
 
-                // 👑 霸氣立體皇冠 SVG (稍微加大)
-                const crownSvg = `<svg viewBox="0 0 24 24" style="width:55px; height:55px; fill:#ffd700; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.9)); position:absolute; top:-40px; left:50%; transform:translateX(-50%) rotate(10deg); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+                // 👑 冠軍專屬金皇冠
+                const crownSvg = `<svg viewBox="0 0 24 24" style="width:clamp(40px, 8vw, 60px); height:clamp(40px, 8vw, 60px); fill:#ffd700; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.8)); position:absolute; top:calc(-1 * clamp(30px, 6vw, 45px)); left:50%; transform:translateX(-50%); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+                // ⭐ 獎台星星
+                const starSvg = `<svg style="width:clamp(30px, 6vw, 50px); height:clamp(30px, 6vw, 50px); fill:rgba(255,255,255,0.4); margin-top:10px;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
 
                 displayOrder.forEach(idx => {
                     const role = cfg.roles[idx];
                     const girl = dtState.roster[idx];
                     const isFirst = (idx === 0);
-                    // ✨ 動態加高頒獎台高度
-                    const pHeight = isFirst ? '240px' : (idx === 1 ? '170px' : '120px');
-                    const avSize = isFirst ? '120px' : '90px';
+                    
+                    // ✨ 響應式高度：用 clamp 限制手機不過高、電腦不矮縮！
+                    const pHeight = isFirst ? 'clamp(150px, 30vh, 260px)' : (idx === 1 ? 'clamp(110px, 22vh, 190px)' : 'clamp(70px, 14vh, 130px)');
+                    const avSize = isFirst ? 'clamp(90px, 16vw, 140px)' : 'clamp(70px, 13vw, 110px)';
+                    
+                    // 根據參考圖，獎台基底顏色可以更實體化
+                    // 1: 金 #ffd700, 2: 銀 #c0c0c0, 3: 銅 #cd7f32
+                    const baseColor = role.color;
                     
                     let girlHtml = '';
                     if (girl) {
                         const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         
-                        // ✨ 神級立體浮空頭像與名牌 (自帶背光光暈)
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-25px; z-index:15; display:flex; flex-direction:column; align-items:center;">
-                                ${isFirst ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:160px; height:160px; background:radial-gradient(circle, ${role.color}80 0%, transparent 70%); z-index:1;"></div>` : ''}
+                            <div style="position:relative; margin-bottom:-10px; z-index:15; display:flex; flex-direction:column; align-items:center;">
                                 ${isFirst ? crownSvg : ''}
-                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:4px; background:linear-gradient(135deg, #222, #000); border:3px solid ${role.color}; box-shadow: 0 15px 30px rgba(0,0,0,0.9), 0 0 25px color-mix(in srgb, ${role.color} 60%, transparent); overflow:visible; position:relative; z-index:10;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:4px; background:#fff; border:4px solid ${baseColor}; box-shadow: 0 10px 20px rgba(0,0,0,0.6); overflow:hidden; position:relative; z-index:10;">
                                     <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">
                                 </div>
-                                <div style="margin-top:-16px; position:relative; z-index:20;">
-                                    <span style="display:inline-block; font-size:${isFirst?'18px':'15px'}; font-weight:900; color:#fff; letter-spacing:1px; background:linear-gradient(180deg, #1a1a24, #050505); padding: 6px 20px; border-radius:30px; border: 2px solid ${role.color}; box-shadow: 0 8px 20px rgba(0,0,0,0.9); text-shadow: 1px 1px 3px #000;">${dName}</span>
+                                <div style="margin-top:-12px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:${isFirst?'18px':'14px'}; font-weight:900; color:#111; letter-spacing:1px; background:#fff; padding: 4px clamp(10px, 2vw, 20px); border-radius:30px; border: 2px solid ${baseColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.5); white-space:nowrap;">${dName}</span>
                                 </div>
                             </div>
                         `;
                     } else {
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-25px; z-index:15; display:flex; flex-direction:column; align-items:center;">
-                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(0,0,0,0.7); border:3px dashed color-mix(in srgb, ${role.color} 50%, transparent); display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 20px rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
-                                    <span style="font-size:36px; color:${role.color}; opacity:0.8;">➕</span>
+                            <div style="position:relative; margin-bottom:-10px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(255,255,255,0.1); border:3px dashed ${baseColor}; display:flex; align-items:center; justify-content:center; box-shadow: 0 5px 15px rgba(0,0,0,0.4);">
+                                    <span style="font-size:30px; color:${baseColor}; opacity:0.8;">➕</span>
                                 </div>
-                                <div style="margin-top:-16px; position:relative; z-index:20;">
-                                    <span style="display:inline-block; font-size:13px; font-weight:700; color:#ddd; background:#111; padding: 6px 16px; border-radius:30px; border: 1px solid #666; box-shadow: 0 5px 15px rgba(0,0,0,0.8);">點擊指派</span>
+                                <div style="margin-top:-12px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:12px; font-weight:700; color:#666; background:#eee; padding: 4px 14px; border-radius:30px; border: 2px solid #ccc;">點擊指派</span>
                                 </div>
                             </div>
                         `;
                     }
 
+                    // ✨ 實體積木感獎台：平台頂部 + 帶有星星的立體正面
                     podiumHtml += `
-                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'"`}>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s;" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'"`}>
                         ${girlHtml}
-                        <div style="width:100%; height:${pHeight}; background: linear-gradient(180deg, color-mix(in srgb, ${role.color} 15%, rgba(255,255,255,0.1)) 0%, rgba(5,5,5,0.95) 80%); border: 1px solid color-mix(in srgb, ${role.color} 30%, transparent); border-top: 5px solid ${role.color}; border-bottom: none; border-radius: 16px 16px 0 0; position:relative; display:flex; justify-content:center; padding-top:25px; box-shadow: 0 -20px 50px rgba(0,0,0,0.9), inset 0 20px 30px rgba(255,255,255,0.05); overflow:hidden;">
-                            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:80%; height:30px; background:radial-gradient(ellipse, color-mix(in srgb, ${role.color} 80%, #fff) 0%, transparent 70%); opacity:0.4;"></div>
-                            
-                            <span style="font-family:var(--sport-font); font-size:${isFirst?'140px':'100px'}; font-weight:900; line-height:0.8; color:transparent; -webkit-text-stroke: 2px color-mix(in srgb, ${role.color} 60%, #fff); filter:drop-shadow(0 0 20px ${role.color}); position:relative; z-index:2; opacity:0.9;">${role.rank}</span>
+                        <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                            <div style="width:100%; height:clamp(15px, 3vh, 25px); background:color-mix(in srgb, ${baseColor} 80%, #fff); border-radius: 6px 6px 0 0; border: 2px solid #fff; border-bottom: none; box-shadow: inset 0 3px 5px rgba(255,255,255,0.6);"></div>
+                            <div style="width:95%; height:${pHeight}; background:linear-gradient(180deg, ${baseColor} 0%, color-mix(in srgb, ${baseColor} 40%, #000) 100%); display:flex; flex-direction:column; justify-content:center; align-items:center; border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(0,0,0,0.3); box-shadow: 0 -5px 15px rgba(0,0,0,0.5);">
+                                <span style="font-family:var(--sport-font); font-size:clamp(60px, 12vw, 100px); font-weight:900; color:rgba(255,255,255,0.9); line-height:0.8; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">${role.rank}</span>
+                                ${starSvg}
+                            </div>
                         </div>
                     </div>`;
                 });
@@ -2387,13 +2395,11 @@
 
                 let displayTitle = dtState.customTitle || cfg.name;
                 
-                // ✨ 專屬舞台背景與標題橫幅
+                // ✨ 專屬舞台背景與標題橫幅 (背景維持高級深色，凸顯明亮的頒獎台)
                 let stageHtml = `
-                    <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, ${boardAccent} 25%, #1a1a24), #050505 80%); box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
-                        <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100%; height:100%; background: repeating-linear-gradient(90deg, transparent, transparent 10%, color-mix(in srgb, ${boardAccent} 6%, transparent) 10%, color-mix(in srgb, ${boardAccent} 6%, transparent) 20%); pointer-events:none; z-index:1; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); opacity: 0.6;"></div>
-                        
-                        <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, color-mix(in srgb, ${boardAccent} 60%, #000), transparent); padding: 15px 10px; margin-top: 30px; margin-bottom: 10px; border-top: 1px solid ${boardAccent}; border-bottom: 1px solid ${boardAccent}; text-align:center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
-                            <div style="font-family:var(--tc-font); font-size:clamp(22px, 5vw, 32px); font-weight:900; color:#fff; text-shadow: 0 0 15px ${boardAccent}, 2px 2px 5px #000; letter-spacing: 2px;">🏆 ${displayTitle}</div>
+                    <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 30%, #1a1a24 0%, #050505 80%); box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
+                        <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, ${boardAccent}, transparent); padding: 12px 10px; margin-top: 30px; margin-bottom: 15px; text-align:center;">
+                            <div style="font-family:var(--tc-font); font-size:clamp(20px, 5vw, 30px); font-weight:900; color:#fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); letter-spacing: 2px;">🏆 ${displayTitle}</div>
                         </div>
                         
                         ${podiumHtml}
@@ -2422,61 +2428,6 @@
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
                             <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
                                 ${isFull ? '📸 頒獎典禮，檢視海報' : '請選滿前 3 名女孩'}
-                            </button>
-                            <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
-                        </div>`;
-                }
-
-            } else {
-                // 原本的戰術板渲染
-                let tokensHtml = dtState.roster.map((girl, index) => {
-                    const role = cfg.roles[index];
-                    if (girl) {
-                        const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
-                        const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
-                        return `
-                        <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:${boardAccent};" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${index})"`}>
-                            <div class="dt-token-img-wrap"><img src="${window.getCdnUrl(girl.img)}"></div>
-                            <div class="dt-token-info"><div class="dt-token-role">${role.name}</div><div class="dt-token-name">${dName}</div></div>
-                        </div>`;
-                    }
-                    return `
-                    <div class="dt-token" style="top:${role.top}; left:${role.left}; --event-accent:#555;" onclick="window.openDtSelector(${index})">
-                        <div class="dt-token-img-wrap" style="border-style:dashed;"><div class="dt-token-empty">➕</div></div>
-                        <div class="dt-token-info"><div class="dt-token-role" style="color:#aaa;">${role.name}</div></div>
-                    </div>`;
-                }).join('');
-
-                if (dtState.isPosterMode) {
-                    container.innerHTML = `
-                        <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">陣容部署完畢</div>
-                        <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，請直接手機截圖分享！</div>
-                        
-                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg">
-                            <div class="dt-watermark">
-                                <div class="dt-watermark-title">DREAM TEAM</div>
-                                <div class="dt-watermark-sub" style="color:${boardAccent};">${modeSubtitle}</div>
-                            </div>
-                            ${tokensHtml}
-                        </div>
-                        
-                        <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-                            <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
-                            <button class="nav-btn" style="border-color:#ff4757; color:#ff4757;" onclick="window.resetDreamTeam()">🗑️ 重建</button>
-                        </div>`;
-                    if(typeof createConfetti === 'function') createConfetti();
-                } else {
-                    container.innerHTML = `
-                        <div class="game-title" style="margin-bottom:5px;">${cfg.name}</div>
-                        <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊場上 ➕ 指派上場)</div>
-                        <div class="dt-tactical-board" style="--event-accent:${boardAccent};">
-                            <img src="./${bgImgFile}" class="court-bg">
-                            ${tokensHtml}
-                        </div>
-                        <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
-                            <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
-                                ${isFull ? '📸 完成佈陣，檢視戰術板' : '教練，場上還有空缺！'}
                             </button>
                             <div style="color:var(--text-sub); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="window.resetDreamTeam()">🔄 重新設定賽制</div>
                         </div>`;
