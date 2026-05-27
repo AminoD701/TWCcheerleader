@@ -2223,14 +2223,37 @@
             else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } // 👈 啟動投票
         };
         // =========================================================================
-        // 🏆 全民應援大賞 智慧分流、搜尋與排行榜引擎
+        // 🏆 全民應援大賞 智慧分流、搜尋與排行榜引擎 (去重複 + 真實票數版)
         // =========================================================================
         let voteState = { currentRegion: 'local', selectedTeam: '全部' };
 
+        // ✨ 核心修復 1：消除跨隊女孩的影分身，並正確組合球隊名稱
+        function getVotePool() {
+            let uniqueMap = new Map();
+            dbGirls.forEach(g => {
+                if(!uniqueMap.has(g.uid)) {
+                    // 初始化 combinedTeam
+                    uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "" });
+                } else {
+                    // 如果已經存在，就把新球隊加進去 (例如: Fubon Angels / Braves)
+                    let e = uniqueMap.get(g.uid);
+                    if (g.team && !e.combinedTeam.includes(g.team)) {
+                        e.combinedTeam += " / " + g.team;
+                    }
+                }
+            });
+            // 只回傳有照片的女孩
+            return Array.from(uniqueMap.values()).filter(g => g.img);
+        }
+
         window.initVoteHall = function() {
-            // ✨ 修復：移除 window.，直接讀取全域 dbGirls
             if (!dbGirls || dbGirls.length === 0) return; 
-            const teams = ['全部', ...new Set(dbGirls.map(g => g.combinedTeam).filter(Boolean))];
+            
+            // 抓出所有不重複的單一球隊名稱做為按鈕
+            let rawTeams = new Set();
+            dbGirls.forEach(g => { if(g.team) rawTeams.add(g.team.trim()); });
+            const teams = ['全部', ...Array.from(rawTeams).sort()];
+            
             const tagsBox = document.getElementById('vote-team-tags');
             if (tagsBox) {
                 tagsBox.innerHTML = teams.map(t => {
@@ -2274,13 +2297,13 @@
             const todayStr = new Date().toISOString().split('T')[0]; 
             const hasVotedToday = localStorage.getItem('cheer_vote_date') === todayStr;
 
-            // ✨ 產生擬真動態票數：根據女孩 ID 產生固定亂數 + 玩家真實投的票
-            let girlsWithVotes = dbGirls.map(g => {
-                let hash = 0;
-                for(let i=0; i<g.uid.length; i++) hash = g.uid.charCodeAt(i) + ((hash << 5) - hash);
-                let baseVotes = 10000 + (Math.abs(hash) % 40000); 
+            // 取得去重複後的乾淨名單
+            const pool = getVotePool();
+
+            // ✨ 核心修復 2：拔除假亂數，完全使用本地真實票數 (從 0 開始)
+            let girlsWithVotes = pool.map(g => {
                 const myVotes = parseInt(localStorage.getItem('my_votes_' + g.uid) || 0);
-                return { ...g, votes: baseVotes + myVotes };
+                return { ...g, votes: myVotes };
             });
 
             // 分流賽道
@@ -2289,7 +2312,7 @@
                 return voteState.currentRegion === 'korea' ? isKorean : !isKorean;
             });
 
-            // ✨ 渲染 TOP 10 橫向排行榜
+            // 渲染 TOP 10 橫向排行榜 (如果 0 票也會排，但大家都一樣時會依照原本陣列順序)
             regionGirls.sort((a, b) => b.votes - a.votes);
             if (leaderboard) {
                 leaderboard.innerHTML = regionGirls.slice(0, 10).map((g, idx) => {
@@ -2308,9 +2331,10 @@
                 }).join('');
             }
 
-            // ✨ 渲染下方女孩選擇網格 (含搜尋功能)
+            // 渲染下方女孩選擇網格 (含搜尋與球隊過濾)
             let filtered = regionGirls.filter(g => {
-                if (voteState.selectedTeam !== '全部' && g.combinedTeam !== voteState.selectedTeam) return false;
+                // 修復：改用 includes 判斷，這樣跨隊女孩 (例如包含 Fubon Angels) 也能被正確篩選出
+                if (voteState.selectedTeam !== '全部' && !(g.combinedTeam || "").includes(voteState.selectedTeam)) return false;
                 if (searchKeyword) {
                     const matchStr = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
                     if (!matchStr.includes(searchKeyword)) return false;
@@ -2353,7 +2377,7 @@
             let myVotes = parseInt(localStorage.getItem('my_votes_' + uid) || 0);
             localStorage.setItem('my_votes_' + uid, myVotes + 1);
 
-            alert(`🎉 應援成功！\n您今天寶貴的一票已經投給了【${name}】！\n目前戰況激烈，明天記得再回來幫她護盤喔！`);
+            alert(`🎉 應援成功！\n您今天寶貴的一票已經投給了【${name}】！\n明天記得再回來幫她護盤喔！`);
             window.renderVoteGrid(); 
         };
         // =========================================================================
