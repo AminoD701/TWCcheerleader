@@ -2319,79 +2319,93 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 全新：專屬前三名頒獎台渲染邏輯 (選秀節目電競高質感版)
+                // ✨ 終極舞台升級版：電競/選秀總決賽超高質感琉璃發光頒獎台
                 const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
-                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:12px; height: 420px; padding: 20px 10px 0; position:relative;">`;
+                let podiumHtml = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:16px; height: 480px; padding: 0 10px; position:relative; z-index:10;">`;
                 
                 if(dtState.isPosterMode) {
                     podiumHtml += `
-                    <div class="dt-watermark" style="top:10px; left:10px; bottom:auto; z-index:20;">
+                    <div class="dt-watermark" style="top:10px; left:15px; bottom:auto; z-index:20;">
                         <div class="dt-watermark-title" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">TOP 3 RANKING</div>
-                        <div class="dt-watermark-sub" style="color:${boardAccent}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
+                        <div class="dt-watermark-sub" style="color:#fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${dtState.rule === 'same' ? dtState.selectedTeam : '跨隊大亂鬥'}</div>
                     </div>`;
                 }
 
-                // 👑 專屬皇冠 SVG
-                const crownSvg = `<svg viewBox="0 0 24 24" style="width:45px; height:45px; fill:#ffd700; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.9)); position:absolute; top:-34px; left:50%; transform:translateX(-50%) rotate(8deg); z-index:15;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
+                // 👑 霸氣立體皇冠 SVG (稍微加大)
+                const crownSvg = `<svg viewBox="0 0 24 24" style="width:55px; height:55px; fill:#ffd700; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.9)); position:absolute; top:-40px; left:50%; transform:translateX(-50%) rotate(10deg); z-index:20;"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>`;
 
                 displayOrder.forEach(idx => {
                     const role = cfg.roles[idx];
                     const girl = dtState.roster[idx];
-                    const isFirst = (idx === 0); // 1號位 (中間冠軍)
+                    const isFirst = (idx === 0);
+                    // ✨ 動態加高頒獎台高度
+                    const pHeight = isFirst ? '240px' : (idx === 1 ? '170px' : '120px');
+                    const avSize = isFirst ? '120px' : '90px';
                     
                     let girlHtml = '';
                     if (girl) {
                         const isTW = (girl.nat || "").includes("台") || (girl.nat || "").includes("臺") || (girl.nat || "").includes("港") || (girl.nat || "").includes("馬");
                         const dName = isTW ? (girl.nickname || girl.realname) : girl.realname;
                         
-                        // ✨ 升級立體浮空頭像與名牌
+                        // ✨ 神級立體浮空頭像與名牌 (自帶背光光暈)
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-20px; z-index:10; display:flex; flex-direction:column; align-items:center;">
+                            <div style="position:relative; margin-bottom:-25px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                                ${isFirst ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:160px; height:160px; background:radial-gradient(circle, ${role.color}80 0%, transparent 70%); z-index:1;"></div>` : ''}
                                 ${isFirst ? crownSvg : ''}
-                                <div style="width:${isFirst?'110px':'85px'}; height:${isFirst?'110px':'85px'}; border-radius:50%; padding:3px; background:linear-gradient(135deg, #111, #333); border:2px solid ${role.color}; box-shadow: 0 10px 25px rgba(0,0,0,0.9), 0 0 20px ${role.color}80; overflow:visible; position:relative;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; padding:4px; background:linear-gradient(135deg, #222, #000); border:3px solid ${role.color}; box-shadow: 0 15px 30px rgba(0,0,0,0.9), 0 0 25px color-mix(in srgb, ${role.color} 60%, transparent); overflow:visible; position:relative; z-index:10;">
                                     <img src="${window.getCdnUrl(girl.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">
                                 </div>
-                                <div style="margin-top:-14px; position:relative; z-index:12;">
-                                    <span style="display:inline-block; font-size:${isFirst?'16px':'14px'}; font-weight:900; color:#fff; letter-spacing:1px; background:linear-gradient(180deg, #2a2a2a, #0a0c0f); padding: 4px 16px; border-radius:30px; border: 1px solid ${role.color}; box-shadow: 0 5px 15px rgba(0,0,0,0.9); text-shadow: 1px 1px 3px #000;">${dName}</span>
+                                <div style="margin-top:-16px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:${isFirst?'18px':'15px'}; font-weight:900; color:#fff; letter-spacing:1px; background:linear-gradient(180deg, #1a1a24, #050505); padding: 6px 20px; border-radius:30px; border: 2px solid ${role.color}; box-shadow: 0 8px 20px rgba(0,0,0,0.9); text-shadow: 1px 1px 3px #000;">${dName}</span>
                                 </div>
                             </div>
                         `;
                     } else {
                         girlHtml = `
-                            <div style="position:relative; margin-bottom:-20px; z-index:10; display:flex; flex-direction:column; align-items:center;">
-                                <div style="width:${isFirst?'110px':'85px'}; height:${isFirst?'110px':'85px'}; border-radius:50%; background:rgba(0,0,0,0.6); border:2px dashed ${role.color}; display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 20px rgba(0,0,0,0.6);">
-                                    <span style="font-size:30px; color:${role.color}; opacity:0.8;">➕</span>
+                            <div style="position:relative; margin-bottom:-25px; z-index:15; display:flex; flex-direction:column; align-items:center;">
+                                <div style="width:${avSize}; height:${avSize}; border-radius:50%; background:rgba(0,0,0,0.7); border:3px dashed color-mix(in srgb, ${role.color} 50%, transparent); display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 20px rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
+                                    <span style="font-size:36px; color:${role.color}; opacity:0.8;">➕</span>
                                 </div>
-                                <div style="margin-top:-14px; position:relative; z-index:12;">
-                                    <span style="display:inline-block; font-size:12px; font-weight:700; color:#aaa; background:#111; padding: 4px 14px; border-radius:30px; border: 1px solid #555;">點擊選擇</span>
+                                <div style="margin-top:-16px; position:relative; z-index:20;">
+                                    <span style="display:inline-block; font-size:13px; font-weight:700; color:#ddd; background:#111; padding: 6px 16px; border-radius:30px; border: 1px solid #666; box-shadow: 0 5px 15px rgba(0,0,0,0.8);">點擊指派</span>
                                 </div>
                             </div>
                         `;
                     }
 
                     podiumHtml += `
-                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'"`}>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex:1; cursor:${dtState.isPosterMode?'default':'pointer'}; transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" ${dtState.isPosterMode ? '' : `onclick="window.openDtSelector(${idx})" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'"`}>
                         ${girlHtml}
-                        <div style="width:100%; height:${role.height}; background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(5,5,5,0.95) 80%); border-top: 4px solid ${role.color}; border-radius: 12px 12px 0 0; position:relative; display:flex; justify-content:center; padding-top:20px; box-shadow: 0 -15px 40px rgba(0,0,0,0.8), inset 0 15px 25px rgba(255,255,255,0.05); overflow:hidden;">
-                            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:70%; height:25px; background:radial-gradient(ellipse, ${role.color} 0%, transparent 70%); opacity:0.35;"></div>
+                        <div style="width:100%; height:${pHeight}; background: linear-gradient(180deg, color-mix(in srgb, ${role.color} 15%, rgba(255,255,255,0.1)) 0%, rgba(5,5,5,0.95) 80%); border: 1px solid color-mix(in srgb, ${role.color} 30%, transparent); border-top: 5px solid ${role.color}; border-bottom: none; border-radius: 16px 16px 0 0; position:relative; display:flex; justify-content:center; padding-top:25px; box-shadow: 0 -20px 50px rgba(0,0,0,0.9), inset 0 20px 30px rgba(255,255,255,0.05); overflow:hidden;">
+                            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:80%; height:30px; background:radial-gradient(ellipse, color-mix(in srgb, ${role.color} 80%, #fff) 0%, transparent 70%); opacity:0.4;"></div>
                             
-                            <span style="font-family:var(--sport-font); font-size:${isFirst?'110px':'80px'}; font-weight:900; line-height:0.8; color:transparent; -webkit-text-stroke: 2px rgba(255,255,255,0.4); filter:drop-shadow(0 0 15px ${role.color}); position:relative; z-index:2; opacity:0.9;">${role.rank}</span>
+                            <span style="font-family:var(--sport-font); font-size:${isFirst?'140px':'100px'}; font-weight:900; line-height:0.8; color:transparent; -webkit-text-stroke: 2px color-mix(in srgb, ${role.color} 60%, #fff); filter:drop-shadow(0 0 20px ${role.color}); position:relative; z-index:2; opacity:0.9;">${role.rank}</span>
                         </div>
                     </div>`;
                 });
                 podiumHtml += `</div>`;
 
                 let displayTitle = dtState.customTitle || cfg.name;
+                
+                // ✨ 專屬舞台背景與標題橫幅
+                let stageHtml = `
+                    <div class="dt-poster" style="border-color:${boardAccent}; padding: 0; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 40%, color-mix(in srgb, ${boardAccent} 25%, #1a1a24), #050505 80%); box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
+                        <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100%; height:100%; background: repeating-linear-gradient(90deg, transparent, transparent 10%, color-mix(in srgb, ${boardAccent} 6%, transparent) 10%, color-mix(in srgb, ${boardAccent} 6%, transparent) 20%); pointer-events:none; z-index:1; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); opacity: 0.6;"></div>
+                        
+                        <div style="position:relative; z-index:20; background: linear-gradient(90deg, transparent, color-mix(in srgb, ${boardAccent} 60%, #000), transparent); padding: 15px 10px; margin-top: 30px; margin-bottom: 10px; border-top: 1px solid ${boardAccent}; border-bottom: 1px solid ${boardAccent}; text-align:center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                            <div style="font-family:var(--tc-font); font-size:clamp(22px, 5vw, 32px); font-weight:900; color:#fff; text-shadow: 0 0 15px ${boardAccent}, 2px 2px 5px #000; letter-spacing: 2px;">🏆 ${displayTitle}</div>
+                        </div>
+                        
+                        ${podiumHtml}
+                    </div>
+                `;
 
                 if (dtState.isPosterMode) {
                     container.innerHTML = `
                         <div class="game-title" style="color:${boardAccent}; text-shadow: 2px 2px 0px #000;">${displayTitle}</div>
                         <div style="color:var(--text-sub); font-size:16px; font-weight:900; margin-bottom:15px;">👇 隱藏介面完成，快截圖分享你的專屬榜單！</div>
                         
-                        <div class="dt-poster" style="border-color:${boardAccent}; background: #0a0c0f; padding: 20px 10px 0px; overflow:visible;">
-                            <div style="font-family:var(--tc-font); font-size:26px; font-weight:900; color:#fff; text-shadow: 2px 2px 0 ${boardAccent}; margin-bottom:5px; text-align:center;">🏆 ${displayTitle}</div>
-                            ${podiumHtml}
-                        </div>
+                        ${stageHtml}
                         
                         <div style="margin-top:30px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                             <button class="nav-btn active" style="background:#111; color:#fff; border-color:#555;" onclick="dtState.isPosterMode=false; window.renderDreamTeamStart()">🔙 返回修改</button>
@@ -2403,9 +2417,7 @@
                         <div class="game-title" style="margin-bottom:5px;">${displayTitle}</div>
                         <div style="color:var(--event-accent); font-size:14px; font-weight:900; margin-bottom:15px;">${modeSubtitle} (點擊頒獎台 ➕ 指派女孩)</div>
                         
-                        <div class="dt-poster" style="border-color:${boardAccent}; background: #0a0c0f; padding: 20px 10px 0px; overflow:visible;">
-                            ${podiumHtml}
-                        </div>
+                        ${stageHtml}
                         
                         <div style="margin-top:25px; display:flex; flex-direction:column; align-items:center; gap:15px;">
                             <button class="nav-btn" style="background:${isFull ? boardAccent : '#333'}; color:${isFull ? '#000' : '#888'}; border-color:transparent; width:100%; max-width:400px; padding:15px; font-size:16px;" onclick="window.generateDtPoster()" ${isFull ? '' : 'disabled'}>
