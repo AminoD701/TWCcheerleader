@@ -2319,12 +2319,46 @@
                     </div>`;
 
             } else if (cfg.type === 'podium') {
-                // ✨ 羅馬神話殿堂級頒獎台：巨大化頭像 + 羅馬柱基座 + 古典羅馬金牌
+                // ✨ 羅馬神話殿堂級頒獎台：巨大化頭像 + 羅馬柱基座 + 古典羅馬金牌 + 金桂冠花草背景
                 const displayOrder = [1, 0, 2]; // 視覺排序：2 號放左邊，1 號放中間最高，3 號放右邊
                 
-                // 背景加入神聖光暈，烘托希臘神話氛圍
+                // 🌿 精緻的 SVG 金桂冠 (代表勝利與榮耀的花草裝飾)
+                const laurelBranchSvg = `
+                <svg viewBox="0 0 100 250" style="width:100%; height:100%; fill:url(#gold-grad); filter:drop-shadow(0 0 12px rgba(255,215,0,0.3));">
+                    <defs>
+                        <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffeb3b" />
+                            <stop offset="50%" stop-color="#d4af37" />
+                            <stop offset="100%" stop-color="#996515" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M50,250 Q40,150 50,10" stroke="url(#gold-grad)" stroke-width="2" fill="none" />
+                    <path d="M48,220 Q20,210 30,180 Q40,190 47,200 Z" />
+                    <path d="M46,180 Q10,160 20,130 Q35,140 45,160 Z" />
+                    <path d="M45,130 Q5,100 20,70 Q35,90 44,110 Z" />
+                    <path d="M47,80 Q15,40 30,10 Q40,30 48,60 Z" />
+                    <path d="M52,230 Q80,220 70,190 Q60,200 53,210 Z" />
+                    <path d="M54,190 Q90,170 80,140 Q65,150 55,170 Z" />
+                    <path d="M55,140 Q95,110 80,80 Q65,100 56,120 Z" />
+                    <path d="M53,90 Q85,50 70,20 Q60,40 52,70 Z" />
+                    <path d="M50,10 Q40,-10 50,-20 Q60,-10 50,10 Z" />
+                </svg>`;
+
+                // ✨ 豐富背景組合：神聖光暈 + 漂浮星塵 + 左右金桂冠
                 let podiumHtml = `
-                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 60%); pointer-events:none; z-index:1;"></div>
+                <div style="position:absolute; top:0%; left:50%; transform:translateX(-50%); width:100%; height:100%; background:radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 65%); pointer-events:none; z-index:1;"></div>
+                
+                <div style="position:absolute; top:15%; left:20%; width:6px; height:6px; background:#fff; border-radius:50%; box-shadow:0 0 10px #fff; opacity:0.6; filter:blur(1px); z-index:2;"></div>
+                <div style="position:absolute; top:35%; right:15%; width:10px; height:10px; background:#ffd700; border-radius:50%; box-shadow:0 0 15px #ffd700; opacity:0.3; filter:blur(2px); z-index:2;"></div>
+                <div style="position:absolute; top:65%; left:10%; width:8px; height:8px; background:#ffeb3b; border-radius:50%; box-shadow:0 0 12px #ffeb3b; opacity:0.4; z-index:2;"></div>
+
+                <div style="position:absolute; bottom:-2%; left:clamp(-20px, -2vw, 10px); width:clamp(100px, 22vw, 250px); height:clamp(250px, 50vh, 550px); opacity:0.4; transform:rotate(-15deg); pointer-events:none; z-index:5;">
+                    ${laurelBranchSvg}
+                </div>
+                
+                <div style="position:absolute; bottom:-2%; right:clamp(-20px, -2vw, 10px); width:clamp(100px, 22vw, 250px); height:clamp(250px, 50vh, 550px); opacity:0.4; transform:rotate(15deg) scaleX(-1); pointer-events:none; z-index:5;">
+                    ${laurelBranchSvg}
+                </div>
 
                 <div style="display:flex; justify-content:center; align-items:flex-end; gap:clamp(8px, 3vw, 25px); height: clamp(450px, 65vh, 650px); padding: 0 10px; position:relative; z-index:10; max-width: 900px; margin: 0 auto;">`;
                 
@@ -2344,12 +2378,10 @@
                     const girl = dtState.roster[idx];
                     const isFirst = (idx === 0);
                     
-                    // ✨ 巨大化參數：用 clamp 完美放大照片與名字！
                     const pHeight = isFirst ? 'clamp(140px, 25vh, 240px)' : (idx === 1 ? 'clamp(100px, 18vh, 160px)' : 'clamp(60px, 11vh, 100px)');
                     const avSize = isFirst ? 'clamp(100px, 22vw, 170px)' : 'clamp(80px, 17vw, 130px)';
                     const nameSize = isFirst ? 'clamp(18px, 3.5vw, 26px)' : 'clamp(14px, 2.8vw, 20px)';
                     
-                    // 金、銀、銅的基底顏色 (加強金屬質感)
                     const baseColor = role.color;
                     const romanNum = ['I', 'II', 'III'][idx];
                     
