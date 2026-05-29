@@ -5164,10 +5164,33 @@ window.renderMinigameStart = function() {
             };
 
             const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+            const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
             const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
             const titleText = getField(n, ['title', '標題'], '無標題');
-            const contentText = getField(n, ['content', '內文', '內容'], '暫無內文');
+            let contentText = getField(n, ['content', '內文', '內容'], '暫無內文');
             const dateText = getField(n, ['date', '日期'], '-');
+
+            // ✨ 戰術一：內文智慧關聯女孩 (Smart Mentions)
+            // 1. 建立所有女孩的姓名與綽號清單，並依照長度排序 (避免短名吃掉長名)
+            let allNames = [];
+            dbGirls.forEach(g => {
+                if (g.realname) allNames.push(g.realname);
+                if (g.nickname && g.nickname !== g.realname) allNames.push(g.nickname);
+            });
+            allNames.sort((a, b) => b.length - a.length);
+            
+            // 2. 將所有名字組合成正則表達式，一鍵將內文的名字替換成可點擊的專屬連結
+            if (allNames.length > 0) {
+                const namesPattern = allNames.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+                const regex = new RegExp(`(${namesPattern})`, 'g');
+                contentText = contentText.replace(regex, (match) => {
+                    const targetGirl = girlMap.get(match) || dbGirls.find(g => g.realname === match || g.nickname === match);
+                    if (targetGirl) {
+                        return `<span onclick="window.openModal('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
+                    }
+                    return match;
+                });
+            }
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
             
