@@ -1655,6 +1655,11 @@
         <div class="filters" id="standard-filters">
             <input type="text" id="searchInput" placeholder="搜尋姓名、綽號或活動..." oninput="window.debounceSearch()">
             <div id="extra-filters" style="display: flex; gap: 10px;">
+                <select id="roleFilter" onchange="window.renderContent()">
+                    <option value="all">所有身分</option>
+                    <option value="cheerleader">正規啦啦隊 (含練習生)</option>
+                    <option value="special">特殊身分 (團長/吉祥物等)</option>
+                </select>
                 <select id="natFilter" onchange="window.renderContent()">
                     <option value="all">所有國籍</option>
                     <option value="韓國">韓國</option><option value="日本">日本</option>
@@ -3745,6 +3750,7 @@
         function renderGirls() {
             const container = document.getElementById('grid-container');
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
+            const role = document.getElementById('roleFilter') ? document.getElementById('roleFilter').value : "all"; // ✨ 抓取身分篩選器
             const nat = document.getElementById('natFilter').value;
             const zodiac = document.getElementById('zodiacFilter').value;
             const sort = document.getElementById('sortFilter').value;
@@ -3754,21 +3760,31 @@
                 const mt = currentTeam === "全部啦啦隊" || (c.team || "").trim() === currentTeam;
                 const mS = search === "" || (c.nickname || "").toLowerCase().includes(search) || (c.realname || "").toLowerCase().includes(search);
                 
-                // ✨ 國籍篩選智慧升級：精準抓出「其他」國籍與混血女孩
+                // 國籍判斷
                 const mN = (() => {
                     if (nat === 'all') return true;
                     const nStr = c.nat || "";
                     if (nat === '臺灣') return nStr.includes("臺") || nStr.includes("台");
-                    if (nat === '其他') {
-                        // 只要國籍欄位「沒有」明確寫著純粹的台灣、韓國、日本，就會被掃進「其他」！
-                        // 這樣馬來西亞、香港、台日混血就會完美現身了！
-                        return !nStr.includes("臺灣") && !nStr.includes("台灣") && !nStr.includes("韓國") && !nStr.includes("日本");
-                    }
+                    if (nat === '其他') return !nStr.includes("臺灣") && !nStr.includes("台灣") && !nStr.includes("韓國") && !nStr.includes("日本");
                     return nStr.includes(nat);
                 })();
 
                 const cz = (c.zodiac || "").trim().replace("魔羯","摩羯").replace("白羊","牡羊");
-                return ms && mt && mS && mN && (zodiac === 'all' || cz === zodiac);
+                const mZ = (zodiac === 'all' || cz === zodiac);
+
+                // ✨ 身分判斷邏輯 (運用剛剛建立的白名單規則)
+                const mRole = (() => {
+                    if (role === 'all') return true;
+                    const note = (c.note || c['備註'] || c.備註 || "").trim();
+                    // 只要有寫備註，且不是練習生/培訓生，就是「特殊身分」
+                    const isSpecial = note !== "" && !note.includes("練習生") && !note.includes("培訓生");
+                    
+                    if (role === 'cheerleader') return !isSpecial; // 只看正規女孩(含練習生)
+                    if (role === 'special') return isSpecial;     // 只看吉祥物/團長/MC
+                    return true;
+                })();
+
+                return ms && mt && mS && mN && mZ && mRole;
             });
 
             if (currentSport === "全部" && currentTeam === "全部啦啦隊") {
