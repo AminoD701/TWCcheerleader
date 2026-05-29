@@ -221,8 +221,8 @@
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         
-        .modal-photo { flex-shrink: 0; width: 100%; height: clamp(160px, 35vh, 280px); object-fit: cover; object-position: top center; border-bottom: 4px solid var(--modal-accent, #fff); }
-        .modal-body { flex: 1; min-height: 0; padding: clamp(15px, 4vw, 25px); overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        .modal-photo { flex-shrink: 0; width: 100%; height: clamp(280px, 40vh, 450px); object-fit: cover; object-position: top center; border-bottom: 4px solid var(--modal-accent, #fff); }
+        .modal-body { flex: 1; min-height: 0; padding: 25px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(30px, env(safe-area-inset-bottom)); }
 
         .modal-close { position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; transition: 0.2s; backdrop-filter: blur(4px); }
         .modal-close:hover { background: var(--fav-accent); transform: scale(1.1); border-color: transparent;}
@@ -549,8 +549,8 @@
             .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
             .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-            .modal-photo { height: clamp(150px, 28vh, 220px) !important; border-bottom-width: 3px !important; } 
-            .modal-body { padding: 15px !important; padding-bottom: 25px !important; }
+            .modal-photo { height: 38vh !important; min-height: 300px !important; border-bottom-width: 3px !important; } 
+            .modal-body { padding: 20px 15px !important; padding-bottom: 30px !important; }
             .modal-nickname { font-size: 24px !important; }
             .modal-number { font-size: 22px; padding: 4px 12px; }
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
@@ -3922,34 +3922,9 @@
 
             container.innerHTML = htmlContent;
         }
-        // ✨ 新增：彈窗專屬班表下拉選單輔助引擎
-        window.updateModalSchedBtn = function() {
-            const sel = document.getElementById('modal-sched-select');
-            const btn = document.getElementById('modal-sched-btn');
-            if(!sel || !btn || !window._tempModalSchedules) return;
-            const s = window._tempModalSchedules[sel.value];
-            if(!s) return;
-            
-            const isSaved = schedSet.has(s.key);
-            btn.innerText = isSaved ? '➖ 移除' : '➕ 加行程';
-            btn.style.background = isSaved ? 'var(--fav-accent)' : '#252c36';
-            btn.style.color = '#fff';
-            btn.style.borderColor = isSaved ? 'transparent' : 'var(--border-color)';
-        };
-
-        window.addModalSched = function(event) {
-            if(event) event.stopPropagation();
-            const sel = document.getElementById('modal-sched-select');
-            if(!sel || !window._tempModalSchedules) return;
-            const s = window._tempModalSchedules[sel.value];
-            if(!s) return;
-            
-            window.toggleMySchedule(s.key, s.num, s.str, s.title, null, null);
-            setTimeout(window.updateModalSchedBtn, 15); // 點擊後瞬間更新按鈕狀態
-        };
-
+        
         // =========================================================================
-        // 個人詳細彈窗 (極致瘦身 + IG小圖示 + 下拉班表版)
+        // 個人詳細彈窗 (IG 質感小圖示 + 班表橫向完美收納版)
         // =========================================================================
         window.openModal = function(id) {
             const c = girlMap.get(id) || dbGirls.find(g => (g.realname||"").trim() === id.trim() || (g.nickname||"").trim() === id.trim());
@@ -3993,26 +3968,29 @@
                 return false;
             });
 
-            // ✨ 將班表轉換成乾淨的下拉選單資料
-            window._tempModalSchedules = herSchedules.map(s => {
-                let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
-                let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
-                let scheduleTitle = `${s.team} · ${s.sport} 應援`;
-                let display = `${s.safeDate.month}/${String(s.safeDate.day).padStart(2,'0')} (${s.safeDate.week}) - ${scheduleTitle}`;
-                return { key, num: s.safeDate.num, str: dateStr, title: scheduleTitle, display };
-            });
-
+            // ✨ 班表回歸直覺方塊，但改為橫向滑動收納，不佔垂直空間！
             let scheduleHtml = '';
-            if (window._tempModalSchedules.length > 0) {
-                let optionsHtml = window._tempModalSchedules.map((s, i) => `<option value="${i}">${s.display}</option>`).join('');
+            if (herSchedules.length > 0) {
+                herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
+                let dateBoxes = herSchedules.map(s => {
+                    let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
+                    let isSaved = schedSet.has(key);
+                    let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
+                    let scheduleTitle = `${s.team} · ${s.sport} 應援`;
+                    
+                    return `
+                    <div style="flex-shrink: 0; background: #15191e; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 10px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 90px;">
+                        <span style="font-size: 11px; color: var(--text-sub); font-weight: 700; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
+                        <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; margin: 4px 0; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                        <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:6px 0; font-size:12px; background:${isSaved?'var(--fav-accent)':'#252c36'}; color:#fff; border:1px solid ${isSaved?'transparent':'var(--border-color)'}; border-radius:4px; font-weight:900; cursor:pointer; margin-top:4px; transition:0.2s;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
+                    </div>`;
+                }).join('');
+
                 scheduleHtml = `
                     <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                        <div style="font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: ${cardAccent}; margin-bottom: 8px; letter-spacing: 1px;">🗓️ 本月應援 SCHEDULE</div>
-                        <div style="display: flex; gap: 8px; align-items: stretch;">
-                            <select id="modal-sched-select" onchange="window.updateModalSchedBtn()" style="flex: 1; padding: 10px 12px; background: #15191e; color: #fff; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-size: 14px; font-weight: 700; font-family: var(--tc-font);">
-                                ${optionsHtml}
-                            </select>
-                            <button id="modal-sched-btn" onclick="window.addModalSched(event)" style="padding: 0 15px; font-size: 14px; font-weight: 900; border-radius: 4px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: 0.2s;"></button>
+                        <div style="font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: ${cardAccent}; margin-bottom: 10px; letter-spacing: 1px;">🗓️ 本月應援 SCHEDULE (可左右滑動)</div>
+                        <div style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 10px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                            ${dateBoxes}
                         </div>
                     </div>
                 `;
@@ -4020,7 +3998,6 @@
 
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
 
-            // ✨ 移除了龐大的 bottom IG button，並將 IG 融入姓名列
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${finalImgUrl ? `<img src="${finalImgUrl}" class="modal-photo">` : ''}
                 <div class="modal-body">
@@ -4059,11 +4036,6 @@
 
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll'); 
-            
-            // ✨ 初始化下拉選單按鈕的按鈕狀態
-            if (window._tempModalSchedules && window._tempModalSchedules.length > 0) {
-                window.updateModalSchedBtn();
-            }
         };
         window.closeModal = function() { 
             document.getElementById('girl-modal').classList.remove('active'); 
