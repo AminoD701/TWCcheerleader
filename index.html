@@ -4903,49 +4903,67 @@ window.renderMinigameStart = function() {
             }
         };
 
-        // 2. 點擊心情按鈕 (樂觀 UI ＋ 背景非同步全網寫入，絕對不卡頓！)
+        // 2. 點擊心情按鈕 (支援「取消」與「換心情」的完美動態版)
         window.clickNewsReaction = function(newsIdx, type) {
             const key = `news_react_single_${newsIdx}`;
             const existingReact = localStorage.getItem(key);
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
+            
+            // 輔助引擎：負責處理畫面的數字增減與特效
+            const updateUI = (reactType, isAdd) => {
+                const btnEl = document.getElementById(`react-btn-${newsIdx}-${reactType}`);
+                const countEl = document.getElementById(`react-count-${newsIdx}-${reactType}`);
+                const voteKey = `news_react_${newsIdx}_${reactType}`;
+                
+                if (countEl && btnEl) {
+                    let currentCount = parseInt(countEl.innerText) || 0;
+                    // 如果是新增就 +1，取消就 -1 (最低為0)
+                    let newCount = isAdd ? currentCount + 1 : Math.max(0, currentCount - 1);
+                    countEl.innerText = newCount;
+                    window.globalNewsReactData[voteKey] = newCount;
+                    
+                    if (isAdd) {
+                        btnEl.style.background = 'rgba(255,255,255,0.12)';
+                        btnEl.style.borderColor = themeColor;
+                        btnEl.style.transform = 'scale(1.1)';
+                        setTimeout(() => btnEl.style.transform = 'none', 200);
+                        
+                        // +1 噴射泡泡特效
+                        const plus = document.createElement('span');
+                        plus.innerText = '+1';
+                        plus.style.cssText = `position:absolute; top:-15px; left:50%; transform:translateX(-50%); color:${themeColor}; font-family:var(--sport-font); font-weight:900; font-size:13px; z-index:30; animation:gacha-bounce 0.5s ease forwards;`;
+                        btnEl.appendChild(plus);
+                        setTimeout(() => plus.remove(), 500);
+                    } else {
+                        btnEl.style.background = 'rgba(255,255,255,0.02)';
+                        btnEl.style.borderColor = 'rgba(255,255,255,0.08)';
+                    }
+                }
 
-            if (existingReact) {
-                if (existingReact === type) alert("您已經點過這個心情囉！💖");
-                else alert("一篇文章只能表達一種心情喔！您已經選過其他心情了。");
+                // 背景悄悄傳送給 Google 試算表，加入 action 參數告訴後端是加還是減
+                if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
+                    fetch(VOTE_API_URL, {
+                        method: "POST",
+                        body: JSON.stringify({ uid: voteKey, action: isAdd ? "add" : "remove" })
+                    }).catch(e => console.log("雲端同步失敗", e));
+                }
+            };
+
+            // 情境 1：點擊自己已經選過的心情 => 執行「收回/取消」
+            if (existingReact === type) {
+                localStorage.removeItem(key); // 解除手機鎖定
+                updateUI(type, false);        // 畫面減 1 並退回灰色
                 return;
             }
             
-            // 本地鎖定防重複洗票
-            localStorage.setItem(key, type);
-            
-            const voteKey = `news_react_${newsIdx}_${type}`;
-            const countEl = document.getElementById(`react-count-${newsIdx}-${type}`);
-            const btnEl = document.getElementById(`react-btn-${newsIdx}-${type}`);
-            
-            if (countEl && btnEl) {
-                // 樂觀更新：前端數字不用等伺服器，直接絲滑 +1
-                let currentCount = parseInt(countEl.innerText) || 0;
-                countEl.innerText = currentCount + 1;
-                window.globalNewsReactData[voteKey] = (parseInt(window.globalNewsReactData[voteKey]) || 0) + 1;
-                
-                // 點亮按鈕
-                btnEl.style.background = 'rgba(255,255,255,0.12)';
-                btnEl.style.borderColor = 'var(--event-accent)';
-                
-                // +1 噴射泡泡特效
-                const plus = document.createElement('span');
-                plus.innerText = '+1';
-                plus.style.cssText = 'position:absolute; top:-15px; left:50%; transform:translateX(-50%); color:var(--event-accent); font-family:var(--sport-font); font-weight:900; font-size:13px; z-index:30; animation:gacha-bounce 0.5s ease forwards;';
-                btnEl.appendChild(plus);
-                setTimeout(() => plus.remove(), 500);
+            // 情境 2：之前選過別的心情，現在想換一個 => 「舊的減1，新的加1」
+            if (existingReact && existingReact !== type) {
+                updateUI(existingReact, false); // 把舊的心情 -1
             }
-
-            // 背景悄悄傳送給 Google 試算表，操作絕對不 Lag
-            if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                fetch(VOTE_API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ uid: voteKey })
-                }).catch(e => console.log("寫入雲端心情失敗", e));
-            }
+            
+            // 情境 3：正常點擊新心情
+            localStorage.setItem(key, type); // 記錄新選擇
+            updateUI(type, true);            // 畫面加 1 並發光
         };
 
         window.renderNewsHub = function() {
