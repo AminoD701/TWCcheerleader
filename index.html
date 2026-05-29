@@ -4977,6 +4977,9 @@ window.renderMinigameStart = function() {
             container.innerHTML = html;
         };
 
+        // =========================================================================
+        // 📰 每日情報專屬彈窗 (潮流標籤雲 + 懸浮分享按鈕版)
+        // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
             if (!n) return;
@@ -4993,17 +4996,27 @@ window.renderMinigameStart = function() {
             const dateText = getField(n, ['date', '日期'], '-');
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
+            
+            // ✨ 標籤雲黑魔法：自動抓取試算表的「標籤雲」欄位，用逗號切開。若沒填，預設顯示分類。
+            const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
+            let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(t=>t) : [tagText];
 
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
 
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
             document.getElementById('modal-dynamic-content').innerHTML = `
-                <div class="modal-body" style="padding: 0;">
+                <div class="modal-body" style="padding: 0; position: relative;">
+                    
+                    <button onclick="window.shareNews(${absoluteIndex}, '${titleText}')" style="position: absolute; top: 12px; right: 55px; width: 36px; height: 36px; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s;" title="分享此情報" onmouseover="this.style.background='${themeColor}'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">
+                        <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:#fff; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    </button>
+
                     ${imgUrl ? `
-                    <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center;">
+                    <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; position: relative;">
                         <img src="${imgUrl}" style="max-width: 100%; height: auto; max-height: 65vh; display: inline-block; vertical-align: middle;">
                     </div>` : ''}
+                    
                     <div style="padding: 25px;">
                         <div class="news-header-meta" style="margin-bottom: 12px;">
                             <span class="news-date">📅 ${dateText}</span>
@@ -5012,11 +5025,11 @@ window.renderMinigameStart = function() {
                         <div class="modal-news-title" style="color:${themeColor}">${titleText}</div>
                         <div class="modal-news-text">${contentText}</div>
                         
-                        <button onclick="window.shareNews(${absoluteIndex}, '${titleText}')" class="modal-ig-btn" style="background: color-mix(in srgb, ${themeColor} 20%, #15191e); border-color: ${themeColor}; margin-top: 25px; cursor: pointer;">
-                            <span style="color:#fff; font-family:var(--tc-font); display:flex; align-items:center; gap:8px;">📢 一鍵分享這篇新聞給球迷 / 複製連結</span>
-                        </button>
-
-                        ${linkText ? `<a href="${linkText}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:12px;"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往相關連結 / 查閱原文</span></a>` : ''}
+                        <div style="margin-top: 25px; display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${tagsArray.map(t => `<span style="background: rgba(255,255,255,0.05); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='${themeColor}'" onmouseout="this.style.color='var(--text-sub)'; this.style.borderColor='rgba(255,255,255,0.1)'">#${t}</span>`).join('')}
+                        </div>
+                        
+                        ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:14px; border-radius:6px; font-weight:900; font-size:14px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:25px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 前往相關連結 / 查閱原文 ➔</a>` : ''}
                     </div>
                 </div>
             `;
