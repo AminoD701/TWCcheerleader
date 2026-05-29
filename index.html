@@ -1735,7 +1735,7 @@
                 </select>
             </div>
         </div>
-        <div class="sub-nav" id="news-filters" style="display: none; border-top: none; margin-top: 0; padding-top: 0; justify-content: center; flex-wrap: wrap; gap: 10px;">
+        <div class="sub-nav" id="news-filters" style="display: none; border-top: none; margin-top: 15px; padding-top: 0; justify-content: center; flex-wrap: wrap; gap: 10px;">
         </div>
     </div>
 
@@ -2320,10 +2320,16 @@
 
                 if (currentMode === 'news') {
                     document.getElementById('news-filters').style.display = 'flex';
-                    document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; // 專屬提示
+                    document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; 
+                    
+                    // ✨ 修復：每次切換回情報大廳，確保搜尋框與標籤狀態歸零，預設顯示「全部情報」
+                    document.getElementById('searchInput').value = ""; 
+                    window.currentNewsTag = "全部";
+                    window.currentNewsHashtag = "";
                 } else {
                     document.getElementById('news-filters').style.display = 'none';
                     document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
+                    document.getElementById('searchInput').value = ""; // 切換到其他分頁時也清空搜尋字眼
                 }
             } else {
                 document.getElementById('filter-bar').style.display = 'none';
