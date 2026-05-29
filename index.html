@@ -1566,7 +1566,7 @@
            ========================================================================= */
         #vote-grid {
             display: grid !important;
-            grid-template-columns: repeat(5, minmax(0, 1fr)) !important; /* 加入 minmax 防撐破 */
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important; /* ✨ 電腦版絕對鎖死 5 排 */
             gap: 15px !important;
             width: 100% !important;
             max-width: 950px !important;
@@ -1575,55 +1575,30 @@
             justify-content: center !important;
         }
 
+        /* 👇 以下是手機版專屬設定 (請確保這組大括號完整包覆) */
         @media (max-width: 768px) {
-            .marquee-wrapper { padding: 8px 0; margin-bottom: 15px; }
-            .marquee-wrapper::before { font-size: 11px; padding: 0 10px; }
-            .marquee-content { font-size: 13px; animation-duration: 20s; }
+            /* 跑馬燈極限縮小 */
+            .marquee-wrapper { padding: 5px 0; margin-bottom: 10px; border-top-width: 1px; border-bottom-width: 1px; }
+            .marquee-wrapper::before { font-size: 9px; padding: 0 8px; letter-spacing: 1px; }
+            .marquee-content { font-size: 10px; animation-duration: 20s; padding-left: 100%; }
+            .marquee-highlight { font-size: 10px; margin: 0 2px; }
             
-            /* ✨ 手機版強制 3 欄，並啟用 minmax(0, 1fr) 防撐破黑魔法 */
+            /* ✨ 手機版強制 3 排 */
             #vote-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
                 gap: 6px !important;
                 padding: 0 5px !important;
             }
             
-            /* ✨ 卡片極限壓縮與防溢出鎖定 */
-            #vote-grid .vote-card { 
-                padding: 8px 4px !important; 
-                min-width: 0 !important; /* 絕對防止內容撐開網格 */
-            }
-            #vote-grid .vote-img-box { 
-                width: 100% !important; 
-                max-width: 75px !important; /* 照片微縮，釋放兩側壓力 */
-                margin: 0 auto 6px !important; 
-            }
-            #vote-grid .vote-card > div:nth-child(2) { 
-                font-size: 12px !important; /* 女孩名字 */
-            } 
-            #vote-grid .vote-card > div:nth-child(3) { 
-                font-size: 9px !important; 
-                padding: 2px 4px !important; 
-                margin-bottom: 6px !important; 
-            } 
-            #vote-grid .vote-card > div:nth-child(4) { 
-                font-size: 11px !important; 
-                margin-bottom: 8px !important; 
-            } 
+            /* 卡片極限壓縮防溢出 */
+            #vote-grid .vote-card { padding: 8px 4px !important; min-width: 0 !important; }
+            #vote-grid .vote-img-box { width: 100% !important; max-width: 75px !important; margin: 0 auto 6px !important; }
+            #vote-grid .vote-card > div:nth-child(2) { font-size: 12px !important; } 
+            #vote-grid .vote-card > div:nth-child(3) { font-size: 9px !important; padding: 2px 4px !important; margin-bottom: 6px !important; } 
+            #vote-grid .vote-card > div:nth-child(4) { font-size: 11px !important; margin-bottom: 8px !important; } 
             
-            /* ✨ 按鈕強制允許換行！字體縮小，絕對不把螢幕撐破 */
-            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { 
-                font-size: 10px !important; 
-                padding: 6px 2px !important; 
-                white-space: normal !important; /* 解除不准換行的封印 */
-                line-height: 1.2 !important;
-                word-break: break-all !important;
-            }
-        }
-        /* ✨ 投票模式專屬：隱藏浮動按鈕以利截圖分享 */
-        body.mode-vote .floating-boba-btn,
-        body.mode-vote .floating-hub-btn,
-        body.mode-vote .back-to-top {
-            display: none !important;
+            /* 按鈕允許換行 */
+            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { font-size: 10px !important; padding: 6px 2px !important; white-space: normal !important; line-height: 1.2 !important; word-break: break-all !important; }
         }
     </style> 
 </head>
