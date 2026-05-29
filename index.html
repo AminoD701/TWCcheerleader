@@ -4884,41 +4884,68 @@ window.renderMinigameStart = function() {
         // 📰 每日動態情報牆核心渲染引擎 (CMS)
         // =========================================================================
         window.currentNewsTag = "全部";
-        // ✨ 新增：新聞共鳴按鈕點擊計票與特效引擎 (嚴格單選版)
+
+        // ✨ 雲端大同步：全網真實數據計票與渲染核心引擎
+        window.globalNewsReactData = {}; // 儲存全網新聞真實心情數據
+
+        // 1. 背景連線抓取全網真實心情數據
+        window.fetchGlobalNewsReactions = async function() {
+            try {
+                // 智慧沿用您投票系統的 API URL，透過參數 type=news 進行後端自動分流
+                if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
+                    const response = await fetch(VOTE_API_URL + "?type=news");
+                    const data = await response.json();
+                    if(data && Object.keys(data).length > 0) {
+                        window.globalNewsReactData = data;
+                    }
+                }
+            } catch (e) {
+                console.log("讀取全網新聞心情失敗，自動切換為本地緩存", e);
+            }
+        };
+
+        // 2. 點擊心情按鈕 (樂觀 UI ＋ 背景非同步全網寫入，絕對不卡頓！)
         window.clickNewsReaction = function(newsIdx, type) {
             const key = `news_react_single_${newsIdx}`;
             const existingReact = localStorage.getItem(key);
 
             if (existingReact) {
-                if (existingReact === type) {
-                    alert("您已經點過這個心情囉！💖");
-                } else {
-                    alert("一篇文章只能表達一種心情喔！您已經選過其他心情了。");
-                }
+                if (existingReact === type) alert("您已經點過這個心情囉！💖");
+                else alert("一篇文章只能表達一種心情喔！您已經選過其他心情了。");
                 return;
             }
             
-            // 鎖定手機紀錄，這篇文章只允許一次表態，並記錄選了什麼心情
+            // 本地鎖定防重複洗票
             localStorage.setItem(key, type);
             
+            const voteKey = `news_react_${newsIdx}_${type}`;
             const countEl = document.getElementById(`react-count-${newsIdx}-${type}`);
             const btnEl = document.getElementById(`react-btn-${newsIdx}-${type}`);
+            
             if (countEl && btnEl) {
+                // 樂觀更新：前端數字不用等伺服器，直接絲滑 +1
                 let currentCount = parseInt(countEl.innerText) || 0;
                 countEl.innerText = currentCount + 1;
+                window.globalNewsReactData[voteKey] = (parseInt(window.globalNewsReactData[voteKey]) || 0) + 1;
                 
-                // 點亮按鈕樣式
+                // 點亮按鈕
                 btnEl.style.background = 'rgba(255,255,255,0.12)';
                 btnEl.style.borderColor = 'var(--event-accent)';
-                btnEl.style.transform = 'scale(1.1)';
-                setTimeout(() => btnEl.style.transform = 'none', 200);
-
-                // 噴射一個可愛的 +1 浮動特效
+                
+                // +1 噴射泡泡特效
                 const plus = document.createElement('span');
                 plus.innerText = '+1';
                 plus.style.cssText = 'position:absolute; top:-15px; left:50%; transform:translateX(-50%); color:var(--event-accent); font-family:var(--sport-font); font-weight:900; font-size:13px; z-index:30; animation:gacha-bounce 0.5s ease forwards;';
                 btnEl.appendChild(plus);
                 setTimeout(() => plus.remove(), 500);
+            }
+
+            // 背景悄悄傳送給 Google 試算表，操作絕對不 Lag
+            if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
+                fetch(VOTE_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ uid: voteKey })
+                }).catch(e => console.log("寫入雲端心情失敗", e));
             }
         };
 
