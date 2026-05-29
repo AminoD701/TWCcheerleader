@@ -2308,21 +2308,23 @@
             const showSubNav = (currentMode === 'girls')
             document.getElementById('sub-nav-sports').style.display = showSubNav ? 'flex' : 'none';
             
-            // ✨ 智慧切換吸頂列：女孩圖鑑與外籍行程顯示搜尋列，情報大廳顯示黃框分類按鈕
-            if (currentMode === 'girls' || currentMode === 'events') {
+            // ✨ 智慧切換吸頂列：開放情報大廳使用共用搜尋列
+            if (currentMode === 'girls' || currentMode === 'events' || currentMode === 'news') {
                 document.getElementById('filter-bar').style.display = 'block';
-                document.getElementById('standard-filters').style.display = 'flex';
-                document.getElementById('news-filters').style.display = 'none';
+                document.getElementById('standard-filters').style.display = 'flex'; // 讓搜尋列現身！
                 
-                // ✨ 加上這行防呆：讓國籍、星座、排序的下拉選單「只在女孩圖鑑」出現！
+                // 讓右側的下拉選單「只在女孩圖鑑」出現
                 if (document.getElementById('extra-filters')) {
                     document.getElementById('extra-filters').style.display = (currentMode === 'girls') ? 'flex' : 'none';
                 }
-            } else if (currentMode === 'news') {
-                document.getElementById('filter-bar').style.display = 'block';
-                document.getElementById('standard-filters').style.display = 'none';
-                document.getElementById('news-filters').style.display = 'flex';
-                window.currentNewsTag = "全部";
+
+                if (currentMode === 'news') {
+                    document.getElementById('news-filters').style.display = 'flex';
+                    document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; // 專屬提示
+                } else {
+                    document.getElementById('news-filters').style.display = 'none';
+                    document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
+                }
             } else {
                 document.getElementById('filter-bar').style.display = 'none';
             }
@@ -5062,7 +5064,10 @@ window.renderMinigameStart = function() {
                 }
             }
 
-            // 2. 依照分類與 Hashtag 雙重篩選
+            // ✨ 抓取搜尋框的關鍵字
+            const searchKeyword = (document.getElementById('searchInput').value || "").toLowerCase().trim();
+
+            // 2. 依照分類、Hashtag 與「全文檢索」三重篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
                 let t = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
                 let matchCat = window.currentNewsTag === "全部" || t === window.currentNewsTag;
@@ -5072,7 +5077,15 @@ window.renderMinigameStart = function() {
                 let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(x=>x) : [t];
                 let matchHash = !window.currentNewsHashtag || tagsArray.includes(window.currentNewsHashtag);
 
-                return matchCat && matchHash;
+                // 全文檢索邏輯：比對標題、內文、標籤
+                let matchSearch = true;
+                if (searchKeyword !== "") {
+                    const titleText = getField(n, ['title', '標題'], '').toLowerCase();
+                    const contentText = getField(n, ['content', '內文', '內容'], '').toLowerCase();
+                    matchSearch = titleText.includes(searchKeyword) || contentText.includes(searchKeyword) || tagsArray.some(tag => tag.toLowerCase().includes(searchKeyword));
+                }
+
+                return matchCat && matchHash && matchSearch;
             });
 
             // 3. 終極排序邏輯：日期越新越上，同日期則越下方越上
