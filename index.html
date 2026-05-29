@@ -2466,11 +2466,12 @@
             }
         }
 
-        // ✨ 建立獨立的抓取全網票數引擎
+        // ✨ 建立獨立的抓取全網票數引擎 (✨ 破除暫存黑魔法)
         window.fetchGlobalVotes = async function() {
             try {
                 if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                    const response = await fetch(VOTE_API_URL);
+                    // 加上 &t=現在時間，逼迫瀏覽器去抓最新票數！
+                    const response = await fetch(VOTE_API_URL + "?t=" + new Date().getTime());
                     const data = await response.json();
                     if(data && Object.keys(data).length > 0) {
                         window.globalVoteData = data;
@@ -2751,6 +2752,8 @@
             if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
                 fetch(VOTE_API_URL, {
                     method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ uid: voteKey, voteKey: voteKey })
                 }).catch(e => console.log("寫入失敗", e));
             } else {
@@ -4887,12 +4890,12 @@ window.renderMinigameStart = function() {
         // ✨ 雲端大同步：全網真實數據計票與渲染核心引擎
         window.globalNewsReactData = {}; // 儲存全網新聞真實心情數據
 
-        // 1. 背景連線抓取全網真實心情數據
+        // 1. 背景連線抓取全網真實心情數據 (✨ 破除暫存黑魔法)
         window.fetchGlobalNewsReactions = async function() {
             try {
-                // 智慧沿用您投票系統的 API URL，透過參數 type=news 進行後端自動分流
                 if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                    const response = await fetch(VOTE_API_URL + "?type=news");
+                    // 加上 &t=現在時間，逼迫瀏覽器每次都去抓最新資料，不准拿暫存！
+                    const response = await fetch(VOTE_API_URL + "?type=news&t=" + new Date().getTime());
                     const data = await response.json();
                     if(data && Object.keys(data).length > 0) {
                         window.globalNewsReactData = data;
@@ -4903,7 +4906,7 @@ window.renderMinigameStart = function() {
             }
         };
 
-        // 2. 點擊心情按鈕 (支援「取消」與「換心情」的完美動態版)
+        // 2. 點擊心情按鈕 (支援「取消」與「換心情」的完美動態版 + ✨ 強制通關指令)
         window.clickNewsReaction = function(newsIdx, type) {
             const key = `news_react_single_${newsIdx}`;
             const existingReact = localStorage.getItem(key);
@@ -4917,7 +4920,6 @@ window.renderMinigameStart = function() {
                 
                 if (countEl && btnEl) {
                     let currentCount = parseInt(countEl.innerText) || 0;
-                    // 如果是新增就 +1，取消就 -1 (最低為0)
                     let newCount = isAdd ? currentCount + 1 : Math.max(0, currentCount - 1);
                     countEl.innerText = newCount;
                     window.globalNewsReactData[voteKey] = newCount;
@@ -4928,7 +4930,6 @@ window.renderMinigameStart = function() {
                         btnEl.style.transform = 'scale(1.1)';
                         setTimeout(() => btnEl.style.transform = 'none', 200);
                         
-                        // +1 噴射泡泡特效
                         const plus = document.createElement('span');
                         plus.innerText = '+1';
                         plus.style.cssText = `position:absolute; top:-15px; left:50%; transform:translateX(-50%); color:${themeColor}; font-family:var(--sport-font); font-weight:900; font-size:13px; z-index:30; animation:gacha-bounce 0.5s ease forwards;`;
@@ -4940,30 +4941,29 @@ window.renderMinigameStart = function() {
                     }
                 }
 
-                // 背景悄悄傳送給 Google 試算表，加入 action 參數告訴後端是加還是減
+                // 背景悄悄傳送給 Google 試算表 (✨ 加入 mode: 'no-cors' 無視瀏覽器阻擋！)
                 if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
                     fetch(VOTE_API_URL, {
                         method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
                         body: JSON.stringify({ uid: voteKey, action: isAdd ? "add" : "remove" })
                     }).catch(e => console.log("雲端同步失敗", e));
                 }
             };
 
-            // 情境 1：點擊自己已經選過的心情 => 執行「收回/取消」
             if (existingReact === type) {
-                localStorage.removeItem(key); // 解除手機鎖定
-                updateUI(type, false);        // 畫面減 1 並退回灰色
+                localStorage.removeItem(key); // 取消選取
+                updateUI(type, false);        
                 return;
             }
             
-            // 情境 2：之前選過別的心情，現在想換一個 => 「舊的減1，新的加1」
             if (existingReact && existingReact !== type) {
-                updateUI(existingReact, false); // 把舊的心情 -1
+                updateUI(existingReact, false); // 換心情時，把舊的扣掉
             }
             
-            // 情境 3：正常點擊新心情
-            localStorage.setItem(key, type); // 記錄新選擇
-            updateUI(type, true);            // 畫面加 1 並發光
+            localStorage.setItem(key, type);
+            updateUI(type, true);           
         };
 
         window.renderNewsHub = function() {
