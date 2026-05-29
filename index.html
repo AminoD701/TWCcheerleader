@@ -72,8 +72,8 @@
         .sports-bg-slider { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: #000; overflow: hidden; }
         /* 背景漸層混入 15% 本命色 */
         .sports-bg-slider::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, color-mix(in srgb, var(--theme-glow, #333) 15%, rgba(10,12,16,0.95)) 0%, rgba(20,25,30,0.9) 100%); z-index: 2; pointer-events: none; transition: background 0.5s ease;}
-        /* 頂部打光特效，散發 35% 濃度的本命光晕 */
-        .sports-bg-slider::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--theme-glow, #333) 35%, transparent) 0%, transparent 70%); z-index: 3; pointer-events: none; transition: background 0.5s ease; mix-blend-mode: screen;}
+        /* 頂部打光特效 (拔除沉重的 mix-blend-mode，拯救手機 GPU 效能) */
+        .sports-bg-slider::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--theme-glow, #333) 40%, transparent) 0%, transparent 70%); z-index: 3; pointer-events: none; transition: background 0.5s ease; }
         
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; filter: grayscale(30%) contrast(110%); animation: slideFade 24s infinite; z-index: 1; }
         .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } 
@@ -2621,7 +2621,7 @@
                         return `
                         <div class="poster-card ${rankClass}" onclick="window.openModal('${g.uid}')">
                             <div class="poster-rank-badge">${rank}</div>
-                            <div class="poster-img-wrap"><img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/150'"></div>
+                            <div class="poster-img-wrap"><img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'"></div>
                             <div class="poster-info">
                                 <div class="poster-name">${dName}</div>
                                 <div class="poster-votes">${g.votes.toLocaleString()} 票</div>
@@ -2682,7 +2682,7 @@
                 <div class="vote-card" style="padding: 12px; position: relative;">
                     ${rankBadge}
                     <div class="vote-img-box" style="margin-bottom: 8px; cursor:pointer;" onclick="window.openModal('${g.uid}')">
-                        <img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/150'">
+                        <img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
                     </div>
                     <div style="font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
                     <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${g.combinedTeam}</div>
@@ -3187,7 +3187,7 @@
                 return `
                 <div class="dt-pick-card" data-search="${searchKeywords}" data-team="${g.combinedTeam}" data-sport="${g.combinedSport}" onclick="window.pickDtGirl(${slotIndex}, '${g.uid}')">
                     <div style="width: 100%; aspect-ratio: 1 / 1; position: relative; overflow: hidden; background: #252c36;">
-                        <img src="${window.getCdnUrl(g.img)}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
+                        <img src="${window.getCdnUrl(g.img)}" loading="lazy" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/200x200/252c36/ffffff?text=No+Image'">
                     </div>
                     <div class="dt-pick-name" style="border-top:2px solid ${roleColor}; line-height:1.2; padding:8px 4px;">
                         <div style="font-size:14px;">${g.realname}</div>${showNick}
