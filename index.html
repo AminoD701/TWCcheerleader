@@ -4310,27 +4310,40 @@
 
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
 
+            // ✨ 升級版：動態高質感海報背景 + 緊湊型資訊排版
+            let posterSection = '';
+            if (posterUrl) {
+                posterSection = `
+                <div style="position: relative; width: 100%; background: #050505; overflow: hidden; border-bottom: 3px solid var(--event-accent);">
+                    <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
+                    <img src="${posterUrl}" style="position: relative; width: 100%; max-height: 55vh; object-fit: contain; display: block; z-index: 2; margin: 0 auto;">
+                </div>`;
+            }
+
             document.getElementById('modal-dynamic-content').innerHTML = `
-                ${posterUrl ? `<div style="width: 100%; background: #000; border-bottom: 4px solid var(--event-accent); text-align: center;"><img src="${posterUrl}" style="width: 100%; height: 300px; object-fit: contain; display: block; margin: 0 auto;"></div>` : ''}
-                <div class="modal-body" style="padding-top: ${posterUrl ? '25px' : '40px'};">
-                    <div style="text-align:center; margin-bottom:25px;">
-                        <div style="font-family:var(--sport-font); font-size:18px; color:var(--event-accent); font-weight:900; letter-spacing:2px;">${e.safeDate.monStr} / ${e.safeDate.year}</div>
-                        <div style="font-family:var(--sport-font); font-size:65px; color:#fff; font-weight:900; line-height:1; margin:5px 0;">${String(e.safeDate.day).padStart(2,'0')}</div>
-                        <div style="font-size:14px; color:var(--text-sub); font-weight:700; letter-spacing:1px;">${e.safeDate.week}</div>
+                ${posterSection}
+                <div class="modal-body" style="padding: 25px;">
+                    
+                    <div style="margin-bottom: 20px; border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; text-align: left;">
+                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 10px;">
+                            📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
+                        </div>
+                        <div style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.4; word-break: break-word;">
+                            ${e.eventname || "賽事活動未定"}
+                        </div>
                     </div>
                     
-                    <div class="modal-nickname" style="color:var(--event-accent); font-size:24px; text-align:center; margin-bottom:30px; word-break: break-word;">${e.eventname || "賽事活動未定"}</div>
-                    
-                    <div class="stats-grid" style="margin-bottom: 30px;">
-                        <div class="stat-box"><span class="stat-label">時間 TIME</span><span class="stat-value" style="font-size:16px;">${e.time||"TBA"}</span></div>
-                        <div class="stat-box"><span class="stat-label">主辦 HOST</span><span class="stat-value" style="font-size:14px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding-top: 15px; padding-bottom: 15px;"><span class="stat-label">地點 LOCATION</span><span class="stat-value" style="font-size:14px; font-family:var(--tc-font);">${addressDisplay}</span></div>
+                    <div class="stats-grid" style="margin-bottom: 25px; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                        <div class="stat-box" style="padding: 10px 5px;"><span class="stat-label">時間 TIME</span><span class="stat-value" style="font-size:15px;">${e.time||"TBA"}</span></div>
+                        <div class="stat-box" style="padding: 10px 5px;"><span class="stat-label">主辦 HOST</span><span class="stat-value" style="font-size:13px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
+                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 12px 10px;"><span class="stat-label">地點 LOCATION</span><span class="stat-value" style="font-size:13px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
                     </div>
 
-                    <div style="font-family:var(--sport-font); font-size:16px; font-weight:900; color:#fff; border-bottom:2px dashed var(--border-color); padding-bottom:10px; margin-bottom:20px; letter-spacing:1px; transform: skewX(-5deg);">出席女孩 GIRLS <span style="font-size:11px; color:var(--text-sub); font-family:var(--tc-font); font-weight:normal;">(點擊查看檔案)</span></div>
-                    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
+                    <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:var(--text-sub); margin-bottom:12px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 10px;">
                         ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">目前尚未公布名單</div>'}
                     </div>
+                    
                     ${saveBtnHtml}
                     ${linkBtnHtml}
                 </div>
