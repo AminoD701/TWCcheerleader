@@ -1833,16 +1833,17 @@
         <div id="dreamteam-container" style="display:none;"></div>
         <div id="feedback-container" style="display:none; max-width: 600px; margin: 30px auto 60px; padding: 0 20px;"></div>
         <div id="vote-container" class="main-content-container" style="display: none; max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 15px;">
-            <div class="game-title" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin-bottom: 5px; font-size: clamp(24px, 5vw, 36px);">🏆 第一屆·啦啦隊女神人氣投票</div>
-            <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:25px; letter-spacing:1px;">🔥 賽期：2026/05/27 ~ 2026/06/27 · 每人每日限投一票</div>
+            <div class="game-title" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin-bottom: 5px; font-size: clamp(24px, 5vw, 36px);">🏆 第一屆·全民應援大賞</div>
+            <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:12px; letter-spacing:1px;">🔥 賽期：2026/05/27 ~ 2026/06/27 · 每個賽道每日限投一票</div>
+            
+            <div style="max-width: 620px; margin: 0 auto 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; font-size: 12px; color: var(--text-sub); text-align: center; font-weight: 700; line-height: 1.6;">
+                📢 本活動僅供球迷應援同樂與測試體驗，票數結果純屬娛樂性質，並非用作實質影響或評斷女孩真實人氣之統計，請大家理性為心儀的啦啦隊女孩加油！💖
+            </div>
             
             <div id="vote-category-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; margin-bottom: 10px;">
-                <div id="vote-tab-korea_pro" class="vote-team-tag active" onclick="window.switchVoteCategory('korea_pro')">🇯🇵🇰🇷 日韓外援 (台灣職聯)</div>
+                <div id="vote-tab-baseball" class="vote-team-tag active" onclick="window.switchVoteCategory('baseball')">⚾ 棒球大賞 (CPBL)</div>
+                <div id="vote-tab-korea_pro" class="vote-team-tag" onclick="window.switchVoteCategory('korea_pro')">🇯🇵🇰🇷 日韓外援 (台灣職聯)</div>
                 <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">🇹🇼 本土應援 (台港馬)</div>
-                <div id="vote-tab-baseball" class="vote-team-tag" onclick="window.switchVoteCategory('baseball')">⚾ CPBL 棒球大賞</div>
-                <div id="vote-tab-volleyball" class="vote-team-tag" onclick="window.switchVoteCategory('volleyball')">🏐 TVPL 排球大賞</div>
-                <div id="vote-tab-tpbl" class="vote-team-tag" onclick="window.switchVoteCategory('tpbl')">🏀 TPBL 籃球大賞</div>
-                <div id="vote-tab-plg" class="vote-team-tag" onclick="window.switchVoteCategory('plg')">🏀 PLG 籃球大賞</div>
             </div>
 
             <div id="vote-leaderboard-container" style="margin-bottom: 30px; background: rgba(17,20,24,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
@@ -2525,7 +2526,7 @@
         // ⚠️ 總教練注意：請把下面這串引號裡的文字，換成您剛剛複製的 GAS 網址！
         const VOTE_API_URL = "https://script.google.com/macros/s/AKfycbwU6NxyjuMdoNt6lFD-SJD1Zsx4CHJlByzkLQZnTYCrcm9POBzPCd3neJPby3uj7I5-_A/exec"; 
         
-        let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
+        let voteState = { currentCategory: 'baseball', selectedTeam: '全部' };
         window.globalVoteData = {}; // 儲存全網真實票數
 
         function getVotePool() {
@@ -2563,12 +2564,9 @@
 
                 let isMatch = false;
                 switch(currentCat) {
+                    case 'baseball':    isMatch = isBaseball; break;
                     case 'korea_pro':   isMatch = isKoreanOrJapanese && isInProLeague; break;
                     case 'local_pro':   isMatch = !isKoreanOrJapanese && !isLuxy; break;
-                    case 'baseball':    isMatch = isBaseball; break;
-                    case 'volleyball':  isMatch = isVolleyball; break;
-                    case 'tpbl':        isMatch = isTPBL; break;
-                    case 'plg':         isMatch = isPLG; break;
                 }
                 if (isMatch && g.team.trim() !== "") validTeams.add(g.team.trim());
             });
@@ -2688,13 +2686,10 @@
                 const isInProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
 
                 switch(currentCat) {
+                    case 'baseball':    return isBaseball;
                     case 'korea_pro':   return isKoreanOrJapanese && isInProLeague; 
                     case 'local_pro':   return !isKoreanOrJapanese && !isLuxy; 
-                    case 'baseball':    return isBaseball; 
-                    case 'volleyball':  return isVolleyball; 
-                    case 'tpbl':        return isTPBL; 
-                    case 'plg':         return isPLG; 
-                    default:            return true;
+                    default:            return false;
                 }
             });
 
