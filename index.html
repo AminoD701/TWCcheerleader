@@ -4306,15 +4306,15 @@
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
-            // ✨ 壓縮按鈕尺寸，讓畫面底部不會太擁擠
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="display:block; width:100%; padding:10px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入 (點擊移除)':'➕ 加入專屬行事曆'}</button>`;
-            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); padding:10px; margin-top:8px; display:block; text-align:center; box-shadow:none;"><span style="color:#fff; font-family:var(--tc-font); font-size:13px;">🔗 前往官方活動連結</span></a>` : '';
+            // ✨ 壓縮按鈕尺寸，並改為「左右並排」，大幅節省垂直空間
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; padding: 8px 4px; font-weight: 900; font-size: 12px; background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap;">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
+            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; padding: 8px 4px; font-weight: 900; font-size: 12px; background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; text-decoration: none; text-align: center; white-space: nowrap;">🔗 官方連結</a>` : '';
 
-            // ✨ 海報區塊黑魔法：鎖定高度，完美比例不裁切，背景自動補滿模糊色塊
+            // ✨ 海報區塊黑魔法：進一步壓縮高度 (最高 22vh)，把空間留給下方資訊
             let posterSection = '';
             if (posterUrl) {
                 posterSection = `
-                <div style="position: relative; width: 100%; height: clamp(140px, 28vh, 250px); background: #050505; overflow: hidden; border-bottom: 3px solid var(--event-accent);">
+                <div style="position: relative; width: 100%; height: clamp(110px, 22vh, 220px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent);">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
                     <img src="${posterUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
                 </div>`;
@@ -4324,31 +4324,31 @@
 
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${posterSection}
-                <div class="modal-body" style="padding: 15px; display: flex; flex-direction: column; gap: 12px;">
+                <div class="modal-body" style="padding: 12px 15px; display: flex; flex-direction: column; gap: 8px;">
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
                         <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; width: fit-content;">
                             📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
                         </div>
-                        <div style="font-size: 18px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
+                        <div style="font-size: 16px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
                             ${e.eventname || "賽事活動未定"}
                         </div>
                     </div>
                     
                     <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
-                        <div class="stat-box" style="padding: 8px 5px;"><span class="stat-label" style="margin-bottom:2px;">時間 TIME</span><span class="stat-value" style="font-size:13px;">${e.time||"TBA"}</span></div>
-                        <div class="stat-box" style="padding: 8px 5px;"><span class="stat-label" style="margin-bottom:2px;">主辦 HOST</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 8px 10px;"><span class="stat-label" style="margin-bottom:2px;">地點 LOCATION</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
+                        <div class="stat-box" style="padding: 6px 4px;"><span class="stat-label" style="margin-bottom:2px;">時間 TIME</span><span class="stat-value" style="font-size:12px;">${e.time||"TBA"}</span></div>
+                        <div class="stat-box" style="padding: 6px 4px;"><span class="stat-label" style="margin-bottom:2px;">主辦 HOST</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
+                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 6px 8px;"><span class="stat-label" style="margin-bottom:2px;">地點 LOCATION</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font); line-height:1.3;">${addressDisplay}</span></div>
                     </div>
 
                     <div>
-                        <div style="font-family:var(--sport-font); font-size:12px; font-weight:900; color:var(--text-sub); margin-bottom:6px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                            ${attendHtml || '<div style="color:var(--text-sub); font-size:12px; font-weight:700;">名單確認中</div>'}
+                        <div style="font-family:var(--sport-font); font-size:11px; font-weight:900; color:var(--text-sub); margin-bottom:4px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            ${attendHtml || '<div style="color:var(--text-sub); font-size:11px; font-weight:700;">名單確認中</div>'}
                         </div>
                     </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 10px;">
+                    <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 8px;">
                         ${saveBtnHtml}
                         ${linkBtnHtml}
                     </div>
