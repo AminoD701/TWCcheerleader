@@ -4928,7 +4928,17 @@ window.renderMinigameStart = function() {
         // =========================================================================
         // 📰 每日動態情報牆核心渲染引擎 (CMS)
         // =========================================================================
-        window.currentNewsTag = "全部";
+        window.currentNewsHashtag = ""; // 新增這行來記住目前點擊的 Hashtag
+
+        // ✨ 點擊 Hashtag 啟動篩選引擎
+        window.filterByHashtag = function(tag) {
+            window.closeModal(); // 先關閉新聞彈窗
+            window.currentNewsHashtag = tag; // 記住要找的標籤
+            window.currentNewsTag = "全部"; // 切回全部範圍來搜尋
+            window.currentDisplayLimit = 10;
+            window.renderNewsHub(); // 重新渲染大廳
+            window.scrollTo({top: 0, behavior: 'smooth'}); // 滑回頂部
+        };
 
         // ✨ 雲端大同步：全網真實數據計票與渲染核心引擎
         window.globalNewsReactData = {}; // 儲存全網新聞真實心情數據
@@ -5028,15 +5038,27 @@ window.renderMinigameStart = function() {
             let uniqueTags = [...new Set(dbNews.map(n => getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報')))].filter(t => t !== "");
             if(newsFilters) {
                 newsFilters.innerHTML = `
-                    <button class="sub-btn ${window.currentNewsTag === '全部' ? 'active' : ''}" onclick="window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部 ALL</button>
-                    ${uniqueTags.map(t => `<button class="sub-btn ${window.currentNewsTag === t ? 'active' : ''}" onclick="window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
+                    <button class="sub-btn ${window.currentNewsTag === '全部' && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部 ALL</button>
+                    ${uniqueTags.map(t => `<button class="sub-btn ${window.currentNewsTag === t && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
                 `;
+                
+                // ✨ 如果目前有啟動 Hashtag 篩選，多補上一顆顯眼的取消按鈕
+                if (window.currentNewsHashtag) {
+                    newsFilters.innerHTML += `<button class="sub-btn active" style="border-color: var(--event-accent); color: var(--event-accent);" onclick="window.currentNewsHashtag=''; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">✕ 取消標籤 #${window.currentNewsHashtag}</button>`;
+                }
             }
 
-            // 2. 依照分類篩選
+            // 2. 依照分類與 Hashtag 雙重篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
                 let t = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                return window.currentNewsTag === "全部" || t === window.currentNewsTag;
+                let matchCat = window.currentNewsTag === "全部" || t === window.currentNewsTag;
+                
+                // 抓取文章的 Hashtag 陣列來比對
+                let hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
+                let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(x=>x) : [t];
+                let matchHash = !window.currentNewsHashtag || tagsArray.includes(window.currentNewsHashtag);
+
+                return matchCat && matchHash;
             });
 
             // 3. 終極排序邏輯：日期越新越上，同日期則越下方越上
@@ -5178,8 +5200,8 @@ window.renderMinigameStart = function() {
                         <div class="modal-news-text" style="margin-bottom: 20px;">${contentText}</div>
                         
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
-                            ${tagsArray.map(t => `<span style="background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">#${t}</span>`).join('')}
-                        </div>
+    ${tagsArray.map(t => `<span onclick="window.filterByHashtag('${t}')" style="cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; transition: 0.2s;" onmouseover="this.style.borderColor='var(--modal-accent)'; this.style.color='#fff';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-sub)';">#${t}</span>`).join('')}
+</div>
                         
                         <div style="display: flex; justify-content: space-between; gap: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
                             ${reactionsHtml}
