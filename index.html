@@ -1335,7 +1335,17 @@
             .news-title-text { font-size: 17px; margin-top: 4px; }
             .news-summary-text { display: none; } /* 手機版直接隱藏摘要，畫面極度乾淨 */
         }
-        /* 🏆 投票大廳專屬樣式 */
+        /* =========================================================================
+           🏆 應援大賞 & 浮動按鈕控制 (終極乾淨版)
+           ========================================================================= */
+        /* ✨ 投票模式專屬：強制隱藏所有浮動按鈕以利截圖分享 */
+        body.mode-vote .floating-boba-btn,
+        body.mode-vote .floating-hub-btn,
+        body.mode-vote .back-to-top {
+            display: none !important;
+        }
+
+        /* 🏆 投票大廳卡片與標籤樣式 */
         .vote-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.2s; position: relative; }
         .vote-card:hover { border-color: #ffd700; transform: translateY(-3px); }
         .vote-img-box { width: 100%; aspect-ratio: 1/1; border-radius: 50%; overflow: hidden; border: 3px solid var(--border-color); margin-bottom: 12px; box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
@@ -1343,79 +1353,21 @@
         .vote-btn-active { width: 100%; padding: 8px; background: linear-gradient(135deg, #ff0044, #ff4757); color: #fff; border: none; border-radius: 6px; font-weight: 900; cursor: pointer; margin-top: auto; box-shadow: 0 4px 10px rgba(255,0,68,0.3); transition: 0.2s; }
         .vote-btn-active:hover { transform: scale(1.03); filter: brightness(1.1); }
         .vote-btn-disabled { width: 100%; padding: 8px; background: #2d3436; color: #7f8c8d; border: 1px solid #4a4a4a; border-radius: 6px; font-weight: 700; cursor: not-allowed; margin-top: auto; }
-        .vote-team-tag { display: inline-block; padding: 6px 14px; background: #1a1e24; border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-sub); font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .vote-team-tag.active { background: #ffd700; color: #000; border-color: #ffd700; }
-        /* =========================================================================
-           📢 全局宣傳跑馬燈 (質感升級版 News Ticker)
-           ========================================================================= */
-        .marquee-wrapper {
-            width: 100%;
-            background: rgba(10, 12, 16, 0.85);
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px 0;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            z-index: 30;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        .marquee-wrapper::before {
-            content: 'LATEST';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background: linear-gradient(90deg, #ff0044, #ff4757);
-            color: #fff;
-            font-family: var(--sport-font);
-            font-weight: 900;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 2;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.8);
-            letter-spacing: 2px;
-        }
-        .marquee-wrapper:hover {
-            background: rgba(17, 20, 24, 0.95);
-            border-top: 1px solid rgba(255, 0, 68, 0.4);
-            border-bottom: 1px solid rgba(255, 0, 68, 0.4);
-        }
-        .marquee-content {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%; 
-            font-family: var(--tc-font);
-            font-size: 14px;
-            font-weight: 700;
-            color: #e2e8f0;
-            letter-spacing: 1px;
-            animation: marquee-scroll 25s linear infinite;
-        }
-        .marquee-wrapper:hover .marquee-content {
-            animation-play-state: paused;
-            color: #fff;
-        }
-        .marquee-highlight {
-            color: #ff4757;
-            font-weight: 900;
-            margin: 0 4px;
-            border-bottom: 1px dashed #ff4757;
-        }
-        @keyframes marquee-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
+        #vote-category-tabs .vote-team-tag { padding: 8px 16px; font-size: 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-sub); transition: 0.3s; cursor: pointer; }
+        #vote-category-tabs .vote-team-tag:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+        #vote-category-tabs .vote-team-tag.active { background: var(--event-accent); color: #fff; border-color: var(--event-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.4); font-weight: 900; }
+        #vote-leaderboard-container { background: linear-gradient(180deg, rgba(17,20,24,0.9), rgba(10,12,16,0.95)) !important; border: 1px solid rgba(255,255,255,0.05) !important; }
 
-        /* =========================================================================
-           🏆 應援大賞 UI 質感優化與終極 RWD 網格
-           ========================================================================= */
-        /* 🏆 應援大賞：動漫海報風 排行榜 (One Piece Style) */
+        /* 📢 全局宣傳跑馬燈 */
+        .marquee-wrapper { width: 100%; background: rgba(10, 12, 16, 0.85); backdrop-filter: blur(8px); border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 0; overflow: hidden; position: relative; cursor: pointer; z-index: 30; margin-bottom: 25px; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
+        .marquee-wrapper::before { content: 'LATEST'; position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, #ff0044, #ff4757); color: #fff; font-family: var(--sport-font); font-weight: 900; font-size: 13px; display: flex; align-items: center; padding: 0 15px; z-index: 2; box-shadow: 5px 0 15px rgba(0,0,0,0.8); letter-spacing: 2px; }
+        .marquee-wrapper:hover { background: rgba(17, 20, 24, 0.95); border-top: 1px solid rgba(255, 0, 68, 0.4); border-bottom: 1px solid rgba(255, 0, 68, 0.4); }
+        .marquee-content { display: inline-block; white-space: nowrap; padding-left: 100%; font-family: var(--tc-font); font-size: 14px; font-weight: 700; color: #e2e8f0; letter-spacing: 1px; animation: marquee-scroll 25s linear infinite; }
+        .marquee-wrapper:hover .marquee-content { animation-play-state: paused; color: #fff; }
+        .marquee-highlight { color: #ff4757; font-weight: 900; margin: 0 4px; border-bottom: 1px dashed #ff4757; }
+        @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* 🏆 動漫海報風 排行榜 (One Piece Style) */
         .poster-leaderboard { display: flex; flex-direction: column; gap: 15px; width: 100%; padding-bottom: 10px; }
         .poster-podium { display: flex; justify-content: center; align-items: flex-end; gap: clamp(8px, 2vw, 15px); margin-bottom: 15px; padding-top: 25px; }
         .poster-card { background: #fff; border: 2px solid #000; position: relative; display: flex; flex-direction: column; cursor: pointer; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
@@ -1427,7 +1379,6 @@
         .poster-votes { font-size: 12px; font-weight: 900; color: #fff; background: #e50012; font-family: var(--sport-font); padding: 2px 8px; border-radius: 20px; margin-top: 4px; border: 1px solid #000; letter-spacing: 0.5px; box-shadow: 2px 2px 0 rgba(0,0,0,0.3);}
         .poster-rank-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-family: var(--sport-font); font-weight: 900; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; border: 2px solid #000; z-index: 5; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
 
-        /* 前三名專屬尺寸與金銀銅特效 */
         .poster-rank-1 { width: 35%; max-width: 160px; border: 3px solid #ffd700; z-index: 3; box-shadow: 0 0 20px rgba(255,215,0,0.4); }
         .poster-rank-1 .poster-img-wrap { aspect-ratio: 3 / 4; border-bottom: 3px solid #ffd700; }
         .poster-rank-1 .poster-rank-badge { background: #ffd700; top: -16px; width: 32px; height: 32px; font-size: 20px; border: 2px solid #b8860b; }
@@ -1443,7 +1394,6 @@
         .poster-rank-3 .poster-rank-badge { background: #cd7f32; top: -12px; width: 24px; height: 24px; font-size: 15px; border: 2px solid #8b4513; }
         .poster-rank-3 .poster-name { font-size: 14px; }
 
-        /* 4~10名下方網格 (升級為 Flex 自動置中陣型) */
         .poster-rest-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px; }
         .poster-rank-rest { flex: 0 0 calc(20% - 10px); max-width: 100px; border-color: #555; }
         .poster-rank-rest .poster-img-wrap { aspect-ratio: 4 / 5; border-bottom: 2px solid #555; }
@@ -1452,117 +1402,8 @@
         .poster-rank-rest .poster-votes { font-size: 10px; padding: 1px 6px; margin-top: 3px; }
         .poster-rank-rest .poster-rank-badge { top: 0; left: 0; transform: none; border-radius: 0 0 6px 0; width: 20px; height: 20px; font-size: 12px; border: none; background: #333; color: #fff; box-shadow: none; border-right: 1px solid #000; border-bottom: 1px solid #000; }
 
-        @media (max-width: 768px) {
-            /* ✨ 魔法在此：一排 4 個，剩下的 3 個會自動在正下方完美置中！ */
-            .poster-rest-grid { gap: 6px; padding: 0; }
-            .poster-rank-rest { flex: 0 0 calc(25% - 6px); max-width: 85px; }
-            
-            .poster-rank-1 { width: 38%; }
-            .poster-rank-2 { width: 31%; margin-bottom: -10px;}
-            .poster-rank-3 { width: 28%; margin-bottom: -15px;}
-            .poster-rank-1 .poster-name { font-size: 15px; }
-            .poster-rank-2 .poster-name { font-size: 13px; }
-            .poster-rank-3 .poster-name { font-size: 12px; }
-            .poster-rank-rest .poster-name { font-size: 11px; }
-            .poster-votes { font-size: 10px; }
-        }
-        #vote-grid {
-            display: grid !important;
-            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-            gap: 15px !important;
-            width: 100% !important;
-            max-width: 950px !important;
-            margin: 0 auto !important; 
-            padding: 0 10px !important;
-            justify-content: center !important;
-        }
-
-        /* ✨ 賽道標籤升級：現代感方圓角微光設計 */
-        #vote-category-tabs .vote-team-tag {
-            padding: 8px 16px;
-            font-size: 13px;
-            border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.03);
-            color: var(--text-sub);
-            transition: 0.3s;
-        }
-        #vote-category-tabs .vote-team-tag:hover {
-            border-color: rgba(255,255,255,0.3);
-            color: #fff;
-        }
-        #vote-category-tabs .vote-team-tag.active {
-            background: var(--event-accent);
-            color: #fff;
-            border-color: var(--event-accent);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            font-weight: 900;
-        }
-
-        /* ✨ 排行榜底板升級：深色玻璃透視漸層 */
-        #vote-leaderboard-container {
-            background: linear-gradient(180deg, rgba(17,20,24,0.9), rgba(10,12,16,0.95)) !important;
-            border: 1px solid rgba(255,255,255,0.05) !important;
-        }
-
-        /* ✨ 跑馬燈極限縮小，優化視覺空間 */
-            .marquee-wrapper { padding: 5px 0; margin-bottom: 10px; border-top-width: 1px; border-bottom-width: 1px; }
-            .marquee-wrapper::before { font-size: 9px; padding: 0 8px; letter-spacing: 1px; }
-            .marquee-content { font-size: 10px; animation-duration: 20s; padding-left: 100%; }
-            .marquee-highlight { font-size: 10px; margin: 0 2px; }
-
-            /* ✨ 賽道標籤微縮，手機滑動更流暢 */
-            #vote-category-tabs .vote-team-tag { padding: 6px 12px; font-size: 12px; }
-
-            /* ✨ 手機版強制 3 欄，並啟用 minmax防撐破黑魔法 */
-            #vote-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                gap: 6px !important;
-                padding: 0 5px !important;
-            }
-            
-            /* ✨ 卡片質感升級：立體漸層光澤、精雕內邊距 */
-            #vote-grid .vote-card { 
-                padding: 8px 4px !important; 
-                min-width: 0 !important; 
-                border-radius: 6px !important;
-                background: linear-gradient(145deg, #1c2128, #111418) !important;
-                border-color: rgba(255,255,255,0.05) !important;
-            }
-            #vote-grid .vote-img-box { 
-                width: 100% !important; 
-                max-width: 70px !important; /* ✨ 照片調至完美比例的 70px */
-                margin: 0 auto 6px !important; 
-                border-width: 2px !important;
-            }
-            #vote-grid .vote-card > div:nth-child(2) { 
-                font-size: 12px !important; /* 女孩名字 */
-            } 
-            #vote-grid .vote-card > div:nth-child(3) { 
-                font-size: 9px !important; 
-                padding: 2px 4px !important; 
-                margin-bottom: 6px !important; 
-                background: rgba(0,0,0,0.3) !important;
-                border: 1px solid rgba(255,255,255,0.05) !important;
-            } 
-            #vote-grid .vote-card > div:nth-child(4) { 
-                font-size: 11px !important; 
-                margin-bottom: 8px !important; 
-                color: #cbd5e1 !important;
-            } 
-            
-            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { 
-                font-size: 10px !important; 
-                padding: 6px 2px !important; 
-                white-space: normal !important; 
-                line-height: 1.2 !important;
-                word-break: break-all !important;
-                border-radius: 4px !important;
-            }
-        }
-
         /* =========================================================================
-           🏆 應援大賞 終極 RWD 絕對網格 (完美置中 5 排 / 手機 3 排防破版)
+           🏆 應援大賞 終極 RWD 絕對網格 (電腦 5 排 / 手機 3 排)
            ========================================================================= */
         #vote-grid {
             display: grid !important;
@@ -1575,7 +1416,7 @@
             justify-content: center !important;
         }
 
-        /* 👇 以下是手機版專屬設定 (請確保這組大括號完整包覆) */
+        /* 📱 手機版專屬斷點 (確保這組大括號完整包覆) */
         @media (max-width: 768px) {
             /* 跑馬燈極限縮小 */
             .marquee-wrapper { padding: 5px 0; margin-bottom: 10px; border-top-width: 1px; border-bottom-width: 1px; }
@@ -1590,15 +1431,27 @@
                 padding: 0 5px !important;
             }
             
-            /* 卡片極限壓縮防溢出 */
-            #vote-grid .vote-card { padding: 8px 4px !important; min-width: 0 !important; }
-            #vote-grid .vote-img-box { width: 100% !important; max-width: 75px !important; margin: 0 auto 6px !important; }
+            /* 網格卡片極限壓縮防溢出 */
+            #vote-grid .vote-card { padding: 8px 4px !important; min-width: 0 !important; border-radius: 6px !important; background: linear-gradient(145deg, #1c2128, #111418) !important; border-color: rgba(255,255,255,0.05) !important; }
+            #vote-grid .vote-img-box { width: 100% !important; max-width: 70px !important; margin: 0 auto 6px !important; border-width: 2px !important; }
             #vote-grid .vote-card > div:nth-child(2) { font-size: 12px !important; } 
-            #vote-grid .vote-card > div:nth-child(3) { font-size: 9px !important; padding: 2px 4px !important; margin-bottom: 6px !important; } 
-            #vote-grid .vote-card > div:nth-child(4) { font-size: 11px !important; margin-bottom: 8px !important; } 
+            #vote-grid .vote-card > div:nth-child(3) { font-size: 9px !important; padding: 2px 4px !important; margin-bottom: 6px !important; background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.05) !important; } 
+            #vote-grid .vote-card > div:nth-child(4) { font-size: 11px !important; margin-bottom: 8px !important; color: #cbd5e1 !important; } 
+            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { font-size: 10px !important; padding: 6px 2px !important; white-space: normal !important; line-height: 1.2 !important; word-break: break-all !important; border-radius: 4px !important; }
             
-            /* 按鈕允許換行 */
-            #vote-grid .vote-btn-active, #vote-grid .vote-btn-disabled { font-size: 10px !important; padding: 6px 2px !important; white-space: normal !important; line-height: 1.2 !important; word-break: break-all !important; }
+            #vote-category-tabs .vote-team-tag { padding: 6px 12px; font-size: 12px; }
+
+            /* 海報榜單手機版壓縮 */
+            .poster-rest-grid { gap: 6px; padding: 0; }
+            .poster-rank-rest { flex: 0 0 calc(25% - 6px); max-width: 85px; }
+            .poster-rank-1 { width: 38%; }
+            .poster-rank-2 { width: 31%; margin-bottom: -10px;}
+            .poster-rank-3 { width: 28%; margin-bottom: -15px;}
+            .poster-rank-1 .poster-name { font-size: 15px; }
+            .poster-rank-2 .poster-name { font-size: 13px; }
+            .poster-rank-3 .poster-name { font-size: 12px; }
+            .poster-rank-rest .poster-name { font-size: 11px; }
+            .poster-votes { font-size: 10px; }
         }
     </style> 
 </head>
