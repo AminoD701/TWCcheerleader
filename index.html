@@ -4882,7 +4882,37 @@ window.renderMinigameStart = function() {
         // =========================================================================
         // 📰 每日動態情報牆核心渲染引擎 (CMS)
         // =========================================================================
-        window.currentNewsTag = "全部"; 
+        window.currentNewsTag = "全部";
+        // ✨ 新增：新聞共鳴按鈕點擊計票與特效引擎
+        window.clickNewsReaction = function(newsIdx, type) {
+            const key = `news_react_${newsIdx}_${type}`;
+            if (localStorage.getItem(key)) {
+                alert("您今天已經對這篇情報表達過這個心情囉！💖");
+                return;
+            }
+            // 鎖定手機紀錄，每篇新聞的每個心情限點一次
+            localStorage.setItem(key, "true");
+            
+            const countEl = document.getElementById(`react-count-${newsIdx}-${type}`);
+            const btnEl = document.getElementById(`react-btn-${newsIdx}-${type}`);
+            if (countEl && btnEl) {
+                let currentCount = parseInt(countEl.innerText) || 0;
+                countEl.innerText = currentCount + 1;
+                
+                // 點亮按鈕樣式
+                btnEl.style.background = 'rgba(255,255,255,0.12)';
+                btnEl.style.borderColor = 'var(--event-accent)';
+                btnEl.style.transform = 'scale(1.1)';
+                setTimeout(() => btnEl.style.transform = 'none', 200);
+
+                // 噴射一個可愛的 +1 浮動特效
+                const plus = document.createElement('span');
+                plus.innerText = '+1';
+                plus.style.cssText = 'position:absolute; top:-15px; left:50%; transform:translateX(-50%); color:var(--event-accent); font-family:var(--sport-font); font-weight:900; font-size:13px; z-index:30; animation:gacha-bounce 0.5s ease forwards;';
+                btnEl.appendChild(plus);
+                setTimeout(() => plus.remove(), 500);
+            }
+        };
 
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
@@ -4978,7 +5008,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專屬彈窗 (潮流標籤雲 + 懸浮分享按鈕版)
+        // 📰 每日情報專專屬彈窗 (終極高格調：六大心情共鳴系統 ＋ 標籤雲)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
@@ -4997,13 +5027,40 @@ window.renderMinigameStart = function() {
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
             
-            // ✨ 標籤雲黑魔法：自動抓取試算表的「標籤雲」欄位，用逗號切開。若沒填，預設顯示分類。
+            // 自動生成 Hashtag 陣列
             const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
             let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(t=>t) : [tagText];
 
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
-
             document.documentElement.style.setProperty('--modal-accent', themeColor);
+
+            // ✨ 智慧六大心情定義陣列 (愛心、大笑、難過、疑惑、生氣、驚訝)
+            const reactTypes = [
+                { id: 'love', icon: '❤️' },
+                { id: 'laugh', icon: '😂' },
+                { id: 'sad', icon: '😢' },
+                { id: 'think', icon: '🤔' },
+                { id: 'angry', icon: '😡' },
+                { id: 'wow', icon: '😮' }
+            ];
+
+            // 生成心情按鈕的 HTML
+            let reactionsHtml = reactTypes.map(r => {
+                // 利用文章索引與字元產生穩定的偽隨機基底票數，看起來生動熱絡
+                const baseCount = ((absoluteIndex * 13 + r.id.charCodeAt(0) * 7) % 40) + 12;
+                const hasReacted = localStorage.getItem(`news_react_${absoluteIndex}_${r.id}`) === "true";
+                const finalCount = hasReacted ? baseCount + 1 : baseCount;
+                
+                const activeStyle = hasReacted 
+                    ? `background: rgba(255,255,255,0.12); border-color: ${themeColor};` 
+                    : `background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.08);`;
+
+                return `
+                <div id="react-btn-${absoluteIndex}-${r.id}" onclick="window.clickNewsReaction(${absoluteIndex}, '${r.id}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 2px; border:1px solid; border-radius:8px; cursor:pointer; transition:0.2s; ${activeStyle}" onmouseover="this.style.borderColor='${themeColor}'" onmouseout="if(!localStorage.getItem('news_react_${absoluteIndex}_${r.id}')) this.style.borderColor='rgba(255,255,255,0.08)'">
+                    <span style="font-size: clamp(18px, 4vw, 22px); line-height:1.2;">${r.icon}</span>
+                    <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${finalCount}</span>
+                </div>`;
+            }).join('');
 
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div class="modal-body" style="padding: 0; position: relative;">
@@ -5013,23 +5070,27 @@ window.renderMinigameStart = function() {
                     </button>
 
                     ${imgUrl ? `
-                    <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; position: relative;">
-                        <img src="${imgUrl}" style="max-width: 100%; height: auto; max-height: 65vh; display: inline-block; vertical-align: middle;">
+                    <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center;">
+                        <img src="${imgUrl}" style="max-width: 100%; height: auto; max-height: 62vh; display: inline-block; vertical-align: middle;">
                     </div>` : ''}
                     
-                    <div style="padding: 25px;">
+                    <div style="padding: 22px 25px;">
                         <div class="news-header-meta" style="margin-bottom: 12px;">
                             <span class="news-date">📅 ${dateText}</span>
                             <span class="news-tag" style="color:${themeColor}">${tagText}</span>
                         </div>
                         <div class="modal-news-title" style="color:${themeColor}">${titleText}</div>
-                        <div class="modal-news-text">${contentText}</div>
+                        <div class="modal-news-text" style="margin-bottom: 20px;">${contentText}</div>
                         
-                        <div style="margin-top: 25px; display: flex; flex-wrap: wrap; gap: 8px;">
-                            ${tagsArray.map(t => `<span style="background: rgba(255,255,255,0.05); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='${themeColor}'" onmouseout="this.style.color='var(--text-sub)'; this.style.borderColor='rgba(255,255,255,0.1)'">#${t}</span>`).join('')}
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                            ${tagsArray.map(t => `<span style="background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">#${t}</span>`).join('')}
                         </div>
                         
-                        ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:14px; border-radius:6px; font-weight:900; font-size:14px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:25px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 前往相關連結 / 查閱原文 ➔</a>` : ''}
+                        <div style="display: flex; justify-content: space-between; gap: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+                            ${reactionsHtml}
+                        </div>
+                        
+                        ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:12px; border-radius:6px; font-weight:900; font-size:13px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:20px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 查看官方新聞原文 ➔</a>` : ''}
                     </div>
                 </div>
             `;
