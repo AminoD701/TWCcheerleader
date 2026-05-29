@@ -4264,13 +4264,13 @@
         };
 
         // =========================================================================
-        // 賽事專屬彈窗 (升級海報與官方連結版)
+        // 賽事專屬彈窗 (單螢幕極致壓縮 + 全幅無損海報版)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
             if(!e) return;
             
-            // ✨ 智慧抓取試算表中的海報與連結欄位
+            // ✨ 智慧抓取試算表中的海報與連結欄位 (請確認試算表有「海報」與「連結」欄位)
             const getField = (obj, keys) => {
                 for (let k of keys) { if (obj[k]) return obj[k].trim(); }
                 return "";
@@ -4284,68 +4284,74 @@
             const attendHtml = attendGirls.map(n => {
                 const g = girlMap.get(n);
                 const targetId = g ? g.uid : n;
+                // ✨ 縮小女孩頭像與卡片，節省螢幕空間
                 return `
-                <div class="girl-hero-card" onclick="window.openModal('${targetId}')" style="width:80px; padding: 5px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="girl-hero-img-wrap" style="width:65px; height:65px; box-shadow:none;">
+                <div class="girl-hero-card" onclick="window.openModal('${targetId}')" style="width:65px; padding: 4px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="girl-hero-img-wrap" style="width:50px; height:50px; box-shadow:none;">
                         ${g?`<img src="${g.img}" class="girl-hero-img" loading="lazy">`:`<div class="girl-hero-img default-avatar"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`}
                     </div>
                     <div class="girl-hero-name-container">
-                        <span class="girl-hero-name" style="font-size:13px;">${g?g.realname:n}</span>
+                        <span class="girl-hero-name" style="font-size:11px;">${g?g.realname:n}</span>
                     </div>
                 </div>`;
             }).join('');
 
+            // ✨ 修正 Google Maps 連結語法，確保手機能正確跳轉導航
             const addressRaw = (e.address || "").trim();
             const addressDisplay = addressRaw 
-                ? `<a href="https://www.google.com/maps/search/?api=1&query=$?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
+                ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
                 : "請見官方公告";
 
             let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"") + '|' + (e.girls||"");
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="display:block; width:100%; padding:16px; margin-top:20px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入專屬行程 (點擊移除)':'➕ 加入我的專屬行事曆'}</button>`;
             
-            // ✨ 官方連結按鈕
-            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:12px; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往官方活動連結 / 貼文</span></a>` : '';
+            // ✨ 壓縮按鈕尺寸，讓畫面底部不會太擁擠
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="display:block; width:100%; padding:10px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入 (點擊移除)':'➕ 加入專屬行事曆'}</button>`;
+            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); padding:10px; margin-top:8px; display:block; text-align:center; box-shadow:none;"><span style="color:#fff; font-family:var(--tc-font); font-size:13px;">🔗 前往官方活動連結</span></a>` : '';
 
-            document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
-
-            // ✨ 升級版：動態高質感海報背景 + 緊湊型資訊排版
+            // ✨ 海報區塊黑魔法：鎖定高度，完美比例不裁切，背景自動補滿模糊色塊
             let posterSection = '';
             if (posterUrl) {
                 posterSection = `
-                <div style="position: relative; width: 100%; background: #050505; overflow: hidden; border-bottom: 3px solid var(--event-accent);">
+                <div style="position: relative; width: 100%; height: clamp(140px, 28vh, 250px); background: #050505; overflow: hidden; border-bottom: 3px solid var(--event-accent);">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
-                    <img src="${posterUrl}" style="position: relative; width: 100%; max-height: 55vh; object-fit: contain; display: block; z-index: 2; margin: 0 auto;">
+                    <img src="${posterUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
                 </div>`;
             }
 
+            document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
+
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${posterSection}
-                <div class="modal-body" style="padding: 25px;">
+                <div class="modal-body" style="padding: 15px; display: flex; flex-direction: column; gap: 12px;">
                     
-                    <div style="margin-bottom: 20px; border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; text-align: left;">
-                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;">
+                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; width: fit-content;">
                             📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
                         </div>
-                        <div style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.4; word-break: break-word;">
+                        <div style="font-size: 18px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
                             ${e.eventname || "賽事活動未定"}
                         </div>
                     </div>
                     
-                    <div class="stats-grid" style="margin-bottom: 25px; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
-                        <div class="stat-box" style="padding: 10px 5px;"><span class="stat-label">時間 TIME</span><span class="stat-value" style="font-size:15px;">${e.time||"TBA"}</span></div>
-                        <div class="stat-box" style="padding: 10px 5px;"><span class="stat-label">主辦 HOST</span><span class="stat-value" style="font-size:13px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 12px 10px;"><span class="stat-label">地點 LOCATION</span><span class="stat-value" style="font-size:13px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
+                    <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                        <div class="stat-box" style="padding: 8px 5px;"><span class="stat-label" style="margin-bottom:2px;">時間 TIME</span><span class="stat-value" style="font-size:13px;">${e.time||"TBA"}</span></div>
+                        <div class="stat-box" style="padding: 8px 5px;"><span class="stat-label" style="margin-bottom:2px;">主辦 HOST</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
+                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 8px 10px;"><span class="stat-label" style="margin-bottom:2px;">地點 LOCATION</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
                     </div>
 
-                    <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:var(--text-sub); margin-bottom:12px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 10px;">
-                        ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">目前尚未公布名單</div>'}
+                    <div>
+                        <div style="font-family:var(--sport-font); font-size:12px; font-weight:900; color:var(--text-sub); margin-bottom:6px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            ${attendHtml || '<div style="color:var(--text-sub); font-size:12px; font-weight:700;">名單確認中</div>'}
+                        </div>
                     </div>
                     
-                    ${saveBtnHtml}
-                    ${linkBtnHtml}
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 10px;">
+                        ${saveBtnHtml}
+                        ${linkBtnHtml}
+                    </div>
                 </div>
             `;
 
