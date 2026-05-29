@@ -221,14 +221,14 @@
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         
-        .modal-photo { flex-shrink: 0; width: 100%; height: clamp(280px, 40vh, 450px); object-fit: cover; object-position: top center; border-bottom: 4px solid var(--modal-accent, #fff); }
-        .modal-body { flex: 1; min-height: 0; padding: 25px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(30px, env(safe-area-inset-bottom)); }
+        .modal-photo { flex-shrink: 0; width: 100%; height: 400px; object-fit: cover; object-position: top center; border-bottom: 6px solid var(--modal-accent, #fff); }
+        .modal-body { flex: 1; min-height: 0; padding: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
 
         .modal-close { position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; transition: 0.2s; backdrop-filter: blur(4px); }
         .modal-close:hover { background: var(--fav-accent); transform: scale(1.1); border-color: transparent;}
         .modal-close svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 3; fill: none; }
 
-        .modal-header-info { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; }
+        .modal-header-info { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px dashed var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
         .modal-nickname { font-size: 32px; font-weight: 900; color: var(--modal-accent, #fff); line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; }
         .modal-realname { font-size: 15px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; }
         .modal-number { font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: var(--modal-accent, #ffeb3b); background: #111418; padding: 4px 15px; border-radius: 4px; border: 2px solid var(--border-color); transform: skewX(-5deg); box-shadow: 4px 4px 0px rgba(0,0,0,0.5); width: fit-content; flex-shrink: 0; }
@@ -549,9 +549,9 @@
             .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
             .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-            .modal-photo { height: 38vh !important; min-height: 300px !important; border-bottom-width: 3px !important; } 
-            .modal-body { padding: 20px 15px !important; padding-bottom: 30px !important; }
-            .modal-nickname { font-size: 24px !important; }
+            .modal-photo { flex-shrink: 0; height: 380px; border-bottom-width: 4px; object-position: top center;} 
+            .modal-body { flex: 1; min-height: 0; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+            .modal-nickname { font-size: 22px; }
             .modal-number { font-size: 22px; padding: 4px 12px; }
             .modal-ig-btn { margin-top: 20px; padding: 14px; font-size: 15px; }
             .modal-close { top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(0,0,0,0.6); border:none;}
@@ -3922,9 +3922,9 @@
 
             container.innerHTML = htmlContent;
         }
-        
+
         // =========================================================================
-        // 個人詳細彈窗 (IG 質感小圖示 + 班表橫向完美收納版)
+        // 個人詳細彈窗
         // =========================================================================
         window.openModal = function(id) {
             const c = girlMap.get(id) || dbGirls.find(g => (g.realname||"").trim() === id.trim() || (g.nickname||"").trim() === id.trim());
@@ -3941,6 +3941,7 @@
             const cardAccent = themeConfig.accent;
             const noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
+            // ✨ 圖片防變身：強制抓取 CSV 裡「第一張有效的圖片」來跟外面的網格同步！
             const validImgRow = allRows.find(g => g.img) || c;
             const finalImgUrl = validImgRow.img ? window.getCdnUrl(validImgRow.img) : '';
 
@@ -3954,46 +3955,60 @@
             const currentMonth = today.getMonth() + 1;
             const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
 
+            // ✨ 班表智慧過濾：如果是菜市場名，球隊必須完全符合才算數！
             let herSchedules = dbSchedules.filter(s => {
                 if (s.safeDate.year !== currentYear || s.safeDate.month !== currentMonth || s.safeDate.num < todayNum) return false;
+                
                 const sName = s.name.trim();
                 const cNick = (c.nickname||"").trim();
                 const cReal = (c.realname||"").trim();
+                
                 if (cNick && sName === cNick) return true;
+                
                 if (sName === cReal) {
                     const isSharedName = [...new Set(dbGirls.filter(g => g.realname === cReal).map(g => g.uid))].length > 1;
-                    if (isSharedName) return teams.includes(s.team);
+                    if (isSharedName) return teams.includes(s.team); // 撞名時，球隊也要一樣！
                     return true;
                 }
                 return false;
             });
 
-            // ✨ 班表回歸直覺方塊，但改為橫向滑動收納，不佔垂直空間！
             let scheduleHtml = '';
             if (herSchedules.length > 0) {
                 herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
-                let dateBoxes = herSchedules.map(s => {
-                    let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
-                    let isSaved = schedSet.has(key);
-                    let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
-                    let scheduleTitle = `${s.team} · ${s.sport} 應援`;
-                    
-                    return `
-                    <div style="flex-shrink: 0; background: #15191e; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 10px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 90px;">
-                        <span style="font-size: 11px; color: var(--text-sub); font-weight: 700; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
-                        <span style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; margin: 4px 0; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                        <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:6px 0; font-size:12px; background:${isSaved?'var(--fav-accent)':'#252c36'}; color:#fff; border:1px solid ${isSaved?'transparent':'var(--border-color)'}; border-radius:4px; font-weight:900; cursor:pointer; margin-top:4px; transition:0.2s;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
-                    </div>`;
-                }).join('');
+                let dateBoxes = '';
+
+                herSchedules.forEach(s => {
+                // 🛠️ 修正：將女孩姓名 (s.name) 加進 key 中，確保同一天同球隊的不同女孩完全獨立分開！
+                let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
+                let isSaved = schedSet.has(key);
+                let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
+                
+                // ✨ 修正：拿掉女孩本名，讓標題更純粹 (女孩姓名會以高質感小標籤顯示在下方)
+                let scheduleTitle = `${s.team} · ${s.sport} 應援`;
+                
+                dateBoxes += `
+                <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
+                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
+                    <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
+                </div>`;
+            });
 
                 scheduleHtml = `
-                    <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                        <div style="font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: ${cardAccent}; margin-bottom: 10px; letter-spacing: 1px;">🗓️ 本月應援 SCHEDULE (可左右滑動)</div>
-                        <div style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 10px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                    <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE <span style="font-size: 12px; color: var(--text-sub); font-family: var(--tc-font); font-weight: normal; margin-left: 5px;">(點日期前往)</span></div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                             ${dateBoxes}
                         </div>
-                    </div>
-                `;
+                    </div>`;
+            } else {
+                scheduleHtml = `
+                    <div style="margin-top: 20px; border-top: 2px dashed var(--border-color); padding-top: 20px;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: var(--text-sub); margin-bottom: 12px; letter-spacing: 1px; transform: skewX(-5deg);">本月應援 SCHEDULE</div>
+                        <div style="font-size: 14px; color: #6a7a90; font-weight: 700;">本月目前尚無後續班表資料。</div>
+                    </div>`;
             }
 
             document.documentElement.style.setProperty('--modal-accent', cardAccent);
@@ -4005,24 +4020,21 @@
                     
                     <div class="modal-header-info">
                         <div>
-                            <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                <div class="modal-nickname" style="color:${cardAccent}">${c.realname}</div>
-                                ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()" style="margin-left:4px;"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
-                            </div>
+                            <div class="modal-nickname" style="color:${cardAccent}">${c.realname}</div>
                             ${(c.nickname && c.nickname !== c.realname) ? `<div class="modal-realname">${c.nickname}</div>` : ''}
                         </div>
                         <div class="modal-number">${nums.join(' ') || "-"}</div>
                     </div>
                     
                     <div class="modal-data-grid">
-                        <div class="modal-data-row" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 4px;">
-                            <span class="modal-data-label">所屬球隊 UNIT</span>
+                        <div class="modal-data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 5px; align-items: flex-start;">
+                            <span class="modal-data-label" style="margin-top: 5px;">所屬球隊 UNIT</span>
                             <div class="team-tags-wrapper">
                                 ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
                             </div>
                         </div>
                     </div>
-                    <div class="stats-grid" style="margin-bottom: 0;">
+                    <div class="stats-grid">
                         <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
                         <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : 'N/A'}</span></div>
                         <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
@@ -4031,12 +4043,14 @@
                     ${noteText ? `<div class="note-box">${noteText}</div>` : ''}
                     
                     ${scheduleHtml}
+                    ${c.ig ? `<a href="${c.ig}" target="_blank" class="modal-ig-btn"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>前往 INSTAGRAM</span></a>` : ''}
                 </div>
             `;
 
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll'); 
         };
+
         window.closeModal = function() { 
             document.getElementById('girl-modal').classList.remove('active'); 
             document.body.classList.remove('no-scroll'); 
