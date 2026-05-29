@@ -2562,6 +2562,10 @@
             const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
 
             let regionGirls = girlsWithVotes.filter(g => {
+                // ✨ 終極排除令：只要備註有寫身分，且不是「練習生」或「培訓生」，通通禁止參賽！
+                const note = (g.note || g['備註'] || g.備註 || "").trim();
+                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return false;
+
                 const natStr = g.nat || "";
                 const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
                 const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
@@ -4472,8 +4476,13 @@ window.renderMinigameStart = function() {
                 }
             });
             
-            // 只抓有照片的女孩進入賽場
-            let pool = Array.from(uniqueMap.values()).filter(g => g.img);
+            // ✨ 終極排除令：只要備註有寫身分，且不是「練習生」或「培訓生」，通通禁止參賽！
+            let pool = Array.from(uniqueMap.values()).filter(g => {
+                if (!g.img) return false;
+                const note = (g.note || g['備註'] || g.備註 || "").trim();
+                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return false;
+                return true;
+            });
 
             // 定義 KBO 十大球團
             const kboTeams = ["doosan bears", "kt wiz", "kia tigers", "kiwoom heroes", "hanwha eagles", "ssg landers", "samsung lions", "nc dinos", "lotte giants", "lg twins"];
