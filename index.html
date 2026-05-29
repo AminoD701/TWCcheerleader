@@ -217,7 +217,7 @@
         ========================================= */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--bg-panel); border: 4px solid #fff; border-radius: 8px; width: 100%; max-width: 460px; position: relative; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 15px 15px 0px rgba(0,0,0,0.6); overflow: hidden; max-height: 90dvh; display: flex; flex-direction: column; }
+        .modal-content { background: var(--bg-panel); border: 4px solid #fff; border-radius: 8px; width: 100%; max-width: 650px; position: relative; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 15px 15px 0px rgba(0,0,0,0.6); overflow: hidden; max-height: 90dvh; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         
@@ -4321,13 +4321,12 @@
         };
 
         // =========================================================================
-        // 賽事專屬彈窗 (單螢幕極致壓縮 + 全幅無損海報版)
+        // 賽事專屬彈窗 (手機極致壓縮 vs 電腦大氣展示 雙棲版)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
             if(!e) return;
             
-            // ✨ 智慧抓取試算表中的海報與連結欄位 (請確認試算表有「海報」與「連結」欄位)
             const getField = (obj, keys) => {
                 for (let k of keys) { if (obj[k]) return obj[k].trim(); }
                 return "";
@@ -4341,19 +4340,18 @@
             const attendHtml = attendGirls.map(n => {
                 const g = girlMap.get(n);
                 const targetId = g ? g.uid : n;
-                // ✨ 縮小女孩頭像與卡片，節省螢幕空間
+                // ✨ 使用 clamp()：手機版頭像小小的 (50px)，電腦版自動變大 (75px)
                 return `
-                <div class="girl-hero-card" onclick="window.openModal('${targetId}')" style="width:65px; padding: 4px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="girl-hero-img-wrap" style="width:50px; height:50px; box-shadow:none;">
+                <div class="girl-hero-card" onclick="window.openModal('${targetId}')" style="width:clamp(65px, 12vw, 95px); padding: clamp(4px, 0.5vw, 8px); border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="girl-hero-img-wrap" style="width:clamp(50px, 9vw, 75px); height:clamp(50px, 9vw, 75px); box-shadow:none;">
                         ${g?`<img src="${g.img}" class="girl-hero-img" loading="lazy">`:`<div class="girl-hero-img default-avatar"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`}
                     </div>
                     <div class="girl-hero-name-container">
-                        <span class="girl-hero-name" style="font-size:11px;">${g?g.realname:n}</span>
+                        <span class="girl-hero-name" style="font-size:clamp(11px, 1.5vw, 14px);">${g?g.realname:n}</span>
                     </div>
                 </div>`;
             }).join('');
 
-            // ✨ 修正 Google Maps 連結語法，確保手機能正確跳轉導航
             const addressRaw = (e.address || "").trim();
             const addressDisplay = addressRaw 
                 ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
@@ -4363,15 +4361,15 @@
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
-            // ✨ 壓縮按鈕尺寸，並改為「左右並排」，大幅節省垂直空間
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; padding: 8px 4px; font-weight: 900; font-size: 12px; background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap;">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
-            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; padding: 8px 4px; font-weight: 900; font-size: 12px; background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; text-decoration: none; text-align: center; white-space: nowrap;">🔗 官方連結</a>` : '';
+            // ✨ 按鈕字體與 padding 自動縮放
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; padding: clamp(8px, 1.5vw, 12px) 4px; font-weight: 900; font-size: clamp(12px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap;">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
+            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="flex: 1; padding: clamp(8px, 1.5vw, 12px) 4px; font-weight: 900; font-size: clamp(12px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; text-decoration: none; text-align: center; white-space: nowrap; margin-top:0; box-shadow:none;">🔗 官方連結</a>` : '';
 
-            // ✨ 海報區塊黑魔法：進一步壓縮高度 (最高 22vh)，把空間留給下方資訊
+            // ✨ 海報高度解放：手機維持最高 220px 確保一頁塞入，電腦最高可達 380px 完美展示大圖
             let posterSection = '';
             if (posterUrl) {
                 posterSection = `
-                <div style="position: relative; width: 100%; height: clamp(110px, 22vh, 220px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent);">
+                <div style="position: relative; width: 100%; height: clamp(110px, 35vh, 380px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent);">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
                     <img src="${posterUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
                 </div>`;
@@ -4379,33 +4377,34 @@
 
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
 
+            // ✨ 內部字體全面套用 clamp 彈性引擎
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${posterSection}
-                <div class="modal-body" style="padding: 12px 15px; display: flex; flex-direction: column; gap: 8px;">
+                <div class="modal-body" style="padding: clamp(12px, 2vw, 25px); display: flex; flex-direction: column; gap: clamp(8px, 1.5vw, 15px);">
                     
-                    <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
-                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; width: fit-content;">
+                    <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: clamp(8px, 1vw, 15px);">
+                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: clamp(11px, 1.5vw, 14px); font-weight: 900; padding: clamp(2px, 0.5vw, 4px) clamp(8px, 1vw, 12px); border-radius: 4px; letter-spacing: 1px; width: fit-content;">
                             📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
                         </div>
-                        <div style="font-size: 16px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
+                        <div style="font-size: clamp(16px, 2.5vw, 24px); font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
                             ${e.eventname || "賽事活動未定"}
                         </div>
                     </div>
                     
                     <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
-                        <div class="stat-box" style="padding: 6px 4px;"><span class="stat-label" style="margin-bottom:2px;">時間 TIME</span><span class="stat-value" style="font-size:12px;">${e.time||"TBA"}</span></div>
-                        <div class="stat-box" style="padding: 6px 4px;"><span class="stat-label" style="margin-bottom:2px;">主辦 HOST</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: 6px 8px;"><span class="stat-label" style="margin-bottom:2px;">地點 LOCATION</span><span class="stat-value" style="font-size:12px; font-family:var(--tc-font); line-height:1.3;">${addressDisplay}</span></div>
+                        <div class="stat-box" style="padding: clamp(6px, 1vw, 12px) 4px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 12px);">時間 TIME</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 16px);">${e.time||"TBA"}</span></div>
+                        <div class="stat-box" style="padding: clamp(6px, 1vw, 12px) 4px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 12px);">主辦 HOST</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 16px); font-family:var(--tc-font);">${e.host||"-"}</span></div>
+                        <div class="stat-box" style="grid-column: 1 / -1; border-right: none; padding: clamp(6px, 1vw, 12px) 8px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 12px);">地點 LOCATION</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 16px); font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
                     </div>
 
                     <div>
-                        <div style="font-family:var(--sport-font); font-size:11px; font-weight:900; color:var(--text-sub); margin-bottom:4px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                            ${attendHtml || '<div style="color:var(--text-sub); font-size:11px; font-weight:700;">名單確認中</div>'}
+                        <div style="font-family:var(--sport-font); font-size:clamp(11px, 1.5vw, 15px); font-weight:900; color:var(--text-sub); margin-bottom:6px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:clamp(6px, 1vw, 10px);">
+                            ${attendHtml || '<div style="color:var(--text-sub); font-size:12px; font-weight:700;">名單確認中</div>'}
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 8px;">
+                    <div style="display: flex; gap: clamp(8px, 1.5vw, 15px); margin-top: auto; padding-top: 8px;">
                         ${saveBtnHtml}
                         ${linkBtnHtml}
                     </div>
