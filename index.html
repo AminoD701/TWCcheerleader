@@ -260,7 +260,21 @@
         .schedule-team-btn span { color: #fff; font-weight: 900; font-size: 18px; letter-spacing: 1px; }
 
         .schedule-desktop { display: block; width: 100%; }
-        .schedule-wrapper { width: 100%; overflow-x: auto; background: var(--bg-panel); border: 4px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.8); padding-bottom: 5px;}
+        .schedule-wrapper { 
+            width: 100%; 
+            max-height: 75vh; /* 🎯 關鍵 1：限制最大高度，大約佔螢幕 75% */
+            overflow: auto;   /* 🎯 關鍵 2：開啟容器內部的上下左右捲動 */
+            background: var(--bg-panel); 
+            border: 4px solid var(--border-color); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8); 
+            padding-bottom: 0px; /* 微調讓捲動軸貼齊底框 */
+        }
+
+        /* 🎁 加碼升級：專屬電競風捲動軸，讓水平拉條更明顯好抓！ */
+        .schedule-wrapper::-webkit-scrollbar { width: 8px; height: 12px; }
+        .schedule-wrapper::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 6px; }
+        .schedule-wrapper::-webkit-scrollbar-thumb { background: var(--team-accent); border-radius: 6px; transition: 0.3s; }
+        .schedule-wrapper::-webkit-scrollbar-thumb:hover { filter: brightness(1.2); }
         .schedule-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 750px; table-layout: fixed;}
         .schedule-table th, .schedule-table td { padding: 20px 8px; border-bottom: 2px solid var(--border-color); border-right: 2px solid var(--border-color);}
         .schedule-table th { background: #1a1e24; position: sticky; top: 0; z-index: 2; border-bottom: 4px solid var(--team-accent); vertical-align: bottom;}
