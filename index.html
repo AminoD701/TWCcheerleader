@@ -1505,13 +1505,11 @@
             border: 1px solid rgba(255,255,255,0.05) !important;
         }
 
-        /* 📱 手機版極致排版與跑馬燈縮小 */
-        @media (max-width: 768px) {
-            /* ✨ 跑馬燈極限縮小，優化視覺空間 */
-            .marquee-wrapper { padding: 6px 0; margin-bottom: 12px; border-top-width: 1px; border-bottom-width: 1px; }
+        /* ✨ 跑馬燈極限縮小，優化視覺空間 */
+            .marquee-wrapper { padding: 5px 0; margin-bottom: 10px; border-top-width: 1px; border-bottom-width: 1px; }
             .marquee-wrapper::before { font-size: 9px; padding: 0 8px; letter-spacing: 1px; }
-            .marquee-content { font-size: 11px; animation-duration: 20s; padding-left: 100%; }
-            .marquee-highlight { font-size: 12px; }
+            .marquee-content { font-size: 10px; animation-duration: 20s; padding-left: 100%; }
+            .marquee-highlight { font-size: 10px; margin: 0 2px; }
 
             /* ✨ 賽道標籤微縮，手機滑動更流暢 */
             #vote-category-tabs .vote-team-tag { padding: 6px 12px; font-size: 12px; }
@@ -1833,17 +1831,24 @@
         <div id="dreamteam-container" style="display:none;"></div>
         <div id="feedback-container" style="display:none; max-width: 600px; margin: 30px auto 60px; padding: 0 20px;"></div>
         <div id="vote-container" class="main-content-container" style="display: none; max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 15px;">
-            <div class="game-title" style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin-bottom: 5px; font-size: clamp(24px, 5vw, 36px);">🏆 第一屆·全民應援大賞</div>
-            <div style="color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; margin-bottom:12px; letter-spacing:1px;">🔥 賽期：2026/05/27 ~ 2026/06/27 · 每個賽道每日限投一票</div>
-            
-            <div style="max-width: 620px; margin: 0 auto 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; font-size: 12px; color: var(--text-sub); text-align: center; font-weight: 700; line-height: 1.6;">
-                📢 本活動僅供球迷應援同樂與測試體驗，票數結果純屬娛樂性質，並非用作實質影響或評斷女孩真實人氣之統計，請大家理性為心儀的啦啦隊女孩加油！💖
-            </div>
-            
-            <div id="vote-category-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; margin-bottom: 10px;">
-                <div id="vote-tab-baseball" class="vote-team-tag active" onclick="window.switchVoteCategory('baseball')">⚾ 棒球大賞 (CPBL)</div>
-                <div id="vote-tab-korea_pro" class="vote-team-tag" onclick="window.switchVoteCategory('korea_pro')">🇯🇵🇰🇷 日韓外援 (台灣職聯)</div>
-                <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">🇹🇼 本土應援 (台港馬)</div>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="font-family: var(--sport-font); font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: #fff; letter-spacing: 4px; margin-bottom: 8px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
+                    <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #ffd700; vertical-align: text-bottom; margin-right: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/></svg>
+                    第一屆·全民應援大賞
+                </h2>
+                
+                <div id="vote-subtitle-box" style="font-size: 13px; font-weight: 700; color: var(--text-sub); letter-spacing: 1px; margin-bottom: 20px;"></div>
+                
+                <div style="max-width: 600px; margin: 0 auto 25px; padding: 10px 15px; border-left: 3px solid #555; background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%); text-align: left;">
+                    <div style="font-family: var(--sport-font); font-size: 11px; color: #888; letter-spacing: 2px; margin-bottom: 4px;">DISCLAIMER</div>
+                    <div style="font-size: 12px; color: #aaa; font-weight: 700; line-height: 1.6;">本活動僅供球迷應援同樂體驗，票數結果純屬娛樂性質，並非用作實質影響或評斷女孩真實人氣之統計。</div>
+                </div>
+                
+                <div id="vote-category-tabs" style="display: flex; justify-content: center; gap: 12px; overflow-x: auto; padding: 5px 10px 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div id="vote-tab-baseball" class="vote-team-tag active" onclick="window.switchVoteCategory('baseball')">CPBL 棒球大賞</div>
+                    <div id="vote-tab-korea_pro" class="vote-team-tag" onclick="window.switchVoteCategory('korea_pro')">日韓外援陣線</div>
+                    <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">台港馬本土應援</div>
+                </div>
             </div>
 
             <div id="vote-leaderboard-container" style="margin-bottom: 30px; background: rgba(17,20,24,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
@@ -2650,15 +2655,22 @@
             if (phase === 'official') hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
             else if (phase === 'closed') hasVotedToday = true; 
 
-            const subtitleEl = document.querySelector('#vote-container > div:nth-child(2)');
+            // ✨ 指向新的副標題容器，並套用極簡專業風文字與按鈕
+            const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676;">🛠️ 全網連線測試階段：開放無限投票！</span> 正式賽期為 6/1~6/30，屆時將恢復每日限投一票。';
-                else if (phase === 'closed') text = '<span style="color:#ff4757;">🔒 活動已結束！</span> 感謝全台粉絲的熱烈參與！';
-                else text = '🔥 <b>正式賽期：6/1 ~ 6/30</b> · 每個賽道每日限投一票！';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 全網測試：開放無限投票！正式賽期 6/1~6/30 將恢復限投。';
+                else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！感謝全台粉絲的熱烈參與。';
+                else text = '<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 各賽區每日限投一票。';
                 
-                // ✨ 植入高質感「一鍵分享」按鈕
-                subtitleEl.innerHTML = text + `<div style="margin-top: 15px;"><button onclick="window.shareVotePage()" class="nav-btn active" style="background: linear-gradient(45deg, #e040fb, #ff4081); color: #fff; border: none; padding: 8px 22px; font-size: 14px; box-shadow: 3px 3px 0px rgba(224,64,251,0.4); border-radius: 30px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;vertical-align:middle;margin-right:6px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>一鍵分享賽區戰況</button></div>`;
+                // 更換為低調質感的分享按鈕
+                subtitleEl.innerHTML = text + `
+                <div style="margin-top: 12px;">
+                    <button onclick="window.shareVotePage()" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 18px; font-size: 12px; font-weight: 700; border-radius: 20px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                        <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; vertical-align:middle; margin-right:6px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        分享賽區戰況
+                    </button>
+                </div>`;
             }
 
             const pool = getVotePool();
