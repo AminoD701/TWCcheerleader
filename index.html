@@ -1459,6 +1459,49 @@
             .poster-rank-rest .poster-name { font-size: 11px; }
             .poster-votes { font-size: 10px; }
         }
+        /* =========================================
+   ✨ 個人詳細彈窗 (電腦版左右雙欄完美比例優化)
+========================================= */
+@media (min-width: 769px) {
+    /* 1. 放大彈窗總寬度，並將內部佈局改為左右排列 */
+    .modal-content {
+        max-width: 880px !important;
+    }
+    .modal-layout {
+        flex-direction: row !important;
+    }
+
+    /* 2. 照片區塊佔左半邊，解除高度限制，完美呈現半身照 */
+    .modal-photo {
+        width: 45% !important;
+        height: auto !important;
+        min-height: 550px;
+        border-bottom: none !important; /* 移除原本的下底線 */
+        border-right: 6px solid var(--modal-accent, #fff) !important; /* 改成右側邊框分隔 */
+    }
+
+    /* 3. 資訊區塊佔右半邊 55%，並垂直置中對齊 */
+    .modal-body {
+        width: 55% !important;
+        padding: 40px 35px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+    }
+
+    /* 4. 將原本絕對定位 (飄在左上角) 的運動標籤，拉回右側內文中排版 */
+    .modal-body .sport-tags {
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* 5. 稍微壓縮一點背號跟按鈕大小，讓右側資訊看起來更精緻 */
+    .modal-nickname { font-size: 28px !important; }
+    .modal-number { font-size: 22px !important; padding: 2px 12px !important; }
+    .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
+}
     </style> 
 </head>
 <body class="no-scroll">
