@@ -4883,15 +4883,22 @@ window.renderMinigameStart = function() {
         // 📰 每日動態情報牆核心渲染引擎 (CMS)
         // =========================================================================
         window.currentNewsTag = "全部";
-        // ✨ 新增：新聞共鳴按鈕點擊計票與特效引擎
+        // ✨ 新增：新聞共鳴按鈕點擊計票與特效引擎 (嚴格單選版)
         window.clickNewsReaction = function(newsIdx, type) {
-            const key = `news_react_${newsIdx}_${type}`;
-            if (localStorage.getItem(key)) {
-                alert("您今天已經對這篇情報表達過這個心情囉！💖");
+            const key = `news_react_single_${newsIdx}`;
+            const existingReact = localStorage.getItem(key);
+
+            if (existingReact) {
+                if (existingReact === type) {
+                    alert("您已經點過這個心情囉！💖");
+                } else {
+                    alert("一篇文章只能表達一種心情喔！您已經選過其他心情了。");
+                }
                 return;
             }
-            // 鎖定手機紀錄，每篇新聞的每個心情限點一次
-            localStorage.setItem(key, "true");
+            
+            // 鎖定手機紀錄，這篇文章只允許一次表態，並記錄選了什麼心情
+            localStorage.setItem(key, type);
             
             const countEl = document.getElementById(`react-count-${newsIdx}-${type}`);
             const btnEl = document.getElementById(`react-btn-${newsIdx}-${type}`);
@@ -5044,19 +5051,20 @@ window.renderMinigameStart = function() {
                 { id: 'wow', icon: '😮' }
             ];
 
-            // 生成心情按鈕的 HTML
+            // 生成心情按鈕的 HTML (✨ 真實 0 互動 + 嚴格單選機制)
             let reactionsHtml = reactTypes.map(r => {
-                // 利用文章索引與字元產生穩定的偽隨機基底票數，看起來生動熱絡
-                const baseCount = ((absoluteIndex * 13 + r.id.charCodeAt(0) * 7) % 40) + 12;
-                const hasReacted = localStorage.getItem(`news_react_${absoluteIndex}_${r.id}`) === "true";
-                const finalCount = hasReacted ? baseCount + 1 : baseCount;
+                const userChoice = localStorage.getItem(`news_react_single_${absoluteIndex}`);
+                const hasReacted = userChoice === r.id;
                 
-                const activeStyle = hasReacted 
-                    ? `background: rgba(255,255,255,0.12); border-color: ${themeColor};` 
+                // 預設為 0，如果自己有點過就顯示 1 (未來若接上後端，可加上全網真實數字)
+                const finalCount = hasReacted ? 1 : 0; 
+                
+                const activeStyle = hasReacted 
+                    ? `background: rgba(255,255,255,0.12); border-color: ${themeColor};` 
                     : `background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.08);`;
 
                 return `
-                <div id="react-btn-${absoluteIndex}-${r.id}" onclick="window.clickNewsReaction(${absoluteIndex}, '${r.id}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 2px; border:1px solid; border-radius:8px; cursor:pointer; transition:0.2s; ${activeStyle}" onmouseover="this.style.borderColor='${themeColor}'" onmouseout="if(!localStorage.getItem('news_react_${absoluteIndex}_${r.id}')) this.style.borderColor='rgba(255,255,255,0.08)'">
+                <div id="react-btn-${absoluteIndex}-${r.id}" onclick="window.clickNewsReaction(${absoluteIndex}, '${r.id}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 2px; border:1px solid; border-radius:8px; cursor:pointer; transition:0.2s; ${activeStyle}" onmouseover="this.style.borderColor='${themeColor}'" onmouseout="if(localStorage.getItem('news_react_single_${absoluteIndex}') !== '${r.id}') this.style.borderColor='rgba(255,255,255,0.08)'">
                     <span style="font-size: clamp(18px, 4vw, 22px); line-height:1.2;">${r.icon}</span>
                     <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${finalCount}</span>
                 </div>`;
@@ -5090,7 +5098,7 @@ window.renderMinigameStart = function() {
                             ${reactionsHtml}
                         </div>
                         
-                        ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:12px; border-radius:6px; font-weight:900; font-size:13px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:20px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 查看官方新聞原文 ➔</a>` : ''}
+                       ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:12px; border-radius:6px; font-weight:900; font-size:13px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:20px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 前往相關連結 ➔</a>` : ''}
                     </div>
                 </div>
             `;
