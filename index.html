@@ -2481,18 +2481,19 @@
             }
         };
 
-        // ✨ 啟動時，強制要求伺服器交出最新戰況
-        window.initVoteHall = async function() {
+        // ✨ 🏆 應援大賞啟動引擎 (極速秒開 + 背景同步)
+        window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
-            const grid = document.getElementById('vote-grid');
-            if(grid) grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffd700; font-weight: 900; font-size: 18px; letter-spacing: 2px;">⏳ 正在連線全網伺服器，同步最新戰況...</div>`;
-
-            // 等待伺服器回傳資料
-            await window.fetchGlobalVotes();
-
+            // 1. 瞬間畫出畫面 (先用舊數字或0)
             updateVoteTeamDropdown();
             window.renderVoteGrid();
+
+            // 2. 背景默默去抓最新戰況，抓完再自動重新渲染排行榜 (不卡住使用者)
+            window.fetchGlobalVotes().then(() => {
+                window.renderVoteGrid();
+            });
+        };ow.renderVoteGrid();
         };
 
         window.switchVoteCategory = async function(category) {
@@ -5015,7 +5016,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專專屬彈窗 (終極高格調：六大心情共鳴系統 ＋ 標籤雲)
+        // 📰 每日情報專屬彈窗 (極速秒開 + 雲端背景同步 + 潮流標籤雲 + 六大心情)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
@@ -5034,14 +5035,12 @@ window.renderMinigameStart = function() {
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
             
-            // 自動生成 Hashtag 陣列
             const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
             let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(t=>t) : [tagText];
 
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
-            // ✨ 智慧六大心情定義陣列 (愛心、大笑、難過、疑惑、生氣、驚訝)
             const reactTypes = [
                 { id: 'love', icon: '❤️' },
                 { id: 'laugh', icon: '😂' },
@@ -5051,13 +5050,14 @@ window.renderMinigameStart = function() {
                 { id: 'wow', icon: '😮' }
             ];
 
-            // 生成心情按鈕的 HTML (✨ 真實 0 互動 + 嚴格單選機制)
+            // ✨ 第一步：瞬間畫出介面 (先用暫存的 0 或手機記憶數字，絕對不卡頓)
             let reactionsHtml = reactTypes.map(r => {
+                const voteKey = `news_react_${absoluteIndex}_${r.id}`;
                 const userChoice = localStorage.getItem(`news_react_single_${absoluteIndex}`);
                 const hasReacted = userChoice === r.id;
                 
-                // 預設為 0，如果自己有點過就顯示 1 (未來若接上後端，可加上全網真實數字)
-                const finalCount = hasReacted ? 1 : 0; 
+                // 先拿本地暫存的數字頂著
+                const tempCount = parseInt(window.globalNewsReactData ? window.globalNewsReactData[voteKey] : 0) || (hasReacted ? 1 : 0);
                 
                 const activeStyle = hasReacted 
                     ? `background: rgba(255,255,255,0.12); border-color: ${themeColor};` 
@@ -5066,7 +5066,7 @@ window.renderMinigameStart = function() {
                 return `
                 <div id="react-btn-${absoluteIndex}-${r.id}" onclick="window.clickNewsReaction(${absoluteIndex}, '${r.id}')" style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 2px; border:1px solid; border-radius:8px; cursor:pointer; transition:0.2s; ${activeStyle}" onmouseover="this.style.borderColor='${themeColor}'" onmouseout="if(localStorage.getItem('news_react_single_${absoluteIndex}') !== '${r.id}') this.style.borderColor='rgba(255,255,255,0.08)'">
                     <span style="font-size: clamp(18px, 4vw, 22px); line-height:1.2;">${r.icon}</span>
-                    <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${finalCount}</span>
+                    <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${tempCount}</span>
                 </div>`;
             }).join('');
 
@@ -5098,13 +5098,26 @@ window.renderMinigameStart = function() {
                             ${reactionsHtml}
                         </div>
                         
-                       ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:12px; border-radius:6px; font-weight:900; font-size:13px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:20px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 前往相關連結 ➔</a>` : ''}
+                        ${linkText ? `<a href="${linkText}" target="_blank" style="display:block; width:100%; background:#1a1e24; color:#fff; border:1px solid var(--border-color); padding:12px; border-radius:6px; font-weight:900; font-size:13px; font-family:var(--tc-font); text-align:center; text-decoration:none; margin-top:20px; transition:0.2s; box-shadow: 4px 4px 0px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">🔗 前往相關連結 ➔</a>` : ''}
                     </div>
                 </div>
             `;
-
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll'); 
+
+            // ✨ 第二步：背景默默去 Google 抓最新數據，抓到後自動替換數字 (完全不卡畫面！)
+            if (typeof window.fetchGlobalNewsReactions === 'function') {
+                window.fetchGlobalNewsReactions().then(() => {
+                    reactTypes.forEach(r => {
+                        const voteKey = `news_react_${absoluteIndex}_${r.id}`;
+                        const realCount = parseInt(window.globalNewsReactData[voteKey] || 0);
+                        const countEl = document.getElementById(`react-count-${absoluteIndex}-${r.id}`);
+                        
+                        // 神不知鬼不覺把數字換成全網最新的真實數據
+                        if (countEl) countEl.innerText = realCount; 
+                    });
+                });
+            }
         };
         // =========================================================================
         // 📢 新聞 CMS 一鍵分享核心引擎 (原生態智慧分享機制)
