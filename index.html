@@ -1621,6 +1621,12 @@
                 word-break: break-all !important;
             }
         }
+        /* ✨ 投票模式專屬：隱藏浮動按鈕以利截圖分享 */
+        body.mode-vote .floating-boba-btn,
+        body.mode-vote .floating-hub-btn,
+        body.mode-vote .back-to-top {
+            display: none !important;
+        }
     </style> 
 </head>
 <body class="no-scroll">
@@ -2315,6 +2321,9 @@
         });
 
         window.setMode = function(mode) {
+            // ✨ 控制投票模式下的浮動按鈕隱藏
+            if (mode === 'vote') document.body.classList.add('mode-vote');
+            else document.body.classList.remove('mode-vote');
             const modeNames = {
                 'girls': '👧 女孩圖鑑 ROSTER',
                 'passport': '🛂 追星護照 MY PASSPORT',
@@ -2645,9 +2654,13 @@
 
             const subtitleEl = document.querySelector('#vote-container > div:nth-child(2)');
             if (subtitleEl) {
-                if (phase === 'testing') subtitleEl.innerHTML = '<span style="color:#00e676;">🛠️ 全網連線測試階段：開放無限投票！</span> 正式賽期為 6/1~6/30，屆時將恢復每日限投一票。';
-                else if (phase === 'closed') subtitleEl.innerHTML = '<span style="color:#ff4757;">🔒 活動已結束！</span> 感謝全台粉絲的熱烈參與！';
-                else subtitleEl.innerHTML = '🔥 <b>正式賽期：6/1 ~ 6/30</b> · 每個賽道每日限投一票！';
+                let text = '';
+                if (phase === 'testing') text = '<span style="color:#00e676;">🛠️ 全網連線測試階段：開放無限投票！</span> 正式賽期為 6/1~6/30，屆時將恢復每日限投一票。';
+                else if (phase === 'closed') text = '<span style="color:#ff4757;">🔒 活動已結束！</span> 感謝全台粉絲的熱烈參與！';
+                else text = '🔥 <b>正式賽期：6/1 ~ 6/30</b> · 每個賽道每日限投一票！';
+                
+                // ✨ 植入高質感「一鍵分享」按鈕
+                subtitleEl.innerHTML = text + `<div style="margin-top: 15px;"><button onclick="window.shareVotePage()" class="nav-btn active" style="background: linear-gradient(45deg, #e040fb, #ff4081); color: #fff; border: none; padding: 8px 22px; font-size: 14px; box-shadow: 3px 3px 0px rgba(224,64,251,0.4); border-radius: 30px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;vertical-align:middle;margin-right:6px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>一鍵分享賽區戰況</button></div>`;
             }
 
             const pool = getVotePool();
@@ -2686,6 +2699,15 @@
             });
 
             regionGirls.sort((a, b) => b.votes - a.votes);
+
+            // ✨ 新增：計算真實排名 (處理同票平手狀況)
+            let currentRank = 1;
+            regionGirls.forEach((g, idx) => {
+                if (idx > 0 && g.votes < regionGirls[idx - 1].votes) {
+                    currentRank = idx + 1;
+                }
+                g.rank = currentRank;
+            });
 
             if (leaderboard) {
                 // 清除舊的 Flex 設定，改用 Block 來裝載我們的新海報網格
@@ -2761,8 +2783,12 @@
                     btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">${btnText}</button>`;
                 }
 
+                const rankColor = g.rank === 1 ? '#ffd700' : g.rank === 2 ? '#c0c0c0' : g.rank === 3 ? '#cd7f32' : '#4a5568';
+                const rankBadge = `<div style="position: absolute; top: -10px; left: -10px; background: ${rankColor}; color: ${g.rank<=3?'#000':'#fff'}; font-family: var(--sport-font); font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 5; border: 2px solid var(--bg-card);">${g.rank}</div>`;
+
                 return `
-                <div class="vote-card" style="padding: 12px;">
+                <div class="vote-card" style="padding: 12px; position: relative;">
+                    ${rankBadge}
                     <div class="vote-img-box" style="margin-bottom: 8px; cursor:pointer;" onclick="window.openModal('${g.uid}')">
                         <img src="${window.getCdnUrl(g.img)}" onerror="this.src='https://via.placeholder.com/150'">
                     </div>
@@ -2775,7 +2801,25 @@
         };
 
         window.filterVoteList = function() { window.renderVoteGrid(); };
+        // ✨ 一鍵分享投票戰況引擎
+        window.shareVotePage = function() {
+            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
+            const currentCatName = catNames[voteState.currentCategory];
+            
+            // 帶有 mode 參數的專屬分享網址
+            const shareUrl = `${window.location.origin}${window.location.pathname}?mode=vote`;
+            const shareText = `【第一屆·全民應援大賞】🏆\n快來看看「${currentCatName}」的即時戰況！\n為你的本命女孩投下神聖的一票吧！🔥\n\n👇 點擊前往投票大廳：`;
 
+            if (navigator.share) {
+                navigator.share({ title: '全民應援大賞', text: shareText, url: shareUrl }).catch(e => console.log('分享取消', e));
+            } else {
+                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                    alert('📋 賽區投票連結已複製！快去各大社群幫女孩催票吧！');
+                }).catch(() => {
+                    alert('📋 連結複製失敗，請手動複製網址。');
+                });
+            }
+        };
         // ✨ 把票真實送出給 Google 伺服器 (加入防誤按機制)
         window.submitVote = function(uid, name) {
             const now = new Date();
