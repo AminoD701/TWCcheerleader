@@ -4264,12 +4264,22 @@
         };
 
         // =========================================================================
-        // 賽事專屬彈窗
+        // 賽事專屬彈窗 (升級海報與官方連結版)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
             if(!e) return;
             
+            // ✨ 智慧抓取試算表中的海報與連結欄位
+            const getField = (obj, keys) => {
+                for (let k of keys) { if (obj[k]) return obj[k].trim(); }
+                return "";
+            };
+            const posterRaw = getField(e, ['海報', 'poster', '圖片', '活動圖片', 'img']);
+            const posterUrl = posterRaw ? window.getCdnUrl(posterRaw) : '';
+            const linkRaw = getField(e, ['連結', 'link', '活動連結', 'ig', 'threads']);
+            const linkUrl = linkRaw ? (linkRaw.startsWith('http') ? linkRaw : `https://${linkRaw}`) : '';
+
             const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
             const attendHtml = attendGirls.map(n => {
                 const g = girlMap.get(n);
@@ -4287,18 +4297,22 @@
 
             const addressRaw = (e.address || "").trim();
             const addressDisplay = addressRaw 
-                ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
-                : "請見球團官網";
+                ? `<a href="https://www.google.com/maps/search/?api=1&query=$?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
+                : "請見官方公告";
 
             let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"") + '|' + (e.girls||"");
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="display:block; width:100%; padding:16px; margin-top:20px; font-weight:900; background:${isSaved?'var(--fav-accent)':'#15191e'}; color:#fff; border:2px solid ${isSaved?'transparent':'#2d3748'}; border-radius:4px; font-family:var(--sport-font); letter-spacing:1px; box-shadow: 6px 6px 0px rgba(0,0,0,0.8); cursor:pointer; transition:0.2s;">${isSaved?'➖ 已加入專屬行程 (點擊移除)':'➕ 加入我的專屬行事曆'}</button>`;
+            
+            // ✨ 官方連結按鈕
+            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="background:#1a1e24; border-color:var(--border-color); margin-top:12px; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);"><span style="color:#fff; font-family:var(--tc-font);">🔗 前往官方活動連結 / 貼文</span></a>` : '';
 
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
 
             document.getElementById('modal-dynamic-content').innerHTML = `
-                <div class="modal-body" style="padding-top: 40px;">
+                ${posterUrl ? `<div style="width: 100%; background: #000; border-bottom: 4px solid var(--event-accent); text-align: center;"><img src="${posterUrl}" style="width: 100%; height: 300px; object-fit: contain; display: block; margin: 0 auto;"></div>` : ''}
+                <div class="modal-body" style="padding-top: ${posterUrl ? '25px' : '40px'};">
                     <div style="text-align:center; margin-bottom:25px;">
                         <div style="font-family:var(--sport-font); font-size:18px; color:var(--event-accent); font-weight:900; letter-spacing:2px;">${e.safeDate.monStr} / ${e.safeDate.year}</div>
                         <div style="font-family:var(--sport-font); font-size:65px; color:#fff; font-weight:900; line-height:1; margin:5px 0;">${String(e.safeDate.day).padStart(2,'0')}</div>
@@ -4318,6 +4332,7 @@
                         ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">目前尚未公布名單</div>'}
                     </div>
                     ${saveBtnHtml}
+                    ${linkBtnHtml}
                 </div>
             `;
 
