@@ -5283,6 +5283,27 @@ window.renderMinigameStart = function() {
                 });
             }
         };
+            if (allNames.length > 0) {
+                const namesPattern = allNames.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+                const regex = new RegExp(`(${namesPattern})`, 'g');
+                contentText = contentText.replace(regex, (match) => {
+                    const targetGirl = girlMap.get(match) || dbGirls.find(g => g.realname === match || g.nickname === match);
+                    if (targetGirl) {
+                        return `<span onclick="window.openModal('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
+                    }
+                    return match;
+                });
+            }
+
+            // 👇 請把下面這段加在這裡 👇
+            // ✨ 新增戰術：內文專屬插圖引擎 (Image Parser)
+            contentText = contentText.replace(/\[img:(.+?)\]/gi, (match, url) => {
+                const cleanUrl = window.getCdnUrl(url.trim()); // 沿用你原本寫好的極速加速器
+                return `<div style="margin: 20px 0; text-align: center;">
+                            <img src="${cleanUrl}" loading="lazy" style="max-width: 100%; height: auto; border-radius: 8px; border: 2px solid var(--modal-accent); box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
+                        </div>`;
+            });
+            // 👆 加上面這段 👆
         // =========================================================================
         // 📢 新聞 CMS 一鍵分享核心引擎 (原生態智慧分享機制)
         // =========================================================================
