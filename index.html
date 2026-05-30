@@ -4449,9 +4449,10 @@
             let isSaved = schedSet.has(key);
             let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
-            // ✨ 按鈕字體與 padding 自動縮放
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; padding: clamp(8px, 1.5vw, 12px) 4px; font-weight: 900; font-size: clamp(12px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap;">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
-            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" class="modal-ig-btn" style="flex: 1; padding: clamp(8px, 1.5vw, 12px) 4px; font-weight: 900; font-size: clamp(12px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; text-decoration: none; text-align: center; white-space: nowrap; margin-top:0; box-shadow:none;">🔗 官方連結</a>` : '';
+            // ✨ 修復：統一按鈕盒模型與排版屬性，移除干擾的 class，強制等高對齊
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
+            
+            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='var(--event-accent)'; this.style.color='var(--event-accent)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : '';
 
             // ✨ 海報高度解放：手機維持最高 220px 確保一頁塞入，電腦最高可達 380px 完美展示大圖
             let posterSection = '';
