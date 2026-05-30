@@ -5158,7 +5158,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專屬彈窗 (極速秒開 + 雲端背景同步 + 潮流標籤雲 + 六大心情)
+        // 📰 每日情報專屬彈窗 (極速秒開 + 雲端背景同步 + 潮流標籤雲 + 六大心情 + 內文插圖)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
@@ -5172,7 +5172,7 @@ window.renderMinigameStart = function() {
             const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
             const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
             const titleText = getField(n, ['title', '標題'], '無標題');
-            let contentText = getField(n, ['content', '內文', '內容'], '暫無內文');
+            let contentText = getField(n, ['content', '內文', '內容'], '暫無內文'); // 注意這裡要用 let
             const dateText = getField(n, ['date', '日期'], '-');
 
             // ✨ 戰術一：內文智慧關聯女孩 (Smart Mentions)
@@ -5196,6 +5196,15 @@ window.renderMinigameStart = function() {
                     return match;
                 });
             }
+
+            // ✨ 內文專屬插圖引擎 (Image Parser)
+            contentText = contentText.replace(/\[img:(.+?)\]/gi, (match, url) => {
+                const cleanUrl = window.getCdnUrl(url.trim()); 
+                return `<div style="margin: 20px 0; text-align: center;">
+                            <img src="${cleanUrl}" loading="lazy" style="max-width: 100%; height: auto; border-radius: 8px; border: 2px solid var(--modal-accent); box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
+                        </div>`;
+            });
+
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
             
@@ -5255,8 +5264,8 @@ window.renderMinigameStart = function() {
                         <div class="modal-news-text" style="margin-bottom: 20px;">${contentText}</div>
                         
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
-    ${tagsArray.map(t => `<span onclick="window.filterByHashtag('${t}')" style="cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; transition: 0.2s;" onmouseover="this.style.borderColor='var(--modal-accent)'; this.style.color='#fff';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-sub)';">#${t}</span>`).join('')}
-</div>
+                            ${tagsArray.map(t => `<span onclick="window.filterByHashtag('${t}')" style="cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; transition: 0.2s;" onmouseover="this.style.borderColor='var(--modal-accent)'; this.style.color='#fff';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-sub)';">#${t}</span>`).join('')}
+                        </div>
                         
                         <div style="display: flex; justify-content: space-between; gap: 6px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
                             ${reactionsHtml}
@@ -5283,7 +5292,6 @@ window.renderMinigameStart = function() {
                 });
             }
         };
-
         // =========================================================================
         // 📢 新聞 CMS 一鍵分享核心引擎 (原生態智慧分享機制)
         // =========================================================================
