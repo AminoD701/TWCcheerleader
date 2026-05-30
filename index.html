@@ -5200,8 +5200,9 @@ window.renderMinigameStart = function() {
             // ✨ 內文專屬插圖引擎 (Image Parser)
             contentText = contentText.replace(/\[img:(.+?)\]/gi, (match, url) => {
                 const cleanUrl = window.getCdnUrl(url.trim()); 
+                // 將原本的 max-width: 100% 替換為 clamp 智慧縮放，並加上 max-height
                 return `<div style="margin: 20px 0; text-align: center;">
-                            <img src="${cleanUrl}" loading="lazy" style="max-width: 100%; height: auto; border-radius: 8px; border: 2px solid var(--modal-accent); box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
+                            <img src="${cleanUrl}" loading="lazy" style="max-width: clamp(200px, 70%, 450px); max-height: 350px; object-fit: contain; border-radius: 8px; border: 2px solid var(--modal-accent); box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
                         </div>`;
             });
 
