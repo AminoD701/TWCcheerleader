@@ -748,11 +748,11 @@
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
         /* =========================================
-           📂 質感電競風下拉選單 & 抽卡按鈕 (絕對水平並排版)
+           📂 質感電競風下拉選單 & 抽卡按鈕 (大小優化版)
            ========================================= */
-        .dropdowns-row { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: nowrap; }
-        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 140px; height: 46px; z-index: 100; }
-        .gacha-wrapper { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 140px; height: 46px; display: flex; z-index: 10; }
+        .dropdowns-row { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 12px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: nowrap; }
+        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 280px; min-width: 140px; height: 46px; z-index: 100; }
+        .gacha-wrapper { position: relative; flex: 0 1 auto; max-width: 140px; min-width: 110px; height: 46px; display: flex; z-index: 10; }
         
         .dropdown-btn { width: 100%; height: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 0 15px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
@@ -770,7 +770,7 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
 
-        .gacha-top-btn { width: 100% !important; height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 20px !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; margin: 0 !important; }
+        .gacha-top-btn { width: 100% !important; height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 15px !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; margin: 0 !important; }
         .gacha-top-btn:hover { border-color: #fff !important; transform: skewX(-5deg) translateY(-2px) !important; box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important; }
         /* =========================================
            📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (完美全名版)
@@ -1047,21 +1047,22 @@
             .dt-token-name { font-size: 11px; padding: 4px 6px 1px; border-radius: 4px;}
         }
         /* =========================================
-           ✨ 終極手機版排版優化：完美雙欄並排
+           ✨ 終極手機版排版優化：完美雙欄並排 (每日一抽縮小版)
            ========================================= */
         @media (max-width: 768px) {
             .dt-setup-select { font-size: 14px; padding: 10px; text-overflow: ellipsis; white-space: nowrap; }
             .enter-btn { font-size: 16px !important; padding: 12px 10px !important; letter-spacing: 0px !important; white-space: nowrap !important; }
             
-            /* ✨ 頂部按鈕群：絕對雙欄並排，不再亂折行 */
-            .dropdowns-row { gap: 10px; padding: 0 5px; flex-wrap: nowrap !important; }
-            .dropdown-container, .gacha-wrapper { max-width: calc(50% - 5px) !important; min-width: 0 !important; flex: 1 1 50% !important; height: 42px !important; margin: 0 !important; }
-            .dropdown-btn { font-size: 12px !important; padding: 0 8px !important; height: 100% !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px var(--border-color) !important; }
+            /* 讓下拉選單拿 65%，抽卡按鈕拿 35% */
+            .dropdowns-row { gap: 8px; padding: 0 5px; flex-wrap: nowrap !important; }
+            .dropdown-container { max-width: calc(65% - 4px) !important; min-width: 0 !important; flex: 1 1 65% !important; height: 42px !important; margin: 0 !important; }
+            .gacha-wrapper { max-width: calc(35% - 4px) !important; min-width: 0 !important; flex: 1 1 35% !important; height: 42px !important; margin: 0 !important; }
+            
+            .dropdown-btn { font-size: 13px !important; padding: 0 10px !important; height: 100% !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px var(--border-color) !important; }
             .dropdown-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
             .dropdown-item { font-size: 13px; padding: 12px 15px; }
             
-            .gacha-top-btn { width: 100% !important; padding: 0 !important; font-size: 13px !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px rgba(156,39,176,0.5) !important; height: 100% !important; display: flex !important; }
-            
+            .gacha-top-btn { width: 100% !important; padding: 0 !important; font-size: 12px !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px rgba(156,39,176,0.5) !important; height: 100% !important; display: flex !important; }
             .dt-setup-card { padding: 15px; }
         }
 
@@ -1498,12 +1499,14 @@
     .modal-number { font-size: 22px !important; padding: 2px 12px !important; }
     .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
 }
-        /* =========================================
-           🏟️ 賽事中心專屬樣式 (升級雙欄電競版)
+/* =========================================
+           🏟️ 賽事中心專屬樣式 (比分與質感月曆版)
            ========================================= */
         .match-calendar-container { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
-        .match-date-row { background: transparent; margin-bottom: 40px; }
-        .match-date-header { background: linear-gradient(90deg, rgba(26,30,36,0.95), rgba(17,20,24,0)); padding: 14px 24px; border-left: 6px solid var(--event-accent); display: flex; align-items: baseline; gap: 15px; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+
+        /* 質感月曆 UI (無 Emoji) */
+        .mc-cal-wrapper { background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 8px; padding: 25px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .mc-cal-header { display: flex; justify-content: space-between; align-items: center
         .match-date-header .day-num { font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         .match-date-header .day-info { font-size: 16px; font-weight: 900; color: var(--event-accent); letter-spacing: 2px; }
 
