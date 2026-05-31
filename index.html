@@ -748,29 +748,30 @@
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
         /* =========================================
-           📂 質感電競風下拉選單 (SVG向量圖示 + 防換行升級版)
+           📂 質感電競風下拉選單 & 抽卡按鈕 (高度統一對齊版)
            ========================================= */
-        .dropdowns-row { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
-        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 150px; }
-        .gacha-wrapper { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-        .dropdown-btn { width: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 12px 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
+        .dropdowns-row { display: flex; justify-content: center; align-items: stretch; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
+        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 280px; min-width: 160px; height: 46px; }
+        .dropdown-btn { width: 100%; height: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 0 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
         .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
         
-        /* ✨ 向量圖示專屬控制 (防止被擠壓) */
         .menu-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; stroke-linecap: round; stroke-linejoin: round; }
-        #mode-btn-text { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+        #mode-btn-text, #team-btn-text { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ✨ 魔法防斷行：使用 max-content 讓選單隨文字自動撐開，保證不換行！ */
-        .dropdown-menu { display: none; position: absolute; top: calc(100% + 15px); left: 0; min-width: 100%; width: max-content; background: rgba(17, 20, 24, 0.98); border: 2px solid var(--border-color); border-radius: 8px; z-index: 100; max-height: 50vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+        .dropdown-menu { display: none; position: absolute; top: calc(100% + 10px); left: 0; min-width: 100%; width: max-content; background: rgba(17, 20, 24, 0.98); border: 2px solid var(--border-color); border-radius: 8px; z-index: 100; max-height: 50vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
         .dropdown-menu.show { display: flex; flex-direction: column; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* ✨ 項目也加上 nowrap，並加入 gap 讓圖示與文字有呼吸空間 */
         .dropdown-item { padding: 15px 20px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-sub); font-family: var(--tc-font); font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; white-space: nowrap !important; }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
+
+        /* 每日一抽外框與按鈕統一 */
+        .gacha-wrapper { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; height: 46px; }
+        .gacha-top-btn { height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 25px !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; }
+        .gacha-top-btn:hover { border-color: #fff !important; transform: skewX(-5deg) translateY(-2px) !important; box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important; }
         /* =========================================
            📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (完美全名版)
         ========================================= */
@@ -1047,47 +1048,23 @@
         }
         /* =========================================
            ✨ 終極手機版排版優化：防按鈕與選單折行
-        ========================================= */
+           ========================================= */
         @media (max-width: 768px) {
-            /* 1. 設定大廳的下拉選單框 */
-            .dt-setup-select { 
-                font-size: 14px; 
-                padding: 10px; 
-                text-overflow: ellipsis; 
-                white-space: nowrap; 
-            }
-            /* 2. 大廳的「確認編制」按鈕 */
-            .enter-btn { 
-                font-size: 16px !important; 
-                padding: 12px 10px !important; 
-                letter-spacing: 0px !important; 
-                white-space: nowrap !important; /* 強制不換行 */
-            }
-            /* 3. 最上方的下拉按鈕與抽卡排版優化 (完美堆疊版) */
-            .dropdowns-row { gap: 8px !important; }
-            .dropdown-container { max-width: calc(50% - 4px) !important; min-width: 130px !important; flex: 1 1 auto !important; }
-            .gacha-wrapper { width: 100% !important; margin-top: 2px; }
-            .gacha-top-btn { width: 100% !important; height: 42px !important; border-radius: 6px !important; font-size: 15px !important; }
+            .dt-setup-select { font-size: 14px; padding: 10px; text-overflow: ellipsis; white-space: nowrap; }
+            .enter-btn { font-size: 16px !important; padding: 12px 10px !important; letter-spacing: 0px !important; white-space: nowrap !important; }
             
-            .dropdown-btn { 
-                font-size: 13px !important; 
-                padding: 10px 12px !important; 
-                letter-spacing: 0px !important; 
-                height: 42px !important;
-            }
-            /* 強制讓選單按鈕裡的文字空間不足時變成 ...，保護右邊的箭頭圖示不掉下去 */
-            .dropdown-btn span { 
-                white-space: nowrap; 
-                overflow: hidden; 
-                text-overflow: ellipsis; 
-            }
-            .dropdown-item { 
-                font-size: 13px !important; 
-                padding: 12px 15px !important; 
-            }
-            .dt-setup-card { 
-                padding: 15px; 
-            }
+            /* ✨ 頂部按鈕群：雙選單並排，抽卡滿版墊底 */
+            .dropdowns-row { gap: 10px; padding: 0 5px; }
+            .dropdown-container { max-width: calc(50% - 5px); min-width: 130px; flex: 1 1 auto; height: 42px; }
+            .dropdown-btn { font-size: 13px; padding: 0 10px; height: 100%; transform: skewX(0); border-radius: 6px; box-shadow: 3px 3px 0px var(--border-color); }
+            .dropdown-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .dropdown-item { font-size: 13px; padding: 12px 15px; }
+            
+            .gacha-wrapper { width: 100%; height: 42px; margin-top: 5px; }
+            .gacha-top-btn { width: 100% !important; padding: 0 !important; font-size: 15px !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px rgba(156,39,176,0.5) !important; }
+            
+            .dt-setup-card { padding: 15px; }
+        }
         }
        
         @keyframes gacha-bounce {
@@ -1743,7 +1720,7 @@
                 </div>
 
                 <div class="gacha-wrapper">
-                    <button class="gacha-top-btn" onclick="window.startGacha()" style="border: none; border-radius: 6px; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; height: 46px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                    <button class="gacha-top-btn" onclick="window.startGacha()">
                         🔮 每日一抽
                     </button>
                 </div>
@@ -5331,18 +5308,27 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 1. 動態抓取試算表標籤，並直接塞進上方的吸頂列！
+            // ✨ 1. 將情報按鈕改為高質感的下拉式選單！
             let uniqueTags = [...new Set(dbNews.map(n => getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報')))].filter(t => t !== "");
             if(newsFilters) {
+                // 決定選單按鈕要顯示的文字
+                let currentBtnText = window.currentNewsHashtag 
+                    ? `🏷️ #${window.currentNewsHashtag}` 
+                    : (window.currentNewsTag === '全部' ? '全部情報 ALL' : `📰 ${window.currentNewsTag}`);
+
                 newsFilters.innerHTML = `
-                    <button class="sub-btn ${window.currentNewsTag === '全部' && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部 ALL</button>
-                    ${uniqueTags.map(t => `<button class="sub-btn ${window.currentNewsTag === t && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
+                    <div class="dropdown-container" style="width: 100%; max-width: 320px; margin: 0 auto; z-index: 45; height: 46px;">
+                        <button class="dropdown-btn" onclick="window.toggleDropdown('news-tag-menu', event)" style="border-color: var(--event-accent); color: var(--event-accent);">
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${currentBtnText}</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="dropdown-menu" id="news-tag-menu">
+                            <button class="dropdown-item ${window.currentNewsTag === '全部' && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部情報 ALL</button>
+                            ${uniqueTags.map(t => `<button class="dropdown-item ${window.currentNewsTag === t && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
+                            ${window.currentNewsHashtag ? `<button class="dropdown-item active" style="color:#ff4757;" onclick="window.currentNewsHashtag=''; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">✕ 取消標籤 #${window.currentNewsHashtag}</button>` : ''}
+                        </div>
+                    </div>
                 `;
-                
-                // ✨ 如果目前有啟動 Hashtag 篩選，多補上一顆顯眼的取消按鈕
-                if (window.currentNewsHashtag) {
-                    newsFilters.innerHTML += `<button class="sub-btn active" style="border-color: var(--event-accent); color: var(--event-accent);" onclick="window.currentNewsHashtag=''; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">✕ 取消標籤 #${window.currentNewsHashtag}</button>`;
-                }
             }
 
             // ✨ 抓取搜尋框的關鍵字
