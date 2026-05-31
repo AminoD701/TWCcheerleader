@@ -1708,8 +1708,7 @@
                             遊樂互動 GAMES
                         </button>
                     </div>
-
-                <div class="dropdown-container" id="team-dropdown-wrapper" style="display:none;">
+                </div> <div class="dropdown-container" id="team-dropdown-wrapper" style="display:none;">
                     <button class="dropdown-btn" onclick="window.toggleDropdown('team-menu', event)">
                         <span id="team-btn-text">全部啦啦隊</span> 
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -2556,7 +2555,7 @@
             // ✨ 智慧切換：只有女孩圖鑑顯示「球隊選單」，其他模式一律顯示「每日一抽」！
             if (currentMode === 'girls') {
                 if (gachaWrapper) gachaWrapper.style.display = 'none';
-                if (wrapper) wrapper.style.display = 'flex'; 
+                if (wrapper) wrapper.style.display = 'block'; 
             } else {
                 if (wrapper) wrapper.style.display = 'none';
                 if (gachaWrapper) gachaWrapper.style.display = 'flex';
