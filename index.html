@@ -748,16 +748,19 @@
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
         /* =========================================
-           📂 質感電競風下拉選單 & 抽卡按鈕 (大小優化版)
+           📂 質感電競風下拉選單 & 抽卡按鈕 (絕對水平並排版)
            ========================================= */
-        .dropdowns-row { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 12px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: nowrap; }
-        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 280px; min-width: 140px; height: 46px; z-index: 100; }
-        .gacha-wrapper { position: relative; flex: 0 0 auto; width: 130px; height: 46px; display: flex; z-index: 10; }
+        .dropdowns-row { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: nowrap; }
+        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 140px; height: 46px; z-index: 100; }
         
         .dropdown-btn { width: 100%; height: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 0 15px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
         .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
         
+        /* 抽卡專屬紫色電競按鈕 (與情報按鈕排版100%一致) */
+        .gacha-top-btn { width: 100%; height: 100%; background: linear-gradient(45deg, #673ab7, #9c27b0); border: 2px solid #e040fb; color: #fff; padding: 0 15px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px rgba(156,39,176,0.5); transition: 0.2s; letter-spacing: 1px; }
+        .gacha-top-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(224,64,251,0.6); }
+
         .menu-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; stroke-linecap: round; stroke-linejoin: round; }
         #mode-btn-text, #team-btn-text { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -770,8 +773,6 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
 
-        .gacha-top-btn { width: 100% !important; height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); font-size: 14px !important; letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; margin: 0 !important; }
-        .gacha-top-btn:hover { border-color: #fff !important; transform: skewX(-5deg) translateY(-2px) !important; box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important; }
         /* =========================================
            📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (完美全名版)
         ========================================= */
@@ -1056,13 +1057,12 @@
             /* ✨ 頂部按鈕群：移除 50% 死板限制，交給 flex 彈性分配空間 */
             .dropdowns-row { gap: 8px; padding: 0 5px; flex-wrap: nowrap !important; }
             .dropdown-container { flex: 1 1 0% !important; max-width: none !important; min-width: 0 !important; height: 42px !important; margin: 0 !important; }
-            .gacha-wrapper { flex: 0 0 auto !important; width: 110px !important; height: 42px !important; margin: 0 !important; }
             
-            .dropdown-btn { font-size: 13px !important; padding: 0 10px !important; height: 100% !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px var(--border-color) !important; }
-            .dropdown-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
+            .dropdown-btn, .gacha-top-btn { font-size: 12px !important; padding: 0 10px !important; height: 100% !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px var(--border-color) !important; display: flex !important; justify-content: space-between !important; }
+            .gacha-top-btn { box-shadow: 3px 3px 0px rgba(156,39,176,0.5) !important; }
+            
+            .dropdown-btn span, .gacha-top-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
             .dropdown-item { font-size: 13px; padding: 12px 15px; }
-            
-            .gacha-top-btn { width: 100% !important; padding: 0 !important; font-size: 13px !important; transform: skewX(0) !important; border-radius: 6px !important; box-shadow: 3px 3px 0px rgba(156,39,176,0.5) !important; height: 100% !important; display: flex !important; }
             
             .dt-setup-card { padding: 15px; }
         }
@@ -1739,7 +1739,8 @@
 
                 <div class="dropdown-container" id="gacha-btn-wrapper" style="display:none;">
                     <button class="gacha-top-btn" onclick="window.startGacha()">
-                        🔮 每日一抽
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">每日一抽 GACHA</span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                     </button>
                 </div>
 
