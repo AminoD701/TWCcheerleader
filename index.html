@@ -1517,56 +1517,59 @@
     .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
 }
         /* =========================================
-           🏟️ 賽事中心專屬樣式 (極致熱血對戰版)
+           🏟️ 賽事中心專屬樣式 (升級雙欄電競版)
            ========================================= */
-        .match-calendar-container { max-width: 1000px; margin: 0 auto; padding: 20px 10px; }
-        .match-date-row { background: transparent; margin-bottom: 35px; }
-        .match-date-header { background: linear-gradient(90deg, rgba(26,30,36,0.9), transparent); padding: 12px 20px; border-left: 5px solid var(--event-accent); display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; border-radius: 4px; }
-        .match-date-header .day-num { font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .match-date-header .day-info { font-size: 15px; font-weight: 700; color: var(--event-accent); letter-spacing: 1px; }
+        .match-calendar-container { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
+        .match-date-row { background: transparent; margin-bottom: 40px; }
+        .match-date-header { background: linear-gradient(90deg, rgba(26,30,36,0.95), rgba(17,20,24,0)); padding: 14px 24px; border-left: 6px solid var(--event-accent); display: flex; align-items: baseline; gap: 15px; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .match-date-header .day-num { font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .match-date-header .day-info { font-size: 16px; font-weight: 900; color: var(--event-accent); letter-spacing: 2px; }
 
-        .match-grid { display: flex; flex-direction: column; gap: 16px; }
+        /* ✨ 魔法網格：電腦版自動雙欄並排，手機版自動單欄 */
+        .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
         
         .match-card { 
-            background: linear-gradient(135deg, #15191e 0%, #1c2128 100%); 
-            border: 1px solid var(--border-color); border-left: 4px solid var(--event-accent);
-            border-radius: 8px; position: relative; overflow: hidden; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            background: linear-gradient(145deg, #1a1e24 0%, #111418 100%); 
+            border: 1px solid rgba(255,255,255,0.05); border-top: 4px solid var(--event-accent);
+            border-radius: 12px; position: relative; overflow: hidden; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1); 
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             display: flex; flex-direction: column; cursor: pointer;
         }
-        /* 斜切光影背景 */
-        .match-card::before { content: ''; position: absolute; top: 0; left: 50%; width: 150%; height: 100%; background: rgba(255,255,255,0.02); transform: skewX(-20deg) translateX(-50%); pointer-events: none; z-index: 0; }
-        .match-card:hover { transform: translateY(-4px) scale(1.01); border-color: var(--event-accent); box-shadow: 0 12px 25px rgba(0,0,0,0.7); z-index: 10; }
+        .match-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, var(--event-accent) 0%, transparent 60%); opacity: 0.05; pointer-events: none; z-index: 0; transition: 0.3s; }
+        .match-card:hover { transform: translateY(-5px); border-color: var(--event-accent); box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.1); z-index: 10; }
+        .match-card:hover::after { opacity: 0.15; }
         
-        /* 頂部：場地與時間 */
-        .match-header-bar { background: rgba(0,0,0,0.4); padding: 10px 15px; font-size: 12px; color: var(--text-sub); font-weight: 900; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 2; position: relative; }
-        .match-time-badge { background: var(--event-accent); color: #000; padding: 2px 12px; border-radius: 20px; font-family: var(--sport-font); font-size: 15px; letter-spacing: 1px; box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+        /* 頂部：場地與時間 (字體顯著加大) */
+        .match-header-bar { background: rgba(0,0,0,0.5); padding: 14px 20px; font-size: 15px; color: #fff; font-weight: 900; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 2; position: relative; letter-spacing: 1px; }
+        .match-time-badge { background: var(--event-accent); color: #000; padding: 4px 16px; border-radius: 6px; font-family: var(--sport-font); font-size: 22px; font-weight: 900; letter-spacing: 2px; box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
         
-        /* 核心對戰區 (左右排版) */
-        .match-vs-area { display: flex; align-items: center; justify-content: space-between; padding: 25px 20px; position: relative; z-index: 2; }
+        /* 核心對戰區 */
+        .match-vs-area { display: flex; align-items: center; justify-content: space-between; padding: 35px 20px; position: relative; z-index: 2; }
         
         /* 中間霸氣 VS */
-        .match-vs-label { font-family: var(--sport-font); font-size: 42px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 4px 4px 0px rgba(0,0,0,0.6); position: absolute; left: 50%; transform: translateX(-50%) skewX(-10deg); z-index: 1; opacity: 0.9; }
+        .match-vs-label { font-family: var(--sport-font); font-size: 46px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 4px 4px 0px rgba(0,0,0,0.6); position: absolute; left: 50%; transform: translateX(-50%) skewX(-10deg); z-index: 1; opacity: 0.9; }
         
-        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 2; width: 40%; }
-        .match-team-logo { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 5px 12px rgba(0,0,0,0.6)); transition: 0.4s; }
+        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 2; width: 40%; }
+        .match-team-logo { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); transition: 0.4s; }
         .match-card:hover .match-team-logo { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 8px 15px rgba(255,255,255,0.2)); }
-        .match-team-name { font-size: 16px; font-weight: 900; color: #fff; text-align: center; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .match-team-name { font-size: 18px; font-weight: 900; color: #fff; text-align: center; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
-        /* 無 Logo 時的預設圓圈 */
-        .match-no-logo { width: 75px; height: 75px; background: #252c36; border: 2px dashed #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-weight: 900; font-size: 14px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
+        .match-no-logo { width: 85px; height: 85px; background: #252c36; border: 2px dashed #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-weight: 900; font-size: 15px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
 
-        .match-note { font-size:13px; color:#ffd700; text-align:center; padding: 8px; background: rgba(255,215,0,0.1); font-weight:900; letter-spacing: 1px; z-index: 2; position: relative; border-top: 1px dashed rgba(255,215,0,0.3); }
+        .match-note { font-size:14px; color:#ffd700; text-align:center; padding: 10px; background: rgba(255,215,0,0.1); font-weight:900; letter-spacing: 1px; z-index: 2; position: relative; border-top: 1px dashed rgba(255,215,0,0.3); }
 
+        /* ✨ 手機版專屬優化 */
         @media (max-width: 768px) {
-            .match-date-header .day-num { font-size: 26px; }
-            .match-header-bar { font-size: 11px; padding: 8px 12px; }
-            .match-time-badge { font-size: 13px; }
-            .match-team-logo { width: 65px; height: 65px; }
-            .match-no-logo { width: 60px; height: 60px; font-size: 12px; }
-            .match-team-name { font-size: 14px; }
-            .match-vs-label { font-size: 32px; }
-            .match-vs-area { padding: 20px 10px; }
+            .match-grid { grid-template-columns: 1fr; gap: 15px; } /* 手機維持單排避免過度擁擠 */
+            .match-date-header .day-num { font-size: 28px; }
+            .match-header-bar { font-size: 14px; padding: 12px 16px; }
+            .match-time-badge { font-size: 18px; padding: 3px 12px; }
+            .match-team-logo { width: 75px; height: 75px; }
+            .match-no-logo { width: 70px; height: 70px; font-size: 13px; }
+            .match-team-name { font-size: 15px; }
+            .match-vs-label { font-size: 36px; }
+            .match-vs-area { padding: 25px 10px; }
         }
     </style> 
 </head>
