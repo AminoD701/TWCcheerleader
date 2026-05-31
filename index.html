@@ -748,13 +748,13 @@
             position: relative; z-index: 1; width: 100%; letter-spacing: 1px;
         }
         /* =========================================
-           📂 質感電競風下拉選單 & 抽卡按鈕 (高度統一對齊版)
+           📂 質感電競風下拉選單 & 抽卡按鈕 (絕對水平並排版)
            ========================================= */
-        .dropdowns-row { display: flex; justify-content: center; align-items: stretch; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: wrap; }
-        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 280px; min-width: 160px; height: 46px; z-index: 100; }
-        .gacha-wrapper { position: relative; flex: 1 1 auto; max-width: 280px; min-width: 160px; height: 46px; display: flex; z-index: 10; }
+        .dropdowns-row { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 80; flex-wrap: nowrap; }
+        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 140px; height: 46px; z-index: 100; }
+        .gacha-wrapper { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 140px; height: 46px; display: flex; z-index: 10; }
         
-        .dropdown-btn { width: 100%; height: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 0 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
+        .dropdown-btn { width: 100%; height: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 0 15px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
         .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
         
@@ -770,7 +770,7 @@
         .dropdown-item:hover, .dropdown-item.active { background: #252c36; color: #fff; border-left: 4px solid var(--event-accent); }
         .dropdown-item img { width: 24px; height: 24px; object-fit: contain; }
 
-        .gacha-top-btn { width: 100% !important; height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 25px !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; }
+        .gacha-top-btn { width: 100% !important; height: 100% !important; background: linear-gradient(45deg, #673ab7, #9c27b0) !important; border: 2px solid #e040fb !important; color: #fff !important; box-shadow: 4px 4px 0px rgba(156,39,176,0.5) !important; animation: gacha-glow 2s infinite alternate; padding: 0 20px !important; border-radius: 6px !important; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; transform: skewX(-5deg); transition: 0.2s; margin: 0 !important; }
         .gacha-top-btn:hover { border-color: #fff !important; transform: skewX(-5deg) translateY(-2px) !important; box-shadow: 6px 6px 0px rgba(224,64,251,0.6) !important; }
         /* =========================================
            📱 手機版小卡片 (Grid) 雙背號防斷行補丁 (完美全名版)
