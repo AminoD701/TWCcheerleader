@@ -749,9 +749,10 @@
         }
         /* =========================================
            📂 質感電競風下拉選單 (SVG向量圖示 + 防換行升級版)
-        ========================================= */
-        .dropdowns-row { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
-        .dropdown-container { position: relative; width: 100%; max-width: 250px; flex: 1; min-width: 140px; }
+           ========================================= */
+        .dropdowns-row { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; max-width: 800px; margin: 0 auto; position: relative; z-index: 60; flex-wrap: wrap; }
+        .dropdown-container { position: relative; flex: 1 1 auto; max-width: 260px; min-width: 150px; }
+        .gacha-wrapper { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
         .dropdown-btn { width: 100%; background: var(--bg-card); color: #fff; border: 2px solid var(--border-color); padding: 12px 20px; font-family: var(--sport-font); font-size: 15px; font-weight: 900; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transform: skewX(-5deg); box-shadow: 4px 4px 0px var(--border-color); transition: 0.2s; letter-spacing: 1px; }
         .dropdown-btn:hover { border-color: #fff; transform: skewX(-5deg) translateY(-2px); box-shadow: 6px 6px 0px rgba(255,255,255,0.2); }
         .dropdown-btn.active { border-color: var(--event-accent); box-shadow: 4px 4px 0px var(--event-accent); color: var(--event-accent); }
@@ -1062,11 +1063,17 @@
                 letter-spacing: 0px !important; 
                 white-space: nowrap !important; /* 強制不換行 */
             }
-            /* 3. 最上方的「夢幻陣容 DREAM TEAM」下拉按鈕 */
+            /* 3. 最上方的下拉按鈕與抽卡排版優化 (完美堆疊版) */
+            .dropdowns-row { gap: 8px !important; }
+            .dropdown-container { max-width: calc(50% - 4px) !important; min-width: 130px !important; flex: 1 1 auto !important; }
+            .gacha-wrapper { width: 100% !important; margin-top: 2px; }
+            .gacha-top-btn { width: 100% !important; height: 42px !important; border-radius: 6px !important; font-size: 15px !important; }
+            
             .dropdown-btn { 
                 font-size: 13px !important; 
                 padding: 10px 12px !important; 
                 letter-spacing: 0px !important; 
+                height: 42px !important;
             }
             /* 強制讓選單按鈕裡的文字空間不足時變成 ...，保護右邊的箭頭圖示不掉下去 */
             .dropdown-btn span { 
@@ -1735,8 +1742,8 @@
                     <div class="dropdown-menu" id="team-menu"></div>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: center; padding: 0 5px;">
-                    <button class="gacha-top-btn" onclick="window.startGacha()" style="border: none; border-radius: 30px; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; height: 38px; display: flex; align-items: center; justify-content: center;">
+                <div class="gacha-wrapper">
+                    <button class="gacha-top-btn" onclick="window.startGacha()" style="border: none; border-radius: 6px; cursor: pointer; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1px; white-space: nowrap; height: 46px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
                         🔮 每日一抽
                     </button>
                 </div>
@@ -2570,8 +2577,10 @@
             const wrapper = document.getElementById('team-dropdown-wrapper');
             const container = document.getElementById('team-menu');
             
-            if (currentMode === 'schedule' || currentMode === 'events' || currentMode === 'passport' || currentMode === 'minigame' || currentMode === 'dreamteam' || currentMode === 'feedback' || (currentMode === 'girls' && currentSport === "全部")) { 
-                wrapper.style.display = 'none'; return; 
+            // ✨ 智慧判斷：只有在「女孩圖鑑(girls)」且「有選擇特定球種」時，才顯示球隊選單！
+            if (currentMode !== 'girls' || currentSport === "全部") { 
+                wrapper.style.display = 'none'; 
+                return; 
             }
             
             const teamsSet = new Set();
