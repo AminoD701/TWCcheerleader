@@ -1504,20 +1504,20 @@
            ========================================= */
         .match-center-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
         
-        /* 質感月曆 UI (無 Emoji 專業版) */
-        .mc-cal-wrapper { background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 8px; padding: 25px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        .mc-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
-        .mc-cal-title { font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .mc-cal-nav-btn { background: #1a1e24; border: 1px solid #2d3748; color: var(--text-sub); border-radius: 4px; padding: 8px 20px; font-family: var(--sport-font); font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        /* 質感月曆 UI (極致縮小壓縮版) */
+        .mc-cal-wrapper { max-width: 550px; margin: 0 auto 35px auto; background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 8px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .mc-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
+        .mc-cal-title { font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .mc-cal-nav-btn { background: #1a1e24; border: 1px solid #2d3748; color: var(--text-sub); border-radius: 4px; padding: 6px 15px; font-family: var(--sport-font); font-size: 14px; font-weight: 900; cursor: pointer; transition: 0.2s; }
         .mc-cal-nav-btn:hover { background: var(--event-accent); color: #000; border-color: var(--event-accent); }
         
-        .mc-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
-        .mc-cal-day-name { font-size: 14px; color: #6a7a90; font-weight: 900; margin-bottom: 10px; font-family: var(--sport-font); letter-spacing: 1px; }
-        .mc-cal-day { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; font-family: var(--sport-font); font-weight: 700; border-radius: 6px; background: #111418; border: 2px solid transparent; cursor: pointer; transition: 0.2s; position: relative; color: #cbd5e1; }
-        .mc-cal-day:hover:not(.empty) { background: #252c36; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.4); border-color: #555; }
+        .mc-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .mc-cal-day-name { font-size: 12px; color: #6a7a90; font-weight: 900; margin-bottom: 6px; font-family: var(--sport-font); letter-spacing: 1px; }
+        .mc-cal-day { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-family: var(--sport-font); font-weight: 700; border-radius: 6px; background: #111418; border: 2px solid transparent; cursor: pointer; transition: 0.2s; position: relative; color: #cbd5e1; }
+        .mc-cal-day:hover:not(.empty) { background: #252c36; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); border-color: #555; }
         .mc-cal-day.empty { background: transparent; cursor: default; }
-        .mc-cal-day.has-event { border-bottom: 4px solid var(--event-accent); color: #fff; font-weight: 900; }
-        .mc-cal-day.active { background: var(--event-accent); color: #000; font-weight: 900; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-color: var(--event-accent); }
+        .mc-cal-day.has-event { border-bottom: 3px solid var(--event-accent); color: #fff; font-weight: 900; }
+        .mc-cal-day.active { background: var(--event-accent); color: #000; font-weight: 900; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-color: var(--event-accent); }
         
         .mc-match-list-title { font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 20px; border-left: 5px solid var(--event-accent); padding-left: 15px; display: flex; align-items: baseline; gap: 12px; }
         .mc-match-list-title span { font-size: 14px; color: var(--text-sub); font-family: var(--tc-font); font-weight: 700; }
@@ -1555,9 +1555,16 @@
 
         @media (max-width: 768px) {
             .match-grid { grid-template-columns: 1fr; gap: 15px; }
-            .mc-cal-wrapper { padding: 15px; }
-            .mc-cal-title { font-size: 20px; }
-            .mc-cal-day { font-size: 14px; }
+            
+            /* 手機版月曆極致壓縮 */
+            .mc-cal-wrapper { padding: 12px; margin-bottom: 25px; }
+            .mc-cal-header { margin-bottom: 10px; padding-bottom: 10px; }
+            .mc-cal-title { font-size: 18px; }
+            .mc-cal-nav-btn { padding: 4px 12px; font-size: 13px; }
+            .mc-cal-grid { gap: 4px; }
+            .mc-cal-day-name { font-size: 11px; margin-bottom: 4px; }
+            .mc-cal-day { font-size: 13px; border-radius: 4px; }
+            
             .match-vs-area { padding: 20px 10px 25px; }
             .match-team-logo { width: 75px; height: 75px; }
             .match-no-logo { width: 65px; height: 65px; font-size: 12px; }
