@@ -1718,7 +1718,7 @@
                     <div class="dropdown-menu" id="team-menu"></div>
                 </div>
 
-                <div class="gacha-wrapper" id="gacha-btn-wrapper">
+                <div class="dropdown-container" id="gacha-btn-wrapper" style="display:none;">
                     <button class="gacha-top-btn" onclick="window.startGacha()">
                         🔮 每日一抽
                     </button>
@@ -2554,20 +2554,26 @@
             const container = document.getElementById('team-menu');
             const gachaWrapper = document.getElementById('gacha-btn-wrapper');
             
-            // ✨ 智慧切換：女孩圖鑑顯示「球隊選單」，其他模式顯示「每日一抽」！
-            if (currentMode !== 'girls') { 
-                if (wrapper) wrapper.style.display = 'none'; 
-                if (gachaWrapper) gachaWrapper.style.display = 'flex'; // 秀出抽卡
-                return; 
+            // ✨ 智慧切換：只有女孩圖鑑顯示「球隊選單」，其他模式一律顯示「每日一抽」！
+            if (currentMode === 'girls') {
+                if (gachaWrapper) gachaWrapper.style.display = 'none';
+                if (wrapper) wrapper.style.display = 'flex'; // 👈 確保球隊選單以 flex 顯示，維持並排
             } else {
-                if (gachaWrapper) gachaWrapper.style.display = 'none'; // 隱藏抽卡
-                if (currentSport === "全部") {
-                    if (wrapper) wrapper.style.display = 'none';
-                    return;
-                }
+                if (wrapper) wrapper.style.display = 'none';
+                if (gachaWrapper) gachaWrapper.style.display = 'flex';
+                return;
             }
             
             const teamsSet = new Set();
+            dbGirls.forEach(c => { 
+                // ✨ 修復：如果選了「全部球種」，依然要把所有球隊搜集起來，不准隱藏選單！
+                if (currentSport === "全部" || (c.sport || "").includes(currentSport)) {
+                    if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
+                }
+            });
+            const activeTeams = Array.from(teamsSet).sort();
+            
+            container.innerHTML = '';
             dbGirls.forEach(c => { 
                 if ((c.sport || "").includes(currentSport)) {
                     if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
@@ -5324,12 +5330,12 @@ window.renderMinigameStart = function() {
                     : (window.currentNewsTag === '全部' ? '全部情報 ALL' : `📰 ${window.currentNewsTag}`);
 
                 newsFilters.innerHTML = `
-                    <div class="dropdown-container" style="width: 100%; max-width: 320px; margin: 0 auto; z-index: 45; height: 46px;">
-                        <button class="dropdown-btn" onclick="window.toggleDropdown('news-tag-menu', event)" style="border-color: var(--event-accent); color: var(--event-accent);">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${currentBtnText}</span>
+                    <div class="dropdown-container" style="width: 100%; max-width: 280px; margin: 0 auto; position: relative; z-index: 90; height: 42px;">
+                        <button class="dropdown-btn" onclick="window.toggleDropdown('news-tag-menu', event)" style="border-color: var(--event-accent); color: var(--event-accent); height: 100%;">
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%;">${currentBtnText}</span>
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
-                        <div class="dropdown-menu" id="news-tag-menu">
+                        <div class="dropdown-menu" id="news-tag-menu" style="width: 100%; max-width: none; top: calc(100% + 5px);">
                             <button class="dropdown-item ${window.currentNewsTag === '全部' && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部情報 ALL</button>
                             ${uniqueTags.map(t => `<button class="dropdown-item ${window.currentNewsTag === t && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
                             ${window.currentNewsHashtag ? `<button class="dropdown-item active" style="color:#ff4757;" onclick="window.currentNewsHashtag=''; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">✕ 取消標籤 #${window.currentNewsHashtag}</button>` : ''}
