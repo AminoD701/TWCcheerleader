@@ -2843,6 +2843,20 @@
         
         let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
         window.globalVoteData = {}; // 儲存全網真實票數
+        window.clientIP = null; // ✨ 新增：儲存球迷的真實 IP
+        
+        // ✨ 新增：透過第三方 API 抓取球迷真實 IP (防無痕第一道防線)
+        window.fetchClientIP = async function() {
+            if (window.clientIP) return;
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                window.clientIP = data.ip;
+            } catch (e) {
+                console.log("IP 抓取失敗，使用暫代 ID", e);
+                window.clientIP = 'unknown_' + Math.floor(Math.random() * 10000);
+            }
+        };
 
         function getVotePool() {
             let uniqueMap = new Map();
@@ -2915,6 +2929,9 @@
         window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
+            // ✨ 0. 背景默默預先抓取球迷 IP
+            window.fetchClientIP();
+
             // 1. 瞬間畫出畫面 (先用舊數字或0)
             updateVoteTeamDropdown();
             window.renderVoteGrid();
@@ -3180,6 +3197,13 @@
             const todayStr = now.toISOString().split('T')[0];
             let todayVotes = [];
             
+            // ✨ 確保 IP 已經抓到，否則阻擋並要求稍後
+            if (!window.clientIP && phase === 'official') {
+                alert("⚠️ 系統正在驗證連線安全，請稍候 2 秒後再試著點擊投票！");
+                window.fetchClientIP();
+                return;
+            }
+
             // 正式賽期檢查防灌票鎖與重複投票
             if (phase === 'official') {
                 const savedData = localStorage.getItem('cheer_vote_data_' + currentCat);
@@ -3188,8 +3212,11 @@
                     if (parsed.date === todayStr) todayVotes = parsed.uids || [];
                 }
                 
-                if (todayVotes.length >= 3) {
-                    alert("⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！");
+                // ✨ 本地端防無痕小手段：檢查這個 IP 今天是不是已經在本地投滿了
+                const localIPVotes = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
+                
+                if (todayVotes.length >= 3 || localIPVotes >= 3) {
+                    alert("⚠️ 系統偵測到您的網路 IP 今日的 3 票已經全部用完囉！請明天再來為女孩應援！");
                     return;
                 }
                 if (todayVotes.includes(uid)) {
@@ -3216,6 +3243,9 @@
                     date: todayStr,
                     uids: todayVotes
                 }));
+                // ✨ 紀錄該 IP 的本地投票次數
+                const currentIpCount = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
+                localStorage.setItem('cheer_ip_count_' + window.clientIP + '_' + todayStr, currentIpCount + 1);
             }
 
             // 畫面直接 +1，給予即時回饋感
@@ -3226,7 +3256,8 @@
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey })
+                    // ✨ 殺手鐧：將球迷的 IP 偷渡到後端！
+                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey, ip: window.clientIP })
                 }).catch(e => console.log("寫入失敗", e));
             } else {
                 console.log("⚠️ 尚未設定 VOTE_API_URL");
