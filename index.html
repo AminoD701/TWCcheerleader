@@ -2478,10 +2478,18 @@
                     let homeStatus = (isFinished && hScore > aScore) ? 'is-winner' : (isFinished && hScore < aScore ? 'is-loser' : '');
                     let awayStatus = (isFinished && aScore > hScore) ? 'is-winner' : (isFinished && aScore < hScore ? 'is-loser' : '');
 
-                    let tHome = teamTranslation[m.hometeam] || m.hometeam;
+                   let tHome = teamTranslation[m.hometeam] || m.hometeam;
                     let tAway = teamTranslation[m.awayteam] || m.awayteam;
-                    const homeCfg = teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
-                    const awayCfg = teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway] || { logo: "", noLogo: true };
+                    
+                    // ✨ 智慧防錯：先根據當前聯盟決定優先後綴，解決 Wing Stars、Fubon Angels 等跨棲球隊抓錯 Logo 的問題
+                    let sportSuffix = "";
+                    if (window.currentMatchLeague === "CPBL") sportSuffix = "_棒球";
+                    else if (window.currentMatchLeague === "TPBL" || window.currentMatchLeague === "PLG") sportSuffix = "_籃球";
+                    else if (window.currentMatchLeague === "TPVL") sportSuffix = "_排球";
+
+                    // 優先使用精準後綴，找不到才往其他球種 fallback
+                    const homeCfg = teamThemes[tHome+sportSuffix] || teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome+"_排球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
+                    const awayCfg = teamThemes[tAway+sportSuffix] || teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway+"_排球"] || teamThemes[tAway] || { logo: "", noLogo: true };
 
                     let centerHtml = isFinished 
                         ? `<div class="score-display">${aScore}</div>
