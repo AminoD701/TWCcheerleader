@@ -2631,7 +2631,8 @@
                     tpblTeams.forEach(t => container.appendChild(createItem(t)));
                 }
 
-                const pleagueTeams = activeTeams.filter(t => getLeague(t) === "P. LEAGUE+");
+                // ✨ 修復：同時認得 "PLG" 與 "P. LEAGUE+"
+                const pleagueTeams = activeTeams.filter(t => getLeague(t) === "PLG" || getLeague(t) === "P. LEAGUE+");
                 if(pleagueTeams.length) {
                     container.appendChild(createItem("P. LEAGUE+ 職籃聯盟", true));
                     pleagueTeams.forEach(t => container.appendChild(createItem(t)));
@@ -4442,7 +4443,8 @@
                     if(key === "其他賽事活動") return !l && !(a.sport||"").includes("棒球") && !(a.sport||"").includes("籃") && !(a.sport||"").includes("排球");
                     if(key.includes("CPBL")) return l === "CPBL" || (a.sport||"").includes("棒球");
                     if(key.includes("TPBL")) return l === "TPBL";
-                    if(key.includes("P. LEAGUE+")) return l === "P. LEAGUE+";
+                    // ✨ 修復：讓班表大廳也能正確抓出 PLG 聯盟的球隊
+                    if(key.includes("P. LEAGUE+")) return l === "PLG" || l === "P. LEAGUE+";
                     if(key.includes("排球")) return l === "排球" || (a.sport||"").includes("排球");
                     return false;
                 });
