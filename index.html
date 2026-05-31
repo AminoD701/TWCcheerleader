@@ -1819,7 +1819,9 @@
                 </div>
                 
                 <div id="vote-category-tabs" style="display: flex; justify-content: center; gap: 12px; overflow-x: auto; padding: 5px 10px 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div id="vote-tab-korea_pro" class="vote-team-tag active" onclick="window.switchVoteCategory('korea_pro')">日韓外援陣線</div>
+                    <div id="vote-tab-baseball" class="vote-team-tag active" onclick="window.switchVoteCategory('baseball')">CPBL 棒球大賞</div>
+                    <div id="vote-tab-korea_pro" class="vote-team-tag" onclick="window.switchVoteCategory('korea_pro')">日韓外援陣線</div>
+                    <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">台港馬本土應援</div>
                 </div>
             </div>
 
@@ -2841,22 +2843,8 @@
         // ⚠️ 總教練注意：請把下面這串引號裡的文字，換成您剛剛複製的 GAS 網址！
         const VOTE_API_URL = "https://script.google.com/macros/s/AKfycbwU6NxyjuMdoNt6lFD-SJD1Zsx4CHJlByzkLQZnTYCrcm9POBzPCd3neJPby3uj7I5-_A/exec"; 
         
-        let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' };
+        let voteState = { currentCategory: 'baseball', selectedTeam: '全部' };
         window.globalVoteData = {}; // 儲存全網真實票數
-        window.clientIP = null; // ✨ 新增：儲存球迷的真實 IP
-        
-        // ✨ 新增：透過第三方 API 抓取球迷真實 IP (防無痕第一道防線)
-        window.fetchClientIP = async function() {
-            if (window.clientIP) return;
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                window.clientIP = data.ip;
-            } catch (e) {
-                console.log("IP 抓取失敗，使用暫代 ID", e);
-                window.clientIP = 'unknown_' + Math.floor(Math.random() * 10000);
-            }
-        };
 
         function getVotePool() {
             let uniqueMap = new Map();
@@ -2929,9 +2917,6 @@
         window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
-            // ✨ 0. 背景默默預先抓取球迷 IP
-            window.fetchClientIP();
-
             // 1. 瞬間畫出畫面 (先用舊數字或0)
             updateVoteTeamDropdown();
             window.renderVoteGrid();
@@ -2979,30 +2964,17 @@
             else if (now >= officialStart) phase = 'official';
 
             const todayStr = now.toISOString().split('T')[0]; 
-            let todayVotes = [];
-            let isCategoryLocked = false;
-            
-            // 正式賽期讀取今日投票紀錄
-            if (phase === 'official') {
-                const savedData = localStorage.getItem('cheer_vote_data_' + currentCat);
-                if (savedData) {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed.date === todayStr) {
-                        todayVotes = parsed.uids || [];
-                    }
-                }
-                if (todayVotes.length >= 3) isCategoryLocked = true;
-            } else if (phase === 'closed') {
-                isCategoryLocked = true; 
-            }
+            let hasVotedToday = false;
+            if (phase === 'official') hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
+            else if (phase === 'closed') hasVotedToday = true; 
 
             // ✨ 指向新的副標題容器，並套用極簡專業風文字與按鈕
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 全網測試：開放無限投票！正式賽期 6/1~6/30 限定每日 3 票。';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 全網測試：開放無限投票！正式賽期 6/1~6/30 將恢復限投。';
                 else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！感謝全台粉絲的熱烈參與。';
-                else text = `<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 每日限定 3 票，不可重複投同位女孩。(今日已投：${todayVotes.length}/3)`;
+                else text = '<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 各賽區每日限投一票。';
                 
                 // 更換為低調質感的分享按鈕
                 subtitleEl.innerHTML = text + `
@@ -3126,19 +3098,14 @@
                 const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                 
                 let btnHtml = '';
-            if (phase === 'closed') {
-                btnHtml = `<button class="vote-btn-disabled">活動已結束 🔒</button>`;
-            } else if (phase === 'official') {
-                if (todayVotes.includes(g.uid)) {
-                    btnHtml = `<button class="vote-btn-disabled">今日已應援 🔒</button>`;
-                } else if (isCategoryLocked) {
-                    btnHtml = `<button class="vote-btn-disabled">今日票數已用盡 🔒</button>`;
+                if (phase === 'closed') {
+                    btnHtml = `<button class="vote-btn-disabled">活動已結束 🔒</button>`;
+                } else if (hasVotedToday && phase === 'official') {
+                    btnHtml = `<button class="vote-btn-disabled">賽區已應援 🔒</button>`;
                 } else {
-                    btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">投她一票 🗳️</button>`;
+                    const btnText = phase === 'testing' ? '連線測試(無限) 🗳️' : '投她一票 🗳️';
+                    btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">${btnText}</button>`;
                 }
-            } else {
-                btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">連線測試(無限) 🗳️</button>`;
-            }
 
                 const rankColor = g.rank === 1 ? '#ffd700' : g.rank === 2 ? '#c0c0c0' : g.rank === 3 ? '#cd7f32' : '#4a5568';
                 const rankBadge = `<div style="position: absolute; top: -10px; left: -10px; background: ${rankColor}; color: ${g.rank<=3?'#000':'#fff'}; font-family: var(--sport-font); font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 5; border: 2px solid var(--bg-card);">${g.rank}</div>`;
@@ -3193,41 +3160,10 @@
             const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
             const currentCat = voteState.currentCategory;
 
-            const todayStr = now.toISOString().split('T')[0];
-            let todayVotes = [];
-            
-            // ✨ 確保 IP 已經抓到，否則阻擋並要求稍後
-            if (!window.clientIP && phase === 'official') {
-                alert("⚠️ 系統正在驗證連線安全，請稍候 2 秒後再試著點擊投票！");
-                window.fetchClientIP();
-                return;
-            }
-
-            // 正式賽期檢查防灌票鎖與重複投票
-            if (phase === 'official') {
-                const savedData = localStorage.getItem('cheer_vote_data_' + currentCat);
-                if (savedData) {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed.date === todayStr) todayVotes = parsed.uids || [];
-                }
-                
-                // ✨ 本地端防無痕小手段：檢查這個 IP 今天是不是已經在本地投滿了
-                const localIPVotes = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
-                
-                if (todayVotes.length >= 3 || localIPVotes >= 3) {
-                    alert("⚠️ 系統偵測到您的網路 IP 今日的 3 票已經全部用完囉！請明天再來為女孩應援！");
-                    return;
-                }
-                if (todayVotes.includes(uid)) {
-                    alert("⚠️ 每天不能重複投給同一位女孩喔！請把票分給其他女孩吧！");
-                    return;
-                }
-            }
-
             // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
             const confirmMsg = phase === 'testing' 
                 ? `🛠️ 【測試模式】\n您確定要把票投給 ${catNames[currentCat]} 的【${name}】嗎？`
-                : `⚠️ 【投票確認】\n您確定要把 1 票投給【${name}】嗎？\n(今日剩餘票數：${2 - todayVotes.length} 票)`;
+                : `⚠️ 【投票確認】\n您確定要將今天 ${catNames[currentCat]} 的神聖一票投給【${name}】嗎？\n(投出後今日無法更改喔！)`;
             
             if (!confirm(confirmMsg)) {
                 return; // 粉絲點擊了「取消」，直接中斷執行
@@ -3235,65 +3171,12 @@
 
             const voteKey = currentCat + '_' + uid; 
             
-            // 正式賽期寫入防灌票紀錄
+            // 正式賽期寫入防灌票鎖
             if (phase === 'official') {
-                todayVotes.push(uid);
-                localStorage.setItem('cheer_vote_data_' + currentCat, JSON.stringify({
-                    date: todayStr,
-                    uids: todayVotes
-                }));
-                // ✨ 紀錄該 IP 的本地投票次數
-                const currentIpCount = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
-                localStorage.setItem('cheer_ip_count_' + window.clientIP + '_' + todayStr, currentIpCount + 1);
+                const todayStr = now.toISOString().split('T')[0];
+                localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
             }
 
-            // 畫面直接 +1，給予即時回饋感
-            window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
-
-            if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                fetch(VOTE_API_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    // ✨ 殺手鐧：將球迷的 IP 偷渡到後端！
-                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey, ip: window.clientIP })
-                }).catch(e => console.log("寫入失敗", e));
-            } else {
-                console.log("⚠️ 尚未設定 VOTE_API_URL");
-            }
-
-            if (phase === 'testing') {
-                alert(`✅ [全網連線測試] 應援成功！\n資料已寫入雲端伺服器！`);
-            } else {
-                alert(`🎉 應援連線成功！\n您已成功把票投給【${name}】！\n今日剩餘 ${3 - todayVotes.length} 票！`);
-            }
-            
-            window.renderVoteGrid();
-                if (todayVotes.includes(uid)) {
-                    alert("⚠️ 每天不能重複投給同一位女孩喔！請把票分給其他女孩吧！");
-                    return;
-                }
-            }
-
-            // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
-            const confirmMsg = phase === 'testing' 
-                ? `🛠️ 【測試模式】\n您確定要把票投給 ${catNames[currentCat]} 的【${name}】嗎？`
-                : `⚠️ 【投票確認】\n您確定要把 1 票投給【${name}】嗎？\n(今日剩餘票數：${2 - todayVotes.length} 票)`;
-            
-            if (!confirm(confirmMsg)) {
-                return; // 粉絲點擊了「取消」，直接中斷執行
-            }
-
-            const voteKey = currentCat + '_' + uid; 
-            
-            // 正式賽期寫入防灌票紀錄
-            if (phase === 'official') {
-                todayVotes.push(uid);
-                localStorage.setItem('cheer_vote_data_' + currentCat, JSON.stringify({
-                    date: todayStr,
-                    uids: todayVotes
-                }));
-            }
             // 畫面直接 +1，給予即時回饋感
             window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
 
@@ -3311,7 +3194,7 @@
             if (phase === 'testing') {
                 alert(`✅ [全網連線測試] 應援成功！\n資料已寫入雲端伺服器！`);
             } else {
-                alert(`🎉 應援連線成功！\n您已成功把票投給【${name}】！\n今日剩餘 ${3 - todayVotes.length} 票！`);
+                alert(`🎉 應援連線成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投出！`);
             }
             
             window.renderVoteGrid(); 
