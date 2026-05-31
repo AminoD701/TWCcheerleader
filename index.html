@@ -1500,67 +1500,64 @@
     .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
 }
 /* =========================================
-           🏟️ 賽事中心專屬樣式 (經典重鑄 + 比分對戰版)
+           🏟️ 賽事中心專屬樣式 (質感月曆 + 比分對戰版)
            ========================================= */
-        .match-calendar-container { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
-        .match-date-row { background: transparent; margin-bottom: 40px; }
+        .match-center-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
         
-        /* 日期標題：還原乾淨俐落的左側線條 */
-        .match-date-header { display: flex; align-items: baseline; gap: 15px; margin-bottom: 15px; border-left: 4px solid var(--event-accent); padding-left: 12px; }
-        .match-date-header .day-num { font-family: var(--sport-font); font-size: 38px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .match-date-header .day-info { font-size: 14px; font-weight: 700; color: var(--event-accent); letter-spacing: 1px; }
+        /* 質感月曆 UI (無 Emoji 專業版) */
+        .mc-cal-wrapper { background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 8px; padding: 25px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .mc-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .mc-cal-title { font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .mc-cal-nav-btn { background: #1a1e24; border: 1px solid #2d3748; color: var(--text-sub); border-radius: 4px; padding: 8px 20px; font-family: var(--sport-font); font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .mc-cal-nav-btn:hover { background: var(--event-accent); color: #000; border-color: var(--event-accent); }
+        
+        .mc-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
+        .mc-cal-day-name { font-size: 14px; color: #6a7a90; font-weight: 900; margin-bottom: 10px; font-family: var(--sport-font); letter-spacing: 1px; }
+        .mc-cal-day { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; font-family: var(--sport-font); font-weight: 700; border-radius: 6px; background: #111418; border: 2px solid transparent; cursor: pointer; transition: 0.2s; position: relative; color: #cbd5e1; }
+        .mc-cal-day:hover:not(.empty) { background: #252c36; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.4); border-color: #555; }
+        .mc-cal-day.empty { background: transparent; cursor: default; }
+        .mc-cal-day.has-event { border-bottom: 4px solid var(--event-accent); color: #fff; font-weight: 900; }
+        .mc-cal-day.active { background: var(--event-accent); color: #000; font-weight: 900; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-color: var(--event-accent); }
+        
+        .mc-match-list-title { font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 20px; border-left: 5px solid var(--event-accent); padding-left: 15px; display: flex; align-items: baseline; gap: 12px; }
+        .mc-match-list-title span { font-size: 14px; color: var(--text-sub); font-family: var(--tc-font); font-weight: 700; }
 
-        /* 經典雙欄網格 */
+        /* 經典賽事對戰卡片 */
         .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
-        
-        /* 賽事卡片主體：還原經典深色底 + 頂部球隊色邊框 */
-        .match-card { 
-            background: #15191e; 
-            border: 1px solid #2d3748; 
-            border-top: 4px solid var(--event-accent);
-            border-radius: 6px; 
-            display: flex; flex-direction: column; overflow: hidden; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s; cursor: pointer;
-        }
+        .match-card { background: #15191e; border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s; cursor: pointer; position: relative; }
         .match-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-color: #555; }
 
-        /* 已結束賽事的特殊灰階樣式 (整個框變暗) */
+        /* 已結束賽事的灰階化特效 */
         .match-card.is-finished { border-top-color: #4a5568 !important; }
         .match-card.is-finished .match-time-badge { background: #4a5568; color: #fff; }
+        .match-card.is-finished::before { content: "FINISHED"; position: absolute; top: 10px; right: -30px; background: #555; color: #fff; font-size: 10px; font-weight: 900; padding: 3px 35px; transform: rotate(45deg); z-index: 10; font-family: var(--sport-font); letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         
-        /* 頂部場地與時間列：還原經典方塊 Badge */
         .match-header-bar { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .match-header-bar span:first-child { font-size: 13px; color: #a0aec0; font-weight: 700; }
         .match-time-badge { background: var(--event-accent); color: #000; padding: 4px 12px; border-radius: 4px; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; }
 
-        /* 對戰區與比分：左右分明 */
         .match-vs-area { display: flex; align-items: center; justify-content: space-between; padding: 30px 20px 35px; position: relative; }
-        
-        /* 球隊區塊 */
         .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 2; width: 35%; transition: 0.3s; }
         .match-team-logo { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: 0.3s; }
         .match-card:hover .match-team-logo { transform: scale(1.08); }
-        .match-team-name { font-size: 15px; font-weight: 900; color: #fff; text-align: center; }
-
-        /* 預設無 Logo 圓圈 */
+        .match-team-name { font-size: 15px; font-weight: 900; color: #fff; text-align: center; transition: 0.3s;}
         .match-no-logo { width: 75px; height: 75px; background: #252c36; border: 2px dashed #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-weight: 900; font-size: 14px; }
 
-        /* 中間 VS 或 比分區塊 */
         .match-center-info { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 12px; width: 30%; }
         .score-display { font-family: var(--sport-font); font-size: 42px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0px #000; min-width: 45px; text-align: center; }
         .match-vs-label { font-family: var(--sport-font); font-size: 40px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
 
-        /* 輸贏特效：輸家變灰透明，贏家亮起 */
+        /* 輸贏判定：輸家變灰透明，贏家亮起 */
         .match-team-box.is-loser { filter: grayscale(1) opacity(0.35); transform: scale(0.9); }
-        .match-team-box.is-winner .match-team-name { color: var(--event-accent); }
+        .match-team-box.is-winner .match-team-name { color: var(--event-accent); text-shadow: 0 0 10px var(--event-accent); }
 
-        /* 底部備註 (例行賽) */
         .match-note { font-size: 13px; color: #ffd700; text-align: center; padding: 10px; background: rgba(255,215,0,0.05); font-weight: 900; letter-spacing: 1px; border-top: 1px dashed rgba(255,215,0,0.2); }
 
-        /* 手機版：維持經典的單列佈局 */
         @media (max-width: 768px) {
             .match-grid { grid-template-columns: 1fr; gap: 15px; }
-            .match-date-header .day-num { font-size: 32px; }
+            .mc-cal-wrapper { padding: 15px; }
+            .mc-cal-title { font-size: 20px; }
+            .mc-cal-day { font-size: 14px; }
             .match-vs-area { padding: 20px 10px 25px; }
             .match-team-logo { width: 75px; height: 75px; }
             .match-no-logo { width: 65px; height: 65px; font-size: 12px; }
@@ -2362,52 +2359,110 @@
             `;
         };
 
+        window.matchCalDate = window.matchCalDate || new Date();
+        window.matchSelectedDateNum = window.matchSelectedDateNum || null;
+
+        window.changeMatchCalMonth = function(offset) {
+            window.matchCalDate.setMonth(window.matchCalDate.getMonth() + offset);
+            window.matchSelectedDateNum = null; 
+            window.renderMatchCalendar(true); 
+        };
+
+        window.selectMatchCalDate = function(dateNum) {
+            window.matchSelectedDateNum = (window.matchSelectedDateNum === dateNum) ? null : dateNum;
+            window.renderMatchCalendar(true);
+        };
+
         window.showLeagueMatches = function(league) {
             window.currentMatchLeague = league;
+            window.matchCalDate = new Date();
+            
+            // 自動選擇最近有比賽的一天
+            let matches = typeof dbMatches !== 'undefined' ? dbMatches.filter(m => m.league === league) : [];
+            window.matchSelectedDateNum = null;
+            if(matches.length > 0) {
+                const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
+                const upcoming = matches.filter(m => m.safeDate.num >= todayNum).sort((a,b) => a.safeDate.num - b.safeDate.num);
+                if(upcoming.length > 0) {
+                    window.matchSelectedDateNum = upcoming[0].safeDate.num;
+                    const y = Math.floor(window.matchSelectedDateNum / 10000);
+                    const m = Math.floor((window.matchSelectedDateNum % 10000) / 100) - 1;
+                    window.matchCalDate = new Date(y, m, 1);
+                } else {
+                    const past = matches.sort((a,b) => b.safeDate.num - a.safeDate.num);
+                    window.matchSelectedDateNum = past[0].safeDate.num;
+                    const y = Math.floor(window.matchSelectedDateNum / 10000);
+                    const m = Math.floor((window.matchSelectedDateNum % 10000) / 100) - 1;
+                    window.matchCalDate = new Date(y, m, 1);
+                }
+            }
             window.renderMatchCalendar();
         };
 
-        window.renderMatchCalendar = function() {
+        window.renderMatchCalendar = function(skipScroll = false) {
             const container = document.getElementById('matches-container');
             container.style.display = 'block'; 
             
             let matches = typeof dbMatches !== 'undefined' ? dbMatches.filter(m => m.league === window.currentMatchLeague) : [];
             if(matches.length === 0) {
-                container.innerHTML = `<div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span>返回聯盟選擇</span></button></div>
+                container.innerHTML = `<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
                                        <div style="text-align:center; padding:100px; color:var(--text-sub); font-weight:700;">目前尚無 ${window.currentMatchLeague} 的賽程資料。</div>`;
                 return;
             }
 
-            const grouped = {};
-            matches.forEach(m => {
-                if(!grouped[m.safeDate.num]) grouped[m.safeDate.num] = { date: m.safeDate, list: [] };
-                grouped[m.safeDate.num].list.push(m);
-            });
-            const sortedDates = Object.keys(grouped).sort((a,b) => a - b);
+            // 構建月曆變數
+            const calYear = window.matchCalDate.getFullYear();
+            const calMonth = window.matchCalDate.getMonth();
+            const firstDay = new Date(calYear, calMonth, 1).getDay();
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            const monNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+
+            let gridHtml = '<div class="mc-cal-grid">';
+            const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+            days.forEach(d => gridHtml += `<div class="mc-cal-day-name">${d}</div>`);
+
+            for(let i=0; i<firstDay; i++) {
+                gridHtml += `<div class="mc-cal-day empty"></div>`;
+            }
+
+            for(let d=1; d<=daysInMonth; d++) {
+                let dNum = parseInt(`${calYear}${String(calMonth+1).padStart(2,'0')}${String(d).padStart(2,'0')}`);
+                let hasEvent = matches.some(m => m.safeDate.num === dNum);
+                let isActive = window.matchSelectedDateNum === dNum;
+
+                let classes = ["mc-cal-day"];
+                if(hasEvent) classes.push("has-event");
+                if(isActive) classes.push("active");
+
+                gridHtml += `<div class="${classes.join(' ')}" ${hasEvent ? `onclick="window.selectMatchCalDate(${dNum})"` : ''}>
+                    ${d}
+                </div>`;
+            }
+            gridHtml += '</div>';
 
             const teamTranslation = {
                 "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
-                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新战神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
+                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                 "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
                 "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars"
             };
 
-            let html = `<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
-                        <div class="match-calendar-container">
-                            <div style="margin-bottom:25px; font-family:var(--sport-font); font-size:28px; font-weight:900; color:var(--event-accent); letter-spacing: 2px;">${window.currentMatchLeague} SEASON 2026</div>`;
+            // 抓出當天被選中的比賽
+            let matchesToRender = [];
+            let displayDateStr = "";
+            if (window.matchSelectedDateNum) {
+                matchesToRender = matches.filter(m => m.safeDate.num === window.matchSelectedDateNum);
+                const sample = matchesToRender[0];
+                if (sample) {
+                    displayDateStr = `${sample.safeDate.month}/${String(sample.safeDate.day).padStart(2,'0')} <span>${sample.safeDate.week}</span>`;
+                }
+            }
 
-            sortedDates.forEach(dNum => {
-                const day = grouped[dNum];
-                html += `
-                    <div class="match-date-row">
-                        <div class="match-date-header">
-                            <span class="day-num">${day.date.month}/${String(day.date.day).padStart(2,'0')}</span>
-                            <span class="day-info">${day.date.week}</span>
-                        </div>
-                        <div class="match-grid">`;
-                
-                day.list.forEach(m => {
+            let cardsHtml = '';
+            if (matchesToRender.length > 0) {
+                cardsHtml = `<div class="mc-match-list-title">DATE : ${displayDateStr}</div><div class="match-grid">`;
+                matchesToRender.forEach(m => {
                     // ✨ 比分與勝負判定邏輯
                     let hScore = parseInt(m.homescore);
                     let aScore = parseInt(m.awayscore);
@@ -2416,22 +2471,19 @@
                     let homeStatus = (isFinished && hScore > aScore) ? 'is-winner' : (isFinished && hScore < aScore ? 'is-loser' : '');
                     let awayStatus = (isFinished && aScore > hScore) ? 'is-winner' : (isFinished && aScore < hScore ? 'is-loser' : '');
 
-                    // 翻譯隊名與抓取設定檔
                     let tHome = teamTranslation[m.hometeam] || m.hometeam;
                     let tAway = teamTranslation[m.awayteam] || m.awayteam;
                     const homeCfg = teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
                     const awayCfg = teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway] || { logo: "", noLogo: true };
 
-                    // ✨ 決定中間顯示 VS 還是分數
                     let centerHtml = isFinished 
                         ? `<div class="score-display">${aScore}</div>
                            <div class="match-vs-label" style="font-size:24px; color:#555; text-shadow:none;">-</div>
                            <div class="score-display">${hScore}</div>`
                         : `<div class="match-vs-label">VS</div>`;
 
-                    html += `
+                    cardsHtml += `
                         <div class="match-card ${isFinished ? 'is-finished' : ''}" style="--event-accent: ${homeCfg.accent};">
-                            
                             <div class="match-header-bar">
                                 <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
                                 <span class="match-time-badge">${isFinished ? 'FINAL' : m.time}</span>
@@ -2456,10 +2508,42 @@
                             ${m.note ? `<div class="match-note">🏆 ${m.note}</div>` : ''}
                         </div>`;
                 });
-                html += `</div></div>`;
-            });
-            container.innerHTML = html + `</div>`;
-            window.scrollTo({top: 0, behavior: 'smooth'});
+                cardsHtml += `</div>`;
+            } else {
+                cardsHtml = `<div style="text-align:center; padding:50px 20px; color:var(--text-sub); border: 1px dashed #2d3748; border-radius: 8px;">
+                    👆 請在上方月曆點擊有底線標示的日期來查看賽程
+                </div>`;
+            }
+
+            // 動態更換日曆邊框顏色
+            let leagueColor = window.currentMatchLeague === 'CPBL' ? '#00b0ff' : (window.currentMatchLeague === 'TPBL' ? '#ff9800' : (window.currentMatchLeague === 'PLG' ? '#ffeb3b' : '#ff4081'));
+
+            let html = `
+                <div style="max-width: 1100px; margin: 0 auto; padding: 0 15px;">
+                    <button class="back-btn" onclick="window.renderMatchesSelection()">
+                        <span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span>
+                    </button>
+                </div>
+                <div class="match-center-wrapper" style="--event-accent: ${leagueColor};">
+                    
+                    <div class="mc-cal-wrapper">
+                        <div class="mc-cal-header">
+                            <div class="mc-cal-title">${monNames[calMonth]} <span style="color:var(--event-accent);">${calYear}</span></div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="mc-cal-nav-btn" onclick="window.changeMatchCalMonth(-1)">❮</button>
+                                <button class="mc-cal-nav-btn" onclick="window.changeMatchCalMonth(1)">❯</button>
+                            </div>
+                        </div>
+                        ${gridHtml}
+                    </div>
+
+                    ${cardsHtml}
+
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            if(!skipScroll) window.scrollTo({top: 0, behavior: 'smooth'});
         };
 
         window.setMode = function(mode) {
