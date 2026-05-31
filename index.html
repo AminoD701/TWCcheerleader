@@ -4491,20 +4491,50 @@
                 herSchedules.sort((a, b) => a.safeDate.num - b.safeDate.num);
                 let dateBoxes = '';
 
+                // ✨ 賽事連動字典 (將中文隊名轉為啦啦隊隊名以利比對)
+                const teamTranslation = {
+                    "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
+                    "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
+                    "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
+                    "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
+                    "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars"
+                };
+
                 herSchedules.forEach(s => {
-                // 🛠️ 修正：將女孩姓名 (s.name) 加進 key 中，確保同一天同球隊的不同女孩完全獨立分開！
                 let key = s.safeDate.num + '|' + s.team + '|' + s.sport + '|' + s.name;
                 let isSaved = schedSet.has(key);
                 let dateStr = `${s.safeDate.monStr}/${String(s.safeDate.day).padStart(2,'0')}`;
                 
-                // ✨ 修正：拿掉女孩本名，讓標題更純粹 (女孩姓名會以高質感小標籤顯示在下方)
+                // ✨ 賽事連動引擎：去 dbMatches 找當天這支球隊的比賽！
+                let matchInfo = typeof dbMatches !== 'undefined' ? dbMatches.find(m => {
+                    let hTeam = teamTranslation[m.hometeam] || m.hometeam;
+                    let aTeam = teamTranslation[m.awayteam] || m.awayteam;
+                    return m.safeDate.num === s.safeDate.num && (hTeam === s.team || aTeam === s.team);
+                }) : null;
+
                 let scheduleTitle = `${s.team} · ${s.sport} 應援`;
+                let vsHtml = `<span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>`;
+
+                // 如果有找到比賽，把對手跟時間秀出來！
+                if (matchInfo) {
+                    let hTeam = teamTranslation[matchInfo.hometeam] || matchInfo.hometeam;
+                    let isHome = hTeam === s.team;
+                    let opponent = isHome ? matchInfo.awayteam : matchInfo.hometeam; 
+                    scheduleTitle = `${s.team} VS ${opponent}`; // 存入追星護照的標題也跟著進化
+                    
+                    vsHtml = `
+                        <div onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="display:flex; flex-direction:column; align-items:center; margin-bottom:5px; width:100%; line-height:1.2;">
+                            <span style="font-size: 10px; color: var(--text-sub); font-weight: 700;">VS ${opponent}</span>
+                            <span style="font-size: 11px; color: ${cardAccent}; font-weight: 900; margin-top: 2px;">${matchInfo.time || 'TBA'}</span>
+                        </div>
+                    `;
+                }
                 
                 dateBoxes += `
                 <div class="schedule-jump-btn" style="background: #111418; border: 1px solid ${cardAccent}; border-bottom: 3px solid ${cardAccent}; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 0px rgba(0,0,0,0.3); min-width: 75px; transition: 0.2s;">
                     <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: var(--text-sub); font-weight: 700; width:100%; text-align:center;">${dateStr} / ${s.safeDate.week}</span>
                     <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height: 1.1; margin: 4px 0; width:100%; text-align:center;">${String(s.safeDate.day).padStart(2,'0')}</span>
-                    <span onclick="window.goToSchedule('${s.team}', '${s.sport}')" style="font-size: 11px; color: ${cardAccent}; text-align: center; line-height: 1.2; font-weight: 700; margin-bottom:5px; width:100%;">${s.team}</span>
+                    ${vsHtml}
                     <button onclick="window.toggleMySchedule('${key}', ${s.safeDate.num}, '${dateStr}', '${scheduleTitle}', event, this);" style="width:100%; padding:4px 0; font-size:11px; background:${isSaved?'var(--fav-accent)':'#333'}; color:#fff; border:1px solid ${isSaved?'transparent':'#2d3748'}; border-radius:2px; font-weight:900; cursor:pointer;">${isSaved?'➖ 移除':'➕ 加行程'}</button>
                 </div>`;
             });
