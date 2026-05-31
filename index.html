@@ -1517,44 +1517,56 @@
     .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
 }
         /* =========================================
-           🏟️ 賽事中心專屬樣式 (融合電競風)
+           🏟️ 賽事中心專屬樣式 (極致熱血對戰版)
            ========================================= */
-        .match-calendar-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .match-date-row { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .match-date-header { background: #1a1e24; padding: 15px 25px; border-bottom: 2px solid var(--event-accent); display: flex; align-items: baseline; gap: 12px; }
-        .match-date-header .day-num { font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; }
-        .match-date-header .day-info { font-size: 16px; font-weight: 700; color: var(--text-sub); }
+        .match-calendar-container { max-width: 1000px; margin: 0 auto; padding: 20px 10px; }
+        .match-date-row { background: transparent; margin-bottom: 35px; }
+        .match-date-header { background: linear-gradient(90deg, rgba(26,30,36,0.9), transparent); padding: 12px 20px; border-left: 5px solid var(--event-accent); display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; border-radius: 4px; }
+        .match-date-header .day-num { font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .match-date-header .day-info { font-size: 15px; font-weight: 700; color: var(--event-accent); letter-spacing: 1px; }
 
-        .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; padding: 20px; background: transparent; }
+        .match-grid { display: flex; flex-direction: column; gap: 16px; }
         
         .match-card { 
-            background: linear-gradient(135deg, #1c2128, #111418); border: 1px solid var(--border-color); border-left: 4px solid var(--event-accent); 
-            border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; 
-            position: relative; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s; 
+            background: linear-gradient(135deg, #15191e 0%, #1c2128 100%); 
+            border: 1px solid var(--border-color); border-left: 4px solid var(--event-accent);
+            border-radius: 8px; position: relative; overflow: hidden; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: flex; flex-direction: column; cursor: pointer;
         }
-        .match-card::before {
-            content: ''; position: absolute; top: 0; left: 50%; width: 150%; height: 100%;
-            background: rgba(255,255,255,0.02); transform: skewX(-15deg) translateX(-50%); pointer-events: none;
-        }
-        .match-card:hover { transform: translateY(-4px); border-color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+        /* 斜切光影背景 */
+        .match-card::before { content: ''; position: absolute; top: 0; left: 50%; width: 150%; height: 100%; background: rgba(255,255,255,0.02); transform: skewX(-20deg) translateX(-50%); pointer-events: none; z-index: 0; }
+        .match-card:hover { transform: translateY(-4px) scale(1.01); border-color: var(--event-accent); box-shadow: 0 12px 25px rgba(0,0,0,0.7); z-index: 10; }
         
-        .match-venue-info { font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 15px; letter-spacing: 1px; z-index: 2; }
-        .match-vs-area { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; margin-bottom: 20px; z-index: 2; }
-        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        /* 頂部：場地與時間 */
+        .match-header-bar { background: rgba(0,0,0,0.4); padding: 10px 15px; font-size: 12px; color: var(--text-sub); font-weight: 900; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 2; position: relative; }
+        .match-time-badge { background: var(--event-accent); color: #000; padding: 2px 12px; border-radius: 20px; font-family: var(--sport-font); font-size: 15px; letter-spacing: 1px; box-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
         
-        .match-team-logo { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6)); transition: 0.3s; }
-        .match-card:hover .match-team-logo { transform: scale(1.1); }
-        .match-team-name { font-size: 15px; font-weight: 900; color: #fff; text-align: center; white-space: nowrap; }
+        /* 核心對戰區 (左右排版) */
+        .match-vs-area { display: flex; align-items: center; justify-content: space-between; padding: 25px 20px; position: relative; z-index: 2; }
         
-        .match-vs-label { font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; text-shadow: 3px 3px 0 #ff0044; transform: skewX(-10deg); margin: 0 5px; }
-        .match-time-label { font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: var(--event-accent); background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); z-index: 2; }
-        .match-note { font-size:12px; color:#ffd700; margin-top:12px; font-weight:900; z-index: 2; background: rgba(255,215,0,0.1); padding: 4px 10px; border-radius: 4px; border: 1px dashed #ffd700;}
+        /* 中間霸氣 VS */
+        .match-vs-label { font-family: var(--sport-font); font-size: 42px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 4px 4px 0px rgba(0,0,0,0.6); position: absolute; left: 50%; transform: translateX(-50%) skewX(-10deg); z-index: 1; opacity: 0.9; }
+        
+        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 2; width: 40%; }
+        .match-team-logo { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 5px 12px rgba(0,0,0,0.6)); transition: 0.4s; }
+        .match-card:hover .match-team-logo { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 8px 15px rgba(255,255,255,0.2)); }
+        .match-team-name { font-size: 16px; font-weight: 900; color: #fff; text-align: center; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        
+        /* 無 Logo 時的預設圓圈 */
+        .match-no-logo { width: 75px; height: 75px; background: #252c36; border: 2px dashed #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-weight: 900; font-size: 14px; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
+
+        .match-note { font-size:13px; color:#ffd700; text-align:center; padding: 8px; background: rgba(255,215,0,0.1); font-weight:900; letter-spacing: 1px; z-index: 2; position: relative; border-top: 1px dashed rgba(255,215,0,0.3); }
 
         @media (max-width: 768px) {
-            .match-grid { padding: 10px; gap: 15px; }
-            .match-team-logo { width: 60px; height: 60px; }
-            .match-team-name { font-size: 13px; }
-            .match-vs-label { font-size: 26px; }
+            .match-date-header .day-num { font-size: 26px; }
+            .match-header-bar { font-size: 11px; padding: 8px 12px; }
+            .match-time-badge { font-size: 13px; }
+            .match-team-logo { width: 65px; height: 65px; }
+            .match-no-logo { width: 60px; height: 60px; font-size: 12px; }
+            .match-team-name { font-size: 14px; }
+            .match-vs-label { font-size: 32px; }
+            .match-vs-area { padding: 20px 10px; }
         }
     </style> 
 </head>
@@ -2360,7 +2372,7 @@
             
             let matches = typeof dbMatches !== 'undefined' ? dbMatches.filter(m => m.league === window.currentMatchLeague) : [];
             if(matches.length === 0) {
-                container.innerHTML = `<button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button>
+                container.innerHTML = `<div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
                                        <div style="text-align:center; padding:100px; color:var(--text-sub); font-weight:700;">目前尚無 ${window.currentMatchLeague} 的賽程資料。</div>`;
                 return;
             }
@@ -2372,40 +2384,63 @@
             });
             const sortedDates = Object.keys(grouped).sort((a,b) => a - b);
 
+            // ✨ 智慧翻譯字典：把中文隊名對應回啦啦隊的英文隊名，救回 Logo！
+            const teamTranslation = {
+                "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", 
+                "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
+                "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars",
+                "新北國王": "New Taipei Queens", "福爾摩沙夢想家": "Formosa Sexy",
+                "桃園璞園領航猿": "Pilots Crew", "臺北富邦勇士": "Fubon Angels",
+                "臺南台鋼獵鷹": "Wing Stars", "新竹御頂攻城獅": "Muse Girls",
+                "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
+                "高雄全家海神": "Aqua Mermaids", "高雄17直播鋼鐵人": "Wing Stars"
+            };
+
             let html = `<div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
                         <div class="match-calendar-container">
-                            <div style="margin-bottom:20px; font-family:var(--sport-font); font-size:24px; font-weight:900; color:var(--event-accent);">${window.currentMatchLeague} SEASON 2026</div>`;
+                            <div style="margin-bottom:25px; font-family:var(--sport-font); font-size:28px; font-weight:900; color:var(--event-accent); letter-spacing: 2px;">${window.currentMatchLeague} SEASON 2026</div>`;
 
             sortedDates.forEach(dNum => {
                 const day = grouped[dNum];
                 html += `
                     <div class="match-date-row">
                         <div class="match-date-header">
-                            <span class="day-num">${day.date.month}/${day.date.day}</span>
+                            <span class="day-num">${day.date.month}/${String(day.date.day).padStart(2,'0')}</span>
                             <span class="day-info">${day.date.week}</span>
                         </div>
                         <div class="match-grid">`;
                 
                 day.list.forEach(m => {
-                    // ✨ 這裡將 m.home_team 全面改成 m.hometeam，m.away_team 改成 m.awayteam
-                    const homeCfg = teamThemes[m.hometeam] || teamThemes[m.hometeam+"_棒球"] || teamThemes[m.hometeam+"_籃球"] || { logo: "", accent: "#ff5722", noLogo: true };
-                    const awayCfg = teamThemes[m.awayteam] || teamThemes[m.awayteam+"_棒球"] || teamThemes[m.awayteam+"_籃球"] || { logo: "", noLogo: true };
+                    // 翻譯隊名
+                    let tHome = teamTranslation[m.hometeam] || m.hometeam;
+                    let tAway = teamTranslation[m.awayteam] || m.awayteam;
+
+                    // 抓取設定檔
+                    const homeCfg = teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
+                    const awayCfg = teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway] || { logo: "", noLogo: true };
 
                     html += `
                         <div class="match-card" style="--event-accent: ${homeCfg.accent};">
-                            <div class="match-venue-info">📍 ${m.venue} | ${m.type}</div>
+                            
+                            <div class="match-header-bar">
+                                <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
+                                <span class="match-time-badge">${m.time}</span>
+                            </div>
+
                             <div class="match-vs-area">
                                 <div class="match-team-box">
-                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.src='https://via.placeholder.com/80/252c36/ffffff?text=AWAY'">` : `<div class="match-team-logo" style="background:#252c36; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:12px;">客場</div>`}
+                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo">客場</div>`}
                                     <span class="match-team-name">${m.awayteam}</span>
                                 </div>
+                                
                                 <div class="match-vs-label">VS</div>
+                                
                                 <div class="match-team-box">
-                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.src='https://via.placeholder.com/80/252c36/ffffff?text=HOME'">` : `<div class="match-team-logo" style="background:#252c36; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:12px;">主場</div>`}
+                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo">主場</div>`}
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
-                            <div class="match-time-label">${m.time}</div>
+                            
                             ${m.note ? `<div class="match-note">🏆 ${m.note}</div>` : ''}
                         </div>`;
                 });
