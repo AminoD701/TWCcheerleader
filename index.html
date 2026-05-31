@@ -1064,8 +1064,7 @@
             
             .dt-setup-card { padding: 15px; }
         }
-        }
-       
+
         @keyframes gacha-bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-5px); }
@@ -2557,7 +2556,7 @@
             // ✨ 智慧切換：只有女孩圖鑑顯示「球隊選單」，其他模式一律顯示「每日一抽」！
             if (currentMode === 'girls') {
                 if (gachaWrapper) gachaWrapper.style.display = 'none';
-                if (wrapper) wrapper.style.display = 'flex'; // 👈 確保球隊選單以 flex 顯示，維持並排
+                if (wrapper) wrapper.style.display = 'flex'; 
             } else {
                 if (wrapper) wrapper.style.display = 'none';
                 if (gachaWrapper) gachaWrapper.style.display = 'flex';
@@ -2566,23 +2565,13 @@
             
             const teamsSet = new Set();
             dbGirls.forEach(c => { 
-                // ✨ 修復：如果選了「全部球種」，依然要把所有球隊搜集起來，不准隱藏選單！
                 if (currentSport === "全部" || (c.sport || "").includes(currentSport)) {
                     if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
                 }
             });
             const activeTeams = Array.from(teamsSet).sort();
             
-            container.innerHTML = '';
-            dbGirls.forEach(c => { 
-                if ((c.sport || "").includes(currentSport)) {
-                    if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
-                }
-            });
-            const activeTeams = Array.from(teamsSet).sort();
-            
             container.innerHTML = ''; 
-            if (wrapper) wrapper.style.display = 'block';
             
             const createItem = (tName, isLeagueTitle = false) => {
                 if(isLeagueTitle) {
