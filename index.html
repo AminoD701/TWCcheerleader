@@ -1818,10 +1818,12 @@
                     <div style="font-size: 12px; color: #aaa; font-weight: 700; line-height: 1.6;">本活動僅供球迷應援同樂體驗，票數結果純屬娛樂性質，並非用作實質影響或評斷女孩真實人氣之統計。</div>
                 </div>
                 
-                <div id="vote-category-tabs" style="display: flex; justify-content: center; gap: 12px; overflow-x: auto; padding: 5px 10px 15px; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div id="vote-tab-baseball" class="vote-team-tag active" onclick="window.switchVoteCategory('baseball')">CPBL 棒球大賞</div>
-                    <div id="vote-tab-korea_pro" class="vote-team-tag" onclick="window.switchVoteCategory('korea_pro')">日韓外援陣線</div>
-                    <div id="vote-tab-local_pro" class="vote-team-tag" onclick="window.switchVoteCategory('local_pro')">台港馬本土應援</div>
+                <div style="background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 8px; padding: 15px 25px; max-width: 600px; margin: 0 auto 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <div style="display: flex; flex-direction: column; text-align: left;">
+                        <span style="font-weight: 900; color: #ffd700; font-size: 16px;">🎟️ 今日剩餘票數</span>
+                        <span style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">每日限投 3 票，不可重複投同一人</span>
+                    </div>
+                    <span id="vote-ticket-counter" style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0 #000;">3 / 3</span>
                 </div>
             </div>
 
@@ -2843,8 +2845,33 @@
         // ⚠️ 總教練注意：請把下面這串引號裡的文字，換成您剛剛複製的 GAS 網址！
         const VOTE_API_URL = "https://script.google.com/macros/s/AKfycbwU6NxyjuMdoNt6lFD-SJD1Zsx4CHJlByzkLQZnTYCrcm9POBzPCd3neJPby3uj7I5-_A/exec"; 
         
-        let voteState = { currentCategory: 'baseball', selectedTeam: '全部' };
-        window.globalVoteData = {}; // 儲存全網真實票數
+        let voteState = { currentCategory: 'korea_pro', selectedTeam: '全部' }; // 強制鎖定日韓外援
+        window.globalVoteData = {}; 
+        window.userIP = ""; // 儲存玩家 IP
+
+        // ✨ 取得使用者真實 IP (利用第三方 API)
+        async function fetchUserIP() {
+            if (window.userIP) return window.userIP;
+            try {
+                let res = await fetch('https://api.ipify.org?format=json');
+                let data = await res.json();
+                window.userIP = data.ip;
+            } catch(e) {
+                // 如果被擋廣告套件攔截，給一組隨機亂數當作備用 IP
+                window.userIP = 'unknown_' + Math.random().toString(36).substr(2, 9);
+            }
+            return window.userIP;
+        }
+
+        // ✨ 取得每日投票紀錄
+        function getDailyVoteRecord() {
+            const todayStr = new Date().toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' });
+            let record = JSON.parse(localStorage.getItem('cheer_vote_record') || '{"date":"","uids":[]}');
+            if (record.date !== todayStr) {
+                return { date: todayStr, uids: [] }; // 換日自動重置
+            }
+            return record;
+        }
 
         function getVotePool() {
             let uniqueMap = new Map();
@@ -2954,7 +2981,11 @@
             const searchKeyword = document.getElementById('vote-search-input')?.value.toLowerCase().trim() || '';
             if (!grid) return;
 
+            // 強制鎖定賽區為日韓外援
+            voteState.currentCategory = 'korea_pro';
             const currentCat = voteState.currentCategory;
+            
+            // ✨ 設定官方投票時間：2026/06/01 00:00:00 ~ 2026/06/30 23:59:59 (台灣時間)
             const now = new Date();
             const officialStart = new Date('2026-06-01T00:00:00+08:00');
             const officialEnd = new Date('2026-06-30T23:59:59+08:00');
@@ -2963,103 +2994,121 @@
             if (now > officialEnd) phase = 'closed';
             else if (now >= officialStart) phase = 'official';
 
-            const todayStr = now.toISOString().split('T')[0]; 
-            let hasVotedToday = false;
-            if (phase === 'official') hasVotedToday = localStorage.getItem('cheer_vote_date_' + currentCat) === todayStr;
-            else if (phase === 'closed') hasVotedToday = true; 
+            // ✨ 讀取今日剩餘票數
+            const record = getDailyVoteRecord();
+            const ticketsLeft = 3 - record.uids.length;
+            const ticketEl = document.getElementById('vote-ticket-counter');
+            if(ticketEl) {
+                ticketEl.innerText = `${Math.max(0, ticketsLeft)} / 3`;
+                ticketEl.style.color = ticketsLeft === 0 ? '#ff4757' : '#fff';
+            }
 
-            // ✨ 指向新的副標題容器，並套用極簡專業風文字與按鈕
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 全網測試：開放無限投票！正式賽期 6/1~6/30 將恢復限投。';
-                else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！感謝全台粉絲的熱烈參與。';
-                else text = '<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 各賽區每日限投一票。';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ 系統測試中 ]</span> 目前為測試期，不受 3 票限制！';
+                else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！感謝粉絲熱烈參與。';
+                else text = '<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 每日限投 3 票。';
                 
-                // 更換為低調質感的分享按鈕
                 subtitleEl.innerHTML = text + `
                 <div style="margin-top: 12px;">
                     <button onclick="window.shareVotePage()" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 18px; font-size: 12px; font-weight: 700; border-radius: 20px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-                        <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; vertical-align:middle; margin-right:6px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                        分享賽區戰況
+                        🔗 分享賽區戰況
                     </button>
                 </div>`;
             }
 
             const pool = getVotePool();
-
-            // ✨ 核心修復：絕對以「雲端真實票數」為主，完全捨棄本地舊紀錄的干擾！
             let girlsWithVotes = pool.map(g => {
                 const voteKey = currentCat + '_' + g.uid; 
                 const realVotes = parseInt(window.globalVoteData[voteKey] || 0);
                 return { ...g, votes: realVotes }; 
             });
 
-            const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
-            const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
-
+            // 嚴格篩選日韓外援
             let regionGirls = girlsWithVotes.filter(g => {
-                // ✨ 終極排除令：只要備註有寫身分，且不是「練習生」或「培訓生」，通通禁止參賽！
                 const note = (g.note || g['備註'] || g.備註 || "").trim();
                 if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return false;
 
                 const natStr = g.nat || "";
                 const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
-                const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
-                
-                const isLuxy = (g.combinedTeam || "").includes("LuxyGirls");
-                const isBaseball = (g.combinedSport || "").includes("棒");
-                const isVolleyball = (g.combinedSport || "").includes("排");
-                const isTPBL = tpblTeams.some(t => (g.combinedTeam || "").includes(t));
-                const isPLG = plgTeams.some(t => (g.combinedTeam || "").includes(t));
-                const isInProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
-
-                switch(currentCat) {
-                    case 'baseball':    return isBaseball;
-                    case 'korea_pro':   return isKoreanOrJapanese && isInProLeague; 
-                    case 'local_pro':   return !isKoreanOrJapanese && !isLuxy; 
-                    default:            return false;
-                }
+                return (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
             });
 
             regionGirls.sort((a, b) => b.votes - a.votes);
 
-            // ✨ 新增：計算真實排名 (處理同票平手狀況)
             let currentRank = 1;
             regionGirls.forEach((g, idx) => {
-                if (idx > 0 && g.votes < regionGirls[idx - 1].votes) {
-                    currentRank = idx + 1;
-                }
+                if (idx > 0 && g.votes < regionGirls[idx - 1].votes) currentRank = idx + 1;
                 g.rank = currentRank;
             });
 
+            // --- 排行榜渲染 (保留原本的動漫海報風，此處縮減代碼長度) ---
             if (leaderboard) {
-                // 清除舊的 Flex 設定，改用 Block 來裝載我們的新海報網格
                 leaderboard.style.display = 'block'; 
-                
                 const top10 = regionGirls.slice(0, 10);
                 if (top10.length === 0) {
                     leaderboard.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub); font-weight:700;">尚無戰況資料</div>`;
                 } else {
-                   // 卡片製造機
                     const buildPosterCard = (g, rank) => {
                         if (!g) return '';
-                        const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                        const dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                        let rankClass = `poster-rank-${rank}`;
-                        if (rank > 3) rankClass = 'poster-rank-rest';
-
-                        // ✨ 極簡風：移除皇冠，純粹依靠金色邊框與版面大小展現第一名氣勢
+                        let rankClass = rank > 3 ? 'poster-rank-rest' : `poster-rank-${rank}`;
                         return `
                         <div class="poster-card ${rankClass}" onclick="window.openModal('${g.uid}')">
                             <div class="poster-rank-badge">${rank}</div>
-                            <div class="poster-img-wrap"><img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'"></div>
+                            <div class="poster-img-wrap"><img src="${window.getCdnUrl(g.img)}" loading="lazy"></div>
                             <div class="poster-info">
-                                <div class="poster-name">${dName}</div>
+                                <div class="poster-name">${g.realname}</div>
                                 <div class="poster-votes">${g.votes.toLocaleString()} 票</div>
                             </div>
                         </div>`;
                     };
+                    let podiumHtml = `<div class="poster-podium">${buildPosterCard(top10[1], 2)}${buildPosterCard(top10[0], 1)}${buildPosterCard(top10[2], 3)}</div>`;
+                    let restHtml = `<div class="poster-rest-grid">${top10.slice(3).map((g,i)=>buildPosterCard(g,i+4)).join('')}</div>`;
+                    leaderboard.innerHTML = `<div class="poster-leaderboard">${podiumHtml}${restHtml}</div>`;
+                }
+            }
+
+            let filtered = regionGirls.filter(g => {
+                if (voteState.selectedTeam !== '全部' && !(g.combinedTeam || "").includes(voteState.selectedTeam)) return false;
+                if (searchKeyword) {
+                    const matchStr = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
+                    if (!matchStr.includes(searchKeyword)) return false;
+                }
+                return true;
+            });
+
+            grid.innerHTML = filtered.map(g => {
+                let btnHtml = '';
+                
+                // ✨ 核心按鈕狀態判定
+                if (phase === 'closed') {
+                    btnHtml = `<button class="vote-btn-disabled">活動已結束 🔒</button>`;
+                } else if (phase === 'official' && record.uids.includes(g.uid)) {
+                    btnHtml = `<button class="vote-btn-disabled" style="background:#2d3748; color:#a0aec0; border:1px solid #4a5568;">今日已應援 💖</button>`;
+                } else if (phase === 'official' && ticketsLeft <= 0) {
+                    btnHtml = `<button class="vote-btn-disabled" style="background:#111; color:#555; border:1px solid #333;">今日票數用盡 🔒</button>`;
+                } else {
+                    const btnText = phase === 'testing' ? '連線測試(無限) 🗳️' : '投她一票 🗳️';
+                    btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${g.realname}')">${btnText}</button>`;
+                }
+
+                const rankColor = g.rank === 1 ? '#ffd700' : g.rank === 2 ? '#c0c0c0' : g.rank === 3 ? '#cd7f32' : '#4a5568';
+                const rankBadge = `<div style="position: absolute; top: -10px; left: -10px; background: ${rankColor}; color: ${g.rank<=3?'#000':'#fff'}; font-family: var(--sport-font); font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 5; border: 2px solid var(--bg-card);">${g.rank}</div>`;
+
+                return `
+                <div class="vote-card" style="padding: 12px; position: relative;">
+                    ${rankBadge}
+                    <div class="vote-img-box" style="margin-bottom: 8px; cursor:pointer;" onclick="window.openModal('${g.uid}')">
+                        <img src="${window.getCdnUrl(g.img)}" loading="lazy">
+                    </div>
+                    <div style="font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${g.realname}</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${g.combinedTeam}</div>
+                    <div style="font-size: 14px; font-weight: 900; color: #a0aec0; margin-bottom: 12px; font-family: var(--sport-font);">${g.votes.toLocaleString()} 票</div>
+                    ${btnHtml}
+                </div>`;
+            }).join('') || `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub); font-weight: 700;">找不到符合條件的女孩 😢</div>`;
+        };
 
                     // 🏆 第一排：TOP 3 王者榮耀台 (排列順序：亞軍、冠軍、季軍)
                     let podiumHtml = `<div class="poster-podium">`;
@@ -3145,7 +3194,7 @@
             }
         };
         // ✨ 把票真實送出給 Google 伺服器 (加入防誤按機制)
-        window.submitVote = function(uid, name) {
+        window.submitVote = async function(uid, name) {
             const now = new Date();
             const officialStart = new Date('2026-06-01T00:00:00+08:00');
             const officialEnd = new Date('2026-06-30T23:59:59+08:00');
@@ -3157,47 +3206,55 @@
                 alert("🔒 投票活動已結束！"); return;
             }
 
-            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
-            const currentCat = voteState.currentCategory;
+            // ✨ 取出使用者的本機投票紀錄
+            let record = getDailyVoteRecord();
 
-            // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
-            const confirmMsg = phase === 'testing' 
-                ? `🛠️ 【測試模式】\n您確定要把票投給 ${catNames[currentCat]} 的【${name}】嗎？`
-                : `⚠️ 【投票確認】\n您確定要將今天 ${catNames[currentCat]} 的神聖一票投給【${name}】嗎？\n(投出後今日無法更改喔！)`;
-            
-            if (!confirm(confirmMsg)) {
-                return; // 粉絲點擊了「取消」，直接中斷執行
-            }
-
-            const voteKey = currentCat + '_' + uid; 
-            
-            // 正式賽期寫入防灌票鎖
             if (phase === 'official') {
-                const todayStr = now.toISOString().split('T')[0];
-                localStorage.setItem('cheer_vote_date_' + currentCat, todayStr);
+                if (record.uids.includes(uid)) {
+                    alert(`⚠️ 您今天已經把票投給【${name}】囉！\n每天不能重複投給同一位女孩，請把愛心分給其他人吧！`);
+                    return;
+                }
+                if (record.uids.length >= 3) {
+                    alert("⚠️ 您今天的 3 張應援票已經全部用完囉！\n請明天再來為女孩們加油！");
+                    return;
+                }
             }
 
-            // 畫面直接 +1，給予即時回饋感
-            window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
+            const confirmMsg = phase === 'testing' 
+                ? `🛠️ 【測試模式 (無限票數)】\n您確定要把票投給【${name}】嗎？`
+                : `⚠️ 【投票確認】\n您確定要將今天寶貴的一票投給【${name}】嗎？\n(投出後今日無法更改，今日剩餘票數：${2 - record.uids.length} 票)`;
+            
+            if (!confirm(confirmMsg)) return;
 
+            // ✨ 抓取使用者 IP
+            const userIP = await fetchUserIP();
+            const voteKey = 'korea_pro_' + uid; 
+            
+            // 寫入本地紀錄 (正式賽才扣除額度)
+            if (phase === 'official') {
+                record.uids.push(uid);
+                localStorage.setItem('cheer_vote_record', JSON.stringify(record));
+            }
+
+            // 畫面直接 +1
+            window.globalVoteData[voteKey] = (parseInt(window.globalVoteData[voteKey]) || 0) + 1;
+            window.renderVoteGrid(); 
+
+            // 連線送到 Google 試算表，把 IP 一起送過去！
             if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
                 fetch(VOTE_API_URL, {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey })
+                    body: JSON.stringify({ uid: voteKey, voteKey: voteKey, ip: userIP }) // 👈 附帶 IP 傳送
                 }).catch(e => console.log("寫入失敗", e));
-            } else {
-                console.log("⚠️ 尚未設定 VOTE_API_URL");
             }
 
             if (phase === 'testing') {
-                alert(`✅ [全網連線測試] 應援成功！\n資料已寫入雲端伺服器！`);
+                alert(`✅ [全網連線測試] 應援成功！`);
             } else {
-                alert(`🎉 應援連線成功！\n您今天在【${catNames[currentCat]}】的寶貴一票已經投出！`);
+                alert(`🎉 應援連線成功！\n您已經成功為【${name}】投下一票！`);
             }
-            
-            window.renderVoteGrid(); 
         };
         // =========================================================================
         // 🌟 夢幻陣容 5.0 (Dream Team) 多賽制擴充引擎 ＋ 自訂頒獎台系統
