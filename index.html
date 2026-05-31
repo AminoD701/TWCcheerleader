@@ -1907,7 +1907,7 @@
             return { num: parseInt(`${String(y).padStart(4,'0')}${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`), mmdd: parseInt(`${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`) };
         }
 
-        let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = []; 
+        let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = [], dbMatches = []; 
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
@@ -1970,6 +1970,7 @@
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = parsed.dbNews || []; 
+                        dbMatches = parsed.dbMatches || []; // 👈 補上這行
                         if (dbGirls.length > 0) {
                             buildGirlMap(); init(); enableEnterButton(); return; 
                         }
@@ -1980,7 +1981,6 @@
             const t = new Date().getTime();
             const baseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${t}`;
 
-            let dbMatches = []; // 宣告比賽資料庫
             try {
                 const [girlsData, eventsData, schedulesData, newsData, matchesData] = await Promise.all([
                     fetchCSV(`${baseUrl}&gid=0&t=${t}`),
@@ -2018,7 +2018,7 @@
                 init(); 
                 enableEnterButton();
                 
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews })); } catch(e) {}
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches })); } catch(e) {}
 
             } catch (err) {
                 const btn = document.getElementById('enter-btn');
