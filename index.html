@@ -2306,27 +2306,47 @@
         window.currentMatchLeague = "全部";
 
         window.renderMatchesSelection = function() {
-            const container = document.getElementById('matches-container'); // 👈 使用我們剛剛新增的專屬容器
-            container.style.display = 'grid';
-            container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-            container.style.gap = '20px';
-            container.style.maxWidth = '1200px';
-            container.style.margin = '0 auto';
-            container.style.padding = '20px';
+            const container = document.getElementById('matches-container'); 
+            // 改用 flex 排版，確保電腦版與手機版都能完美居中對齊
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+            container.style.padding = '20px 15px';
             
-            const leagues = ["CPBL", "TPBL", "PLG", "TPVL"];
-            const colors = { "CPBL": "#00b0ff", "TPBL": "#ff9800", "PLG": "#ffeb3b", "TPVL": "#ff4081" };
+            // 加入聯盟的全名與專屬圖示
+            const leagues = [
+                { id: "CPBL", name: "中華職棒大聯盟", color: "#00b0ff", icon: "⚾" },
+                { id: "TPBL", name: "台灣職業籃球大聯盟", color: "#ff9800", icon: "🏀" },
+                { id: "PLG", name: "P. LEAGUE+", color: "#ffeb3b", icon: "🏀" },
+                { id: "TPVL", name: "企業排球聯賽", color: "#ff4081", icon: "🏐" }
+            ];
             
             container.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; margin-bottom: 20px;">
-                    <div class="game-title">賽事中心 MATCH CENTER</div>
-                    <p style="color:var(--text-sub); font-weight:700;">請選擇想查看的聯盟賽程</p>
-                </div>` + 
-                leagues.map(l => `
-                    <div class="schedule-team-btn" style="--btn-accent:${colors[l]}; padding: 40px 20px; justify-content: center; width:100%;" onclick="window.showLeagueMatches('${l}')">
-                        <span style="font-size: 24px;">${l}</span>
-                    </div>
-                `).join('');
+                <div style="text-align: center; margin-bottom: 35px; margin-top: 10px;">
+                    <div class="game-title" style="font-size: clamp(28px, 6vw, 42px); letter-spacing: 4px; text-shadow: 3px 3px 0px rgba(0, 176, 255, 0.5);">賽事中心 MATCH CENTER</div>
+                    <p style="color:var(--text-sub); font-weight:700; letter-spacing: 2px;">請選擇您想查看的賽事聯盟</p>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 900px;">
+                    ${leagues.map(l => `
+                        <div onclick="window.showLeagueMatches('${l.id}')"
+                             style="flex: 1 1 300px; max-width: 420px; height: 170px; background: linear-gradient(135deg, #1c2128, #111418); border: 2px solid var(--border-color); border-bottom: 6px solid ${l.color}; border-radius: 12px; cursor: pointer; position: relative; overflow: hidden; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);"
+                             onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.borderColor='${l.color}'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.8), 0 0 20px ${l.color}50';"
+                             onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.5)';">
+
+                            <div style="position: absolute; right: -5%; bottom: -30%; font-family: var(--sport-font); font-size: 110px; font-weight: 900; color: rgba(255,255,255,0.03); pointer-events: none; transform: rotate(-10deg);">
+                                ${l.id}
+                            </div>
+
+                            <div style="font-size: 32px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${l.icon}</div>
+                            <div style="font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; letter-spacing: 2px; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); line-height: 1;">${l.id}</div>
+                            <div style="font-size: 14px; font-weight: 900; color: ${l.color}; letter-spacing: 1.5px; margin-top: 6px;">${l.name}</div>
+                            
+                            <div style="position: absolute; top: 15px; left: 15px; width: 8px; height: 8px; border-radius: 50%; background: ${l.color}; box-shadow: 0 0 8px ${l.color};"></div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         };
 
         window.showLeagueMatches = function(league) {
