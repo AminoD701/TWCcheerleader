@@ -2367,8 +2367,9 @@
                         <div class="match-grid">`;
                 
                 day.list.forEach(m => {
-                    const homeCfg = teamThemes[m.home_team] || teamThemes[m.home_team+"_棒球"] || teamThemes[m.home_team+"_籃球"] || { logo: "", accent: "#ff5722", noLogo: true };
-                    const awayCfg = teamThemes[m.away_team] || teamThemes[m.away_team+"_棒球"] || teamThemes[m.away_team+"_籃球"] || { logo: "", noLogo: true };
+                    // ✨ 這裡將 m.home_team 全面改成 m.hometeam，m.away_team 改成 m.awayteam
+                    const homeCfg = teamThemes[m.hometeam] || teamThemes[m.hometeam+"_棒球"] || teamThemes[m.hometeam+"_籃球"] || { logo: "", accent: "#ff5722", noLogo: true };
+                    const awayCfg = teamThemes[m.awayteam] || teamThemes[m.awayteam+"_棒球"] || teamThemes[m.awayteam+"_籃球"] || { logo: "", noLogo: true };
 
                     html += `
                         <div class="match-card" style="--event-accent: ${homeCfg.accent};">
@@ -2376,12 +2377,12 @@
                             <div class="match-vs-area">
                                 <div class="match-team-box">
                                     ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.src='https://via.placeholder.com/80/252c36/ffffff?text=AWAY'">` : `<div class="match-team-logo" style="background:#252c36; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:12px;">客場</div>`}
-                                    <span class="match-team-name">${m.away_team}</span>
+                                    <span class="match-team-name">${m.awayteam}</span>
                                 </div>
                                 <div class="match-vs-label">VS</div>
                                 <div class="match-team-box">
                                     ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.src='https://via.placeholder.com/80/252c36/ffffff?text=HOME'">` : `<div class="match-team-logo" style="background:#252c36; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:12px;">主場</div>`}
-                                    <span class="match-team-name">${m.home_team}</span>
+                                    <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
                             <div class="match-time-label">${m.time}</div>
