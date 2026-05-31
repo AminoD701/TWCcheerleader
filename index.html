@@ -1500,52 +1500,74 @@
     .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
 }
 /* =========================================
-           🏟️ 賽事中心專屬樣式 (質感對戰比分版)
+           🏟️ 賽事中心專屬樣式 (經典重鑄 + 比分對戰版)
            ========================================= */
         .match-calendar-container { max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
         .match-date-row { background: transparent; margin-bottom: 40px; }
-        .match-date-header { background: linear-gradient(90deg, rgba(26,30,36,0.95), rgba(17,20,24,0)); padding: 14px 24px; border-left: 6px solid var(--event-accent); display: flex; align-items: baseline; gap: 15px; margin-bottom: 20px; border-radius: 6px; }
-        .match-date-header .day-num { font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .match-date-header .day-info { font-size: 16px; font-weight: 900; color: var(--event-accent); letter-spacing: 2px; }
-
-        .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; }
         
-        /* 賽事卡片主體 */
+        /* 日期標題：還原乾淨俐落的左側線條 */
+        .match-date-header { display: flex; align-items: baseline; gap: 15px; margin-bottom: 15px; border-left: 4px solid var(--event-accent); padding-left: 12px; }
+        .match-date-header .day-num { font-family: var(--sport-font); font-size: 38px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .match-date-header .day-info { font-size: 14px; font-weight: 700; color: var(--event-accent); letter-spacing: 1px; }
+
+        /* 經典雙欄網格 */
+        .match-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
+        
+        /* 賽事卡片主體：還原經典深色底 + 頂部球隊色邊框 */
         .match-card { 
-            background: linear-gradient(145deg, #1a1e24 0%, #111418 100%); 
-            border: 1px solid rgba(255,255,255,0.05); border-top: 4px solid var(--event-accent);
-            border-radius: 12px; position: relative; overflow: hidden; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            display: flex; flex-direction: column; transition: 0.3s;
+            background: #15191e; 
+            border: 1px solid #2d3748; 
+            border-top: 4px solid var(--event-accent);
+            border-radius: 6px; 
+            display: flex; flex-direction: column; overflow: hidden; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: 0.3s; cursor: pointer;
         }
+        .match-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-color: #555; }
+
+        /* 已結束賽事的特殊灰階樣式 (整個框變暗) */
+        .match-card.is-finished { border-top-color: #4a5568 !important; }
+        .match-card.is-finished .match-time-badge { background: #4a5568; color: #fff; }
         
-        /* 頂部場地列 */
-        .match-header-bar { background: rgba(0,0,0,0.4); padding: 12px 20px; font-size: 14px; color: var(--text-sub); font-weight: 900; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 2; }
-        .match-time-badge { background: var(--event-accent); color: #000; padding: 2px 12px; border-radius: 4px; font-family: var(--sport-font); font-size: 18px; font-weight: 900; }
+        /* 頂部場地與時間列：還原經典方塊 Badge */
+        .match-header-bar { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .match-header-bar span:first-child { font-size: 13px; color: #a0aec0; font-weight: 700; }
+        .match-time-badge { background: var(--event-accent); color: #000; padding: 4px 12px; border-radius: 4px; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; }
 
-        /* 已結束賽事的特殊灰階樣式 */
-        .match-card.is-finished { filter: grayscale(0.5); opacity: 0.85; border-top-color: #555 !important; }
-        .match-card.is-finished .match-time-badge { background: #555; color: #aaa; }
-        .match-card.is-finished::before { content: "FINISHED"; position: absolute; top: 10px; right: -30px; background: #ff4757; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 40px; transform: rotate(45deg); z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        /* 對戰區與比分：左右分明 */
+        .match-vs-area { display: flex; align-items: center; justify-content: space-between; padding: 30px 20px 35px; position: relative; }
+        
+        /* 球隊區塊 */
+        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 2; width: 35%; transition: 0.3s; }
+        .match-team-logo { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: 0.3s; }
+        .match-card:hover .match-team-logo { transform: scale(1.08); }
+        .match-team-name { font-size: 15px; font-weight: 900; color: #fff; text-align: center; }
 
-        /* 對戰區與比分 */
-        .match-vs-area { display: flex; align-items: center; justify-content: space-around; padding: 40px 20px; position: relative; }
-        .score-display { font-family: var(--sport-font); font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.2); min-width: 60px; text-align: center; }
-        .vs-label-small { font-family: var(--sport-font); font-size: 18px; color: #555; font-style: italic; }
+        /* 預設無 Logo 圓圈 */
+        .match-no-logo { width: 75px; height: 75px; background: #252c36; border: 2px dashed #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #888; font-weight: 900; font-size: 14px; }
 
-        /* 球隊與勝負特效 */
-        .match-team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: 0.4s; }
-        .match-team-logo { width: 110px; height: 110px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
-        .match-team-name { font-size: 16px; font-weight: 900; color: #fff; text-align: center; }
+        /* 中間 VS 或 比分區塊 */
+        .match-center-info { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 12px; width: 30%; }
+        .score-display { font-family: var(--sport-font); font-size: 42px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0px #000; min-width: 45px; text-align: center; }
+        .match-vs-label { font-family: var(--sport-font); font-size: 40px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 3px 3px 0px rgba(0,0,0,0.6); }
 
-        /* 輸球的視覺處分 */
-        .match-team-box.is-loser { opacity: 0.3; filter: grayscale(1) blur(1px); transform: scale(0.9); }
-        .match-team-box.is-winner .match-team-name { color: var(--event-accent); text-shadow: 0 0 10px var(--event-accent); }
+        /* 輸贏特效：輸家變灰透明，贏家亮起 */
+        .match-team-box.is-loser { filter: grayscale(1) opacity(0.35); transform: scale(0.9); }
+        .match-team-box.is-winner .match-team-name { color: var(--event-accent); }
 
+        /* 底部備註 (例行賽) */
+        .match-note { font-size: 13px; color: #ffd700; text-align: center; padding: 10px; background: rgba(255,215,0,0.05); font-weight: 900; letter-spacing: 1px; border-top: 1px dashed rgba(255,215,0,0.2); }
+
+        /* 手機版：維持經典的單列佈局 */
         @media (max-width: 768px) {
-            .match-grid { grid-template-columns: 1fr; }
-            .match-team-logo { width: 85px; height: 85px; }
-            .score-display { font-size: 36px; }
+            .match-grid { grid-template-columns: 1fr; gap: 15px; }
+            .match-date-header .day-num { font-size: 32px; }
+            .match-vs-area { padding: 20px 10px 25px; }
+            .match-team-logo { width: 75px; height: 75px; }
+            .match-no-logo { width: 65px; height: 65px; font-size: 12px; }
+            .match-team-name { font-size: 14px; }
+            .match-vs-label { font-size: 32px; }
+            .score-display { font-size: 32px; min-width: 35px; }
+            .match-time-badge { font-size: 14px; padding: 3px 8px; }
         }
     </style> 
 </head>
@@ -2366,12 +2388,12 @@
             const teamTranslation = {
                 "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
-                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
+                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新战神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                 "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
                 "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars"
             };
 
-            let html = `<div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span>返回聯盟選擇</span></button></div>
+            let html = `<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
                         <div class="match-calendar-container">
                             <div style="margin-bottom:25px; font-family:var(--sport-font); font-size:28px; font-weight:900; color:var(--event-accent); letter-spacing: 2px;">${window.currentMatchLeague} SEASON 2026</div>`;
 
@@ -2386,6 +2408,7 @@
                         <div class="match-grid">`;
                 
                 day.list.forEach(m => {
+                    // ✨ 比分與勝負判定邏輯
                     let hScore = parseInt(m.homescore);
                     let aScore = parseInt(m.awayscore);
                     let isFinished = !isNaN(hScore) && !isNaN(aScore);
@@ -2393,33 +2416,43 @@
                     let homeStatus = (isFinished && hScore > aScore) ? 'is-winner' : (isFinished && hScore < aScore ? 'is-loser' : '');
                     let awayStatus = (isFinished && aScore > hScore) ? 'is-winner' : (isFinished && aScore < hScore ? 'is-loser' : '');
 
-                    const homeCfg = teamThemes[teamTranslation[m.hometeam]+"_棒球"] || teamThemes[teamTranslation[m.hometeam]+"_籃球"] || teamThemes[teamTranslation[m.hometeam]] || { logo: "", accent: "#555", noLogo: true };
-                    const awayCfg = teamThemes[teamTranslation[m.awayteam]+"_棒球"] || teamThemes[teamTranslation[m.awayteam]+"_籃球"] || teamThemes[teamTranslation[m.awayteam]] || { logo: "", noLogo: true };
+                    // 翻譯隊名與抓取設定檔
+                    let tHome = teamTranslation[m.hometeam] || m.hometeam;
+                    let tAway = teamTranslation[m.awayteam] || m.awayteam;
+                    const homeCfg = teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
+                    const awayCfg = teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway] || { logo: "", noLogo: true };
+
+                    // ✨ 決定中間顯示 VS 還是分數
+                    let centerHtml = isFinished 
+                        ? `<div class="score-display">${aScore}</div>
+                           <div class="match-vs-label" style="font-size:24px; color:#555; text-shadow:none;">-</div>
+                           <div class="score-display">${hScore}</div>`
+                        : `<div class="match-vs-label">VS</div>`;
 
                     html += `
                         <div class="match-card ${isFinished ? 'is-finished' : ''}" style="--event-accent: ${homeCfg.accent};">
+                            
                             <div class="match-header-bar">
-                                <span>📍 ${m.venue} | ${m.type}</span>
+                                <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
                                 <span class="match-time-badge">${isFinished ? 'FINAL' : m.time}</span>
                             </div>
 
                             <div class="match-vs-area">
                                 <div class="match-team-box ${awayStatus}">
-                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo">` : `<div class="match-no-logo">AWAY</div>`}
+                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo">客場</div>`}
                                     <span class="match-team-name">${m.awayteam}</span>
                                 </div>
                                 
-                                <div style="display:flex; align-items:center; gap:15px;">
-                                    <div class="score-display">${isNaN(aScore) ? '' : aScore}</div>
-                                    <div class="vs-label-small">${isFinished ? '-' : 'VS'}</div>
-                                    <div class="score-display">${isNaN(hScore) ? '' : hScore}</div>
+                                <div class="match-center-info">
+                                    ${centerHtml}
                                 </div>
                                 
                                 <div class="match-team-box ${homeStatus}">
-                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo">` : `<div class="match-no-logo">HOME</div>`}
+                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo">主場</div>`}
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
+                            
                             ${m.note ? `<div class="match-note">🏆 ${m.note}</div>` : ''}
                         </div>`;
                 });
