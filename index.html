@@ -3127,12 +3127,14 @@
                 
                 let btnHtml = '';
             if (phase === 'closed') {
-                btnHtml = `<button class="vote-btn-disabled">活動已結束 🔒</button>`;
+                btnHtml = `<button class="vote-btn-disabled" onclick="alert('🔒 投票活動已圓滿結束囉！')">活動已結束 🔒</button>`;
             } else if (phase === 'official') {
                 if (todayVotes.includes(g.uid)) {
-                    btnHtml = `<button class="vote-btn-disabled">今日已應援 🔒</button>`;
+                    // ✨ 點擊已投票的女孩，彈出禁止警告
+                    btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 您今天已經把票投給她囉！請把剩下的票分給其他女孩吧！')">今日已應援 🔒</button>`;
                 } else if (isCategoryLocked) {
-                    btnHtml = `<button class="vote-btn-disabled">今日票數已用盡 🔒</button>`;
+                    // ✨ 點擊沒票時，彈出用盡警告
+                    btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！')">今日票數已用盡 🔒</button>`;
                 } else {
                     btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">投她一票 🗳️</button>`;
                 }
