@@ -1868,27 +1868,37 @@
 
         const teamThemes = {
             "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
-            "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
+            
+            // ⚾ 棒球組 (維持你原本的舊檔名，完全沒動！)
             "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
             "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
+            "Wing Stars_棒球": { accent: "#00e676", logo: "images/winstars_logo.png", noLogo: false, league: "CPBL" },
             "Uni-Girls": { accent: "#ff9800", logo: "images/unilions_logo.png", noLogo: false, league: "CPBL" },
-            "Rakuten Girls": { accent: "#9c27b0", logo: "images/rakuten_logo.png", noLogo: false, league: "CPBL" }, // 樂天紫
-            "Dragon Beauties": { accent: "#e50012", logo: "images/dragons_logo.png", noLogo: false, league: "CPBL" }, // 味全紅
-            "Formosa Sexy": { accent: "#76ff03", logo: "", noLogo: true, league: "TPBL" },
-            "Passion Sisters_籃球": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
-            "Muse Girls": { accent: "#ce93d8", logo: "", noLogo: true, league: "TPBL" },
-            "Taishin Wonders": { accent: "#f44336", logo: "", noLogo: true, league: "TPBL" },
-            "Leopard Girls": { accent: "#ffffff", logo: "", noLogo: true, league: "TPBL" },
-            "New Taipei Queens": { accent: "#ffeb3b", logo: "", noLogo: true, league: "TPBL" },
-            "Aqua Mermaids": { accent: "#03a9f4", logo: "", noLogo: true, league: "TPBL" },
-            "Pilots Crew": { accent: "#ff9800", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Youngkey Girls": { accent: "#69f0ae", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Wing Stars_籃球": { accent: "#00e676", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Fubon Angels_籃球": { accent: "#2196f3", logo: "", noLogo: true, league: "P. LEAGUE+" },
-            "Tokki Cutie": { accent: "#ff9800", logo: "", noLogo: true, league: "排球" },
-            "Little witches": { accent: "#00e5ff", logo: "", noLogo: true, league: "排球" },
-            "Peach Girls": { accent: "#f06292", logo: "", noLogo: true, league: "排球" },
-            "Wing Stars_排球": { accent: "#29b6f6", logo: "", noLogo: true, league: "排球" },
+            "Rakuten Girls": { accent: "#9c27b0", logo: "images/rakuten_logo.png", noLogo: false, league: "CPBL" },
+            "Dragon Beauties": { accent: "#e50012", logo: "images/dragons_logo.png", noLogo: false, league: "CPBL" },
+            
+            // 🏀 TPBL 籃球組
+            "Aqua Mermaids": { accent: "#03a9f4", logo: "images/aquas_logo.png", noLogo: false, league: "TPBL" },
+            "Formosa Sexy": { accent: "#76ff03", logo: "images/dreamers_logo.png", noLogo: false, league: "TPBL" },
+            "Passion Sisters_籃球": { accent: "#ffeb3b", logo: "images/ps_basketball.png", noLogo: false, league: "TPBL" },
+            "Muse Girls": { accent: "#ce93d8", logo: "images/lioneers_logo.png", noLogo: false, league: "TPBL" },
+            "Taishin Wonders": { accent: "#f44336", logo: "images/mars_logo.png", noLogo: false, league: "TPBL" },
+            "Leopard Girls": { accent: "#ffffff", logo: "images/leopards_logo.png", noLogo: false, league: "TPBL" },
+            "New Taipei Queens": { accent: "#ffeb3b", logo: "images/kings_logo.png", noLogo: false, league: "TPBL" },
+
+            // 🏀 PLG 籃球組
+            "Pilots Crew": { accent: "#ff9800", logo: "images/pilots_logo.png", noLogo: false, league: "PLG" },
+            "Youngkey Girls": { accent: "#69f0ae", logo: "images/youngkey_logo.png", noLogo: false, league: "PLG" },
+            "Wing Stars_籃球": { accent: "#00e676", logo: "images/ws_basketball.png", noLogo: false, league: "PLG" },
+            "Fubon Angels_籃球": { accent: "#2196f3", logo: "images/fa_basketball.png", noLogo: false, league: "PLG" },
+
+            // 🏐 TPVL 排球組
+            "Tokki Cutie": { accent: "#ff9800", logo: "images/tokki_logo.png", noLogo: false, league: "TPVL" },
+            "Peach Girls": { accent: "#f06292", logo: "images/peach_logo.png", noLogo: false, league: "TPVL" },
+            "Little Witches": { accent: "#00e5ff", logo: "images/witches_logo.png", noLogo: false, league: "TPVL" },
+            "Wing Stars_排球": { accent: "#29b6f6", logo: "images/ws_volleyball.png", noLogo: false, league: "TPVL" },
+            
+            // 🌟 其他
             "LuxyGirls": { accent: "#e040fb", logo: "", noLogo: true, league: "其他" }
         };
 
@@ -2380,14 +2390,24 @@
 
             // ✨ 智慧翻譯字典：把中文隊名對應回啦啦隊的英文隊名，救回 Logo！
             const teamTranslation = {
+                // CPBL
                 "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", 
                 "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars",
-                "新北國王": "New Taipei Queens", "福爾摩沙夢想家": "Formosa Sexy",
-                "桃園璞園領航猿": "Pilots Crew", "臺北富邦勇士": "Fubon Angels",
-                "臺南台鋼獵鷹": "Wing Stars", "新竹御頂攻城獅": "Muse Girls",
+                
+                // TPBL
+                "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
+                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls",
                 "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
-                "高雄全家海神": "Aqua Mermaids", "高雄17直播鋼鐵人": "Wing Stars"
+                "新北國王": "New Taipei Queens",
+
+                // PLG
+                "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls",
+                "臺南台鋼獵鷹": "Wing Stars", "臺北富邦勇士": "Fubon Angels",
+
+                // TPVL
+                "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls",
+                "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars"
             };
 
             let html = `<div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;"><button class="back-btn" onclick="window.renderMatchesSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回聯盟選擇</span></button></div>
