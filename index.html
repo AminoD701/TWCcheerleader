@@ -2988,7 +2988,8 @@
             if (now > officialEnd) phase = 'closed';
             else if (now >= officialStart) phase = 'official';
 
-            const todayStr = now.toISOString().split('T')[0]; 
+            // ✨ 修正：強制使用亞洲/台北時區計算日期，確保凌晨 12:00 準時重製
+            const todayStr = new Date().toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-'); 
             let todayVotes = [];
             let isCategoryLocked = false;
             
@@ -3205,8 +3206,8 @@
             const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
             const currentCat = voteState.currentCategory;
 
-            // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
-            const todayStr = now.toISOString().split('T')[0];
+            // ✨ 修正：強制使用亞洲/台北時區計算日期，確保凌晨 12:00 準時重製
+            const todayStr = new Date().toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-');
             let todayVotes = [];
             
             // ✨ 確保 IP 已經抓到，否則阻擋並要求稍後
