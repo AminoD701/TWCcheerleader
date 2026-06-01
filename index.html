@@ -2506,6 +2506,7 @@
 
                             <div class="match-vs-area">
                                 <div class="match-team-box ${awayStatus}">
+                                    <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">客隊 AWAY</div>
                                     ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo">客場</div>`}
                                     <span class="match-team-name">${m.awayteam}</span>
                                 </div>
@@ -2515,6 +2516,7 @@
                                 </div>
                                 
                                 <div class="match-team-box ${homeStatus}">
+                                    <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">主隊 HOME</div>
                                     ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo">主場</div>`}
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
