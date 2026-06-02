@@ -2455,24 +2455,24 @@
                 vsOpponent = (h === cheerTeam) ? `VS ${match.awayteam}` : `AT ${match.hometeam}`;
             }
 
-            // 3. 生成「膠囊型」女孩清單 (仿照手機版班表好看的樣式)
+            // 3. 生成「膠囊型」女孩清單 (融入本土/外籍智慧姓名分流邏輯)
             let girlsHtml = girlNames.map(gn => {
                 const g = girlMap.get(gn) || dbGirls.find(x => x.realname === gn || x.nickname === gn);
-                const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬"));
+                const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
                 const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : gn;
-                const dSub = (g && isLocal && g.nickname !== g.realname) ? g.realname : "";
+                const dSub = (g && !isLocal && g.nickname && g.nickname !== g.realname) ? g.nickname : ((g && isLocal && g.nickname !== g.realname) ? g.realname : "");
                 const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                 const targetId = g ? g.uid : gn;
 
                 const sRecord = scheduledGirls.find(s => s.name === gn);
-                const taskBadge = sRecord && sRecord.note ? `<div style="font-size:10px; background:${themeColor}; color:#000; padding:1px 8px; border-radius:4px; font-weight:900; margin-top:2px;">${sRecord.note}</div>` : '';
+                const taskBadge = sRecord && sRecord.note ? `<div class="mc-task-badge" style="font-size:10px; background:${themeColor}; color:#000; padding:1px 8px; border-radius:4px; font-weight:900; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${sRecord.note}</div>` : '';
 
                 return `
-                <div class="timeline-girl" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 140px; max-width: 180px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
+                <div class="mc-roster-item" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 140px; max-width: 180px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
                     <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid ${themeColor}; background:#252c36;" onerror="this.src='https://via.placeholder.com/50'">
-                    <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0;">
+                    <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0; width:100%;">
                         <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
-                        ${taskBadge ? taskBadge : (dSub ? `<span style="font-size:11px; color:var(--text-sub);">${dSub}</span>` : '')}
+                        ${taskBadge ? taskBadge : (dSub ? `<span style="font-size:11px; color:var(--text-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dSub}</span>` : '')}
                     </div>
                 </div>`;
             }).join('');
@@ -2481,6 +2481,40 @@
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
             document.getElementById('modal-dynamic-content').innerHTML = `
+                <style>
+                    /* ✨ 電腦版維持彈性橫排，手機版自動切換為與班表相同的 3 欄黃金比例 */
+                    .mc-roster-grid { display:flex; flex-wrap:wrap; gap:12px; justify-content: flex-start; }
+                    @media (max-width: 768px) {
+                        .mc-roster-grid {
+                            display: grid !important;
+                            grid-template-columns: repeat(3, 1fr) !important;
+                            gap: 8px !important;
+                        }
+                        .mc-roster-item {
+                            flex: none !important;
+                            max-width: none !important;
+                            flex-direction: column !important;
+                            border-radius: 12px !important;
+                            padding: 8px 4px !important;
+                            gap: 5px !important;
+                            text-align: center !important;
+                        }
+                        .mc-roster-item img {
+                            width: 42px !important;
+                            height: 42px !important;
+                        }
+                        .mc-roster-item div {
+                            align-items: center !important;
+                        }
+                        .mc-roster-item span {
+                            font-size: 12px !important;
+                        }
+                        .mc-roster-item .mc-task-badge {
+                            font-size: 9px !important;
+                            padding: 1px 4px !important;
+                        }
+                    }
+                </style>
                 <div class="modal-body" style="padding: 0; display: flex; flex-direction: column; height:100%; background: #0a0c0f;">
                     <div style="padding: 35px 20px; background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%); border-bottom: 2px solid ${themeColor}; text-align: center; position: relative; overflow: hidden;">
                         <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:var(--sport-font); font-size:80px; font-weight:900; color:rgba(255,255,255,0.02); white-space:nowrap; z-index:1; pointer-events:none;">LINEUP</div>
@@ -2493,7 +2527,7 @@
                     
                     <div style="flex:1; overflow-y:auto; padding: 25px 15px; -webkit-overflow-scrolling: touch;">
                         <div style="font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: ${themeColor}; letter-spacing: 2px; margin-bottom: 20px; border-left: 4px solid ${themeColor}; padding-left: 12px;">TODAY'S ROSTER</div>
-                        ${girlsHtml ? `<div style="display:flex; flex-wrap:wrap; gap:12px; justify-content: flex-start;">${girlsHtml}</div>` : `<div style="text-align:center; padding: 60px 20px; color:var(--text-sub); font-weight:700; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">今日尚無應援名單登錄。</div>`}
+                        ${girlsHtml ? `<div class="mc-roster-grid">${girlsHtml}</div>` : `<div style="text-align:center; padding: 60px 20px; color:var(--text-sub); font-weight:700; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">今日尚無應援名單登錄。</div>`}
                     </div>
                 </div>
             `;
@@ -4827,13 +4861,16 @@
             
             let desktopHtml = `<div class="schedule-desktop"><div class="schedule-wrapper"><table class="schedule-table"><thead><tr><th>ROSTER</th>` + 
                 girls.map(n => {
-                    // ✨ 智慧防撞車：透過「球隊」＋「名字」雙重比對，精準抓到對的人！
                     const bestMatch = dbGirls.find(g => (g.realname === n || g.nickname === n) && g.team === currentScheduleTeam) || girlMap.get(n) || { realname: n, nickname: "", uid: n };
-                    const showReal = bestMatch.realname;
-                    const showNick = (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname) ? bestMatch.nickname : "";
+                    
+                    // ✨ 表頭名稱分流升級：本土用綽號、外籍用本名
+                    const isLocal = bestMatch.nat && ((bestMatch.nat || "").includes("台") || (bestMatch.nat || "").includes("臺") || (bestMatch.nat || "").includes("港") || (bestMatch.nat || "").includes("馬") || (bestMatch.team || "").toLowerCase().includes("luxygirls"));
+                    const displayName = isLocal ? (bestMatch.nickname || bestMatch.realname) : bestMatch.realname;
+                    const displaySub = isLocal ? (bestMatch.nickname !== bestMatch.realname ? bestMatch.realname : "") : (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname ? bestMatch.nickname : "");
+                    
                     const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
                     
-                    return `<th onclick="window.openModal('${bestMatch.uid}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${imgUrl}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${showReal}</span>${showNick ? `<span class="schedule-girl-nickname">${showNick}</span>` : ''}</div></div></th>`;
+                    return `<th onclick="window.openModal('${bestMatch.uid}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${imgUrl}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${displayName}</span>${displaySub ? `<span class="schedule-girl-nickname">${displaySub}</span>` : ''}</div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
             let currentMonthDesk = "";
@@ -4870,21 +4907,23 @@
                         <div class="timeline-roster">`;
                     
                     attendees.forEach(gn => {
-                        // ✨ 智慧防撞車 (手機版)
                         const bestMatch = dbGirls.find(g => (g.realname === gn || g.nickname === gn) && g.team === currentScheduleTeam) || girlMap.get(gn) || { realname: gn, nickname: "", uid: gn };
-                        const showReal = bestMatch.realname;
-                        const showNick = (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname) ? bestMatch.nickname : "";
+                        
+                        // ✨ 手機時間軸名稱分流升級：本土用綽號、外籍用本名
+                        const isLocal = bestMatch.nat && ((bestMatch.nat || "").includes("台") || (bestMatch.nat || "").includes("臺") || (bestMatch.nat || "").includes("港") || (bestMatch.nat || "").includes("馬") || (bestMatch.team || "").toLowerCase().includes("luxygirls"));
+                        const displayName = isLocal ? (bestMatch.nickname || bestMatch.realname) : bestMatch.realname;
+                        const displaySub = isLocal ? (bestMatch.nickname !== bestMatch.realname ? bestMatch.realname : "") : (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname ? bestMatch.nickname : "");
+                        
                         const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
                         
-                        // ✨ 抓取該女孩在今天的班表紀錄，檢查備註
                         const sRecord = data.find(s => s.safeDate.num === dNum && s.name === gn);
                         const taskBadge = sRecord && sRecord.note ? `<span style="font-size:9px; background:var(--team-accent); color:#000; padding:1px 4px; border-radius:4px; margin-top:2px; width:fit-content; font-weight:900;">${sRecord.note}</span>` : '';
 
                         mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${bestMatch.uid}')" style="align-items:center; display:flex;">
                             <img src="${imgUrl}" loading="lazy">
                             <div style="display:flex; flex-direction:column; line-height:1.2;">
-                                <span>${showReal}</span>
-                                ${showNick ? `<span style="font-size:10px; color:var(--text-sub); margin-bottom:1px;">${showNick}</span>` : ''}
+                                <span>${displayName}</span>
+                                ${displaySub ? `<span style="font-size:10px; color:var(--text-sub); margin-bottom:1px;">${displaySub}</span>` : ''}
                                 ${taskBadge}
                             </div>
                         </div>`;
