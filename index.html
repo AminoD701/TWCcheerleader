@@ -2455,12 +2455,13 @@
                 vsOpponent = (h === cheerTeam) ? `VS ${match.awayteam}` : `AT ${match.hometeam}`;
             }
 
-            // 3. 生成「膠囊型」女孩清單 (融入本土/外籍智慧姓名分流邏輯)
+            // 3. 生成「膠囊型」女孩清單 (極致單一名稱邏輯：本土僅綽號，外籍僅本名)
             let girlsHtml = girlNames.map(gn => {
                 const g = girlMap.get(gn) || dbGirls.find(x => x.realname === gn || x.nickname === gn);
                 const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
+                
+                // ✨ 核心邏輯：本土只秀綽號(無綽號才用本名)，日韓只秀本名。不顯示任何副標題！
                 const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : gn;
-                const dSub = (g && !isLocal && g.nickname && g.nickname !== g.realname) ? g.nickname : ((g && isLocal && g.nickname !== g.realname) ? g.realname : "");
                 const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                 const targetId = g ? g.uid : gn;
 
@@ -2472,7 +2473,7 @@
                     <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid ${themeColor}; background:#252c36;" onerror="this.src='https://via.placeholder.com/50'">
                     <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0; width:100%;">
                         <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
-                        ${taskBadge ? taskBadge : (dSub ? `<span style="font-size:11px; color:var(--text-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dSub}</span>` : '')}
+                        ${taskBadge}
                     </div>
                 </div>`;
             }).join('');
@@ -4863,14 +4864,13 @@
                 girls.map(n => {
                     const bestMatch = dbGirls.find(g => (g.realname === n || g.nickname === n) && g.team === currentScheduleTeam) || girlMap.get(n) || { realname: n, nickname: "", uid: n };
                     
-                    // ✨ 表頭名稱分流升級：本土用綽號、外籍用本名
+                    // ✨ 表頭名稱極致單一邏輯：本土只秀綽號，外籍只秀本名，沒有副標題！
                     const isLocal = bestMatch.nat && ((bestMatch.nat || "").includes("台") || (bestMatch.nat || "").includes("臺") || (bestMatch.nat || "").includes("港") || (bestMatch.nat || "").includes("馬") || (bestMatch.team || "").toLowerCase().includes("luxygirls"));
                     const displayName = isLocal ? (bestMatch.nickname || bestMatch.realname) : bestMatch.realname;
-                    const displaySub = isLocal ? (bestMatch.nickname !== bestMatch.realname ? bestMatch.realname : "") : (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname ? bestMatch.nickname : "");
                     
                     const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
                     
-                    return `<th onclick="window.openModal('${bestMatch.uid}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${imgUrl}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${displayName}</span>${displaySub ? `<span class="schedule-girl-nickname">${displaySub}</span>` : ''}</div></div></th>`;
+                    return `<th onclick="window.openModal('${bestMatch.uid}')" style="cursor:pointer;"><div class="schedule-girl-col"><img src="${imgUrl}" class="schedule-girl-img" loading="lazy"><div class="schedule-girl-name-container"><span class="schedule-girl-name">${displayName}</span></div></div></th>`;
                 }).join('') + `</tr></thead><tbody>`;
             
             let currentMonthDesk = "";
@@ -4909,10 +4909,9 @@
                     attendees.forEach(gn => {
                         const bestMatch = dbGirls.find(g => (g.realname === gn || g.nickname === gn) && g.team === currentScheduleTeam) || girlMap.get(gn) || { realname: gn, nickname: "", uid: gn };
                         
-                        // ✨ 手機時間軸名稱分流升級：本土用綽號、外籍用本名
+                        // ✨ 手機時間軸極致單一邏輯
                         const isLocal = bestMatch.nat && ((bestMatch.nat || "").includes("台") || (bestMatch.nat || "").includes("臺") || (bestMatch.nat || "").includes("港") || (bestMatch.nat || "").includes("馬") || (bestMatch.team || "").toLowerCase().includes("luxygirls"));
                         const displayName = isLocal ? (bestMatch.nickname || bestMatch.realname) : bestMatch.realname;
-                        const displaySub = isLocal ? (bestMatch.nickname !== bestMatch.realname ? bestMatch.realname : "") : (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname ? bestMatch.nickname : "");
                         
                         const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
                         
@@ -4923,7 +4922,6 @@
                             <img src="${imgUrl}" loading="lazy">
                             <div style="display:flex; flex-direction:column; line-height:1.2;">
                                 <span>${displayName}</span>
-                                ${displaySub ? `<span style="font-size:10px; color:var(--text-sub); margin-bottom:1px;">${displaySub}</span>` : ''}
                                 ${taskBadge}
                             </div>
                         </div>`;
