@@ -2428,63 +2428,72 @@
         // 🏟️ 賽事專屬：主場應援名單彈窗引擎 (一鍵查看班表)
         // =========================================================================
         window.openMatchRosterModal = function(dateNum, cheerTeam, league, themeColor, sportTeamName) {
-            // 球種轉換 (根據聯盟精準鎖定)
             let sport = "";
             if (league === "CPBL") sport = "棒球";
             else if (league === "TPBL" || league === "PLG") sport = "籃球";
             else if (league === "TPVL") sport = "排球";
 
-            // 過濾當天、該啦啦隊、且符合該球種的班表
+            // 1. 抓取這隊今天的班表與女孩
             let scheduledGirls = dbSchedules.filter(s =>
                 s.safeDate.num === dateNum &&
                 s.team === cheerTeam &&
                 (sport === "" || (s.sport || "").includes(sport))
             );
-
-            // 取出所有女孩名稱 (去重複)
             let girlNames = [...new Set(scheduledGirls.map(s => s.name))];
 
-            // 產生女孩卡片 HTML (延用高質感的 girl-hero-card)
+            // 2. 抓取這場比賽的詳細資訊 (為了秀出對手)
+            const teamTranslation = { "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy", "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls", "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars", "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars" };
+            
+            let match = dbMatches.find(m => {
+                let h = teamTranslation[m.hometeam] || m.hometeam;
+                let a = teamTranslation[m.awayteam] || m.awayteam;
+                return m.safeDate.num === dateNum && (h === cheerTeam || a === cheerTeam);
+            });
+            let vsOpponent = "";
+            if (match) {
+                let h = teamTranslation[match.hometeam] || match.hometeam;
+                vsOpponent = (h === cheerTeam) ? `VS ${match.awayteam}` : `AT ${match.hometeam}`;
+            }
+
+            // 3. 生成「膠囊型」女孩清單 (仿照手機版班表好看的樣式)
             let girlsHtml = girlNames.map(gn => {
                 const g = girlMap.get(gn) || dbGirls.find(x => x.realname === gn || x.nickname === gn);
-                // 智慧國籍：台港馬顯示綽號，外籍顯示本名
                 const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬"));
                 const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : gn;
+                const dSub = (g && isLocal && g.nickname !== g.realname) ? g.realname : "";
                 const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                 const targetId = g ? g.uid : gn;
 
-                // ✨ 尋找該女孩在今天的班表紀錄，看看有沒有特殊任務
                 const sRecord = scheduledGirls.find(s => s.name === gn);
-                const taskBadge = sRecord && sRecord.note ? `<div style="font-size:9px; background:${themeColor}; color:#000; padding:2px 6px; border-radius:10px; margin-top:4px; font-weight:900; letter-spacing:1px; white-space:nowrap; box-shadow:0 2px 4px rgba(0,0,0,0.5);">${sRecord.note}</div>` : '';
+                const taskBadge = sRecord && sRecord.note ? `<div style="font-size:10px; background:${themeColor}; color:#000; padding:1px 8px; border-radius:4px; font-weight:900; margin-top:2px;">${sRecord.note}</div>` : '';
 
                 return `
-                <div class="girl-hero-card" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="width:clamp(75px, 14vw, 100px); padding: clamp(6px, 1vw, 10px); border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="girl-hero-img-wrap" style="width:clamp(60px, 11vw, 80px); height:clamp(60px, 11vw, 80px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-color:${themeColor}; margin: 0 auto 8px;">
-                        ${imgUrl ? `<img src="${imgUrl}" class="girl-hero-img" loading="lazy" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">` : `<div class="girl-hero-img default-avatar" style="width:100%; height:100%; border-radius:50%;"><svg viewBox="0 0 24 24" style="width:50%; height:50%; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`}
-                    </div>
-                    <div class="girl-hero-name-container" style="text-align:center;">
-                        <span class="girl-hero-name" style="font-size:clamp(12px, 1.8vw, 15px); color:#fff; font-weight:900;">${dName}</span>
-                        ${taskBadge}
+                <div class="timeline-girl" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 140px; max-width: 180px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${themeColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
+                    <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid ${themeColor}; background:#252c36;" onerror="this.src='https://via.placeholder.com/50'">
+                    <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0;">
+                        <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
+                        ${taskBadge ? taskBadge : (dSub ? `<span style="font-size:11px; color:var(--text-sub);">${dSub}</span>` : '')}
                     </div>
                 </div>`;
             }).join('');
 
-            const y = Math.floor(dateNum / 10000);
-            const m = Math.floor((dateNum % 10000) / 100);
-            const d = dateNum % 100;
-
+            const y = Math.floor(dateNum / 10000), m = Math.floor((dateNum % 10000) / 100), d = dateNum % 100;
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
-            // 直接將內容塞入原本的 girl-modal，維持一致的彈窗體驗
             document.getElementById('modal-dynamic-content').innerHTML = `
-                <div class="modal-body" style="padding: clamp(25px, 4vw, 40px) 15px; display: flex; flex-direction: column; gap: 20px; height:100%; background: radial-gradient(circle at center, #1a1e24 0%, #0a0c0f 100%);">
-                    <div style="text-align:center; padding-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1);">
-                        <div style="font-family: var(--sport-font); font-size: 16px; color: ${themeColor}; font-weight: 900; letter-spacing: 3px; margin-bottom: 10px;">${y} / ${String(m).padStart(2,'0')} / ${String(d).padStart(2,'0')}</div>
-                        <div style="font-size: 28px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${sportTeamName} 主場應援</div>
-                        <div style="display:inline-block; margin-top:12px; background: rgba(255,255,255,0.05); border: 1px solid ${themeColor}; color: #fff; padding: 4px 18px; border-radius: 20px; font-size: 14px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">${cheerTeam}</div>
+                <div class="modal-body" style="padding: 0; display: flex; flex-direction: column; height:100%; background: #0a0c0f;">
+                    <div style="padding: 35px 20px; background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%); border-bottom: 2px solid ${themeColor}; text-align: center; position: relative; overflow: hidden;">
+                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:var(--sport-font); font-size:80px; font-weight:900; color:rgba(255,255,255,0.02); white-space:nowrap; z-index:1; pointer-events:none;">LINEUP</div>
+                        <div style="position:relative; z-index:2;">
+                            <div style="font-family: var(--sport-font); font-size: 16px; color: ${themeColor}; font-weight: 900; letter-spacing: 4px; margin-bottom: 8px;">${y}.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}</div>
+                            <div style="font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px;">${cheerTeam}</div>
+                            <div style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: var(--text-sub); margin-top: 5px;">${vsOpponent}</div>
+                        </div>
                     </div>
-                    <div style="flex:1; overflow-y:auto; padding: 10px 0;">
-                        ${girlsHtml ? `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(12px, 2vw, 20px);">${girlsHtml}</div>` : `<div style="text-align:center; padding: 50px 20px; color:var(--text-sub); font-weight:700; font-size:16px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">這天目前尚無女孩的應援班表資料 😢</div>`}
+                    
+                    <div style="flex:1; overflow-y:auto; padding: 25px 15px; -webkit-overflow-scrolling: touch;">
+                        <div style="font-family: var(--sport-font); font-size: 14px; font-weight: 900; color: ${themeColor}; letter-spacing: 2px; margin-bottom: 20px; border-left: 4px solid ${themeColor}; padding-left: 12px;">TODAY'S ROSTER</div>
+                        ${girlsHtml ? `<div style="display:flex; flex-wrap:wrap; gap:12px; justify-content: flex-start;">${girlsHtml}</div>` : `<div style="text-align:center; padding: 60px 20px; color:var(--text-sub); font-weight:700; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">今日尚無應援名單登錄。</div>`}
                     </div>
                 </div>
             `;
