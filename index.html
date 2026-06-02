@@ -2405,6 +2405,68 @@
             }
             window.renderMatchCalendar();
         };
+        // =========================================================================
+        // 🏟️ 賽事專屬：主場應援名單彈窗引擎 (一鍵查看班表)
+        // =========================================================================
+        window.openMatchRosterModal = function(dateNum, cheerTeam, league, themeColor, sportTeamName) {
+            // 球種轉換 (根據聯盟精準鎖定)
+            let sport = "";
+            if (league === "CPBL") sport = "棒球";
+            else if (league === "TPBL" || league === "PLG") sport = "籃球";
+            else if (league === "TPVL") sport = "排球";
+
+            // 過濾當天、該啦啦隊、且符合該球種的班表
+            let scheduledGirls = dbSchedules.filter(s =>
+                s.safeDate.num === dateNum &&
+                s.team === cheerTeam &&
+                (sport === "" || (s.sport || "").includes(sport))
+            );
+
+            // 取出所有女孩名稱 (去重複)
+            let girlNames = [...new Set(scheduledGirls.map(s => s.name))];
+
+            // 產生女孩卡片 HTML (延用高質感的 girl-hero-card)
+            let girlsHtml = girlNames.map(gn => {
+                const g = girlMap.get(gn) || dbGirls.find(x => x.realname === gn || x.nickname === gn);
+                // 智慧國籍：台港馬顯示綽號，外籍顯示本名
+                const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬"));
+                const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : gn;
+                const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
+                const targetId = g ? g.uid : gn;
+
+                return `
+                <div class="girl-hero-card" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="width:clamp(75px, 14vw, 100px); padding: clamp(6px, 1vw, 10px); border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="girl-hero-img-wrap" style="width:clamp(60px, 11vw, 80px); height:clamp(60px, 11vw, 80px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-color:${themeColor}; margin: 0 auto 8px;">
+                        ${imgUrl ? `<img src="${imgUrl}" class="girl-hero-img" loading="lazy" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center;">` : `<div class="girl-hero-img default-avatar" style="width:100%; height:100%; border-radius:50%;"><svg viewBox="0 0 24 24" style="width:50%; height:50%; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`}
+                    </div>
+                    <div class="girl-hero-name-container" style="text-align:center;">
+                        <span class="girl-hero-name" style="font-size:clamp(12px, 1.8vw, 15px); color:#fff; font-weight:900;">${dName}</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const y = Math.floor(dateNum / 10000);
+            const m = Math.floor((dateNum % 10000) / 100);
+            const d = dateNum % 100;
+
+            document.documentElement.style.setProperty('--modal-accent', themeColor);
+
+            // 直接將內容塞入原本的 girl-modal，維持一致的彈窗體驗
+            document.getElementById('modal-dynamic-content').innerHTML = `
+                <div class="modal-body" style="padding: clamp(25px, 4vw, 40px) 15px; display: flex; flex-direction: column; gap: 20px; height:100%; background: radial-gradient(circle at center, #1a1e24 0%, #0a0c0f 100%);">
+                    <div style="text-align:center; padding-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1);">
+                        <div style="font-family: var(--sport-font); font-size: 16px; color: ${themeColor}; font-weight: 900; letter-spacing: 3px; margin-bottom: 10px;">${y} / ${String(m).padStart(2,'0')} / ${String(d).padStart(2,'0')}</div>
+                        <div style="font-size: 28px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${sportTeamName} 主場應援</div>
+                        <div style="display:inline-block; margin-top:12px; background: rgba(255,255,255,0.05); border: 1px solid ${themeColor}; color: #fff; padding: 4px 18px; border-radius: 20px; font-size: 14px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">${cheerTeam}</div>
+                    </div>
+                    <div style="flex:1; overflow-y:auto; padding: 10px 0;">
+                        ${girlsHtml ? `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(12px, 2vw, 20px);">${girlsHtml}</div>` : `<div style="text-align:center; padding: 50px 20px; color:var(--text-sub); font-weight:700; font-size:16px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">這天目前尚無女孩的應援班表資料 😢</div>`}
+                    </div>
+                </div>
+            `;
+            document.getElementById('girl-modal').classList.add('active');
+            document.body.classList.add('no-scroll');
+        };
 
         window.renderMatchCalendar = function(skipScroll = false) {
             const container = document.getElementById('matches-container');
@@ -2497,8 +2559,9 @@
                            <div class="score-display">${hScore}</div>`
                         : `<div class="match-vs-label">VS</div>`;
 
+                    // ✨ 綁定彈窗：點擊對戰卡片直接呼叫「主場應援名單」！
                     cardsHtml += `
-                        <div class="match-card ${isFinished ? 'is-finished' : ''}" style="--event-accent: ${homeCfg.accent};">
+                        <div class="match-card ${isFinished ? 'is-finished' : ''}" style="--event-accent: ${homeCfg.accent};" onclick="window.openMatchRosterModal(${m.safeDate.num}, '${tHome}', '${window.currentMatchLeague}', '${homeCfg.accent}', '${m.hometeam}')">
                             <div class="match-header-bar">
                                 <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
                                 <span class="match-time-badge">${isFinished ? 'FINAL' : m.time}</span>
