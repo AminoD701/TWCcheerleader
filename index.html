@@ -2020,14 +2020,29 @@
                     let team = (row.team || "").trim();
                     let name = (row.name || row.nickname || row['綽號'] || "").trim();
                     let dStr = String(row.dates || row.date || "");
-                    // ✨ 抓取特殊任務備註 (支援多種常見標題命名)
-                    let note = (row.note || row['備註'] || row.備註 || row['任務'] || row.任務 || "").trim();
+                    let rawNote = String(row.note || row['備註'] || row.備註 || row['任務'] || row.任務 || "").trim();
                     
                     let dParts = dStr.split(/[,\s\n、，]+/);
                     dParts.forEach(d => {
                         const p = parseDateFlexible(d);
-                        // 把 note 也一起存進去！
-                        if(p && name) flat.push({ sport, team, name, safeDate: p, note: note });
+                        if(p && name) {
+                            let specificNote = "";
+                            if (rawNote) {
+                                // ✨ 智慧萃取：用正則表達式尋找該日期專屬的備註 (例如從 "6/2轉播" 中抽出 "轉播")
+                                // 支援 "6/2轉播"、"6/2 轉播"、"6/2:轉播" 等格式
+                                let safeD = d.replace(/\//g, '\\/');
+                                let regex = new RegExp(`(?:^|[^\\d/])` + safeD + `[\\s：:]*([^\\s,，、]+)`);
+                                let match = rawNote.match(regex);
+                                
+                                if (match) {
+                                    specificNote = match[1]; // 成功抓到該日期的專屬任務
+                                } else if (!/\d+\/\d+/.test(rawNote)) {
+                                    // 如果備註裡完全沒有 "月/日" 的日期格式，視為全日期通用的統包備註 (如：一日店長)
+                                    specificNote = rawNote;
+                                }
+                            }
+                            flat.push({ sport, team, name, safeDate: p, note: specificNote });
+                        }
                     });
                 });
                 dbSchedules = flat;
