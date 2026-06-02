@@ -2020,10 +2020,14 @@
                     let team = (row.team || "").trim();
                     let name = (row.name || row.nickname || row['綽號'] || "").trim();
                     let dStr = String(row.dates || row.date || "");
+                    // ✨ 抓取特殊任務備註 (支援多種常見標題命名)
+                    let note = (row.note || row['備註'] || row.備註 || row['任務'] || row.任務 || "").trim();
+                    
                     let dParts = dStr.split(/[,\s\n、，]+/);
                     dParts.forEach(d => {
                         const p = parseDateFlexible(d);
-                        if(p && name) flat.push({ sport, team, name, safeDate: p });
+                        // 把 note 也一起存進去！
+                        if(p && name) flat.push({ sport, team, name, safeDate: p, note: note });
                     });
                 });
                 dbSchedules = flat;
@@ -2434,6 +2438,10 @@
                 const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                 const targetId = g ? g.uid : gn;
 
+                // ✨ 尋找該女孩在今天的班表紀錄，看看有沒有特殊任務
+                const sRecord = scheduledGirls.find(s => s.name === gn);
+                const taskBadge = sRecord && sRecord.note ? `<div style="font-size:9px; background:${themeColor}; color:#000; padding:2px 6px; border-radius:10px; margin-top:4px; font-weight:900; letter-spacing:1px; white-space:nowrap; box-shadow:0 2px 4px rgba(0,0,0,0.5);">${sRecord.note}</div>` : '';
+
                 return `
                 <div class="girl-hero-card" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="width:clamp(75px, 14vw, 100px); padding: clamp(6px, 1vw, 10px); border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
                     <div class="girl-hero-img-wrap" style="width:clamp(60px, 11vw, 80px); height:clamp(60px, 11vw, 80px); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-color:${themeColor}; margin: 0 auto 8px;">
@@ -2441,6 +2449,7 @@
                     </div>
                     <div class="girl-hero-name-container" style="text-align:center;">
                         <span class="girl-hero-name" style="font-size:clamp(12px, 1.8vw, 15px); color:#fff; font-weight:900;">${dName}</span>
+                        ${taskBadge}
                     </div>
                 </div>`;
             }).join('');
@@ -4843,11 +4852,16 @@
                         const showNick = (bestMatch.nickname && bestMatch.nickname !== bestMatch.realname) ? bestMatch.nickname : "";
                         const imgUrl = bestMatch.img ? window.getCdnUrl(bestMatch.img) : '';
                         
+                        // ✨ 抓取該女孩在今天的班表紀錄，檢查備註
+                        const sRecord = data.find(s => s.safeDate.num === dNum && s.name === gn);
+                        const taskBadge = sRecord && sRecord.note ? `<span style="font-size:9px; background:var(--team-accent); color:#000; padding:1px 4px; border-radius:4px; margin-top:2px; width:fit-content; font-weight:900;">${sRecord.note}</span>` : '';
+
                         mobileHtml += `<div class="timeline-girl" onclick="window.openModal('${bestMatch.uid}')" style="align-items:center; display:flex;">
                             <img src="${imgUrl}" loading="lazy">
                             <div style="display:flex; flex-direction:column; line-height:1.2;">
                                 <span>${showReal}</span>
-                                ${showNick ? `<span style="font-size:10px; color:var(--team-accent);">${showNick}</span>` : ''}
+                                ${showNick ? `<span style="font-size:10px; color:var(--text-sub); margin-bottom:1px;">${showNick}</span>` : ''}
+                                ${taskBadge}
                             </div>
                         </div>`;
                     });
