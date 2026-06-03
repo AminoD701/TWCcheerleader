@@ -5751,16 +5751,37 @@ window.renderMinigameStart = function() {
             
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
 
-            let cardsHtml = displayList.map(n => {
+            // ✨ 頭條智慧分流引擎：如果是「首頁、無搜尋、無篩選」的狀態，就把第一篇升級為「巨幅看板」！
+            let isDefaultView = (searchKeyword === "" && window.currentNewsTag === "全部" && !window.currentNewsHashtag);
+            
+            let cardsHtml = displayList.map((n, index) => {
                 const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
                 const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
                 const rawContent = getField(n, ['content', '內文', '內容']);
-                const summary = rawContent ? (rawContent.slice(0, 55) + '...') : '';
+                const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                 const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
                 const titleText = getField(n, ['title', '標題'], '無標題');
                 const dateText = getField(n, ['date', '日期'], '-');
 
-                // ✨ 終極對稱補丁：有圖片就秀圖片，沒圖片時生成「高質感電競風封面」，保證卡片大小絕對一致！
+                // 🏆 專屬頭條看板 (只有在預設首頁的第一篇，且有圖片時才會觸發)
+                if (index === 0 && isDefaultView && imgUrl) {
+                    return `
+                    <div class="news-hero-card" onclick="window.openNewsModal(${n._idx})" style="position: relative; width: 100%; height: clamp(250px, 45vh, 450px); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: 0.3s; display: flex; align-items: flex-end;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--event-accent)'; this.querySelector('.hero-bg').style.transform='scale(1.05)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.querySelector('.hero-bg').style.transform='none';">
+                        <div class="hero-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${imgUrl}'); background-size: cover; background-position: top center; transition: 0.5s ease-out; z-index: 1;"></div>
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0.95) 100%); z-index: 2;"></div>
+                        
+                        <div style="position: relative; z-index: 3; padding: 25px; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <span style="background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 12px; font-weight: 900; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px;">LATEST 最新頭條</span>
+                                <span style="font-size: 13px; color: #cbd5e1; font-weight: 700; font-family: var(--sport-font);">${dateText}</span>
+                            </div>
+                            <div style="font-size: clamp(22px, 5vw, 36px); font-weight: 900; color: #fff; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin-bottom: 8px;">${titleText}</div>
+                            <div style="font-size: clamp(13px, 2.5vw, 15px); color: #a0aec0; font-weight: 700; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${summary}</div>
+                        </div>
+                    </div>`;
+                }
+
+                // 📄 一般卡片 (維持原本的渲染邏輯)
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
                     : `<div class="news-img-wrap" style="background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; text-align:center;">
