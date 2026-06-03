@@ -2635,46 +2635,17 @@
                     let badgeTextColor = isMatchDelayed ? "#ffffff" : (isFinished ? "#ffffff" : "#000000");
                     let cardOpacityStyle = isMatchDelayed ? "opacity: 0.45; filter: grayscale(40%);" : "";
 
-                    // ✨ 智慧判定特殊狀態：如果 time 欄位寫了「延賽」、「取消」或「因雨」，啟動紅色警戒標籤
-                    let matchTimeRaw = String(m.time || "").trim();
-                    let isMatchDelayed = matchTimeRaw.includes("延賽") || matchTimeRaw.includes("取消") || matchTimeRaw.includes("因雨");
-                    
-                    let badgeBgColor = isMatchDelayed ? "#ff4757" : (isFinished ? "#4a5568" : homeCfg.accent);
-                    let badgeTextColor = isMatchDelayed ? "#ffffff" : (isFinished ? "#ffffff" : "#000000");
-                    let cardOpacityStyle = isMatchDelayed ? "opacity: 0.45; filter: grayscale(40%);" : "";
-
                     // ✨ 綁定彈窗：點擊對戰卡片直接呼叫「主場應援名單」！
-                    // (移除浮水印，回歸極簡質感黑底)
                     cardsHtml += `
                         <div class="match-card ${isFinished ? 'is-finished' : ''} ${isMatchDelayed ? 'is-delayed' : ''}" 
                              style="--event-accent: ${homeCfg.accent}; ${cardOpacityStyle} position: relative; overflow: hidden;" 
                              onclick="window.openMatchRosterModal(${m.safeDate.num}, '${tHome}', '${window.currentMatchLeague}', '${homeCfg.accent}', '${m.hometeam}')">
                             
-                            <div class="match-header-bar" style="position: relative; z-index: 2;">
-                                <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
-                                <span class="match-time-badge" style="background: ${badgeBgColor} !important; color: ${badgeTextColor} !important;">${isMatchDelayed ? matchTimeRaw : (isFinished ? 'FINAL' : m.time)}</span>
-                            </div>
+                            ${(homeCfg.logo && !homeCfg.noLogo) ? `
+                                <img src="${homeCfg.logo}" style="position: absolute; right: -8%; bottom: -20%; width: 220px; height: 220px; object-fit: contain; opacity: 0.04; pointer-events: none; z-index: 1; transform: rotate(-15deg); filter: brightness(0) invert(1);">
+                            ` : ''}
 
-                            <div class="match-vs-area" style="position: relative; z-index: 2;">
-                                <div class="match-team-box ${awayStatus}">
-                                    <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">客隊 AWAY</div>
-                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo">客場</div>`}
-                                    <span class="match-team-name">${m.awayteam}</span>
-                                </div>
-                                
-                                <div class="match-center-info">
-                                    ${centerHtml}
-                                </div>
-                                
-                                <div class="match-team-box ${homeStatus}">
-                                    <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">主隊 HOME</div>
-                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo">主場</div>`}
-                                    <span class="match-team-name">${m.hometeam}</span>
-                                </div>
-                            </div>
-                            
-                            ${m.note ? `<div class="match-note" style="position: relative; z-index: 2;">🏆 ${m.note}</div>` : ''}
-                        </div>`;
+                            <div class="match-header-bar" style="position: relative; z-index: 2;">
                                 <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
                                 <span class="match-time-badge" style="background: ${badgeBgColor} !important; color: ${badgeTextColor} !important;">${isMatchDelayed ? matchTimeRaw : (isFinished ? 'FINAL' : m.time)}</span>
                             </div>
