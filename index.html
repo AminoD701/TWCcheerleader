@@ -4450,25 +4450,26 @@
                 })();
 
                 return ms && mt && mS && mN && mZ && mRole;
+        });
+
+        // ✨ 修正：取消死板的分類限制，改為永遠進行 uid 全自動去重與資料聚合，完美解決團長/MC重複出現的問題
+        if (result.length > 0) {
+            const mMap = new Map();
+            result.forEach(c => { 
+                const k = c.uid; 
+                if (!k) return;
+                if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); } 
+                else { 
+                    let e = mMap.get(k); 
+                    if (!e.mS.includes(c.sport || "")) e.mS.push(c.sport || ""); 
+                    if (!e.mT.includes(c.team || "")) e.mT.push(c.team || ""); 
+                    if (!e.mN.includes(c.num || "") && c.num && c.num !== "-") e.mN.push(c.num || ""); 
+                } 
             });
+            result = Array.from(mMap.values());
+        }
 
-            if (currentSport === "全部" && currentTeam === "全部啦啦隊") {
-                const mMap = new Map();
-                result.forEach(c => { 
-                    const k = c.uid; 
-                    if (!k) return;
-                    if (!mMap.has(k)) { mMap.set(k, { ...c, mS: [c.sport || ""], mT: [c.team || ""], mN: [c.num || ""] }); } 
-                    else { 
-                        let e = mMap.get(k); 
-                        if (!e.mS.includes(c.sport || "")) e.mS.push(c.sport || ""); 
-                        if (!e.mT.includes(c.team || "")) e.mT.push(c.team || ""); 
-                        if (!e.mN.includes(c.num || "") && c.num && c.num !== "-") e.mN.push(c.num || ""); 
-                    } 
-                });
-                result = Array.from(mMap.values());
-            }
-
-            result.sort((a,b) => {
+        result.sort((a,b) => {
                 if(sort === 'default') { 
                     const getNatWeight = (nat) => {
                         if ((nat || "").includes("韓國")) return 1;
@@ -4515,20 +4516,14 @@
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
                 let noteText = (c.note || c['備註'] || c.備註 || "").trim();
 
-                // ✨ 升級 1：榮譽職位專屬斜角緞帶 (隊長/總監等)
-                let ribbonHtml = '';
+                // ✨ 修正 1：改為右下角高質感專屬動態標籤 (完美避開右上角愛心按鈕，並正名為「練習生」)
+                let badgeHtml = '';
                 if (noteText.includes('隊長') || noteText.includes('總監') || noteText.includes('經理')) {
-                    ribbonHtml = `
-                    <div style="position: absolute; top: 22px; right: -35px; background: linear-gradient(45deg, #ffd700, #ff8c00); color: #000; padding: 4px 40px; font-weight: 900; font-size: 11px; transform: rotate(45deg); z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6); letter-spacing: 2px; font-family: var(--sport-font); border: 1px solid #fff;">
-                        ${noteText}
-                    </div>`;
-                    noteText = ''; // 清空底部備註，避免重複
+                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; font-weight: 900; border: 1px solid #fff;">${noteText}</div>`;
                 } else if (noteText.includes('練習生') || noteText.includes('培訓')) {
-                    ribbonHtml = `
-                    <div style="position: absolute; top: 22px; right: -35px; background: linear-gradient(45deg, #00e676, #00b0ff); color: #000; padding: 4px 40px; font-weight: 900; font-size: 11px; transform: rotate(45deg); z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6); letter-spacing: 2px; font-family: var(--sport-font); border: 1px solid #fff;">
-                        ROOKIE
-                    </div>`;
-                    noteText = '';
+                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #00e676, #00b0ff); color: #000; font-weight: 900; border: 1px solid #fff;">練習生</div>`;
+                } else if (noteText) {
+                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20;">${noteText}</div>`;
                 }
 
                 // ✨ 升級 2：本命女孩(加入最愛)專屬「SSR全像閃卡光暈」
@@ -4544,14 +4539,13 @@
 
                 return `
                 <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}; position: relative;" onclick="window.openModal('${c.uid}')" onmouseover="this.style.boxShadow='0 15px 35px ${cardAccent}60'; this.style.borderColor='${cardAccent}'; this.style.transform='translateY(-6px) scale(1.02)';" onmouseout="this.style.boxShadow='8px 8px 0px rgba(0,0,0,0.6)'; this.style.borderColor='var(--border-color)'; this.style.transform='none';">
-                    ${ribbonHtml}
                     <div class="photo-area" style="position: relative; overflow: hidden;">
                         ${shineEffect}
                         <div class="sport-tags" style="z-index: 20;">${sportTags}</div>
                         <div class="fav-btn ${isFav ? 'active' : ''}" style="z-index: 25;" onclick="window.toggleFavorite('${c.uid}', event, this)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
-                        ${noteText ? `<div class="photo-note-tag" style="z-index: 20;">${noteText}</div>` : ''}
+                        ${badgeHtml}
                         ${c.img?`<img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">`:''}
                     </div>
                     <div class="info-section">
