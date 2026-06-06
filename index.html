@@ -5682,13 +5682,11 @@ window.renderMinigameStart = function() {
         window.selectMainCategory = function(mainTag) {
             window.currentMainCategory = mainTag;
             window.currentSubCategory = "全部";
-            window.renderDualTierNewsFilters(window.dbNews); 
             window.renderNewsHub(); 
         };
 
         window.selectSubCategory = function(subTag) {
             window.currentSubCategory = subTag;
-            window.renderDualTierNewsFilters(window.dbNews); 
             window.renderNewsHub(); 
         };
 
@@ -5833,7 +5831,6 @@ window.renderMinigameStart = function() {
             window.currentMainCategory = mainTag;
             window.currentSubCategory = "全部";
             window.currentDisplayLimit = 10;
-            window.renderDualTierNewsFilters(window.dbNews); 
             window.renderNewsHub(); 
         };
 
