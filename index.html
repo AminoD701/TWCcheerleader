@@ -2951,19 +2951,8 @@
             else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
             else if (currentMode === 'feedback') { fb.style.display = 'block'; window.renderFeedbackStart(); }
-            else if (currentMode === 'news') {
-                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'flex';
-                    document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; 
-                    document.getElementById('searchInput').value = ""; 
-                    window.currentMainCategory = "全部";
-                    window.currentSubCategory = "全部";
-                    window.currentNewsHashtag = "";
-                } else {
-                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'none';
-                    document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
-                    document.getElementById('searchInput').value = "";
-                }
-            else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } 
+            else if (currentMode === 'news') { news.style.display = 'flex'; window.renderNewsHub(); }
+            else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); }
             else if (currentMode === 'matches') { matches.style.display = 'block'; window.renderMatchesSelection(); }
             else if (currentMode === 'games') { gamesHub.style.display = 'flex'; window.renderGamesHub(); } // 👈 啟動大廳
         };
