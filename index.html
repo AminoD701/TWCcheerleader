@@ -5635,7 +5635,8 @@ window.renderMinigameStart = function() {
             
             allNewsData.forEach(n => {
                 let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
-                let rawSubTag = (n.sub_tag || n['子分類'] || n.subTag || ""); 
+                // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
+                let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
                 let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
 
                 if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
@@ -5672,7 +5673,7 @@ window.renderMinigameStart = function() {
             window.currentMainCategory = mainTag;
             window.currentSubCategory = "全部";
             window.currentDisplayLimit = 10;
-            window.renderNewsHub(); 
+            window.renderNewsHub(); // 讓這行自動去呼叫正確的資料過濾即可
         };
 
         window.selectSubCategory = function(subTag) {
@@ -5785,7 +5786,8 @@ window.renderMinigameStart = function() {
             
             allNewsData.forEach(n => {
                 let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
-                let rawSubTag = (n.sub_tag || n['子分類'] || n.subTag || ""); 
+                // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
+                let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
                 let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
 
                 if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
@@ -5820,8 +5822,7 @@ window.renderMinigameStart = function() {
             window.currentMainCategory = mainTag;
             window.currentSubCategory = "全部";
             window.currentDisplayLimit = 10;
-            window.renderDualTierNewsFilters(window.dbNews); 
-            window.renderNewsHub(); 
+            window.renderNewsHub(); // 讓這行自動去呼叫正確的資料過濾即可
         };
 
         window.selectSubCategory = function(subTag) {
@@ -5855,7 +5856,8 @@ window.renderMinigameStart = function() {
             // 2. 依照主分類、子分類、Hashtag 與「全文檢索」篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
                 let mainTag = getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類');
-                let rawSubTag = getField(n, ['sub_tag', '子分類', 'subTag'], '');
+                // ✨ 修正：在陣列最前面加入 'subtag'
+                let rawSubTag = getField(n, ['subtag', 'sub_tag', '子分類', 'subTag'], '');
                 let subTag = rawSubTag !== "" ? rawSubTag : "全部";
 
                 let matchMain = (window.currentMainCategory === "全部" || mainTag === window.currentMainCategory);
