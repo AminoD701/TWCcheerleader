@@ -1787,7 +1787,7 @@
             </div>
         </div>
         
-        <div id="news-filter-dropdowns" style="display: none; justify-content: center; gap: 10px; margin-top: 15px; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 10px;">
+        <div id="news-filter-dropdowns" style="display: none; justify-content: center; gap: 10px; margin-top: 15px; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto;">
             <select id="news-main-select" onchange="window.selectMainCategory(this.value)" style="flex: 1; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 15px; font-weight: 700; outline: none; cursor: pointer;"></select>
             <select id="news-sub-select" onchange="window.selectSubCategory(this.value)" style="display: none; flex: 1; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 15px; font-weight: 700; outline: none; cursor: pointer;"></select>
         </div>
@@ -2786,15 +2786,14 @@
                 }
 
                 if (currentMode === 'news') {
-                    if(document.getElementById('news-filter-container')) document.getElementById('news-filter-container').style.display = 'flex';
+                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'flex';
                     document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; 
-                    
                     document.getElementById('searchInput').value = ""; 
                     window.currentMainCategory = "全部";
                     window.currentSubCategory = "全部";
                     window.currentNewsHashtag = "";
                 } else {
-                    if(document.getElementById('news-filter-container')) document.getElementById('news-filter-container').style.display = 'none';
+                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'none';
                     document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
                     document.getElementById('searchInput').value = "";
                 }
@@ -5795,7 +5794,6 @@ window.renderMinigameStart = function() {
                 }
             });
 
-            // 畫出主選單
             let mainHtml = `<option value="全部">全部情報 ALL</option>`;
             Object.keys(categoryTree).forEach(mainTag => {
                 if (mainTag === "全部") return;
@@ -5803,7 +5801,6 @@ window.renderMinigameStart = function() {
             });
             mainSelect.innerHTML = mainHtml;
 
-            // 畫出子選單 (如果有子分類才顯示)
             let currentSubTags = categoryTree[window.currentMainCategory] || [];
             if (window.currentMainCategory !== "全部" && currentSubTags.length > 0) {
                 subSelect.style.display = 'block';
