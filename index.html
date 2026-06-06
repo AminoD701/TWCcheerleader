@@ -1786,11 +1786,10 @@
                 </select>
             </div>
         </div>
-        <div id="news-filter-container" style="display: none; flex-direction: column; align-items: center; gap: 8px; margin-top: 15px; width: 100%;">
-            <div class="sub-nav" id="news-main-filters" style="border-top: none; padding-top: 0; justify-content: center; flex-wrap: wrap; gap: 10px; overflow: visible !important; width: 100%;">
-            </div>
-            <div class="sub-nav" id="news-sub-filters" style="display: none; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 10px; justify-content: center; flex-wrap: wrap; gap: 8px; overflow: visible !important; width: 100%;">
-            </div>
+        
+        <div id="news-filter-dropdowns" style="display: none; justify-content: center; gap: 10px; margin-top: 15px; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 10px;">
+            <select id="news-main-select" onchange="window.selectMainCategory(this.value)" style="flex: 1; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 15px; font-weight: 700; outline: none; cursor: pointer;"></select>
+            <select id="news-sub-select" onchange="window.selectSubCategory(this.value)" style="display: none; flex: 1; padding: 10px; background: #111; color: #fff; border: 2px solid var(--border-color); border-radius: 4px; font-size: 15px; font-weight: 700; outline: none; cursor: pointer;"></select>
         </div>
     </div>
 
@@ -2952,7 +2951,18 @@
             else if (currentMode === 'minigame') { game.style.display = 'block'; renderMinigameStart(); }
             else if (currentMode === 'dreamteam') { dt.style.display = 'block'; renderDreamTeamStart(); }
             else if (currentMode === 'feedback') { fb.style.display = 'block'; window.renderFeedbackStart(); }
-            else if (currentMode === 'news') { news.style.display = 'flex'; renderNewsHub(); }
+            else if (currentMode === 'news') {
+                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'flex';
+                    document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; 
+                    document.getElementById('searchInput').value = ""; 
+                    window.currentMainCategory = "全部";
+                    window.currentSubCategory = "全部";
+                    window.currentNewsHashtag = "";
+                } else {
+                    if(document.getElementById('news-filter-dropdowns')) document.getElementById('news-filter-dropdowns').style.display = 'none';
+                    document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
+                    document.getElementById('searchInput').value = "";
+                }
             else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } 
             else if (currentMode === 'matches') { matches.style.display = 'block'; window.renderMatchesSelection(); }
             else if (currentMode === 'games') { gamesHub.style.display = 'flex'; window.renderGamesHub(); } // 👈 啟動大廳
@@ -5761,6 +5771,82 @@ window.renderMinigameStart = function() {
             updateUI(type, true);           
         };
 
+        // ==========================================
+        // ✨ 情報大廳：雙層原生下拉選單引擎 & 變數
+        // ==========================================
+        window.currentMainCategory = "全部";
+        window.currentSubCategory = "全部";
+
+        window.filterByHashtag = function(tag) {
+            window.closeModal(); 
+            window.currentNewsHashtag = tag; 
+            window.currentMainCategory = "全部"; 
+            window.currentSubCategory = "全部"; 
+            window.currentDisplayLimit = 10;
+            window.renderNewsHub(); 
+            window.scrollTo({top: 0, behavior: 'smooth'}); 
+        };
+
+        window.renderDualTierNewsFilters = function(allNewsData) {
+            const mainSelect = document.getElementById('news-main-select');
+            const subSelect = document.getElementById('news-sub-select');
+            if (!mainSelect || !subSelect) return;
+
+            let categoryTree = { "全部": [] };
+            
+            allNewsData.forEach(n => {
+                let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
+                let rawSubTag = (n.sub_tag || n['子分類'] || n.subTag || ""); 
+                let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
+
+                if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
+                if (subTag && !categoryTree[mainTag].includes(subTag)) {
+                    categoryTree[mainTag].push(subTag);
+                }
+            });
+
+            // 畫出主選單
+            let mainHtml = `<option value="全部">全部情報 ALL</option>`;
+            Object.keys(categoryTree).forEach(mainTag => {
+                if (mainTag === "全部") return;
+                mainHtml += `<option value="${mainTag}" ${window.currentMainCategory === mainTag ? 'selected' : ''}>${mainTag}</option>`;
+            });
+            mainSelect.innerHTML = mainHtml;
+
+            // 畫出子選單 (如果有子分類才顯示)
+            let currentSubTags = categoryTree[window.currentMainCategory] || [];
+            if (window.currentMainCategory !== "全部" && currentSubTags.length > 0) {
+                subSelect.style.display = 'block';
+                let subHtml = `<option value="全部">全部 ${window.currentMainCategory}</option>`;
+                currentSubTags.forEach(subTag => {
+                    subHtml += `<option value="${subTag}" ${window.currentSubCategory === subTag ? 'selected' : ''}>${subTag}</option>`;
+                });
+                subSelect.innerHTML = subHtml;
+            } else {
+                subSelect.style.display = 'none';
+                subSelect.innerHTML = '';
+            }
+        };
+
+        window.selectMainCategory = function(mainTag) {
+            window.currentNewsHashtag = ""; 
+            window.currentMainCategory = mainTag;
+            window.currentSubCategory = "全部";
+            window.currentDisplayLimit = 10;
+            window.renderDualTierNewsFilters(window.dbNews); 
+            window.renderNewsHub(); 
+        };
+
+        window.selectSubCategory = function(subTag) {
+            window.currentNewsHashtag = "";
+            window.currentSubCategory = subTag;
+            window.currentDisplayLimit = 10;
+            window.renderNewsHub(); 
+        };
+
+        // ==========================================
+        // ✨ 情報卡片生成引擎
+        // ==========================================
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
             
@@ -5774,15 +5860,14 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 1. 呼叫雙層按鈕渲染引擎
+            // 1. 呼叫雙層下拉選單渲染引擎
             window.renderDualTierNewsFilters(dbNews);
 
-            // ✨ 抓取搜尋框的關鍵字
             const searchKeyword = (document.getElementById('searchInput').value || "").toLowerCase().trim();
 
             // 2. 依照主分類、子分類、Hashtag 與「全文檢索」篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
-                let mainTag = getField(n, ['tag', '標籤', '分類'], '未分類');
+                let mainTag = getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類');
                 let rawSubTag = getField(n, ['sub_tag', '子分類', 'subTag'], '');
                 let subTag = rawSubTag !== "" ? rawSubTag : "全部";
 
@@ -5815,8 +5900,6 @@ window.renderMinigameStart = function() {
             });
             
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
-
-            // ✨ 頭條智慧分流引擎：如果是「首頁、無搜尋、無篩選」的狀態，就把第一篇升級為「巨幅看板」！
             let isDefaultView = (searchKeyword === "" && window.currentMainCategory === "全部" && window.currentSubCategory === "全部" && !window.currentNewsHashtag);
             
             let cardsHtml = displayList.map((n, index) => {
@@ -5828,7 +5911,6 @@ window.renderMinigameStart = function() {
                 const titleText = getField(n, ['title', '標題'], '無標題');
                 const dateText = getField(n, ['date', '日期'], '-');
 
-                // 🏆 專屬頭條看板 (只有在預設首頁的第一篇，且有圖片時才會觸發)
                 if (index === 0 && isDefaultView && imgUrl) {
                     return `
                     <div class="news-hero-card" onclick="window.openNewsModal(${n._idx})" style="position: relative; width: 100%; height: clamp(250px, 45vh, 450px); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: 0.3s; display: flex; align-items: flex-end;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--event-accent)'; this.querySelector('.hero-bg').style.transform='scale(1.05)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.querySelector('.hero-bg').style.transform='none';">
@@ -5846,7 +5928,6 @@ window.renderMinigameStart = function() {
                     </div>`;
                 }
 
-                // 📄 一般卡片 (維持原本的渲染邏輯)
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
                     : `<div class="news-img-wrap" style="background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; text-align:center;">
@@ -5873,7 +5954,6 @@ window.renderMinigameStart = function() {
                 </div>`;
             }).join('');
 
-            // ✨ 移除了原本包在裡面的 tag 按鈕區塊，只留下新聞卡片
             let html = `<div style="display:flex; flex-direction:column; gap:20px;">${cardsHtml || '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>'}</div>`;
 
             if (sortedNews.length > window.currentDisplayLimit) {
