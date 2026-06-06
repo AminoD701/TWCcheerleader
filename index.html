@@ -1786,7 +1786,11 @@
                 </select>
             </div>
         </div>
-        <div class="sub-nav" id="news-filters" style="display: none; border-top: none; margin-top: 15px; padding-top: 0; justify-content: center; flex-wrap: wrap; gap: 10px; overflow: visible !important;">
+        <div id="news-filter-container" style="display: none; flex-direction: column; align-items: center; gap: 8px; margin-top: 15px; width: 100%;">
+            <div class="sub-nav" id="news-main-filters" style="border-top: none; padding-top: 0; justify-content: center; flex-wrap: wrap; gap: 10px; overflow: visible !important; width: 100%;">
+            </div>
+            <div class="sub-nav" id="news-sub-filters" style="display: none; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 10px; justify-content: center; flex-wrap: wrap; gap: 8px; overflow: visible !important; width: 100%;">
+            </div>
         </div>
     </div>
 
@@ -2783,17 +2787,17 @@
                 }
 
                 if (currentMode === 'news') {
-                    document.getElementById('news-filters').style.display = 'flex';
+                    if(document.getElementById('news-filter-container')) document.getElementById('news-filter-container').style.display = 'flex';
                     document.getElementById('searchInput').placeholder = "🔍 搜尋情報標題或內文..."; 
                     
-                    // ✨ 修復：每次切換回情報大廳，確保搜尋框與標籤狀態歸零，預設顯示「全部情報」
                     document.getElementById('searchInput').value = ""; 
-                    window.currentNewsTag = "全部";
+                    window.currentMainCategory = "全部";
+                    window.currentSubCategory = "全部";
                     window.currentNewsHashtag = "";
                 } else {
-                    document.getElementById('news-filters').style.display = 'none';
+                    if(document.getElementById('news-filter-container')) document.getElementById('news-filter-container').style.display = 'none';
                     document.getElementById('searchInput').placeholder = "🔍 搜尋姓名、綽號或活動...";
-                    document.getElementById('searchInput').value = ""; // 切換到其他分頁時也清空搜尋字眼
+                    document.getElementById('searchInput').value = "";
                 }
             } else {
                 document.getElementById('filter-bar').style.display = 'none';
@@ -5606,16 +5610,76 @@ window.renderMinigameStart = function() {
         // =========================================================================
         // 📰 每日動態情報牆核心渲染引擎 (CMS)
         // =========================================================================
-        window.currentNewsHashtag = ""; // 新增這行來記住目前點擊的 Hashtag
+        window.currentNewsHashtag = ""; 
+        window.currentMainCategory = "全部";
+        window.currentSubCategory = "全部";
 
-        // ✨ 點擊 Hashtag 啟動篩選引擎
         window.filterByHashtag = function(tag) {
-            window.closeModal(); // 先關閉新聞彈窗
-            window.currentNewsHashtag = tag; // 記住要找的標籤
-            window.currentNewsTag = "全部"; // 切回全部範圍來搜尋
+            window.closeModal(); 
+            window.currentNewsHashtag = tag; 
+            window.currentMainCategory = "全部"; 
+            window.currentSubCategory = "全部"; 
             window.currentDisplayLimit = 10;
-            window.renderNewsHub(); // 重新渲染大廳
-            window.scrollTo({top: 0, behavior: 'smooth'}); // 滑回頂部
+            window.renderNewsHub(); 
+            window.scrollTo({top: 0, behavior: 'smooth'}); 
+        };
+
+        window.renderDualTierNewsFilters = function(allNewsData) {
+            const mainContainer = document.getElementById('news-filter-container');
+            const mainNav = document.getElementById('news-main-filters');
+            const subNav = document.getElementById('news-sub-filters');
+            
+            if (!mainContainer || !mainNav || !subNav) return;
+            
+            mainContainer.style.display = 'flex';
+
+            let categoryTree = { "全部": [] };
+            
+            allNewsData.forEach(n => {
+                let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
+                let rawSubTag = (n.sub_tag || n['子分類'] || n.subTag || ""); 
+                let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
+
+                if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
+                if (subTag && !categoryTree[mainTag].includes(subTag)) {
+                    categoryTree[mainTag].push(subTag);
+                }
+            });
+
+            let mainHtml = `<button class="sub-btn ${window.currentMainCategory === '全部' ? 'active' : ''}" onclick="window.selectMainCategory('全部')">全部情報</button>`;
+            
+            Object.keys(categoryTree).forEach(mainTag => {
+                if (mainTag === "全部") return;
+                mainHtml += `<button class="sub-btn ${window.currentMainCategory === mainTag ? 'active' : ''}" onclick="window.selectMainCategory('${mainTag}')">${mainTag}</button>`;
+            });
+            mainNav.innerHTML = mainHtml;
+
+            let currentSubTags = categoryTree[window.currentMainCategory] || [];
+            
+            if (window.currentMainCategory !== "全部" && currentSubTags.length > 0) {
+                subNav.style.display = 'flex';
+                let subHtml = `<button class="sub-btn ${window.currentSubCategory === '全部' ? 'active' : ''}" style="transform: scale(0.9);" onclick="window.selectSubCategory('全部')">全部 ${window.currentMainCategory}</button>`;
+                
+                currentSubTags.forEach(subTag => {
+                    subHtml += `<button class="sub-btn ${window.currentSubCategory === subTag ? 'active' : ''}" style="transform: scale(0.9);" onclick="window.selectSubCategory('${subTag}')">${subTag}</button>`;
+                });
+                subNav.innerHTML = subHtml;
+            } else {
+                subNav.style.display = 'none';
+            }
+        };
+
+        window.selectMainCategory = function(mainTag) {
+            window.currentMainCategory = mainTag;
+            window.currentSubCategory = "全部";
+            window.renderDualTierNewsFilters(window.dbNews); 
+            window.renderNewsHub(); 
+        };
+
+        window.selectSubCategory = function(subTag) {
+            window.currentSubCategory = subTag;
+            window.renderDualTierNewsFilters(window.dbNews); 
+            window.renderNewsHub(); 
         };
 
         // ✨ 雲端大同步：全網真實數據計票與渲染核心引擎
@@ -5699,11 +5763,9 @@ window.renderMinigameStart = function() {
 
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
-            const newsFilters = document.getElementById('news-filters'); // 👈 抓取上方的吸頂列
             
             if (!dbNews || dbNews.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前教練室尚未發布任何情報 📝</div>`;
-                if(newsFilters) newsFilters.innerHTML = '';
                 return;
             }
 
@@ -5712,43 +5774,26 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 1. 將情報分類按鈕改為高質感的下拉式選單！
-            let uniqueTags = [...new Set(dbNews.map(n => getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報')))].filter(t => t !== "");
-            if(newsFilters) {
-                // 決定選單按鈕要顯示的文字
-                let currentBtnText = window.currentNewsHashtag 
-                    ? `🏷️ #${window.currentNewsHashtag}` 
-                    : (window.currentNewsTag === '全部' ? '全部情報 ALL' : `📰 ${window.currentNewsTag}`);
-
-                newsFilters.innerHTML = `
-                    <div class="dropdown-container" style="width: 100%; max-width: 280px; margin: 0 auto; position: relative; z-index: 90; height: 42px;">
-                        <button class="dropdown-btn" onclick="window.toggleDropdown('news-tag-menu', event)" style="border-color: var(--event-accent); color: var(--event-accent); height: 100%;">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%;">${currentBtnText}</span>
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="dropdown-menu" id="news-tag-menu" style="width: 100%; max-width: none; top: calc(100% + 5px);">
-                            <button class="dropdown-item ${window.currentNewsTag === '全部' && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='全部'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">全部情報 ALL</button>
-                            ${uniqueTags.map(t => `<button class="dropdown-item ${window.currentNewsTag === t && !window.currentNewsHashtag ? 'active' : ''}" onclick="window.currentNewsHashtag=''; window.currentNewsTag='${t}'; window.currentDisplayLimit=10; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">${t}</button>`).join('')}
-                            ${window.currentNewsHashtag ? `<button class="dropdown-item active" style="color:#ff4757;" onclick="window.currentNewsHashtag=''; window.renderNewsHub(); window.scrollTo({top: 0, behavior: 'smooth'});">✕ 取消標籤 #${window.currentNewsHashtag}</button>` : ''}
-                        </div>
-                    </div>
-                `;
-            }
+            // ✨ 1. 呼叫雙層按鈕渲染引擎
+            window.renderDualTierNewsFilters(dbNews);
 
             // ✨ 抓取搜尋框的關鍵字
             const searchKeyword = (document.getElementById('searchInput').value || "").toLowerCase().trim();
 
-            // 2. 依照分類、Hashtag 與「全文檢索」三重篩選
+            // 2. 依照主分類、子分類、Hashtag 與「全文檢索」篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
-                let t = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                let matchCat = window.currentNewsTag === "全部" || t === window.currentNewsTag;
+                let mainTag = getField(n, ['tag', '標籤', '分類'], '未分類');
+                let rawSubTag = getField(n, ['sub_tag', '子分類', 'subTag'], '');
+                let subTag = rawSubTag !== "" ? rawSubTag : "全部";
+
+                let matchMain = (window.currentMainCategory === "全部" || mainTag === window.currentMainCategory);
+                let matchSub = (window.currentSubCategory === "全部" || subTag === window.currentSubCategory);
+                let matchCat = matchMain && matchSub;
                 
-                // 抓取文章的 Hashtag 陣列來比對
                 let hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
-                let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(x=>x) : [t];
+                let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(x=>x) : [mainTag];
                 let matchHash = !window.currentNewsHashtag || tagsArray.includes(window.currentNewsHashtag);
 
-                // 全文檢索邏輯：比對標題、內文、標籤
                 let matchSearch = true;
                 if (searchKeyword !== "") {
                     const titleText = getField(n, ['title', '標題'], '').toLowerCase();
@@ -5772,7 +5817,7 @@ window.renderMinigameStart = function() {
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
 
             // ✨ 頭條智慧分流引擎：如果是「首頁、無搜尋、無篩選」的狀態，就把第一篇升級為「巨幅看板」！
-            let isDefaultView = (searchKeyword === "" && window.currentNewsTag === "全部" && !window.currentNewsHashtag);
+            let isDefaultView = (searchKeyword === "" && window.currentMainCategory === "全部" && window.currentSubCategory === "全部" && !window.currentNewsHashtag);
             
             let cardsHtml = displayList.map((n, index) => {
                 const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
