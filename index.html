@@ -2443,11 +2443,11 @@
             else if (league === "TPBL" || league === "PLG") sport = "籃球";
             else if (league === "TPVL") sport = "排球";
 
-            // 1. 抓取這隊今天的班表與女孩
+            // 1. 抓取這隊今天的班表與女孩 (✨ 支援跨界應援：只要備註有寫到該球種，一律抓進來！)
             let scheduledGirls = dbSchedules.filter(s =>
                 s.safeDate.num === dateNum &&
                 s.team === cheerTeam &&
-                (sport === "" || (s.sport || "").includes(sport))
+                (sport === "" || (s.sport || "").includes(sport) || (s.note || "").includes(sport))
             );
             let girlNames = [...new Set(scheduledGirls.map(s => s.name))];
 
