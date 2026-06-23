@@ -2457,17 +2457,22 @@
                 if (s.safeDate.num !== dateNum) return false;
 
                 let noteStr = (s.note || "").toLowerCase();
+                let teamStr = (s.team || "").toLowerCase();
+                let sportStr = (s.sport || "").toLowerCase();
                 let sportTeamUpper = (sportTeamName || cheerTeam || "").toUpperCase();
 
-                // 🌟 核心攔截：只要備註有「明星」，且今天比賽隊伍是 ALLSTAR 或 TAIWAN，強制抓人放行！
-                if (noteStr.includes("明星") || noteStr.includes("allstar") || noteStr.includes("taiwan")) {
+                // 🌟 核心攔截：全欄位無差別掃描！不管教練把「明星」寫在備註、球隊還是球種，一律強制抓人！
+                let isAllStarEvent = noteStr.includes("明星") || teamStr.includes("明星") || sportStr.includes("明星") || noteStr.includes("allstar") || noteStr.includes("taiwan");
+                
+                if (isAllStarEvent) {
+                    // 只要這場比賽是明星賽
                     if (sportTeamUpper.includes("ALLSTAR") || sportTeamUpper.includes("TAIWAN")) {
-                        // 如果備註有明確指定隊伍
-                        if (noteStr.includes("allstar") && sportTeamUpper.includes("ALLSTAR")) return true;
-                        if (noteStr.includes("taiwan") && sportTeamUpper.includes("TAIWAN")) return true;
+                        // 如果教練有明確指定她去哪一隊 (寫在備註或球隊)
+                        if ((noteStr.includes("allstar") || teamStr.includes("allstar")) && sportTeamUpper.includes("ALLSTAR")) return true;
+                        if ((noteStr.includes("taiwan") || teamStr.includes("taiwan")) && sportTeamUpper.includes("TAIWAN")) return true;
                         
-                        // 若無明確指定，只要有「明星」二字，兩隊無差別放行，確保不開天窗！
-                        if (!noteStr.includes("allstar") && !noteStr.includes("taiwan")) return true;
+                        // 若無明確指定，兩隊無差別放行，確保絕對不開天窗！
+                        if (!noteStr.includes("allstar") && !noteStr.includes("taiwan") && !teamStr.includes("allstar") && !teamStr.includes("taiwan")) return true;
                     }
                 }
 
