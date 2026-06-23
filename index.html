@@ -4742,7 +4742,10 @@
             const lookupSport = currentSport === "全部" ? "" : currentSport;
             const themeConfig = teamThemes[`${lookupTeam}_${lookupSport}`] || teamThemes[lookupTeam] || teamThemes["全部啦啦隊"];
             const cardAccent = themeConfig.accent;
-            const noteText = (c.note || c['備註'] || c.備註 || "").trim();
+            
+            // ✨ 隱形斗篷：過濾掉「合作夥伴」相關字眼，避免出現在個人詳細彈窗中！
+            let rawNoteText = (c.note || c['備註'] || c.備註 || "").trim();
+            const noteText = rawNoteText.replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
 
             // ✨ 圖片防變身：強制抓取 CSV 裡「第一張有效的圖片」來跟外面的網格同步！
             const validImgRow = allRows.find(g => g.img) || c;
