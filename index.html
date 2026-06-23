@@ -2443,12 +2443,19 @@
             else if (league === "TPBL" || league === "PLG") sport = "籃球";
             else if (league === "TPVL") sport = "排球";
 
-            // 1. 抓取這隊今天的班表與女孩 (✨ 支援跨界應援：只要備註有寫到該球種，一律抓進來！)
-            let scheduledGirls = dbSchedules.filter(s =>
-                s.safeDate.num === dateNum &&
-                s.team === cheerTeam &&
-                (sport === "" || (s.sport || "").includes(sport) || (s.note || "").includes(sport))
-            );
+            // 1. 抓取這隊今天的班表與女孩 (✨ 終極跨界引擎：支援常規班表 + 備註指名客串)
+            let scheduledGirls = dbSchedules.filter(s => {
+                if (s.safeDate.num !== dateNum) return false;
+
+                // 情況 A：她本來就是這支啦啦隊的 (常規過濾)
+                let isRegular = s.team === cheerTeam && (sport === "" || (s.sport || "").includes(sport));
+
+                // 情況 B：她是別隊的，但「備註」裡面有明確寫到這支啦啦隊或球隊的名字 (跨界通行證)
+                let noteStr = (s.note || "").toLowerCase();
+                let isGuest = noteStr !== "" && (noteStr.includes(cheerTeam.toLowerCase()) || (sportTeamName && noteStr.includes(sportTeamName.toLowerCase())));
+
+                return isRegular || isGuest;
+            });
             let girlNames = [...new Set(scheduledGirls.map(s => s.name))];
 
             // 2. 抓取這場比賽的詳細資訊 (為了秀出對手)
