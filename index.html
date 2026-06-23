@@ -6399,11 +6399,13 @@ window.renderMinigameStart = function() {
                 const badgeColor = isPartner ? '#ff5722' : themeColor; 
                 const badgeText = isPartner ? '🤝 合作夥伴' : '✨ 旗下藝人';
                 
+                // ✨ 解除寬度封印，改為 width: 100% 讓網格自動撐開
+                // ✨ 放大 padding、頭像、字體，並加入更精緻的邊框陰影
                 return `
-                <div style="flex: 0 0 auto; width: 135px; display:flex; flex-direction:column; align-items:center; cursor:pointer; background: var(--bg-card); border: 1px solid var(--border-color); padding: 15px 10px; border-radius: 8px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position:relative;" onmouseover="this.style.borderColor='${badgeColor}'; this.style.transform='translateY(-6px) scale(1.03)'; this.style.boxShadow='0 10px 20px color-mix(in srgb, ${badgeColor} 40%, transparent)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.5)';" onclick="window.openModal('${g.uid}')">
-                    <div style="position:absolute; top:-8px; background:${badgeColor}; color:#000; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; letter-spacing:1px; z-index:10; border: 1px solid #111;">${badgeText}</div>
-                    <img src="${window.getCdnUrl(g.img)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid ${badgeColor}; background:#252c36; margin-bottom:12px; margin-top:8px;" loading="lazy">
-                    <span style="font-size:16px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
+                <div style="width: 100%; display:flex; flex-direction:column; align-items:center; cursor:pointer; background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px 15px; border-radius: 12px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 15px rgba(0,0,0,0.3); position:relative;" onmouseover="this.style.borderColor='${badgeColor}'; this.style.transform='translateY(-6px) scale(1.02)'; this.style.boxShadow='0 12px 25px color-mix(in srgb, ${badgeColor} 30%, transparent)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.3)';" onclick="window.openModal('${g.uid}')">
+                    <div style="position:absolute; top:-12px; background:${badgeColor}; color:#000; font-size:11px; font-weight:900; padding:4px 12px; border-radius:20px; letter-spacing:1px; z-index:10; border: 2px solid var(--bg-card); box-shadow: 0 2px 6px rgba(0,0,0,0.4);">${badgeText}</div>
+                    <img src="${window.getCdnUrl(g.img)}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; object-position:top center; border:3px solid ${badgeColor}; background:#252c36; margin-bottom:15px; margin-top:5px; box-shadow: 0 6px 15px rgba(0,0,0,0.5);" loading="lazy">
+                    <span style="font-size:18px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
                 </div>`;
             };
 
@@ -6417,12 +6419,12 @@ window.renderMinigameStart = function() {
                         <span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回經紀大廳</span>
                     </button>
                 </div>
-                <div style="background: rgba(17,20,24,0.6); border: 1px solid var(--border-color); border-top: 4px solid ${themeColor}; border-radius: 12px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 25px;">
-                        <h3 style="font-family:var(--sport-font); font-size:clamp(20px, 4vw, 26px); font-weight:900; color:#fff; margin:0; letter-spacing:2px; text-transform:uppercase; text-shadow: 2px 2px 0px color-mix(in srgb, ${themeColor} 40%, #000);">${agencyName}</h3>
-                        <span style="font-size:13px; font-weight:900; color:${themeColor}; background:color-mix(in srgb, ${themeColor} 15%, transparent); padding:4px 12px; border-radius:20px; border:1px solid color-mix(in srgb, ${themeColor} 40%, transparent); white-space:nowrap;">陣容總計 ${totalCount} 名</span>
+                <div style="background: rgba(17,20,24,0.6); border: 1px solid var(--border-color); border-top: 4px solid ${themeColor}; border-radius: 12px; padding: 30px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 30px;">
+                        <h3 style="font-family:var(--sport-font); font-size:clamp(20px, 4vw, 28px); font-weight:900; color:#fff; margin:0; letter-spacing:2px; text-transform:uppercase; text-shadow: 2px 2px 0px color-mix(in srgb, ${themeColor} 40%, #000);">${agencyName}</h3>
+                        <span style="font-size:14px; font-weight:900; color:${themeColor}; background:color-mix(in srgb, ${themeColor} 15%, transparent); padding:6px 15px; border-radius:20px; border:1px solid color-mix(in srgb, ${themeColor} 40%, transparent); white-space:nowrap;">陣容總計 ${totalCount} 名</span>
                     </div>
-                    <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:flex-start;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 30vw, 200px), 1fr)); gap: 25px; justify-content:center;">
                         ${cardsHtml}
                     </div>
                 </div>
