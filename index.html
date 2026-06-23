@@ -2720,29 +2720,57 @@
                     let matchTimeRaw = String(m.time || "").trim();
                     let isMatchDelayed = matchTimeRaw.includes("延賽") || matchTimeRaw.includes("取消") || matchTimeRaw.includes("因雨");
                     
-                    let badgeBgColor = isMatchDelayed ? "#ff4757" : (isFinished ? "#4a5568" : homeCfg.accent);
+                    // ✨ 明星賽專屬判定：提升整個卡片的尊爵感
+                    let isAllStar = (m.note || "").includes("明星") || tHome.includes("ALLSTAR") || tAway.includes("ALLSTAR") || tHome.includes("TAIWAN") || tAway.includes("TAIWAN");
+                    
+                    let badgeBgColor = isMatchDelayed ? "#ff4757" : (isFinished ? "#4a5568" : (isAllStar ? "#ffd700" : homeCfg.accent));
                     let badgeTextColor = isMatchDelayed ? "#ffffff" : (isFinished ? "#ffffff" : "#000000");
+                    
                     let cardOpacityStyle = isMatchDelayed ? "opacity: 0.45; filter: grayscale(40%);" : "";
+                    // 明星賽賦予霸氣漸層黑金背景
+                    let cardBgStyle = isAllStar ? "background: linear-gradient(135deg, #1f1a14 0%, #111418 100%); border-top: 4px solid #ffd700;" : "";
+
+                    // ✨ 專屬字體徽章製造機 (Typographic Logo Builder)
+                    const buildTypoLogo = (teamName, cfg) => {
+                        if (cfg.logo && !cfg.noLogo) {
+                            return `<img src="${cfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">${teamName.substring(0,3)}</div>`;
+                        }
+                        
+                        let displayHtml = teamName.substring(0, 3).toUpperCase();
+                        let customFont = '24px';
+                        
+                        // 針對明星賽隊伍給予霸氣圖騰與排版
+                        if (teamName.toUpperCase().includes('ALLSTAR')) {
+                            displayHtml = `<svg viewBox="0 0 24 24" style="width:45px; height:45px; fill:${cfg.accent}; filter:drop-shadow(0 0 6px ${cfg.accent});"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>`;
+                        } else if (teamName.toUpperCase().includes('TAIWAN')) {
+                            displayHtml = `<div style="line-height:1.1; font-size:14px;">TEAM<br><span style="font-size:26px;">TW</span></div>`;
+                        }
+
+                        // ✨ 加入 border: 3px solid 強制覆蓋掉原本的虛線！並加入內外雙重發光特效！
+                        return `<div class="match-no-logo" style="border: 3px solid ${cfg.accent}; color: ${cfg.accent}; background: radial-gradient(circle, color-mix(in srgb, ${cfg.accent} 25%, transparent) 0%, #111418 80%); box-shadow: 0 0 20px color-mix(in srgb, ${cfg.accent} 30%, transparent), inset 0 0 15px color-mix(in srgb, ${cfg.accent} 30%, transparent); font-size: ${customFont}; font-family: var(--sport-font); text-transform: uppercase; text-shadow: 0 0 8px ${cfg.accent};">${displayHtml}</div>`;
+                    };
 
                     // ✨ 綁定彈窗：點擊對戰卡片直接呼叫「主場應援名單」！
                     cardsHtml += `
                         <div class="match-card ${isFinished ? 'is-finished' : ''} ${isMatchDelayed ? 'is-delayed' : ''}" 
-                             style="--event-accent: ${homeCfg.accent}; ${cardOpacityStyle} position: relative; overflow: hidden;" 
+                             style="--event-accent: ${homeCfg.accent}; ${cardOpacityStyle} ${cardBgStyle} position: relative; overflow: hidden;" 
                              onclick="window.openMatchRosterModal(${m.safeDate.num}, '${tHome}', '${window.currentMatchLeague}', '${homeCfg.accent}', '${m.hometeam}')">
-                            
+                             
+                            ${isAllStar ? `<svg viewBox="0 0 24 24" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:280px; height:280px; fill:#ffd700; opacity:0.04; pointer-events:none; z-index:1;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>` : ''}
+                             
                             ${(homeCfg.logo && !homeCfg.noLogo) ? `
                                 <img src="${homeCfg.logo}" style="position: absolute; right: -8%; bottom: -20%; width: 220px; height: 220px; object-fit: contain; opacity: 0.04; pointer-events: none; z-index: 1; transform: rotate(-15deg); filter: brightness(0) invert(1);">
                             ` : ''}
 
-                            <div class="match-header-bar" style="position: relative; z-index: 2;">
+                            <div class="match-header-bar" style="position: relative; z-index: 2; ${isAllStar ? 'border-bottom: 1px solid rgba(255,215,0,0.1);' : ''}">
                                 <span>📍 ${m.venue} <span style="opacity:0.5; margin:0 5px;">|</span> ${m.type}</span>
-                                <span class="match-time-badge" style="background: ${badgeBgColor} !important; color: ${badgeTextColor} !important;">${isMatchDelayed ? matchTimeRaw : (isFinished ? 'FINAL' : m.time)}</span>
+                                <span class="match-time-badge" style="background: ${badgeBgColor} !important; color: ${badgeTextColor} !important; ${isAllStar && !isMatchDelayed && !isFinished ? 'box-shadow: 0 0 10px rgba(255,215,0,0.5);' : ''}">${isMatchDelayed ? matchTimeRaw : (isFinished ? 'FINAL' : m.time)}</span>
                             </div>
 
                             <div class="match-vs-area" style="position: relative; z-index: 2;">
                                 <div class="match-team-box ${awayStatus}">
                                     <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">客隊 AWAY</div>
-                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo" style="border-color:${awayCfg.accent}; color:${awayCfg.accent}; background:color-mix(in srgb, ${awayCfg.accent} 15%, transparent); box-shadow:0 0 15px color-mix(in srgb, ${awayCfg.accent} 40%, transparent); font-size:24px; font-family:var(--sport-font); text-transform:uppercase;">${tAway.substring(0,3)}</div>`}
+                                    ${buildTypoLogo(tAway, awayCfg)}
                                     <span class="match-team-name">${m.awayteam}</span>
                                 </div>
                                 
@@ -2752,12 +2780,12 @@
                                 
                                 <div class="match-team-box ${homeStatus}">
                                     <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">主隊 HOME</div>
-                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo" style="border-color:${homeCfg.accent}; color:${homeCfg.accent}; background:color-mix(in srgb, ${homeCfg.accent} 15%, transparent); box-shadow:0 0 15px color-mix(in srgb, ${homeCfg.accent} 40%, transparent); font-size:24px; font-family:var(--sport-font); text-transform:uppercase;">${tHome.substring(0,3)}</div>`}
+                                    ${buildTypoLogo(tHome, homeCfg)}
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
                             
-                            ${m.note ? `<div class="match-note" style="position: relative; z-index: 2;">🏆 ${m.note}</div>` : ''}
+                            ${m.note ? `<div class="match-note" style="position: relative; z-index: 2; ${isAllStar ? 'background: rgba(255,215,0,0.1); border-top: 1px solid rgba(255,215,0,0.3); color: #ffd700;' : ''}">🏆 ${m.note}</div>` : ''}
                         </div>`;
                 });
                 cardsHtml += `</div>`;
