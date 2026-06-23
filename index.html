@@ -6298,30 +6298,47 @@ window.renderMinigameStart = function() {
                 return;
             }
 
-            // ✨ 準備一組高質感的電競霓虹色系，用來輪流分配給各個經紀公司
-            const agencyColors = ['#00b0ff', '#e040fb', '#00e676', '#ffeb3b', '#ff4757', '#18ffff', '#ff9800'];
+            // ✨ 準備一組高質感的柔和霓虹色系 (褪去俗氣的高飽和，改用高雅的微光色調)
+            const agencyColors = ['#38bdf8', '#c084fc', '#4ade80', '#facc15', '#fb7185', '#22d3ee', '#fb923c'];
 
             // ==========================================
             // 狀態 1：第一層大廳 (顯示經紀公司區塊)
             // ==========================================
             if (!window.currentAgency) {
                 let lobbyHtml = `
-                    <div style="text-align: center; margin-bottom: 40px; margin-top: 10px;">
-                        <div class="game-title" style="font-size: clamp(28px, 6vw, 42px); letter-spacing: 4px; text-shadow: 3px 3px 0px #e040fb;">🏢 經紀公司大廳</div>
-                        <p style="color:var(--text-sub); font-weight:700; letter-spacing: 2px;">請選擇想查看的外援所屬經紀公司</p>
+                    <div style="text-align: center; margin-bottom: 50px; margin-top: 10px;">
+                        <div class="game-title" style="font-size: clamp(28px, 6vw, 36px); letter-spacing: 4px; text-shadow: none; color: #fff;">經紀公司大廳</div>
+                        <p style="color:var(--text-sub); font-family:var(--sport-font); font-weight:700; letter-spacing: 3px;">AGENCY DIRECTORY</p>
                     </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1050px; margin: 0 auto;">
                 `;
 
                 agencies.forEach((agencyName, idx) => {
                     let { signed, partner } = agencyGroups[agencyName];
                     let totalCount = signed.length + partner.length;
-                    let themeColor = agencyColors[idx % agencyColors.length]; // 依序抓取專屬色
+                    let themeColor = agencyColors[idx % agencyColors.length];
                     
+                    // ✨ 尊爵質感卡片：深邃漸層底、細緻微光邊框、角落氛圍光、精品數據排版
                     lobbyHtml += `
-                    <div class="schedule-team-btn" style="--btn-accent:${themeColor}; width: calc(50% - 9px); min-width: 280px; justify-content: space-between; padding: 25px 20px;" onclick="window.currentAgency='${agencyName}'; window.renderAgencyHub(); window.scrollTo({top:0, behavior:'smooth'});">
-                        <span style="font-size: 20px; color: #fff; font-weight: 900; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${agencyName}</span>
-                        <span style="font-size: 13px; background: color-mix(in srgb, ${themeColor} 15%, transparent); color: ${themeColor}; padding: 6px 12px; border-radius: 20px; border: 1px solid color-mix(in srgb, ${themeColor} 40%, transparent); font-weight: 900; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">陣容 ${totalCount} 名 ➔</span>
+                    <div onclick="window.currentAgency='${agencyName}'; window.renderAgencyHub(); window.scrollTo({top:0, behavior:'smooth'});"
+                         style="flex: 1 1 calc(50% - 20px); min-width: 280px; background: linear-gradient(145deg, #1a1e24, #0d0f12); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 30px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative; overflow: hidden;"
+                         onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='color-mix(in srgb, ${themeColor} 50%, transparent)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px color-mix(in srgb, ${themeColor} 20%, transparent)'; this.querySelector('.agency-glow').style.opacity='0.4'; this.querySelector('.agency-arrow').style.transform='translateX(5px)';"
+                         onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.4)'; this.querySelector('.agency-glow').style.opacity='0.1'; this.querySelector('.agency-arrow').style.transform='none';">
+                         
+                        <div class="agency-glow" style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: ${themeColor}; filter: blur(45px); opacity: 0.1; border-radius: 50%; pointer-events: none; transition: 0.5s ease-out;"></div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px; z-index: 2; max-width: 70%;">
+                            <span style="font-size: 20px; color: #f8fafc; font-weight: 900; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${agencyName}</span>
+                            <span style="font-size: 11px; color: #64748b; font-family: var(--sport-font); letter-spacing: 2px;">MANAGEMENT ROSTER</span>
+                        </div>
+                        
+                        <div style="z-index: 2; display: flex; align-items: center; gap: 15px;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                <span style="font-family: var(--sport-font); font-size: 28px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${totalCount}</span>
+                                <span style="font-size: 10px; color: #64748b; font-weight: 700; letter-spacing: 1.5px; margin-top: 4px;">GIRLS</span>
+                            </div>
+                            <svg class="agency-arrow" viewBox="0 0 24 24" style="width: 22px; height: 22px; stroke: ${themeColor}; stroke-width: 2.5; fill: none; opacity: 0.8; transition: 0.3s ease-out; stroke-linecap: round; stroke-linejoin: round;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </div>
                     </div>`;
                 });
 
