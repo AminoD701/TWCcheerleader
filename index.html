@@ -4557,15 +4557,19 @@
                 const cz = (c.zodiac || "").trim().replace("魔羯","摩羯").replace("白羊","牡羊");
                 const mZ = (zodiac === 'all' || cz === zodiac);
 
-                // ✨ 身分判斷邏輯 (運用剛剛建立的白名單規則)
+               // ✨ 身分判斷邏輯 (運用剛剛建立的白名單規則)
                 const mRole = (() => {
                     if (role === 'all') return true;
                     const note = (c.note || c['備註'] || c.備註 || "").trim();
-                    // 只要有寫備註，且不是練習生/培訓生，就是「特殊身分」
-                    const isSpecial = note !== "" && !note.includes("練習生") && !note.includes("培訓生");
+                    
+                    // ✨ 隱形斗篷延伸：在篩選前，先把「合作夥伴」相關字眼抹除
+                    const cleanNoteForFilter = note.replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
+                    
+                    // 只要清除合作字眼後還有剩餘的備註，且不是練習生/培訓生，才是真正的「特殊身分」
+                    const isSpecial = cleanNoteForFilter !== "" && !cleanNoteForFilter.includes("練習生") && !cleanNoteForFilter.includes("培訓生");
                     
                     if (role === 'cheerleader') return !isSpecial; // 只看正規女孩(含練習生)
-                    if (role === 'special') return isSpecial;     // 只看吉祥物/團長/MC
+                    if (role === 'special') return isSpecial;      // 只看吉祥物/團長/MC
                     return true;
                 })();
 
