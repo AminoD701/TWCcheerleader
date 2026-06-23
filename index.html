@@ -2472,13 +2472,17 @@
                 vsOpponent = (h === cheerTeam) ? `VS ${match.awayteam}` : `AT ${match.hometeam}`;
             }
 
-            // 3. ✨ 升級分組邏輯：將女孩依照「所屬球隊」分組，客串球隊獨立標示且自帶專屬配色！
+            // 3. ✨ 升級分組邏輯：將女孩依照「通告單(班表)上的球隊」分組，完美支援雙棲女孩客串！
             let groupedRoster = {};
             girlNames.forEach(gn => {
                 const g = girlMap.get(gn) || dbGirls.find(x => x.realname === gn || x.nickname === gn);
-                let tName = (g && g.team) ? g.team : cheerTeam;
+                const sRecord = scheduledGirls.find(s => s.name === gn); // 👈 抓出她今天的這張「通告單」
+                
+                // ✨ 智慧判斷：優先看「通告單上寫她是哪隊派來的」，如果沒有才看「她檔案上寫的第一支球隊」
+                let tName = (sRecord && sRecord.team) ? sRecord.team : ((g && g.team) ? g.team : cheerTeam);
+                
                 if (!groupedRoster[tName]) groupedRoster[tName] = [];
-                groupedRoster[tName].push({ gn, g });
+                groupedRoster[tName].push({ gn, g, sRecord });
             });
 
             // 確保主場球隊永遠排在第一位，其他球隊依名稱排序
@@ -2506,13 +2510,12 @@
                     : '';
 
                 let groupCards = groupedRoster[tName].map(item => {
-                    const { gn, g } = item;
+                    const { gn, g, sRecord } = item;
                     const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
                     const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : gn;
                     const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                     const targetId = g ? g.uid : gn;
 
-                    const sRecord = scheduledGirls.find(s => s.name === gn);
                     const taskBadge = sRecord && sRecord.note ? `<div class="mc-task-badge" style="font-size:10px; background:${tColor}; color:#000; padding:1px 8px; border-radius:4px; font-weight:900; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${sRecord.note}</div>` : '';
 
                     // ✨ 使用 tColor 為跨界女孩畫上她們原本球隊的代表色邊框！
@@ -2525,6 +2528,10 @@
                         </div>
                     </div>`;
                 }).join('');
+
+                // 將標題與卡片網格包裝起來
+                return `${groupTitle}<div class="mc-roster-grid">${groupCards}</div>`;
+            }).join('');
 
                 // 將標題與卡片網格包裝起來
                 return `${groupTitle}<div class="mc-roster-grid">${groupCards}</div>`;
