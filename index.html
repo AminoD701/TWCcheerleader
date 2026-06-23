@@ -1459,49 +1459,49 @@
             .poster-rank-rest .poster-name { font-size: 11px; }
             .poster-votes { font-size: 10px; }
         }
-        /* =========================================
-   ✨ 個人詳細彈窗 (電腦版左右雙欄完美比例優化 - 修正情報版面衝突)
-========================================= */
-@media (min-width: 769px) {
-    /* 1. 放大彈窗總寬度 */
-    .modal-content { max-width: 880px !important; }
-    
-    /* ✨ 關鍵修正 1：只有「包含女孩照片」的圖鑑彈窗，才轉為左右雙欄排列！ */
-    .modal-layout:has(.modal-photo) { 
-        flex-direction: row !important; 
-    }
-    
-    /* 2. 照片區塊維持 45% */
-    .modal-photo { 
-        width: 45% !important; 
-        height: auto !important; 
-        min-height: 550px; 
-        border-bottom: none !important; 
-        border-right: 6px solid var(--modal-accent, #fff) !important; 
-    }
+/* =========================================
+           ✨ 個人詳細彈窗 (電腦版左右雙欄完美比例優化 - 巨型海報展現版)
+        ========================================= */
+        @media (min-width: 769px) {
+            /* 1. 放大彈窗總寬度，從原本的 880px 霸氣拉寬到 1050px！ */
+            .modal-content { max-width: 1050px !important; }
+            
+            /* ✨ 關鍵修正 1：只有「包含女孩照片」的圖鑑彈窗，才轉為左右雙欄排列！ */
+            .modal-layout:has(.modal-photo) { 
+                flex-direction: row !important; 
+            }
+            
+            /* 2. 照片區塊擴張到 50%，高度拉升，防裁切！ */
+            .modal-photo { 
+                width: 50% !important; 
+                height: auto !important; 
+                min-height: 650px; 
+                border-bottom: none !important; 
+                border-right: 6px solid var(--modal-accent, #fff) !important; 
+            }
 
-    /* ✨ 關鍵修正 2：只對跟在照片旁邊的區塊做 55% 壓縮，放過情報與賽事彈窗！ */
-    .modal-layout:has(.modal-photo) .modal-body { 
-        width: 55% !important; 
-        padding: 40px 35px !important; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: center; 
-    }
+            /* ✨ 關鍵修正 2：資訊區塊佔剩餘 50%，加大 Padding 增加呼吸感！ */
+            .modal-layout:has(.modal-photo) .modal-body { 
+                width: 50% !important; 
+                padding: 50px 45px !important; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: center; 
+            }
 
-    /* 3. 將原本絕對定位的運動標籤，拉回右側內文中排版 */
-    .modal-layout:has(.modal-photo) .sport-tags { 
-        position: relative !important; 
-        top: 0 !important; 
-        left: 0 !important; 
-        margin-bottom: 20px !important; 
-    }
+            /* 3. 將原本絕對定位的運動標籤，拉回右側內文中排版 */
+            .modal-layout:has(.modal-photo) .sport-tags { 
+                position: relative !important; 
+                top: 0 !important; 
+                left: 0 !important; 
+                margin-bottom: 25px !important; 
+            }
 
-    /* 4. 稍微壓縮背號跟按鈕大小 */
-    .modal-nickname { font-size: 28px !important; }
-    .modal-number { font-size: 22px !important; padding: 2px 12px !important; }
-    .modal-ig-btn { margin-top: 20px !important; padding: 12px !important; }
-}
+            /* 4. 配合大彈窗，微微放大名字與背號，氣勢跟上！ */
+            .modal-nickname { font-size: 34px !important; }
+            .modal-number { font-size: 26px !important; padding: 4px 15px !important; }
+            .modal-ig-btn { margin-top: 30px !important; padding: 15px !important; font-size: 16px !important; }
+        }
 /* =========================================
            🏟️ 賽事中心專屬樣式 (質感月曆 + 比分對戰版)
            ========================================= */
