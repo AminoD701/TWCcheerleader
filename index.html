@@ -562,7 +562,7 @@
             .event-mini-avatar { width: 32px; height: 32px; margin-left: -6px;}
             
             .modal-overlay { align-items: flex-end; padding: 0; }
-            .modal-content { max-height: 85dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
+            .modal-content { max-height: 95dvh; display: flex; flex-direction: column; max-width: 100%; border-radius: 12px 12px 0 0; border: none; border-top: 5px solid var(--modal-accent, #fff); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); transform: translateY(100%) !important; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0) !important; } 
             .modal-layout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
             .modal-photo { flex-shrink: 0; height: 380px; border-bottom-width: 4px; object-position: top center;} 
@@ -5372,11 +5372,11 @@
             
             let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='var(--event-accent)'; this.style.color='var(--event-accent)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : '';
 
-            // ✨ 海報高度終極解放：智慧判定螢幕高度，讓直向海報在電腦版也能霸氣展現！
+            // ✨ 海報高度在手機版微調，讓出更多空間給下方資訊，並加上 flex-shrink: 0 嚴禁擠壓！
             let posterSection = '';
             if (posterUrl) {
                 posterSection = `
-                <div style="position: relative; width: 100%; height: clamp(250px, 45vh, 600px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent);">
+                <div style="position: relative; width: 100%; height: clamp(200px, 35vh, 600px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent); flex-shrink: 0;">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
                     <img src="${posterUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
                 </div>`;
@@ -5384,34 +5384,34 @@
 
             document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
 
-            // ✨ 內部字體全面套用 clamp 彈性引擎，極限壓縮垂直間距
+            // ✨ 所有內部區塊都加上 flex-shrink: 0，並解除文字大小的過度壓縮！
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${posterSection}
-                <div class="modal-body" style="padding: clamp(10px, 2vw, 20px); display: flex; flex-direction: column; gap: clamp(6px, 1vw, 12px);">
+                <div class="modal-body" style="padding: clamp(15px, 3vw, 25px); display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
                     
-                    <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: clamp(6px, 1vw, 10px);">
-                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: clamp(11px, 1.5vw, 13px); font-weight: 900; padding: clamp(2px, 0.5vw, 4px) clamp(8px, 1vw, 12px); border-radius: 4px; letter-spacing: 1px; width: fit-content;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; flex-shrink: 0;">
+                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; width: fit-content;">
                             📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
                         </div>
-                        <div style="font-size: clamp(15px, 2.5vw, 22px); font-weight: 900; color: #fff; line-height: 1.2; word-break: break-word;">
+                        <div style="font-size: clamp(20px, 4vw, 26px); font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
                             ${e.eventname || "賽事活動未定"}
                         </div>
                     </div>
                     
-                    <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
-                        <div class="stat-box" style="padding: clamp(4px, 1vw, 10px) 4px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 11px);">時間 TIME</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 15px);">${e.time||"TBA"}</span></div>
-                        <div class="stat-box" style="padding: clamp(4px, 1vw, 10px) 4px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 11px);">主辦 HOST</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 15px); font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-top: 1px solid var(--border-color); border-bottom: none; border-right: none; padding: clamp(4px, 1vw, 10px) 8px;"><span class="stat-label" style="margin-bottom:2px; font-size:clamp(10px, 1vw, 11px);">地點 LOCATION</span><span class="stat-value" style="font-size:clamp(12px, 1.5vw, 15px); font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
+                    <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); flex-shrink: 0;">
+                        <div class="stat-box" style="padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">時間 TIME</span><span class="stat-value" style="font-size:15px;">${e.time||"TBA"}</span></div>
+                        <div class="stat-box" style="padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">主辦 HOST</span><span class="stat-value" style="font-size:15px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
+                        <div class="stat-box" style="grid-column: 1 / -1; border-top: 1px solid var(--border-color); border-bottom: none; border-right: none; padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">地點 LOCATION</span><span class="stat-value" style="font-size:15px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
                     </div>
 
-                    <div>
-                        <div style="font-family:var(--sport-font); font-size:clamp(11px, 1.5vw, 13px); font-weight:900; color:var(--text-sub); margin-bottom:4px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:clamp(6px, 1vw, 10px);">
-                            ${attendHtml || '<div style="color:var(--text-sub); font-size:12px; font-weight:700;">名單確認中</div>'}
+                    <div style="flex-shrink: 0; margin-top: 5px;">
+                        <div style="font-family:var(--sport-font); font-size:13px; font-weight:900; color:var(--text-sub); margin-bottom:8px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                            ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">名單確認中</div>'}
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: clamp(8px, 1.5vw, 15px); margin-top: auto; padding-top: 4px;">
+                    <div style="display: flex; gap: 15px; margin-top: auto; padding-top: 10px; flex-shrink: 0;">
                         ${saveBtnHtml}
                         ${linkBtnHtml}
                     </div>
