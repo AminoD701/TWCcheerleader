@@ -2533,10 +2533,6 @@
                 return `${groupTitle}<div class="mc-roster-grid">${groupCards}</div>`;
             }).join('');
 
-                // 將標題與卡片網格包裝起來
-                return `${groupTitle}<div class="mc-roster-grid">${groupCards}</div>`;
-            }).join('');
-
             const y = Math.floor(dateNum / 10000), m = Math.floor((dateNum % 10000) / 100), d = dateNum % 100;
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
