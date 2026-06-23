@@ -4639,6 +4639,34 @@
             const currentMonth = today.getMonth() + 1;
             const todayNum = parseInt(`${currentYear}${String(currentMonth).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`);
 
+            // ==========================================
+            // ✨ 戰術四：本命催票直達車
+            // ==========================================
+            let voteBtnHtml = '';
+            const officialEnd = new Date('2026-06-30T23:59:59+08:00');
+            if (today <= officialEnd) {
+                // 從全網真實票數庫中抓取她的票數
+                const voteKey = 'korea_pro_' + c.uid; 
+                const herVotes = parseInt(window.globalVoteData ? (window.globalVoteData[voteKey] || 0) : 0);
+                
+                // 為了精準催票，只要她是外援，或是已經有票數了，就秀出專屬催票框！
+                const isForeign = (c.nat || "").includes("韓") || (c.nat || "").includes("日");
+                
+                if (isForeign || herVotes > 0) {
+                    voteBtnHtml = `
+                    <div style="margin-top: 15px; margin-bottom: 15px;">
+                        <div style="background: linear-gradient(135deg, #ff0044, #9c27b0); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; box-shadow: 0 6px 15px rgba(255,0,68,0.4); border: 1px solid #ff4757; transition: 0.3s;" 
+                             onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 25px rgba(255,0,68,0.6)';" 
+                             onmouseout="this.style.transform='none'; this.style.boxShadow='0 6px 15px rgba(255,0,68,0.4)';" 
+                             onclick="window.closeModal(); window.setMode('vote'); setTimeout(()=>{ document.getElementById('vote-search-input').value='${c.realname}'; window.filterVoteList(); }, 500);">
+                            <div style="font-family: var(--sport-font); font-size: 13px; color: #ffd700; font-weight: 900; letter-spacing: 2px; margin-bottom: 6px;">🏆 第一屆·全民應援大賞</div>
+                            <div style="font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 4px; letter-spacing: 1px;">快去幫 ${c.realname} 投票護盤！</div>
+                            <div style="font-size: 13px; color: #fff; opacity: 0.9; font-weight: 700;">目前累積 ${herVotes.toLocaleString()} 票，點擊前往應援 ➔</div>
+                        </div>
+                    </div>`;
+                }
+            }
+
             // ✨ 班表智慧過濾：如果是菜市場名，球隊必須完全符合才算數！
             let herSchedules = dbSchedules.filter(s => {
                 if (s.safeDate.year !== currentYear || s.safeDate.month !== currentMonth || s.safeDate.num < todayNum) return false;
@@ -4756,7 +4784,7 @@
                     </div>
                     ${noteText ? `<div class="note-box">${noteText}</div>` : ''}
                     
-                    ${scheduleHtml}
+                    ${voteBtnHtml} ${scheduleHtml}
                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="modal-ig-btn"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>前往 INSTAGRAM</span></a>` : ''}
                 </div>
             `;
