@@ -2544,14 +2544,15 @@
                     const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                     const targetId = g ? g.uid : gn;
 
-                    const taskBadge = sRecord && sRecord.note ? `<div class="mc-task-badge" style="font-size:10px; background:${tColor}; color:#000; padding:1px 8px; border-radius:4px; font-weight:900; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${sRecord.note}</div>` : '';
+                    // ✨ 徽章字體加大、間距拉開
+                    const taskBadge = sRecord && sRecord.note ? `<div class="mc-task-badge" style="font-size:11px; background:${tColor}; color:#000; padding:2px 8px; border-radius:4px; font-weight:900; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${sRecord.note}</div>` : '';
 
-                    // ✨ 使用 tColor 為跨界女孩畫上她們原本球隊的代表色邊框！
+                    // ✨ 膠囊卡片全面放大！大頭貼變 56px，名字變 17px，寬度上限解放到 240px
                     return `
-                    <div class="mc-roster-item" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 140px; max-width: 180px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
-                        <img src="${imgUrl}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid ${tColor}; background:#252c36;" onerror="this.src='https://via.placeholder.com/50'">
+                    <div class="mc-roster-item" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 180px; max-width: 240px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 10px; border-radius: 50px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
+                        <img src="${imgUrl}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid ${tColor}; background:#252c36;" onerror="this.src='https://via.placeholder.com/60'">
                         <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0; width:100%;">
-                            <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
+                            <span style="font-size:17px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
                             ${taskBadge}
                         </div>
                     </div>`;
@@ -2566,8 +2567,13 @@
 
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <style>
-                    /* ✨ 電腦版維持彈性橫排，手機版自動切換為與班表相同的 3 欄黃金比例 */
-                    .mc-roster-grid { display:flex; flex-wrap:wrap; gap:12px; justify-content: flex-start; }
+                    /* ✨ 霸王條款：只要打開賽事名單，彈窗寬度強制擴張到 1050px！ */
+                    @media (min-width: 769px) {
+                        .modal-content { max-width: 1050px !important; }
+                    }
+                    /* ✨ 卡片間距從 12px 加大到 16px，呼吸感倍增 */
+                    .mc-roster-grid { display:flex; flex-wrap:wrap; gap:16px; justify-content: flex-start; }
+                    
                     @media (max-width: 768px) {
                         .mc-roster-grid {
                             display: grid !important;
