@@ -6428,8 +6428,10 @@ window.renderMinigameStart = function() {
                     agencyGroups[agency] = { signed: [], partner: [] };
                 }
                 
-                let isDuplicate = agencyGroups[agency].signed.some(existing => existing.uid === g.uid) || 
-                                  agencyGroups[agency].partner.some(existing => existing.uid === g.uid);
+                // ✨ 終極防重複機制：嚴格比對「本名」，完全無視 UID 或綽號、空白鍵的微小差異！
+                let gName = (g.realname || "").trim();
+                let isDuplicate = agencyGroups[agency].signed.some(existing => (existing.realname || "").trim() === gName) || 
+                                  agencyGroups[agency].partner.some(existing => (existing.realname || "").trim() === gName);
                 
                 if (!isDuplicate) {
                     let note = (g.note || g['備註'] || g.備註 || "").trim();
