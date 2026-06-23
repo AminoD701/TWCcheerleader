@@ -4708,15 +4708,25 @@
                 const voteKey = 'korea_pro_' + c.uid; 
                 const herVotes = parseInt(window.globalVoteData ? (window.globalVoteData[voteKey] || 0) : 0);
                 
-                // ✨ 修正：嚴格區分純外援與混血兒，且排除練習生，與投票大廳邏輯100%同步
+               // ✨ 修正：嚴格區分純外援與混血兒，且排除練習生，與投票大廳邏輯100%同步
                 const natStr = c.nat || "";
                 const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
-                const isForeign = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat; // 有日韓國籍，且「沒有」台港馬國籍才算純外援
+                const isForeign = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat; 
                 
                 const noteTextStr = (c.note || c['備註'] || c.備註 || "").trim();
                 const isValidStatus = noteTextStr === "" || (!noteTextStr.includes("練習生") && !noteTextStr.includes("培訓生"));
 
-                if (isForeign && isValidStatus) {
+                // ✨ 核心修復：必須在台灣的主流聯盟應援才算數！(排除純 KBO 或未登錄台灣球隊的外籍女孩)
+                const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
+                const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
+                const isBaseball = sports.some(s => s.includes("棒"));
+                const isVolleyball = sports.some(s => s.includes("排"));
+                const isTPBL = teams.some(t => tpblTeams.some(tpbl => t.includes(tpbl)));
+                const isPLG = teams.some(t => plgTeams.some(plg => t.includes(plg)));
+                const isInTaiwanProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
+
+                // 三大條件必須同時滿足：是純外籍 + 不是練習生 + 有在台灣聯賽應援
+                if (isForeign && isValidStatus && isInTaiwanProLeague) {
                     voteBtnHtml = `
                     <div style="margin-top: 15px; margin-bottom: 15px;">
                         <div style="background: linear-gradient(135deg, #ff0044, #9c27b0); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; box-shadow: 0 6px 15px rgba(255,0,68,0.4); border: 1px solid #ff4757; transition: 0.3s;" 
