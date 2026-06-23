@@ -2457,22 +2457,17 @@
                 if (s.safeDate.num !== dateNum) return false;
 
                 let noteStr = (s.note || "").toLowerCase();
+                let sportTeamUpper = (sportTeamName || cheerTeam || "").toUpperCase();
 
-                // 🌟 核心攔截：判定今天是不是中職明星賽 (7/18 或 7/19)
-                // 只要備註有提到「明星賽」，直接發放最高權限通行證！
-                if (noteStr.includes("明星賽")) {
-                    // 如果這場賽事中心的隊伍叫 ALLSTAR 或 TAIWAN
-                    if (sportTeamName === "ALLSTAR" || sportTeamName === "TAIWAN") {
-                        // 智慧分流：根據您在 Excel 備註裡寫的分配來抓人
-                        // 範例：如果備註寫「7/18中職明星賽(ALLSTAR)」或「7/18中職明星賽 ALLSTAR」
-                        if (noteStr.includes(sportTeamName.toLowerCase())) {
-                            return true;
-                        }
-                        // 防呆 fallback：如果您備註只有單純寫「7/18中職明星賽」而沒寫分隊
-                        // 預設就讓她們在兩隊的賽事中心都看得到名單，確保不會開天窗！
-                        if (!noteStr.includes("allstar") && !noteStr.includes("taiwan")) {
-                            return true;
-                        }
+                // 🌟 核心攔截：只要備註有「明星」，且今天比賽隊伍是 ALLSTAR 或 TAIWAN，強制抓人放行！
+                if (noteStr.includes("明星") || noteStr.includes("allstar") || noteStr.includes("taiwan")) {
+                    if (sportTeamUpper.includes("ALLSTAR") || sportTeamUpper.includes("TAIWAN")) {
+                        // 如果備註有明確指定隊伍
+                        if (noteStr.includes("allstar") && sportTeamUpper.includes("ALLSTAR")) return true;
+                        if (noteStr.includes("taiwan") && sportTeamUpper.includes("TAIWAN")) return true;
+                        
+                        // 若無明確指定，只要有「明星」二字，兩隊無差別放行，確保不開天窗！
+                        if (!noteStr.includes("allstar") && !noteStr.includes("taiwan")) return true;
                     }
                 }
 
@@ -2736,7 +2731,7 @@
                             <div class="match-vs-area" style="position: relative; z-index: 2;">
                                 <div class="match-team-box ${awayStatus}">
                                     <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">客隊 AWAY</div>
-                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo">客場</div>`}
+                                    ${(awayCfg.logo && !awayCfg.noLogo) ? `<img src="${awayCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">AWAY</div>` : `<div class="match-no-logo" style="border-color:${awayCfg.accent}; color:${awayCfg.accent}; background:color-mix(in srgb, ${awayCfg.accent} 15%, transparent); box-shadow:0 0 15px color-mix(in srgb, ${awayCfg.accent} 40%, transparent); font-size:24px; font-family:var(--sport-font); text-transform:uppercase;">${tAway.substring(0,3)}</div>`}
                                     <span class="match-team-name">${m.awayteam}</span>
                                 </div>
                                 
@@ -2746,7 +2741,7 @@
                                 
                                 <div class="match-team-box ${homeStatus}">
                                     <div style="font-family: var(--sport-font); font-size: 11px; color: var(--text-sub); font-weight: 900; letter-spacing: 1px; margin-bottom: -4px;">主隊 HOME</div>
-                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo">主場</div>`}
+                                    ${(homeCfg.logo && !homeCfg.noLogo) ? `<img src="${homeCfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">HOME</div>` : `<div class="match-no-logo" style="border-color:${homeCfg.accent}; color:${homeCfg.accent}; background:color-mix(in srgb, ${homeCfg.accent} 15%, transparent); box-shadow:0 0 15px color-mix(in srgb, ${homeCfg.accent} 40%, transparent); font-size:24px; font-family:var(--sport-font); text-transform:uppercase;">${tHome.substring(0,3)}</div>`}
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
