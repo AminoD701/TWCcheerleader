@@ -5988,9 +5988,21 @@ window.renderMinigameStart = function() {
             if (allNames.length > 0) {
                 const namesPattern = allNames.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
                 const regex = new RegExp(`(${namesPattern})`, 'g');
+                
+                // ✨ 新增：建立一個「已標記名單」，用來記憶這篇文章已經幫哪些女孩加上連結了
+                let mentionedGirls = new Set(); 
+                
                 contentText = contentText.replace(regex, (match) => {
                     const targetGirl = girlMap.get(match) || dbGirls.find(g => g.realname === match || g.nickname === match);
+                    
                     if (targetGirl) {
+                        // 如果這個女孩已經在名單裡 (被標記過了)，就直接回傳純文字，不加連結！
+                        if (mentionedGirls.has(targetGirl.uid)) {
+                            return match;
+                        }
+                        
+                        // 如果是第一次出現，就把她加入名單，並回傳橘色可點擊的專屬標籤
+                        mentionedGirls.add(targetGirl.uid);
                         return `<span onclick="window.openModal('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
                     }
                     return match;
