@@ -2816,10 +2816,11 @@
                 });
             }
 
-            currentMode = mode;
+           currentMode = mode;
             currentTeam = "全部啦啦隊"; 
             currentScheduleTeam = null; 
             currentScheduleSport = null; 
+            window.currentAgency = null; // ✨ 新增：每次切換頁面時，將經紀公司退回第一層大廳
             if(document.getElementById('team-btn-text')) document.getElementById('team-btn-text').innerText = "全部啦啦隊";
             // ✨ 1. 記憶目前的分頁 (存入瀏覽器短暫記憶，重整時就能回到這裡)
             sessionStorage.setItem('cheer_current_tab', mode);
@@ -6227,12 +6228,14 @@ window.renderMinigameStart = function() {
             }
         };
         // ==========================================
-        // 🏢 經紀公司專屬大廳 渲染引擎 (支援旗下藝人/合作夥伴分類)
+        // 🏢 經紀公司專屬大廳 渲染引擎 (兩段式展開 + 隱藏球隊)
         // ==========================================
+        window.currentAgency = null;
+
         window.renderAgencyHub = function() {
             const container = document.getElementById('agency-container');
             
-            // 1. 抓出所有經紀公司資料，並內部分類為「旗下藝人」與「合作夥伴」
+            // 1. 抓出並分類所有經紀公司資料
             let agencyGroups = {};
             dbGirls.forEach(g => {
                 let agency = (g.agency || g['經紀公司'] || "").trim();
@@ -6242,12 +6245,10 @@ window.renderMinigameStart = function() {
                     agencyGroups[agency] = { signed: [], partner: [] };
                 }
                 
-                // 防重複機制
                 let isDuplicate = agencyGroups[agency].signed.some(existing => existing.uid === g.uid) || 
                                   agencyGroups[agency].partner.some(existing => existing.uid === g.uid);
                 
                 if (!isDuplicate) {
-                    // ✨ 智慧分類：檢查備註欄位是否包含「合作」字眼
                     let note = (g.note || g['備註'] || g.備註 || "").trim();
                     if (note.includes("合作")) {
                         agencyGroups[agency].partner.push(g);
@@ -6264,44 +6265,68 @@ window.renderMinigameStart = function() {
                 return;
             }
 
-            // 大廳頂部標題
-            let html = `
-                <div style="text-align: center; margin-bottom: 40px; margin-top: 10px;">
-                    <div class="game-title" style="font-size: clamp(28px, 6vw, 42px); letter-spacing: 4px; text-shadow: 3px 3px 0px #03a9f4;">🏢 經紀公司大廳</div>
-                    <p style="color:var(--text-sub); font-weight:700; letter-spacing: 2px;">匯集來台發展的最強外援陣容</p>
-                </div>
-                <div style="display:flex; flex-direction:column; gap:40px;">
-            `;
+            // ==========================================
+            // 狀態 1：第一層大廳 (顯示經紀公司區塊)
+            // ==========================================
+            if (!window.currentAgency) {
+                let lobbyHtml = `
+                    <div style="text-align: center; margin-bottom: 40px; margin-top: 10px;">
+                        <div class="game-title" style="font-size: clamp(28px, 6vw, 42px); letter-spacing: 4px; text-shadow: 3px 3px 0px #03a9f4;">🏢 經紀公司大廳</div>
+                        <p style="color:var(--text-sub); font-weight:700; letter-spacing: 2px;">請選擇想查看的外援所屬經紀公司</p>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;">
+                `;
 
-            // ✨ 卡片製造機：根據身分給予不同的邊框與徽章
+                agencies.forEach(agencyName => {
+                    let { signed, partner } = agencyGroups[agencyName];
+                    let totalCount = signed.length + partner.length;
+                    
+                    // ✨ 借用班表系統的電競按鈕設計，完美融合版面
+                    lobbyHtml += `
+                    <div class="schedule-team-btn" style="--btn-accent:#03a9f4; width: calc(50% - 9px); min-width: 280px; justify-content: space-between; padding: 25px 20px;" onclick="window.currentAgency='${agencyName}'; window.renderAgencyHub(); window.scrollTo({top:0, behavior:'smooth'});">
+                        <span style="font-size: 20px; color: #fff; font-weight: 900;">${agencyName}</span>
+                        <span style="font-size: 13px; background: rgba(3,169,244,0.1); color: #03a9f4; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(3,169,244,0.3); font-weight: 900; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">陣容 ${totalCount} 名 ➔</span>
+                    </div>`;
+                });
+
+                lobbyHtml += `</div>`;
+                container.innerHTML = lobbyHtml;
+                return;
+            }
+
+            // ==========================================
+            // 狀態 2：第二層細節 (展開該公司的女孩名單)
+            // ==========================================
+            let agencyName = window.currentAgency;
+            let { signed, partner } = agencyGroups[agencyName];
+            let totalCount = signed.length + partner.length;
+
             const renderGirlCard = (g, isPartner) => {
                 const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                 const dName = isLocal ? (g.nickname || g.realname) : g.realname;
                 
-                // 合作夥伴用「橘色」，旗下藝人用「藍色」
                 const badgeColor = isPartner ? '#ff9800' : '#03a9f4'; 
                 const badgeText = isPartner ? '🤝 合作夥伴' : '✨ 旗下藝人';
                 
+                // ✨ 已移除球隊名稱，專注展現女孩名字
                 return `
                 <div style="flex: 0 0 auto; width: 135px; display:flex; flex-direction:column; align-items:center; cursor:pointer; background: var(--bg-card); border: 1px solid var(--border-color); padding: 15px 10px; border-radius: 8px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position:relative;" onmouseover="this.style.borderColor='${badgeColor}'; this.style.transform='translateY(-6px) scale(1.03)'; this.style.boxShadow='0 10px 20px ${badgeColor}40';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.5)';" onclick="window.openModal('${g.uid}')">
                     <div style="position:absolute; top:-8px; background:${badgeColor}; color:#000; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; letter-spacing:1px; z-index:10; border: 1px solid #111;">${badgeText}</div>
                     <img src="${window.getCdnUrl(g.img)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid ${badgeColor}; background:#252c36; margin-bottom:12px; margin-top:8px;" loading="lazy">
-                    <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
-                    <span style="font-size:11px; color:var(--text-sub); margin-top:4px; font-weight:700;">${g.team || '未登錄'}</span>
+                    <span style="font-size:16px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
                 </div>`;
             };
 
-            // 將每家經紀公司變成一個霸氣的區塊
-            agencies.forEach(agencyName => {
-                let { signed, partner } = agencyGroups[agencyName];
-                let totalCount = signed.length + partner.length;
-                
-                let cardsHtml = '';
-                // 優先排旗下藝人，再排合作夥伴
-                if (signed.length > 0) cardsHtml += signed.map(g => renderGirlCard(g, false)).join('');
-                if (partner.length > 0) cardsHtml += partner.map(g => renderGirlCard(g, true)).join('');
+            let cardsHtml = '';
+            if (signed.length > 0) cardsHtml += signed.map(g => renderGirlCard(g, false)).join('');
+            if (partner.length > 0) cardsHtml += partner.map(g => renderGirlCard(g, true)).join('');
 
-                html += `
+            let detailHtml = `
+                <div style="max-width: 1000px; margin: 0 auto; padding-bottom: 20px;">
+                    <button class="back-btn" onclick="window.currentAgency=null; window.renderAgencyHub();">
+                        <span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回經紀大廳</span>
+                    </button>
+                </div>
                 <div style="background: rgba(17,20,24,0.6); border: 1px solid var(--border-color); border-top: 4px solid #03a9f4; border-radius: 12px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 25px;">
                         <h3 style="font-family:var(--sport-font); font-size:clamp(20px, 4vw, 26px); font-weight:900; color:#fff; margin:0; letter-spacing:2px; text-transform:uppercase;">${agencyName}</h3>
@@ -6310,11 +6335,10 @@ window.renderMinigameStart = function() {
                     <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:flex-start;">
                         ${cardsHtml}
                     </div>
-                </div>`;
-            });
+                </div>
+            `;
 
-            html += `</div>`;
-            container.innerHTML = html;
+            container.innerHTML = detailHtml;
         };
         window.onload = loadData;
     </script>
