@@ -2063,6 +2063,11 @@
                 init(); 
                 enableEnterButton();
                 
+                // ✨ 新增：網站載入完成時，背景默默去抓取全網最新票數，確保女孩圖鑑一打開就有資料！
+                if (typeof window.fetchGlobalVotes === 'function') {
+                    window.fetchGlobalVotes();
+                }
+                
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches })); } catch(e) {}
 
             } catch (err) {
@@ -4649,10 +4654,15 @@
                 const voteKey = 'korea_pro_' + c.uid; 
                 const herVotes = parseInt(window.globalVoteData ? (window.globalVoteData[voteKey] || 0) : 0);
                 
-                // 為了精準催票，只要她是外援，或是已經有票數了，就秀出專屬催票框！
-                const isForeign = (c.nat || "").includes("韓") || (c.nat || "").includes("日");
+                // ✨ 修正：嚴格區分純外援與混血兒，且排除練習生，與投票大廳邏輯100%同步
+                const natStr = c.nat || "";
+                const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
+                const isForeign = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat; // 有日韓國籍，且「沒有」台港馬國籍才算純外援
                 
-                if (isForeign || herVotes > 0) {
+                const noteTextStr = (c.note || c['備註'] || c.備註 || "").trim();
+                const isValidStatus = noteTextStr === "" || (!noteTextStr.includes("練習生") && !noteTextStr.includes("培訓生"));
+
+                if (isForeign && isValidStatus) {
                     voteBtnHtml = `
                     <div style="margin-top: 15px; margin-bottom: 15px;">
                         <div style="background: linear-gradient(135deg, #ff0044, #9c27b0); padding: 16px; border-radius: 8px; text-align: center; cursor: pointer; box-shadow: 0 6px 15px rgba(255,0,68,0.4); border: 1px solid #ff4757; transition: 0.3s;" 
