@@ -6227,21 +6227,33 @@ window.renderMinigameStart = function() {
             }
         };
         // ==========================================
-        // 🏢 經紀公司專屬大廳 渲染引擎
+        // 🏢 經紀公司專屬大廳 渲染引擎 (支援旗下藝人/合作夥伴分類)
         // ==========================================
         window.renderAgencyHub = function() {
             const container = document.getElementById('agency-container');
             
-            // 抓出所有經紀公司資料
+            // 1. 抓出所有經紀公司資料，並內部分類為「旗下藝人」與「合作夥伴」
             let agencyGroups = {};
             dbGirls.forEach(g => {
                 let agency = (g.agency || g['經紀公司'] || "").trim();
-                if (!agency) return; // 沒有寫經紀公司的女孩不列入
+                if (!agency) return;
 
-                if (!agencyGroups[agency]) agencyGroups[agency] = [];
-                // 防重複：確保同一位女孩不會重複出現兩次
-                if (!agencyGroups[agency].some(existing => existing.uid === g.uid)) {
-                    agencyGroups[agency].push(g);
+                if (!agencyGroups[agency]) {
+                    agencyGroups[agency] = { signed: [], partner: [] };
+                }
+                
+                // 防重複機制
+                let isDuplicate = agencyGroups[agency].signed.some(existing => existing.uid === g.uid) || 
+                                  agencyGroups[agency].partner.some(existing => existing.uid === g.uid);
+                
+                if (!isDuplicate) {
+                    // ✨ 智慧分類：檢查備註欄位是否包含「合作」字眼
+                    let note = (g.note || g['備註'] || g.備註 || "").trim();
+                    if (note.includes("合作")) {
+                        agencyGroups[agency].partner.push(g);
+                    } else {
+                        agencyGroups[agency].signed.push(g);
+                    }
                 }
             });
 
@@ -6261,28 +6273,39 @@ window.renderMinigameStart = function() {
                 <div style="display:flex; flex-direction:column; gap:40px;">
             `;
 
+            // ✨ 卡片製造機：根據身分給予不同的邊框與徽章
+            const renderGirlCard = (g, isPartner) => {
+                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                
+                // 合作夥伴用「橘色」，旗下藝人用「藍色」
+                const badgeColor = isPartner ? '#ff9800' : '#03a9f4'; 
+                const badgeText = isPartner ? '🤝 合作夥伴' : '✨ 旗下藝人';
+                
+                return `
+                <div style="flex: 0 0 auto; width: 135px; display:flex; flex-direction:column; align-items:center; cursor:pointer; background: var(--bg-card); border: 1px solid var(--border-color); padding: 15px 10px; border-radius: 8px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position:relative;" onmouseover="this.style.borderColor='${badgeColor}'; this.style.transform='translateY(-6px) scale(1.03)'; this.style.boxShadow='0 10px 20px ${badgeColor}40';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.5)';" onclick="window.openModal('${g.uid}')">
+                    <div style="position:absolute; top:-8px; background:${badgeColor}; color:#000; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; letter-spacing:1px; z-index:10; border: 1px solid #111;">${badgeText}</div>
+                    <img src="${window.getCdnUrl(g.img)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid ${badgeColor}; background:#252c36; margin-bottom:12px; margin-top:8px;" loading="lazy">
+                    <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
+                    <span style="font-size:11px; color:var(--text-sub); margin-top:4px; font-weight:700;">${g.team || '未登錄'}</span>
+                </div>`;
+            };
+
             // 將每家經紀公司變成一個霸氣的區塊
             agencies.forEach(agencyName => {
-                let girls = agencyGroups[agencyName];
+                let { signed, partner } = agencyGroups[agencyName];
+                let totalCount = signed.length + partner.length;
                 
-                // 畫出這家公司旗下的所有女孩照片
-                let cardsHtml = girls.map(g => {
-                    const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                    const dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                    
-                    return `
-                    <div style="flex: 0 0 auto; width: 135px; display:flex; flex-direction:column; align-items:center; cursor:pointer; background: var(--bg-card); border: 1px solid var(--border-color); padding: 15px 10px; border-radius: 8px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onmouseover="this.style.borderColor='#03a9f4'; this.style.transform='translateY(-6px) scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(3,169,244,0.3)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.5)';" onclick="window.openModal('${g.uid}')">
-                        <img src="${window.getCdnUrl(g.img)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid #03a9f4; background:#252c36; margin-bottom:12px;">
-                        <span style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${dName}</span>
-                        <span style="font-size:11px; color:var(--text-sub); margin-top:4px; font-weight:700;">${g.team || '未登錄'}</span>
-                    </div>`;
-                }).join('');
+                let cardsHtml = '';
+                // 優先排旗下藝人，再排合作夥伴
+                if (signed.length > 0) cardsHtml += signed.map(g => renderGirlCard(g, false)).join('');
+                if (partner.length > 0) cardsHtml += partner.map(g => renderGirlCard(g, true)).join('');
 
                 html += `
                 <div style="background: rgba(17,20,24,0.6); border: 1px solid var(--border-color); border-top: 4px solid #03a9f4; border-radius: 12px; padding: 25px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 25px;">
                         <h3 style="font-family:var(--sport-font); font-size:clamp(20px, 4vw, 26px); font-weight:900; color:#fff; margin:0; letter-spacing:2px; text-transform:uppercase;">${agencyName}</h3>
-                        <span style="font-size:13px; font-weight:900; color:#03a9f4; background:rgba(3,169,244,0.1); padding:4px 12px; border-radius:20px; border:1px solid rgba(3,169,244,0.3); white-space:nowrap;">旗下陣容 ${girls.length} 名</span>
+                        <span style="font-size:13px; font-weight:900; color:#03a9f4; background:rgba(3,169,244,0.1); padding:4px 12px; border-radius:20px; border:1px solid rgba(3,169,244,0.3); white-space:nowrap;">陣容總計 ${totalCount} 名</span>
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:flex-start;">
                         ${cardsHtml}
