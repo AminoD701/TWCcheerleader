@@ -5131,7 +5131,7 @@
         };
 
         // =========================================================================
-        // ✨ 同一天聚合的「日曆方塊卡」(外籍行程)
+        // ✨ 同一天聚合的「日曆方塊卡」(外籍行程) - 尊爵電競升級版
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5164,47 +5164,53 @@
                 const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                     
-                    // ✨ 全新排版：將每個女孩變成獨立的「大照片 + 名字」區塊
+                    // ✨ 升級 1：女孩大頭貼強制雙欄對齊 (Grid)，照片放大，不再東倒西歪！
                     const girlsHtml = attendGirls.map(n => {
                         const g = girlMap.get(n);
                         let dName = n;
-                        // 預設無照片時的替代頭像 (放大版)
-                        let imgHtml = `<div style="width:60px; height:60px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; border:2px solid var(--border-color);"><svg viewBox="0 0 24 24" style="width:28px; height:28px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
+                        let imgHtml = `<div style="width:48px; height:48px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; border:2px solid var(--border-color);"><svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
                         
                         if (g) {
-                            // 智慧國籍分流：台港馬顯示綽號，外籍顯示本名
                             const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                             dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                            
-                            // 放大頭像 (由原本的 36px 升級為 60px)
-                            imgHtml = `<img src="${window.getCdnUrl(g.img)}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--event-accent); margin:0 auto 8px; display:block; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" loading="lazy">`;
+                            imgHtml = `<img src="${window.getCdnUrl(g.img)}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--event-accent); margin:0 auto 8px; display:block; box-shadow: 0 4px 8px rgba(0,0,0,0.5);" loading="lazy">`;
                         }
 
                         return `
-                        <div style="display:flex; flex-direction:column; align-items:center; flex: 1 1 45%; padding: 5px 0;">
+                        <div style="display:flex; flex-direction:column; align-items:center; padding: 5px 0;">
                             ${imgHtml}
-                            <span style="font-size:15px; font-weight:900; color:#fff; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
+                            <span style="font-size:14px; font-weight:900; color:#fff; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
                         </div>`;
                     }).join('');
+                    
+                    const timeBadge = e.time ? `<div style="background: color-mix(in srgb, var(--event-accent) 15%, transparent); color: var(--event-accent); font-family: var(--sport-font); font-size: 11px; font-weight: 900; padding: 3px 10px; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--event-accent) 30%, transparent); letter-spacing: 1px; margin-bottom: 8px; display: inline-block;">⏰ ${e.time}</div>` : '';
 
+                    // ✨ 升級 2：資訊置頂！把時間、活動名、地點拉到卡片最上方，並用虛線隔開女孩名單
                     return `
-                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="padding: 15px 10px; display:flex; flex-wrap:wrap; justify-content:center; gap: 8px;">
-                        ${girlsHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700; padding:10px 0;">名單確認中</div>'}
+                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column;" onmouseover="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='var(--event-accent)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'; this.style.boxShadow='none';">
                         
-                        <div style="width:100%; font-size:12px; color:var(--text-sub); font-weight:700; margin-top:4px; text-align:center; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            📍 ${e.eventname || "活動賽事"}
+                        <div style="text-align: center; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 15px; margin-bottom: 15px;">
+                            ${timeBadge}
+                            <div style="font-size: 17px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 6px;">${e.eventname || "活動賽事"}</div>
+                            <div style="font-size: 12px; color: var(--text-sub); font-weight: 700;">📍 ${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}</div>
                         </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%;">
+                            ${girlsHtml || '<div style="grid-column: 1/-1; color:var(--text-sub); font-size:13px; font-weight:700; text-align:center; padding:10px 0;">名單確認中</div>'}
+                        </div>
+                        
                     </div>`;
                 }).join('');
 
+                // ✨ 升級 3：日期標題霸氣化！加大字體，加入文字陰影與深邃黑漸層底
                 return `
-                <div class="event-date-card ${isExp?'expired':''}">
-                    <div class="event-date-header">
-                        <div class="event-date-month">${date.monStr}</div>
-                        <div class="event-date-day">${String(date.day).padStart(2,'0')}</div>
-                        <div style="font-size:11px; color:var(--text-sub); margin-top:2px;">${date.week}</div>
+                <div class="event-date-card ${isExp?'expired':''}" style="background: linear-gradient(180deg, #1a1e24 0%, #0d0f12 100%); border: 1px solid #2d3748; border-top: 4px solid var(--event-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
+                    <div class="event-date-header" style="background: rgba(0,0,0,0.25); padding: 18px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-family: var(--sport-font); font-size: 15px; color: var(--event-accent); font-weight: 900; letter-spacing: 2px; line-height: 1; margin-bottom: 6px; text-transform: uppercase;">${date.monStr}</div>
+                        <div style="font-family: var(--sport-font); font-size: 52px; color: #fff; font-weight: 900; line-height: 1; text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">${String(date.day).padStart(2,'0')}</div>
+                        <div style="font-size: 13px; color: var(--text-sub); margin-top: 8px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-family: var(--sport-font);">${date.week}</div>
                     </div>
-                    <div class="event-slots-container">
+                    <div class="event-slots-container" style="padding: 15px; display: flex; flex-direction: column; background: transparent;">
                         ${slotsHtml}
                     </div>
                 </div>`;
@@ -5213,12 +5219,31 @@
             const groupedUp = groupEventsByDate(up);
             const groupedEx = groupEventsByDate(ex);
 
-            let html = groupedUp.length 
+            // ✨ 終極解方：動態注入 CSS 霸王條款！將 Grid 最小寬度從 160px 強制擴展到 260px，一舉消滅擁擠感！
+            let styleInjection = `
+                <style>
+                    #event-container .event-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+                        gap: 25px !important;
+                        width: 100% !important;
+                        align-items: start !important;
+                    }
+                    @media (max-width: 768px) {
+                        #event-container .event-grid {
+                            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+                            gap: 15px !important;
+                        }
+                    }
+                </style>
+            `;
+
+            let html = styleInjection + (groupedUp.length 
                 ? `<div class="event-grid">${groupedUp.map(g=>buildDateCard(g,false)).join('')}</div>` 
-                : (search===""?'<div style="text-align:center;padding:100px 50px;color:var(--text-sub); font-weight:700; width:100%;">目前沒有近期的活動賽事。</div>':'');
+                : (search===""?'<div style="text-align:center;padding:100px 50px;color:var(--text-sub); font-weight:700; width:100%; font-size:16px;">目前沒有近期的活動賽事。</div>':''));
             
             if(groupedEx.length) {
-                html += `<div class="event-section-divider">歷史賽事紀錄 ARCHIVE</div><div class="event-grid">${groupedEx.map(g=>buildDateCard(g,true)).join('')}</div>`;
+                html += `<div class="event-section-divider" style="margin-top: 50px; color: #888;">歷史賽事紀錄 ARCHIVE</div><div class="event-grid">${groupedEx.map(g=>buildDateCard(g,true)).join('')}</div>`;
             }
             
             document.getElementById('event-container').innerHTML = html;
