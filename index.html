@@ -1460,30 +1460,30 @@
             .poster-votes { font-size: 10px; }
         }
 /* =========================================
-           ✨ 個人詳細彈窗 (電腦版左右雙欄完美比例優化 - 巨型海報展現版)
+           ✨ 個人詳細彈窗 (電腦版左右雙欄完美比例優化 - 黃金六四主角版)
         ========================================= */
         @media (min-width: 769px) {
-            /* 1. 放大彈窗總寬度，從原本的 880px 霸氣拉寬到 1050px！ */
-            .modal-content { max-width: 1050px !important; }
+            /* 1. 彈窗總寬度再拉寬到 1100px，釋放更多空間給照片！ */
+            .modal-content { max-width: 1100px !important; }
             
             /* ✨ 關鍵修正 1：只有「包含女孩照片」的圖鑑彈窗，才轉為左右雙欄排列！ */
             .modal-layout:has(.modal-photo) { 
                 flex-direction: row !important; 
             }
             
-            /* 2. 照片區塊擴張到 50%，高度拉升，防裁切！ */
+            /* 2. 霸氣宣言：照片區塊擴張到 60%，絕對主角防裁切！ */
             .modal-photo { 
-                width: 50% !important; 
+                width: 60% !important; 
                 height: auto !important; 
                 min-height: 650px; 
                 border-bottom: none !important; 
                 border-right: 6px solid var(--modal-accent, #fff) !important; 
             }
 
-            /* ✨ 關鍵修正 2：資訊區塊佔剩餘 50%，加大 Padding 增加呼吸感！ */
+            /* ✨ 關鍵修正 2：資訊區塊縮減至精緻的 40%，讓排版更緊湊俐落！ */
             .modal-layout:has(.modal-photo) .modal-body { 
-                width: 50% !important; 
-                padding: 50px 45px !important; 
+                width: 40% !important; 
+                padding: 45px 35px !important; /* 配合寬度縮減，微調 Padding 避免文字太擠 */
                 display: flex; 
                 flex-direction: column; 
                 justify-content: center; 
@@ -1497,7 +1497,7 @@
                 margin-bottom: 25px !important; 
             }
 
-            /* 4. 配合大彈窗，微微放大名字與背號，氣勢跟上！ */
+            /* 4. 配合大彈窗，維持大氣的名字與背號！ */
             .modal-nickname { font-size: 34px !important; }
             .modal-number { font-size: 26px !important; padding: 4px 15px !important; }
             .modal-ig-btn { margin-top: 30px !important; padding: 15px !important; font-size: 16px !important; }
