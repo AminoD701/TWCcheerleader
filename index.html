@@ -4634,16 +4634,19 @@
                 }).join('');
                 
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
-                let noteText = (c.note || c['備註'] || c.備註 || "").trim();
+                let rawNoteText = (c.note || c['備註'] || c.備註 || "").trim();
 
-                // ✨ 修正 1：改為右下角高質感專屬動態標籤 (完美避開右上角愛心按鈕，並正名為「練習生」)
+                // ✨ 隱形斗篷：把「合作夥伴」相關字眼從圖鑑的顯示字串中抹除！
+                let cleanNote = rawNoteText.replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
+
+                // ✨ 改為右下角高質感專屬動態標籤
                 let badgeHtml = '';
-                if (noteText.includes('隊長') || noteText.includes('總監') || noteText.includes('經理')) {
-                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; font-weight: 900; border: 1px solid #fff;">${noteText}</div>`;
-                } else if (noteText.includes('練習生') || noteText.includes('培訓')) {
+                if (cleanNote.includes('隊長') || cleanNote.includes('總監') || cleanNote.includes('經理')) {
+                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; font-weight: 900; border: 1px solid #fff;">${cleanNote}</div>`;
+                } else if (cleanNote.includes('練習生') || cleanNote.includes('培訓')) {
                     badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #00e676, #00b0ff); color: #000; font-weight: 900; border: 1px solid #fff;">練習生</div>`;
-                } else if (noteText) {
-                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20;">${noteText}</div>`;
+                } else if (cleanNote !== "") {
+                    badgeHtml = `<div class="photo-note-tag" style="z-index: 20;">${cleanNote}</div>`;
                 }
 
                 // ✨ 升級 2：本命女孩(加入最愛)專屬「SSR全像閃卡光暈」
