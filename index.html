@@ -5131,7 +5131,7 @@
         };
 
         // =========================================================================
-        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (巨型浮水印 + 完美動線對齊版)
+        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (全寬橫幅 Banner + 數據裝飾版)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5161,7 +5161,6 @@
             const buildDateCard = (group, isExp) => {
                 const { date, events } = group;
                 
-                // 確保同日期的活動，絕對按照時間先後順序排列
                 const getTimeVal = (tStr) => {
                     if (!tStr) return 9999;
                     let m = tStr.match(/(\d{1,2}):(\d{2})/);
@@ -5173,7 +5172,6 @@
                 const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                     
-                    // ✨ 女孩頭像與資訊：保持大尺寸，並加上更精緻的立體光影
                     const girlsHtml = attendGirls.map(n => {
                         const g = girlMap.get(n);
                         let dName = n;
@@ -5194,8 +5192,6 @@
                     
                     const timeBadge = e.time ? `<div style="color: #fff; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 6px; width: fit-content; border: 1px solid rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:var(--event-accent); stroke-width:3;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${e.time}</div>` : `<div style="color: var(--text-sub); font-family: var(--sport-font); font-size: 14px; font-weight: 900; letter-spacing: 1px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; width: fit-content;">TBA</div>`;
 
-                    // ✨ 黃金動線排版進化：時間(左) ➔ 女孩(中) ➔ 資訊(最右)
-                    // 改用極簡深灰色底與動態亮光飾條，取消內建 padding 造成的左右不齊
                     return `
                     <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 130px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
                          onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='color-mix(in srgb, var(--event-accent) 50%, transparent)'; this.style.transform='scale(1.01)'; this.querySelector('.slot-accent-bar').style.opacity='1'; this.querySelector('.slot-accent-bar').style.boxShadow='0 0 12px var(--event-accent)';" 
@@ -5219,23 +5215,42 @@
                     </div>`;
                 }).join('');
 
+                const currentYear = date.year || new Date().getFullYear();
+
+                // ✨ 終極升級：取消側邊排版，改為頂部全寬 Banner！
                 return `
-                <div class="event-date-card ${isExp?'expired':''}" style="background: linear-gradient(145deg, #15191e 0%, #0d0f12 100%); border: 1px solid #2d3748; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; transition: 0.3s; width: 100%; box-sizing: border-box; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
+                <div class="event-date-card ${isExp?'expired':''}" style="background: linear-gradient(145deg, #15191e 0%, #0d0f12 100%); border: 1px solid #2d3748; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: 0.3s; width: 100%; box-sizing: border-box; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
                     
-                    <div class="event-date-header" style="background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); min-width: 150px; width: 15%; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; position: relative; overflow: hidden;">
+                    <div class="event-date-header" style="background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, transparent 100%); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 18px 30px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden;">
                         
-                        <div class="giant-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--sport-font); font-size: 160px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; user-select: none; line-height: 1;">${date.day ? String(date.day).padStart(2,'0') : ""}</div>
+                        <div style="position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: var(--event-accent); box-shadow: 0 0 12px var(--event-accent);"></div>
                         
-                        <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--event-accent); box-shadow: 0 0 15px var(--event-accent);"></div>
-                        
-                        <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;">
-                            <div class="event-date-month" style="font-family: var(--sport-font); font-size: 16px; color: var(--event-accent); font-weight: 900; letter-spacing: 3px; line-height: 1; margin-bottom: 12px; text-transform: uppercase;">${date.monStr || "TBA"}</div>
-                            <div class="event-date-day" style="font-family: var(--sport-font); font-size: 64px; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.8);">${date.day ? String(date.day).padStart(2,'0') : "--"}</div>
-                            <div class="event-date-week" style="font-size: 14px; color: #64748b; margin-top: 15px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-family: var(--sport-font);">${date.week || "-"}</div>
+                        <div class="giant-watermark" style="position: absolute; right: 5%; top: 50%; transform: translateY(-50%); font-family: var(--sport-font); font-size: 90px; font-weight: 900; color: rgba(255,255,255,0.015); pointer-events: none; user-select: none; line-height: 1; white-space: nowrap;">${date.monStr} ${String(date.day).padStart(2,'0')}</div>
+
+                        <div style="display: flex; align-items: baseline; gap: 15px; z-index: 2;">
+                            <div style="font-family: var(--sport-font); font-size: 46px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.6);">
+                                ${date.month}/${String(date.day).padStart(2,'0')}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="font-family: var(--sport-font); font-size: 15px; color: var(--event-accent); font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">${date.week}</div>
+                                <div style="font-family: var(--sport-font); font-size: 13px; color: #64748b; font-weight: 900; letter-spacing: 1px;">${currentYear}</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 20px; z-index: 2;">
+                            <div class="desktop-only-info" style="text-align: right;">
+                                <div style="font-family: var(--sport-font); font-size: 11px; color: #64748b; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;">DAILY SCHEDULE</div>
+                                <div style="font-size: 13px; color: #cbd5e1; font-weight: 700; margin-top: 4px;">本日共安排 <span style="color: var(--event-accent); font-weight: 900; font-size: 18px; margin: 0 4px;">${events.length}</span> 場行程</div>
+                            </div>
+                            <div style="display: flex; gap: 4px; align-items: flex-end; height: 28px;">
+                                <div style="width: 4px; height: 40%; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
+                                <div style="width: 4px; height: 70%; background: rgba(255,255,255,0.2); border-radius: 2px;"></div>
+                                <div style="width: 4px; height: 100%; background: var(--event-accent); border-radius: 2px; box-shadow: 0 0 8px var(--event-accent);"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="event-slots-container" style="flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; background: transparent; min-width: 0; box-sizing: border-box;">
+                    <div class="event-slots-container" style="flex: 1; padding: 25px 30px; display: flex; flex-direction: column; gap: 15px; background: transparent; min-width: 0; box-sizing: border-box;">
                         ${slotsHtml}
                     </div>
                 </div>`;
@@ -5244,7 +5259,7 @@
             const groupedUp = groupEventsByDate(up);
             const groupedEx = groupEventsByDate(ex);
 
-            // ✨ CSS 注入：強制對齊邊界，修復手機版留白不一致的問題
+            // ✨ CSS 注入：因為已經改為上下堆疊，移除對外層 card 錯誤的 flex-direction: row 設定
             let styleInjection = `
                 <style>
                     #event-container .event-grid {
@@ -5260,26 +5275,14 @@
                     /* 隱藏網頁版橫向捲軸 */
                     .event-slot-girls-col::-webkit-scrollbar { display: none; }
                     
-                    /* 📱 手機版專屬完美響應式對齊 */
                     @media (max-width: 768px) {
-                        .event-date-card { flex-direction: column !important; }
+                        /* 隱藏電腦版專屬的裝飾與數據 */
+                        .desktop-only-info { display: none !important; }
                         
-                        /* 日期橫排對齊，隱藏巨型浮水印 */
+                        /* 手機版：日期橫幅縮小 Padding */
                         .event-date-header { 
-                            flex-direction: row !important; 
-                            align-items: baseline !important; 
-                            gap: 12px; 
                             padding: 15px 20px !important; 
-                            border-right: none !important; 
-                            border-bottom: 1px solid rgba(255,255,255,0.08) !important; 
-                            justify-content: flex-start !important; 
-                            width: 100% !important; 
-                            background: rgba(0,0,0,0.4) !important;
                         }
-                        .event-date-header > div { margin: 0 !important; }
-                        .event-date-header .event-date-day { font-size: 48px !important; }
-                        .event-date-header .event-date-month, .event-date-header .event-date-week { font-size: 14px !important; }
-                        .giant-watermark { display: none !important; }
                         
                         .event-slots-container { padding: 15px !important; gap: 15px !important; }
                         
@@ -5294,7 +5297,6 @@
                             box-sizing: border-box !important;
                         }
                         
-                        /* 縮小時間間距，取消左邊框 */
                         .event-slot-time-col { 
                             flex: none !important; 
                             width: 100% !important; 
@@ -5304,7 +5306,6 @@
                         }
                         .event-slot-time-col div { font-size: 15px !important; }
                         
-                        /* 女孩靠左對齊，無邊框 */
                         .event-slot-girls-col { 
                             flex: none !important; 
                             width: 100% !important; 
@@ -5314,7 +5315,6 @@
                             justify-content: flex-start !important; 
                         }
                         
-                        /* 活動細節加上底色區分，且靠左對齊 */
                         .event-slot-info-col { 
                             flex: none !important; 
                             width: 100% !important; 
