@@ -1880,6 +1880,10 @@
         const teamThemes = {
             "全部啦啦隊": { accent: "#ffeb3b", logo: "", noLogo: true, league: "" },
             
+            // 🌟 新增：2026 中職明星賽限定夢幻雙雄
+            "ALLSTAR": { accent: "#ffd700", logo: "images/allstar_logo.png", noLogo: true, league: "CPBL" }, // 耀眼金 (明星隊)
+            "TAIWAN": { accent: "#00e676", logo: "images/taiwan_logo.png", noLogo: true, league: "CPBL" },   // 螢光綠 (國家隊)
+            
             // ⚾ 棒球組 (維持你原本的舊檔名，完全沒動！)
             "Passion Sisters_棒球": { accent: "#ffeb3b", logo: "images/brothers_logo.png", noLogo: false, league: "CPBL" },
             "Fubon Angels_棒球": { accent: "#2196f3", logo: "images/fubon_logo.png", noLogo: false, league: "CPBL" },
@@ -2448,15 +2452,34 @@
             else if (league === "TPBL" || league === "PLG") sport = "籃球";
             else if (league === "TPVL") sport = "排球";
 
-            // 1. 抓取這隊今天的班表與女孩 (✨ 終極跨界引擎：支援常規班表 + 備註指名客串)
+            // 1. 抓取這隊今天的班表與女孩 (✨ 終極跨界＋明星賽大融合引擎)
             let scheduledGirls = dbSchedules.filter(s => {
                 if (s.safeDate.num !== dateNum) return false;
 
-                // 情況 A：她本來就是這支啦啦隊的 (常規過濾)
+                let noteStr = (s.note || "").toLowerCase();
+
+                // 🌟 核心攔截：判定今天是不是中職明星賽 (7/18 或 7/19)
+                // 只要備註有提到「明星賽」，直接發放最高權限通行證！
+                if (noteStr.includes("明星賽")) {
+                    // 如果這場賽事中心的隊伍叫 ALLSTAR 或 TAIWAN
+                    if (sportTeamName === "ALLSTAR" || sportTeamName === "TAIWAN") {
+                        // 智慧分流：根據您在 Excel 備註裡寫的分配來抓人
+                        // 範例：如果備註寫「7/18中職明星賽(ALLSTAR)」或「7/18中職明星賽 ALLSTAR」
+                        if (noteStr.includes(sportTeamName.toLowerCase())) {
+                            return true;
+                        }
+                        // 防呆 fallback：如果您備註只有單純寫「7/18中職明星賽」而沒寫分隊
+                        // 預設就讓她們在兩隊的賽事中心都看得到名單，確保不會開天窗！
+                        if (!noteStr.includes("allstar") && !noteStr.includes("taiwan")) {
+                            return true;
+                        }
+                    }
+                }
+
+                // 情況 A：一般例行賽 - 她本來就是這支啦啦隊的
                 let isRegular = s.team === cheerTeam && (sport === "" || (s.sport || "").includes(sport));
 
-                // 情況 B：她是別隊的，但「備註」裡面有明確寫到這支啦啦隊或球隊的名字 (跨界通行證)
-                let noteStr = (s.note || "").toLowerCase();
+                // 情況 B：一般例行賽 - 跨界客串 (備註指名球隊)
                 let isGuest = noteStr !== "" && (noteStr.includes(cheerTeam.toLowerCase()) || (sportTeamName && noteStr.includes(sportTeamName.toLowerCase())));
 
                 return isRegular || isGuest;
