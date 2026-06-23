@@ -5131,7 +5131,7 @@
         };
 
         // =========================================================================
-        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (頂級電競透光質感 + 絕對等高防斷行)
+        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (巨型浮水印 + 完美動線對齊版)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5161,6 +5161,7 @@
             const buildDateCard = (group, isExp) => {
                 const { date, events } = group;
                 
+                // 確保同日期的活動，絕對按照時間先後順序排列
                 const getTimeVal = (tStr) => {
                     if (!tStr) return 9999;
                     let m = tStr.match(/(\d{1,2}):(\d{2})/);
@@ -5172,7 +5173,7 @@
                 const slotsHtml = events.map(e => {
                     const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                     
-                    // ✨ 質感升級 1：女孩頭像改為「雙層立體感」，底層是深色漸層，上層是頭像
+                    // ✨ 女孩頭像與資訊：保持大尺寸，並加上更精緻的立體光影
                     const girlsHtml = attendGirls.map(n => {
                         const g = girlMap.get(n);
                         let dName = n;
@@ -5181,60 +5182,60 @@
                         if (g) {
                             const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                             dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                            imgHtml = `
-                            <div style="width:65px; height:65px; border-radius:50%; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.8)); padding: 2px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; box-shadow: 0 5px 12px rgba(0,0,0,0.6); flex-shrink:0;">
-                                <img src="${window.getCdnUrl(g.img)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:top center; border: 2px solid #0a0c0f;" loading="lazy">
-                            </div>`;
+                            imgHtml = `<img src="${window.getCdnUrl(g.img)}" style="width:65px; height:65px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--border-color); margin-bottom:8px; display:block; box-shadow: 0 4px 10px rgba(0,0,0,0.6); flex-shrink:0; transition: 0.3s;" onmouseover="this.style.borderColor='var(--event-accent)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='none';" loading="lazy">`;
                         }
 
                         return `
-                        <div style="display:flex; flex-direction:column; align-items:center; flex: 0 0 auto; margin-right: 15px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; flex: 0 0 auto; margin-right: 12px; cursor: pointer;" onclick="window.openModal('${g ? g.uid : n}'); event.stopPropagation();">
                             ${imgHtml}
-                            <span style="font-size:14px; font-weight:900; color:#fff; text-align:center; width:85px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${dName}</span>
+                            <span style="font-size:15px; font-weight:900; color:#fff; text-align:center; width:85px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
                         </div>`;
                     }).join('');
                     
-                    // ✨ 質感升級 2：時間標籤改為「科技感發光指示牌」
-                    const timeBadge = e.time 
-                        ? `<div style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(90deg, color-mix(in srgb, var(--event-accent) 15%, transparent) 0%, transparent 100%); border-left: 2px solid var(--event-accent); padding: 6px 12px; border-radius: 4px; color: #fff; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 8px color-mix(in srgb, var(--event-accent) 50%, transparent);">
-                               <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:var(--event-accent); stroke-width:2.5;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${e.time}
-                           </div>` 
-                        : `<div style="color: #64748b; font-family: var(--sport-font); font-size: 14px; font-weight: 900; letter-spacing: 1px; padding-left: 12px; border-left: 2px solid #64748b;">TBA</div>`;
+                    const timeBadge = e.time ? `<div style="color: #fff; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 6px; width: fit-content; border: 1px solid rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:var(--event-accent); stroke-width:3;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${e.time}</div>` : `<div style="color: var(--text-sub); font-family: var(--sport-font); font-size: 14px; font-weight: 900; letter-spacing: 1px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; width: fit-content;">TBA</div>`;
 
-                    // ✨ 質感升級 3：卡片去除醜陋方塊，改為微光漸層背景與滑順邊框
+                    // ✨ 黃金動線排版進化：時間(左) ➔ 女孩(中) ➔ 資訊(最右)
+                    // 改用極簡深灰色底與動態亮光飾條，取消內建 padding 造成的左右不齊
                     return `
-                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 140px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
-                         onmouseover="this.style.background='linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)'; this.style.borderColor='color-mix(in srgb, var(--event-accent) 40%, transparent)'; this.style.transform='translateX(6px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';" 
-                         onmouseout="this.style.background='linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)'; this.style.borderColor='rgba(255,255,255,0.05)'; this.style.transform='none'; this.style.boxShadow='none';">
+                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 130px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
+                         onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='color-mix(in srgb, var(--event-accent) 50%, transparent)'; this.style.transform='scale(1.01)'; this.querySelector('.slot-accent-bar').style.opacity='1'; this.querySelector('.slot-accent-bar').style.boxShadow='0 0 12px var(--event-accent)';" 
+                         onmouseout="this.style.background='rgba(255,255,255,0.015)'; this.style.borderColor='rgba(255,255,255,0.04)'; this.style.transform='none'; this.querySelector('.slot-accent-bar').style.opacity='0.2'; this.querySelector('.slot-accent-bar').style.boxShadow='none';">
                         
-                        <div class="event-slot-time-col" style="flex: 0 0 130px; text-align: left;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--event-accent); opacity: 0.2; transition: 0.3s;" class="slot-accent-bar"></div>
+
+                        <div class="event-slot-time-col" style="flex: 0 0 120px; text-align: left; padding-left: 10px;">
                             ${timeBadge}
                         </div>
 
-                        <div class="event-slot-girls-col" style="flex: 1; display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-start; border-left: 1px dashed rgba(255,255,255,0.1); padding-left: 25px; border-right: 1px dashed rgba(255,255,255,0.1); padding-right: 25px; margin-right: 10px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; height: 100%;">
+                        <div class="event-slot-girls-col" style="flex: 1; display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-start; border-left: 1px solid rgba(255,255,255,0.08); padding-left: 20px; margin-right: 10px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; height: 100%;">
                             ${girlsHtml || '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">名單確認中</div>'}
                         </div>
 
-                        <div class="event-slot-info-col" style="flex: 0 0 32%; min-width: 250px; text-align: left; padding: 0 15px; overflow: hidden; display: flex; flex-direction: column; justify-content: center;">
-                            <div style="font-size: 20px; font-weight: 900; color: #f8fafc; line-height: 1.3; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.8);" title="${e.eventname || "活動賽事"}">${e.eventname || "活動賽事"}</div>
-                            <div style="font-size: 13px; color: #94a3b8; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${e.address ? e.address : '地點請見官方公告'}">📍 ${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}</div>
+                        <div class="event-slot-info-col" style="flex: 0 0 30%; min-width: 200px; text-align: right; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid rgba(255,255,255,0.08);">
+                            <div style="font-size: 19px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${e.eventname || "活動賽事"}">${e.eventname || "活動賽事"}</div>
+                            <div style="font-size: 13px; color: var(--text-sub); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${e.address ? e.address : '地點請見官方公告'}">📍 ${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}</div>
                         </div>
                         
                     </div>`;
                 }).join('');
 
-                // ✨ 質感升級 4：大卡片取消生硬的左邊框，改用「頂部發光飾條」與深邃背景
                 return `
-                <div class="event-date-card ${isExp?'expired':''}" style="background: #111418; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); display: flex; transition: 0.3s; width: 100%; box-sizing: border-box; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)';">
+                <div class="event-date-card ${isExp?'expired':''}" style="background: linear-gradient(145deg, #15191e 0%, #0d0f12 100%); border: 1px solid #2d3748; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; transition: 0.3s; width: 100%; box-sizing: border-box; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
                     
-                    <div class="event-date-header" style="background: linear-gradient(180deg, #1a1e24 0%, #111418 100%); min-width: 140px; width: 14%; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.04); box-sizing: border-box; position: relative;">
-                        <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--event-accent); box-shadow: 0 0 12px var(--event-accent);"></div>
-                        <div class="event-date-month" style="font-family: var(--sport-font); font-size: 15px; color: var(--event-accent); font-weight: 900; letter-spacing: 3px; line-height: 1; margin-bottom: 12px; text-transform: uppercase;">${date.monStr || "TBA"}</div>
-                        <div class="event-date-day" style="font-family: var(--sport-font); font-size: 64px; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.8);">${date.day ? String(date.day).padStart(2,'0') : "--"}</div>
-                        <div class="event-date-week" style="font-size: 13px; color: #64748b; margin-top: 14px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-family: var(--sport-font);">${date.week || "-"}</div>
+                    <div class="event-date-header" style="background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); min-width: 150px; width: 15%; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; position: relative; overflow: hidden;">
+                        
+                        <div class="giant-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--sport-font); font-size: 160px; font-weight: 900; color: rgba(255,255,255,0.02); pointer-events: none; user-select: none; line-height: 1;">${date.day ? String(date.day).padStart(2,'0') : ""}</div>
+                        
+                        <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--event-accent); box-shadow: 0 0 15px var(--event-accent);"></div>
+                        
+                        <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;">
+                            <div class="event-date-month" style="font-family: var(--sport-font); font-size: 16px; color: var(--event-accent); font-weight: 900; letter-spacing: 3px; line-height: 1; margin-bottom: 12px; text-transform: uppercase;">${date.monStr || "TBA"}</div>
+                            <div class="event-date-day" style="font-family: var(--sport-font); font-size: 64px; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.8);">${date.day ? String(date.day).padStart(2,'0') : "--"}</div>
+                            <div class="event-date-week" style="font-size: 14px; color: #64748b; margin-top: 15px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-family: var(--sport-font);">${date.week || "-"}</div>
+                        </div>
                     </div>
 
-                    <div class="event-slots-container" style="flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 18px; background: radial-gradient(circle at right top, rgba(255,255,255,0.02) 0%, transparent 40%); min-width: 0; box-sizing: border-box;">
+                    <div class="event-slots-container" style="flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; background: transparent; min-width: 0; box-sizing: border-box;">
                         ${slotsHtml}
                     </div>
                 </div>`;
@@ -5243,7 +5244,7 @@
             const groupedUp = groupEventsByDate(up);
             const groupedEx = groupEventsByDate(ex);
 
-            // ✨ CSS 注入：確保手機版排版同樣具有無框的高級感
+            // ✨ CSS 注入：強制對齊邊界，修復手機版留白不一致的問題
             let styleInjection = `
                 <style>
                     #event-container .event-grid {
@@ -5263,24 +5264,26 @@
                     @media (max-width: 768px) {
                         .event-date-card { flex-direction: column !important; }
                         
-                        /* 日期橫排對齊，去除右邊線 */
+                        /* 日期橫排對齊，隱藏巨型浮水印 */
                         .event-date-header { 
                             flex-direction: row !important; 
                             align-items: baseline !important; 
                             gap: 12px; 
-                            padding: 18px 20px 15px !important; 
+                            padding: 15px 20px !important; 
                             border-right: none !important; 
-                            border-bottom: 1px solid rgba(255,255,255,0.05) !important; 
+                            border-bottom: 1px solid rgba(255,255,255,0.08) !important; 
                             justify-content: flex-start !important; 
                             width: 100% !important; 
+                            background: rgba(0,0,0,0.4) !important;
                         }
                         .event-date-header > div { margin: 0 !important; }
-                        .event-date-header .event-date-day { font-size: 42px !important; }
+                        .event-date-header .event-date-day { font-size: 48px !important; }
                         .event-date-header .event-date-month, .event-date-header .event-date-week { font-size: 14px !important; }
+                        .giant-watermark { display: none !important; }
                         
                         .event-slots-container { padding: 15px !important; gap: 15px !important; }
                         
-                        /* 內部卡片堆疊 */
+                        /* 內部卡片堆疊，強制寬度 100% 解決左右留白不均 */
                         .event-slot-item { 
                             flex-direction: column !important; 
                             align-items: flex-start !important; 
@@ -5291,16 +5294,17 @@
                             box-sizing: border-box !important;
                         }
                         
-                        /* 手機版：取消左側線條，改為乾淨的時間標籤 */
+                        /* 縮小時間間距，取消左邊框 */
                         .event-slot-time-col { 
                             flex: none !important; 
                             width: 100% !important; 
                             border-bottom: 1px dashed rgba(255,255,255,0.1) !important; 
                             padding-bottom: 12px !important; 
+                            padding-left: 0 !important;
                         }
                         .event-slot-time-col div { font-size: 15px !important; }
                         
-                        /* 女孩靠左對齊 */
+                        /* 女孩靠左對齊，無邊框 */
                         .event-slot-girls-col { 
                             flex: none !important; 
                             width: 100% !important; 
@@ -5310,15 +5314,17 @@
                             justify-content: flex-start !important; 
                         }
                         
-                        /* 手機版活動細節：去除底色，改用極簡側邊線條 */
+                        /* 活動細節加上底色區分，且靠左對齊 */
                         .event-slot-info-col { 
                             flex: none !important; 
                             width: 100% !important; 
                             margin-top: 5px !important; 
-                            padding: 8px 12px !important; 
-                            background: transparent !important;
+                            padding: 12px 15px !important; 
+                            background: rgba(255,255,255,0.03) !important;
+                            border-radius: 6px !important;
                             border-left: 3px solid var(--event-accent) !important;
                             box-sizing: border-box !important;
+                            text-align: left !important;
                         }
                     }
                 </style>
