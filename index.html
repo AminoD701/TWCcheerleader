@@ -6600,13 +6600,13 @@ window.renderMinigameStart = function() {
             container.innerHTML = detailHtml;
         };
         // =========================================================================
-        // ✨ 全新功能：主題日特區渲染引擎 (球隊主題日 X 賽事中心黃金聯動)
+        // ✨ 主題日特區渲染引擎 (16:9 劇院級官方海報牆 ＋ 賽事班表黃金聯動版)
         // =========================================================================
         window.renderTeamThemesHub = function() {
-            const container = document.getElementById('news-container'); // 借用中央主容器渲染
+            const container = document.getElementById('news-container'); 
             
             if (!dbThemes || dbThemes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前尚未排定球隊主題日活動 🎪</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前教練室尚未排定球隊主題日活動 🎪</div>`;
                 return;
             }
 
@@ -6617,52 +6617,71 @@ window.renderMinigameStart = function() {
                 const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
                 const tColor = (teamThemes[t.cheerteam] || { accent: "#ff5722" }).accent;
 
-                // ✨ 核心黑魔法 1：一鍵連動賽事中心女孩應援名單彈窗
-                // window.openMatchRosterModal(日期數字, 啦啦隊名, 聯盟, 啦啦隊代表色, 主場球隊名)
-                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${tColor}', '${t.team}')`;
+                // 智慧抓取您填在 Excel 裡的官方圖片網址 (img)
+                const rawImg = t.img || t.image || t.poster || "";
+                const imgUrl = rawImg ? window.getCdnUrl(rawImg.trim()) : '';
 
-                // ✨ 核心黑魔法 2：一鍵跳轉到應援班表大廳
-                // window.goToSchedule(啦啦隊名, 運動種類)
+                // 一鍵連動賽事中心與應援班表指令
+                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${tColor}', '${t.team}')`;
                 const scheduleClickCmd = `window.goToSchedule('${t.cheerteam}', '棒球')`;
 
+                // ✨ 網頁美觀設計：如果教練有放圖片，啟動 16:9 官方大圖天幕區塊 (Netflix 級雙層不裁切遮罩)
+                let posterBannerHtml = '';
+                if (imgUrl) {
+                    posterBannerHtml = `
+                    <div style="position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 380px; background: #050505; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgUrl}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.25); z-index: 1;"></div>
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${imgUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2;"></div>
+                    </div>`;
+                } else {
+                    // Fallback 機制：如果沒放圖片，自動呈現低調精緻的球隊標籤背景
+                    posterBannerHtml = `
+                    <div style="width: 100%; height: 60px; background: linear-gradient(90deg, color-mix(in srgb, ${tColor} 8%, transparent), transparent); position: relative;"></div>`;
+                }
+
                 return `
-                <div class="theme-activity-card" style="background: linear-gradient(145deg, #1a1e24 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.05); border-left: 5px solid ${tColor}; border-radius: 12px; padding: 25px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; overflow: hidden; margin-bottom: 20px; box-sizing: border-box; width:100%; transition: 0.3s;"
-                     onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='color-mix(in srgb, ${tColor} 40%, transparent)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,255,255,0.05)';">
+                <div class="theme-activity-card" style="background: linear-gradient(145deg, #16191e 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: flex; flex-direction: column; margin-bottom: 30px; box-sizing: border-box; width:100%; transition: 0.3s;"
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='color-mix(in srgb, ${tColor} 30%, transparent)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,255,255,0.05)';">
                     
-                    <div style="flex: 0 0 130px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 10px;">
-                        <div style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
-                        <div style="font-family: var(--sport-font); font-size: 13px; color: ${tColor}; font-weight: 900; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase;">${t.safeDate.week}</div>
-                        <div style="font-size: 12px; color: var(--text-sub); font-weight: 700; margin-top: 8px;">📍 ${t.venue}</div>
-                    </div>
+                    ${posterBannerHtml}
 
-                    <div style="flex: 1; text-align: left; padding-left: 25px; padding-right: 20px; min-width: 0;">
-                        <span style="font-size: 11px; background: color-mix(in srgb, ${tColor} 15%, transparent); color: ${tColor}; border: 1px solid color-mix(in srgb, ${tColor} 30%, transparent); padding: 2px 8px; border-radius: 4px; font-weight: 900; letter-spacing: 1px;">CPBL THEME DAY</span>
-                        <div style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.title}">${t.title}</div>
-                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700; margin-top: 4px;">主辦單位：${t.team} (${t.cheerteam})</div>
-                    </div>
+                    <div class="theme-card-body" style="padding: 25px 30px; display: flex; align-items: center; justify-content: space-between; position: relative;">
+                        <div style="position: absolute; left: 0; top: 20px; bottom: 20px; width: 4px; background: ${tColor}; box-shadow: 0 0 10px ${tColor}; border-radius: 0 4px 4px 0;"></div>
+                        
+                        <div style="flex: 0 0 140px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px;">
+                            <div style="font-family: var(--sport-font); font-size: 36px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
+                            <div style="font-family: var(--sport-font); font-size: 14px; color: ${tColor}; font-weight: 900; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase;">${t.safeDate.week}</div>
+                            <div style="font-size: 13px; color: var(--text-sub); font-weight: 700; margin-top: 8px;">📍 ${t.venue}</div>
+                        </div>
 
-                    <div style="display: flex; gap: 12px; align-items: center; flex-shrink:0;">
-                        <button onclick="${rosterClickCmd}" style="background: ${tColor}; color: #000; border: none; padding: 10px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">🗳️ 今日陣容</button>
-                        <button onclick="${scheduleClickCmd}" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#fff'; this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'">🗓️ 應援班表</button>
+                        <div style="flex: 1; text-align: left; padding-left: 30px; padding-right: 20px; min-width: 0;">
+                            <span style="font-size: 11px; background: color-mix(in srgb, ${tColor} 15%, transparent); color: ${tColor}; border: 1px solid color-mix(in srgb, ${tColor} 30%, transparent); padding: 2px 8px; border-radius: 4px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;">OFFICIAL THEME DAY</span>
+                            <div style="font-size: 24px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${t.title}">${t.title}</div>
+                            <div style="font-size: 14px; color: #64748b; font-weight: 700; margin-top: 4px;">球隊主辦：${t.team} <span style="opacity:0.3; margin: 0 4px;">|</span> ${t.cheerteam}</div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
+                            <button onclick="${rosterClickCmd}" style="background: ${tColor}; color: #000; border: none; padding: 12px 24px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">🗳️ 今日陣容</button>
+                            <button onclick="${scheduleClickCmd}" style="background: rgba(255,255,255,0.04); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 12px 24px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#fff'; this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)'">🗓️ 應援班表</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
 
-            // 手機版自動流暢適應堆疊
+            // 手機版自動流暢適應堆疊，圖文分離防擠壓
             let responsiveStyle = `
                 <style>
                     @media (max-width: 768px) {
-                        .theme-activity-card { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; padding: 20px !important; }
-                        .theme-activity-card > div { width: 100% !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-                        .theme-activity-card div:first-child { border-bottom: 1px dashed rgba(255,255,255,0.1) !important; padding-bottom: 10px !important; display: flex; align-items: baseline; gap: 10px; }
-                        .theme-activity-card div:first-child div:last-child { margin: 0 0 0 auto !important; }
-                        .theme-activity-card div:nth-child(3) { display: flex; gap: 8px; margin-top: 5px; }
-                        .theme-activity-card button { flex: 1; padding: 12px 10px !important; font-size: 13px !important; }
+                        .theme-card-body { flex-direction: column !important; align-items: flex-start !important; gap: 18px !important; padding: 20px !important; }
+                        .theme-card-body > div { width: 100% !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+                        .theme-card-body div:first-child { border-bottom: 1px dashed rgba(255,255,255,0.1) !important; padding-bottom: 12px !important; display: flex; align-items: baseline; gap: 10px; }
+                        .theme-card-body div:nth-child(3) { display: flex; gap: 8px; margin-top: 5px; }
+                        .theme-card-body button { flex: 1; padding: 12px 10px !important; font-size: 13px !important; }
                     }
                 </style>
             `;
 
-            container.innerHTML = responsiveStyle + `<div style="display:flex; flex-direction:column; width:100%; max-width:950px; margin:0 auto;">${themeCardsHtml}</div>`;
+            container.innerHTML = responsiveStyle + `<div style="display:flex; flex-direction:column; width:100%; max-width:950px; margin:0 auto; padding: 0 10px; box-sizing:border-box;">${themeCardsHtml}</div>`;
         };
         window.onload = loadData;
     </script>
