@@ -6606,20 +6606,6 @@ window.renderMinigameStart = function() {
             container.innerHTML = detailHtml;
         };
         // =========================================================================
-        // ✨ 主題日特區渲染引擎 (主客場獨立欄位直讀 ＋ 應援陣容智慧連動版)
-        // =========================================================================
-        window.renderTeamThemesHub = function(selectedTeam = null) {
-            const container = document.getElementById('news-container'); 
-            
-            if (!dbThemes || dbThemes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前尚未排定球隊主題日活動 🎪</div>`;
-                return;
-            }
-
-            // 依照時間先後排序
-            dbThemes.sort((a,b) => a.safeDate.num - b.safeDate.num);
-
-        // =========================================================================
         // ✨ 主題日特區渲染引擎 (SVG純淨圖示 + 標題換行 + 智慧球隊色 + 名單強悍抓取版)
         // =========================================================================
         window.renderTeamThemesHub = function(selectedTeam = null) {
