@@ -3049,8 +3049,8 @@
                   gamesHub = document.getElementById('games-container'),
                   agency = document.getElementById('agency-container'); // 👈 加入新容器
                   
-            // 開局先將所有功能區塊完全隱藏
-            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = news.style.display = vote.style.display = matches.style.display = gamesHub.style.display = 'none';
+            // ✨ 核心修復：開局先將所有功能區塊完全隱藏 (把 agency.style.display 也加進來了！)
+            grid.style.display = list.style.display = sched.style.display = passport.style.display = game.style.display = dt.style.display = fb.style.display = news.style.display = vote.style.display = matches.style.display = gamesHub.style.display = agency.style.display = 'none';
             
             if (!skipScroll) { window.scrollTo({top: 0}); }
             
