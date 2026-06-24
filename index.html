@@ -6605,10 +6605,10 @@ window.renderMinigameStart = function() {
 
             container.innerHTML = detailHtml;
         };
-       // =========================================================================
-        // ✨ 主題日特區渲染引擎 (智慧總圖置頂 ＋ 嚴格類名防遮擋安全版)
         // =========================================================================
-        window.renderTeamThemesHub = function() {
+        // ✨ 主題日特區渲染引擎 (雙層球隊色彩視覺 ＋ 經紀公司風方塊大廳版)
+        // =========================================================================
+        window.renderTeamThemesHub = function(selectedTeam = null) {
             const container = document.getElementById('news-container'); 
             
             if (!dbThemes || dbThemes.length === 0) {
@@ -6616,117 +6616,158 @@ window.renderMinigameStart = function() {
                 return;
             }
 
-            // 依據時間先後排序主題日
+            // 依照時間先後排序
             dbThemes.sort((a,b) => a.safeDate.num - b.safeDate.num);
 
-            // ✨ 網頁設計優化：自動抽取出第一張有效的官方大圖，作為整頁的「頂部總公告大看板」
-            let masterPosterUrl = '';
-            for (let t of dbThemes) {
+            // =====================================================================
+            // 🏷️ 【第一層：球隊選擇大廳】 (參考經紀公司大廳的精緻方塊排版)
+            // =====================================================================
+            if (!selectedTeam) {
+                // 按球隊分組統計主題日數量
+                let teamGroups = {};
+                dbThemes.forEach(t => {
+                    if (!teamGroups[t.team]) {
+                        teamGroups[t.team] = { name: t.team, cheerteam: t.cheerteam, list: [] };
+                    }
+                    teamGroups[t.team].list.push(t);
+                });
+
+                let teamBlocksHtml = Object.values(teamGroups).map(tg => {
+                    const tColor = (teamThemes[tg.cheerteam] || { accent: "#ff5722" }).accent;
+                    const count = tg.list.length;
+
+                    // 製作仿經紀公司風格的球隊主題方塊，完美融入球隊代表色
+                    return `
+                    <div class="team-theme-hub-block" onclick="window.renderTeamThemesHub('${tg.name}')" 
+                         style="background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 22px 28px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; overflow: hidden;"
+                         onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='${tColor}'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.4), inset 0 0 15px color-mix(in srgb, ${tColor} 20%, transparent)'; this.querySelector('.hub-arrow').style.transform='translateX(5px)'; this.querySelector('.hub-arrow').style.color='${tColor}';" 
+                         onmouseout="this.style.background='linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%)'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'; this.style.boxShadow='none'; this.querySelector('.hub-arrow').style.transform='none'; this.querySelector('.hub-arrow').style.color='#64748b';">
+                        
+                        <div style="text-align: left; display:flex; flex-direction:column; gap:4px;">
+                            <div style="font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 0.5px;">${tg.name}</div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 700; font-family: var(--sport-font); letter-spacing: 1px;">${tg.cheerteam.toUpperCase()}</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 18px;">
+                            <div style="text-align: right;">
+                                <div style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: #fff; line-height:1; display:inline-block; vertical-align:middle;">${count}</div>
+                                <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-top: 2px; letter-spacing:0.5px;">活動場次</div>
+                            </div>
+                            <div class="hub-arrow" style="font-size: 20px; color: #64748b; font-weight: 900; transition: 0.3s; font-family: var(--sport-font);">➔</div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                let mainStyle = `
+                <style>
+                    .theme-hub-grid {
+                        display: grid !important; grid-template-columns: repeat(2, 11fr) !important; gap: 20px !important; width: 100% !important; max-width: 950px !important; margin: 0 auto !important; padding: 10px; box-sizing: border-box !important;
+                    }
+                    @media (max-width: 768px) {
+                        .theme-hub-grid { grid-template-columns: 11fr !important; gap: 15px !important; }
+                    }
+                </style>`;
+
+                container.innerHTML = mainStyle + `
+                <div style="text-align:center; margin-bottom: 30px; width:100%;">
+                    <div style="font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px;">球隊主題日特區</div>
+                    <div style="font-size: 13px; color: var(--text-sub); margin-top: 6px; font-weight: 700;">請選擇您想查看的主題活動聯盟球隊</div>
+                </div>
+                <div class="theme-hub-grid">${teamBlocksHtml}</div>`;
+                return;
+            }
+
+            // =====================================================================
+            // 📖 【第二層：單一球隊主題日列表頁】 (點擊方塊後進入)
+            // =====================================================================
+            const filteredThemes = dbThemes.filter(t => t.team === selectedTeam);
+            const firstTheme = filteredThemes[0] || {};
+            const mainColor = (teamThemes[firstTheme.cheerteam] || { accent: "#ff5722" }).accent;
+
+            // 智慧提取該球隊在 Excel 中填寫的第一張海報宣傳圖
+            let teamPosterUrl = '';
+            for (let t of filteredThemes) {
                 const rawImg = t.img || t.image || t.poster || "";
                 if (rawImg.trim()) {
-                    masterPosterUrl = window.getCdnUrl(rawImg.trim());
-                    break; // 找到一張就夠了，作為全隊下半季主題日的總視覺宣傳
+                    teamPosterUrl = window.getCdnUrl(rawImg.trim());
+                    break;
                 }
             }
 
-            // 1. 建立頂部總公告大看板的 HTML (如果 Excel 有填圖片網址才會顯示)
-            let masterHeaderHtml = '';
-            if (masterPosterUrl) {
-                masterHeaderHtml = `
-                <div class="theme-master-header" style="position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 420px; background: #050505; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 35px; box-sizing: border-box;">
-                    <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${masterPosterUrl}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
-                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${masterPosterUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2;"></div>
+            // 建立置頂大圖 HTML
+            let posterHeaderHtml = '';
+            if (teamPosterUrl) {
+                posterHeaderHtml = `
+                <div class="theme-master-header" style="position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 400px; background: #050505; overflow: hidden; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 25px; box-sizing: border-box;">
+                    <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${teamPosterUrl}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.25); z-index: 1;"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${teamPosterUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2;"></div>
                 </div>`;
             }
 
-            // 2. 建立下方精緻、不重複塞圖的活動時程表列表
-            let themeCardsHtml = dbThemes.map(t => {
+            // 建立各場活動時程表卡片
+            let themeCardsHtml = filteredThemes.map(t => {
                 const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
-                const tColor = (teamThemes[t.cheerteam] || { accent: "#ff5722" }).accent;
-
-                // 一鍵連動賽事中心與應援班表指令
-                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${tColor}', '${t.team}')`;
+                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${mainColor}', '${t.team}')`;
                 const scheduleClickCmd = `window.goToSchedule('${t.cheerteam}', '棒球')`;
 
                 return `
-                <div class="theme-activity-card" style="background: linear-gradient(145deg, #16191e 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.4); margin-bottom: 20px; box-sizing: border-box; width:100%; transition: 0.3s; position: relative;">
-                    
-                    <div class="theme-card-body" style="padding: 22px 25px; display: flex; align-items: center; justify-content: space-between; position: relative; width: 100%; box-sizing: border-box;">
+                <div class="theme-activity-card" style="background: linear-gradient(145deg, #16191e 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 15px; box-sizing: border-box; width:100%; position: relative;">
+                    <div class="theme-card-body" style="padding: 20px 25px; display: flex; align-items: center; justify-content: space-between; position: relative; width: 100%; box-sizing: border-box;">
                         
-                        <div class="theme-glow-bar" style="position: absolute; left: 0; top: 15px; bottom: 15px; width: 4px; background: ${tColor}; box-shadow: 0 0 10px ${tColor}; border-radius: 0 4px 4px 0;"></div>
+                        <div class="theme-glow-bar" style="position: absolute; left: 0; top: 15px; bottom: 15px; width: 4px; background: ${mainColor}; box-shadow: 0 0 10px ${mainColor}; border-radius: 0 4px 4px 0;"></div>
                         
-                        <div class="theme-col-date" style="flex: 0 0 130px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
-                            <div style="font-family: var(--sport-font); font-size: 34px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
-                            <div style="font-family: var(--sport-font); font-size: 13px; color: ${tColor}; font-weight: 900; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase;">${t.safeDate.week}</div>
-                            <div class="theme-venue-text" style="font-size: 12px; color: var(--text-sub); font-weight: 700; margin-top: 8px;">📍 ${t.venue}</div>
+                        <div class="theme-col-date" style="flex: 0 0 120px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
+                            <div style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
+                            <div style="font-family: var(--sport-font); font-size: 13px; color: ${mainColor}; font-weight: 900; letter-spacing: 1.5px; margin-top: 4px; text-transform: uppercase;">${t.safeDate.week}</div>
+                            <div class="theme-venue-text" style="font-size: 12px; color: var(--text-sub); font-weight: 700; margin-top: 6px;">📍 ${t.venue}</div>
                         </div>
 
                         <div class="theme-col-info" style="flex: 1; text-align: left; padding-left: 25px; padding-right: 15px; min-width: 0; box-sizing: border-box;">
-                            <span style="font-size: 11px; background: color-mix(in srgb, ${tColor} 12%, transparent); color: ${tColor}; border: 1px solid color-mix(in srgb, ${tColor} 25%, transparent); padding: 2px 8px; border-radius: 4px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">OFFICIAL THEME DAY</span>
-                            <div style="font-size: 21px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${t.title}">${t.title}</div>
-                            <div style="font-size: 13px; color: #64748b; font-weight: 700; margin-top: 4px;">球隊主辦：${t.team} <span style="opacity:0.2; margin: 0 4px;">|</span> ${t.cheerteam}</div>
+                            <span style="font-size: 10px; background: color-mix(in srgb, ${mainColor} 12%, transparent); color: ${mainColor}; border: 1px solid color-mix(in srgb, ${mainColor} 25%, transparent); padding: 1px 6px; border-radius: 4px; font-weight: 900; letter-spacing: 1px;">THEME EVENT</span>
+                            <div style="font-size: 20px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.title}">${t.title}</div>
                         </div>
 
-                        <div class="theme-col-btns" style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
-                            <button onclick="${rosterClickCmd}" style="background: ${tColor}; color: #000; border: none; padding: 11px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">🗳️ 今日陣容</button>
-                            <button onclick="${scheduleClickCmd}" style="background: rgba(255,255,255,0.04); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 11px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#fff'; this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)'">🗓️ 應援班表</button>
+                        <div class="theme-col-btns" style="display: flex; gap: 10px; align-items: center; flex-shrink: 0;">
+                            <button onclick="${rosterClickCmd}" style="background: ${mainColor}; color: #000; border: none; padding: 10px 18px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">🗳️ 今日陣容</button>
+                            <button onclick="${scheduleClickCmd}" style="background: rgba(255,255,255,0.04); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 18px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#fff'; this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)'">🗓️ 應援班表</button>
                         </div>
                     </div>
                 </div>`;
             }).join('');
 
-            // ✨ 精準響應式 CSS 注入：完全放過發光條，精準將欄位進行上下垂直堆疊
             let responsiveStyle = `
                 <style>
                     @media (max-width: 768px) {
-                        /* 1. 主容器轉為垂直排列 */
-                        .theme-card-body { 
-                            flex-direction: column !important; 
-                            align-items: stretch !important; 
-                            gap: 15px !important; 
-                            padding: 18px 20px !important; 
-                        }
-                        /* 2. 嚴格鎖定發光條尺寸，絕對禁止它滿版變大 */
-                        .theme-glow-bar {
-                            width: 4px !important;
-                            left: 0 !important;
-                            top: 15px !important;
-                            bottom: 15px !important;
-                            height: auto !important;
-                        }
-                        /* 3. 日期改為橫向一字排開 */
-                        .theme-col-date { 
-                            width: 100% !important;
-                            border-right: none !important; 
-                            border-bottom: 1px dashed rgba(255,255,255,0.1) !important; 
-                            padding-right: 0 !important;
-                            padding-bottom: 10px !important; 
-                            display: flex !important;
-                            align-items: baseline !important;
-                            gap: 10px !important;
-                        }
+                        .theme-card-body { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; padding: 15px 18px !important; }
+                        .theme-glow-bar { width: 4px !important; left: 0 !important; top: 15px !important; bottom: 15px !important; height: auto !important; }
+                        .theme-col-date { width: 100% !important; border-right: none !important; border-bottom: 1px dashed rgba(255,255,255,0.08) !important; padding-right: 0 !important; padding-bottom: 8px !important; display: flex !important; align-items: baseline !important; gap: 10px !important; }
                         .theme-venue-text { margin-top: 0 !important; margin-left: auto !important; }
-                        /* 4. 內容與按鈕滿版 */
                         .theme-col-info { width: 100% !important; padding: 0 !important; }
-                        .theme-col-btns { 
-                            width: 100% !important; 
-                            display: flex !important; 
-                            gap: 10px !important; 
-                            margin-top: 5px !important;
-                        }
-                        .theme-col-btns button { 
-                            flex: 1 !important; 
-                            padding: 12px 10px !important; 
-                            font-size: 13px !important; 
-                        }
+                        .theme-col-btns { width: 100% !important; display: flex !important; gap: 8px !important; margin-top: 2px !important;}
+                        .theme-col-btns button { flex: 1 !important; padding: 11px 10px !important; font-size: 13px !important; }
                     }
                 </style>
             `;
 
-            // 將「頂部公告看板」與「下方乾淨活動時程列表」無縫組合輸出
+            // 渲染內頁：附帶返回大廳按鈕
             container.innerHTML = responsiveStyle + `
                 <div style="display:flex; flex-direction:column; width:100%; max-width:950px; margin:0 auto; padding: 0 10px; box-sizing:border-box;">
-                    ${masterHeaderHtml}
+                    
+                    <div style="width: 100%; text-align: left; margin-bottom: 20px;">
+                        <button onclick="window.renderTeamThemesHub()" 
+                                style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.08); padding: 8px 18px; border-radius: 6px; font-weight: 900; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='${mainColor}';" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.08)';">
+                            ❮ 返回主題日大廳
+                        </button>
+                    </div>
+
+                    ${posterHeaderHtml}
+                    
+                    <div style="text-align:left; margin-bottom: 20px; border-left: 4px solid ${mainColor}; padding-left: 12px;">
+                        <div style="font-size: 22px; font-weight: 900; color: #fff;">${selectedTeam} 主題活動列表</div>
+                        <div style="font-size: 13px; color: var(--text-sub); margin-top: 4px; font-weight: 700;">點擊下方按鈕即可快速聯動當日應援陣容與女孩月曆</div>
+                    </div>
+
                     <div style="display:flex; flex-direction:column; width:100%;">${themeCardsHtml}</div>
                 </div>`;
         };
