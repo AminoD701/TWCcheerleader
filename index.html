@@ -6606,7 +6606,7 @@ window.renderMinigameStart = function() {
             container.innerHTML = detailHtml;
         };
         // =========================================================================
-        // ✨ 主題日特區渲染引擎 (球隊主場方塊 ＋ 總圖置頂 ＋ 當日女孩陣容直秀版)
+        // ✨ 主題日特區渲染引擎 (主客場獨立欄位直讀 ＋ 應援陣容智慧連動版)
         // =========================================================================
         window.renderTeamThemesHub = function(selectedTeam = null) {
             const container = document.getElementById('news-container'); 
@@ -6615,19 +6615,6 @@ window.renderMinigameStart = function() {
                 container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前尚未排定球隊主題日活動 🎪</div>`;
                 return;
             }
-
-            // 智慧解碼器：精準抓取 team 欄位第一個寫的「主場球隊」
-            const getHomeTeam = (teamStr) => {
-                if (!teamStr) return "未知球隊";
-                return teamStr.split(/[\svsVSv\.s\.]+/)[0].trim();
-            };
-
-            // 智慧解碼器：抓取後方的「客場對戰球隊」
-            const getAwayTeamDisplay = (teamStr) => {
-                if (!teamStr) return "";
-                const parts = teamStr.split(/[\svsVSv\.s\.]+/);
-                return parts.length > 1 ? `vs ${parts[1].trim()}` : "";
-            };
 
             // 依照時間先後排序
             dbThemes.sort((a,b) => a.safeDate.num - b.safeDate.num);
@@ -6638,7 +6625,10 @@ window.renderMinigameStart = function() {
             if (!selectedTeam) {
                 let teamGroups = {};
                 dbThemes.forEach(t => {
-                    const homeTeam = getHomeTeam(t.team);
+                    // ✨ 核心升級：直接讀取乾淨的 home_team 欄位，絕不搞混！
+                    const homeTeam = (t.home_team || t.hometeam || "").trim();
+                    if (!homeTeam) return;
+
                     if (!teamGroups[homeTeam]) {
                         teamGroups[homeTeam] = { name: homeTeam, cheerteam: t.cheerteam, list: [] };
                     }
@@ -6649,7 +6639,6 @@ window.renderMinigameStart = function() {
                     const tColor = (teamThemes[tg.cheerteam] || { accent: "#ff5722" }).accent;
                     const count = tg.list.length;
 
-                    // 採用班表大廳的高質感球隊專屬發光外框設計
                     return `
                     <div class="team-theme-hub-block" onclick="window.renderTeamThemesHub('${tg.name}')" 
                          style="background: #111418; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 25px; cursor: pointer; text-align: center; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4);"
@@ -6688,7 +6677,8 @@ window.renderMinigameStart = function() {
             // =====================================================================
             // 📖 【第二層：單一球隊內頁】 (置頂下半季總圖 ＋ 智慧連動當天應援名單)
             // =====================================================================
-            const filteredThemes = dbThemes.filter(t => getHomeTeam(t.team) === selectedTeam);
+            // ✨ 核心升級：精準篩選匹配的主場球隊
+            const filteredThemes = dbThemes.filter(t => (t.home_team || t.hometeam || "").trim() === selectedTeam);
             const firstTheme = filteredThemes[0] || {};
             const mainColor = (teamThemes[firstTheme.cheerteam] || { accent: "#ff5722" }).accent;
 
@@ -6713,19 +6703,21 @@ window.renderMinigameStart = function() {
 
             let themeCardsHtml = filteredThemes.map(t => {
                 const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
-                const awayTeam = getAwayTeamDisplay(t.team);
+                
+                // ✨ 核心升級：客場球隊直接抓欄位，有值才顯示 vs
+                const awayTeam = (t.away_team || t.awayteam || "").trim();
+                const awayDisplay = awayTeam ? `<span style="color: #64748b; font-weight: 700;">vs ${awayTeam}</span>` : "";
 
-                // 🔍 核心智慧黑魔法：利用 matchdate 自動跨海去 dbMatches 撈取當天真正的應援女孩名單！
+                // 自動跨海去 dbMatches 撈取當天真正的應援女孩名單
                 let foundGirlsStr = "";
                 if (window.dbMatches) {
                     const matchedGame = dbMatches.find(m => m.safeDate && m.safeDate.num == t.matchdate);
                     if (matchedGame && matchedGame.girls) foundGirlsStr = matchedGame.girls;
                 }
-                if (!foundGirlsStr && t.girls) foundGirlsStr = t.girls; // 備用 Fallback
+                if (!foundGirlsStr && t.girls) foundGirlsStr = t.girls;
 
                 const attendGirls = (foundGirlsStr || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                 
-                // 渲染當天應援啦啦隊頭像陣容
                 const girlsHtml = attendGirls.map(n => {
                     const g = girlMap.get(n);
                     let dName = n;
@@ -6742,7 +6734,9 @@ window.renderMinigameStart = function() {
                     </div>`;
                 }).join('');
 
-                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${mainColor}', '${t.team}')`;
+                // 為了與舊代碼向下相容，發送給名單彈窗的對戰字串做個小組合
+                const matchFullTitle = awayTeam ? `${selectedTeam} vs ${awayTeam}` : selectedTeam;
+                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${mainColor}', '${matchFullTitle}')`;
 
                 return `
                 <div class="theme-activity-card" onclick="${rosterClickCmd}" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-sizing: border-box; width:100%; position: relative; cursor: pointer; transition: 0.2s;"
@@ -6761,7 +6755,7 @@ window.renderMinigameStart = function() {
                             <div style="font-size: 12px; color: ${mainColor}; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
                                 <span style="background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 4px;">🏠 主場</span> 
                                 <span style="color: #fff;">${selectedTeam}</span> 
-                                <span style="color: #64748b; font-weight: 700;">${awayTeam}</span>
+                                ${awayDisplay}
                             </div>
                             <div style="font-size: 19px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.title}">${t.title}</div>
                         </div>
@@ -6773,7 +6767,7 @@ window.renderMinigameStart = function() {
                 </div>`;
             }).join('');
 
-            // 手機版排版完美化
+            // 手機版排版優化
             let responsiveStyle = `
                 <style>
                     .theme-col-girls::-webkit-scrollbar { display: none; }
@@ -6783,7 +6777,7 @@ window.renderMinigameStart = function() {
                         .theme-col-date { width: 100% !important; border-right: none !important; border-bottom: 1px dashed rgba(255,255,255,0.08) !important; padding-right: 0 !important; padding-bottom: 6px !important; display: flex !important; align-items: baseline !important; gap: 10px !important; }
                         .theme-col-info { width: 100% !important; padding: 0 !important; }
                         .theme-col-girls { width: 100% !important; border-left: none !important; padding-left: 0 !important; height: auto !important; padding-top: 5px; }
-                    </div>
+                    }
                 </style>
             `;
 
@@ -6802,7 +6796,7 @@ window.renderMinigameStart = function() {
                     
                     <div style="text-align:left; margin-bottom: 25px; border-left: 4px solid ${mainColor}; padding-left: 12px;">
                         <div style="font-size: 24px; font-weight: 900; color: #fff;">${selectedTeam} 限定主題活動</div>
-                        <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 700;">📍 點擊活動區塊即可開啟賽事精準應援視窗</div>
+                        <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 700;">以下為 ${selectedTeam} 主場限定活動與應援班表</div>
                     </div>
 
                     <div style="display:flex; flex-direction:column; width:100%;">${themeCardsHtml}</div>
