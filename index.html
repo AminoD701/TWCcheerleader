@@ -6607,7 +6607,7 @@ window.renderMinigameStart = function() {
             container.innerHTML = detailHtml;
         };
         // =========================================================================
-        // ✨ 主題日特區渲染引擎 (對戰 LOGO 視覺化 + 電腦版右對齊 + 手機版極限壓縮)
+        // ✨ 主題日特區渲染引擎 (真實隊徽 + 完美防變形換行 + 手機黃金比例版)
         // =========================================================================
         window.renderTeamThemesHub = function(selectedTeam = null) {
             const container = document.getElementById('news-container'); 
@@ -6638,20 +6638,26 @@ window.renderMinigameStart = function() {
                 return '#ff5722'; 
             };
 
-            // ✨ 隊徽自動生成引擎：提取球隊首字製作高質感圓形 Badge (有 LOGO 網址會優先用 LOGO)
-            const getTeamBadge = (tName) => {
+            // ✨ 真實隊徽渲染引擎：去 teamThemes 撈取真正的 LOGO 圖片
+            const getTeamLogo = (tName) => {
                 if (!tName) return '';
-                const c = resolveTeamColor(tName);
-                const globalTheme = window.teamThemes ? (window.teamThemes[tName] || Object.values(window.teamThemes).find(x => x.name === tName)) : null;
-                if (globalTheme && globalTheme.logo) {
-                    return `<img src="${window.getCdnUrl(globalTheme.logo)}" style="width:22px; height:22px; object-fit:contain; drop-shadow: 0 2px 4px rgba(0,0,0,0.5); flex-shrink: 0;">`;
+                let logoUrl = '';
+                if (window.teamThemes) {
+                    for (let key in window.teamThemes) {
+                        if (window.teamThemes[key].name === tName || key === tName) {
+                            logoUrl = window.teamThemes[key].logo;
+                            break;
+                        }
+                    }
                 }
-                const shortName = tName.replace('中信','').replace('統一','').replace('樂天','').replace('富邦','').replace('味全','').replace('台鋼','').substring(0,1) || tName.substring(0,1);
-                return `<div style="width: 22px; height: 22px; border-radius: 50%; background: ${c}; border: 1px solid rgba(255,255,255,0.2); color: #000; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5); flex-shrink: 0;">${shortName}</div>`;
+                if (logoUrl) {
+                    return `<img src="${window.getCdnUrl(logoUrl)}" style="width:32px; height:32px; object-fit:contain; drop-shadow: 0 2px 4px rgba(0,0,0,0.6); flex-shrink: 0;" alt="${tName}">`;
+                }
+                return ``; // 如果沒有LOGO就留空，只顯示文字
             };
 
             const iconPin = `<svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:currentColor; stroke-width:2; fill:none; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
-            const iconRoster = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:currentColor; stroke-width:2; fill:none; margin-right:4px; vertical-align:text-bottom;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
+            const iconRoster = `<svg viewBox="0 0 24 24" style="width:15px; height:15px; stroke:currentColor; stroke-width:2; fill:none; margin-right:6px; vertical-align:text-bottom;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
 
             // =====================================================================
             // 🏷️ 【第一層：主場球隊選擇大廳】
@@ -6723,25 +6729,30 @@ window.renderMinigameStart = function() {
 
             let themeCardsHtml = filteredThemes.map(t => {
                 const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
-                
                 const awayTeam = (t.away_team || t.awayteam || "").trim();
-                
-                // ✨ 賽事對戰 LOGO 渲染區塊 (不再寫主場/客場，直接呈現徽章與隊名)
+
+                // ✨ 完美複刻賽事中心的對戰 LOGO 排版
                 let matchupHtml = '';
                 if (awayTeam) {
                     matchupHtml = `
-                    <div class="theme-matchup" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 900; background: rgba(0,0,0,0.25); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: fit-content; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                        ${getTeamBadge(selectedTeam)}
-                        <span style="color: #fff;">${selectedTeam}</span>
-                        <span style="color: #64748b; margin: 0 2px; font-size: 11px; font-family: var(--sport-font); font-style: italic;">VS</span>
-                        ${getTeamBadge(awayTeam)}
-                        <span style="color: #cbd5e1;">${awayTeam}</span>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${getTeamLogo(selectedTeam)}
+                            <span style="font-size:15px; font-weight:900; color:#fff;">${selectedTeam}</span>
+                        </div>
+                        <span style="color:#64748b; font-size:13px; font-weight:900; font-family:var(--sport-font); font-style:italic;">VS</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${getTeamLogo(awayTeam)}
+                            <span style="font-size:15px; font-weight:900; color:#cbd5e1;">${awayTeam}</span>
+                        </div>
                     </div>`;
                 } else {
                     matchupHtml = `
-                    <div class="theme-matchup" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 900; background: rgba(0,0,0,0.25); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: fit-content; margin-top: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                        ${getTeamBadge(selectedTeam)}
-                        <span style="color: #fff;">${selectedTeam}</span>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${getTeamLogo(selectedTeam)}
+                            <span style="font-size:15px; font-weight:900; color:#fff;">${selectedTeam}</span>
+                        </div>
                     </div>`;
                 }
 
@@ -6751,11 +6762,8 @@ window.renderMinigameStart = function() {
                     const matchedGame = dbMatches.find(m => m.safeDate && parseInt(m.safeDate.num, 10) === targetMatchNum && (m.team || m.home_team || "").includes(selectedTeam));
                     if (matchedGame && matchedGame.girls) foundGirlsStr = matchedGame.girls;
                 }
+                if (!foundGirlsStr) foundGirlsStr = t.girls || t['女孩'] || t['出席名單'] || t['名單'] || "";
                 
-                if (!foundGirlsStr) {
-                    foundGirlsStr = t.girls || t['女孩'] || t['出席名單'] || t['名單'] || "";
-                }
-
                 const attendGirls = (foundGirlsStr || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                 
                 let girlsHtml = "";
@@ -6763,16 +6771,17 @@ window.renderMinigameStart = function() {
                     girlsHtml = attendGirls.map(n => {
                         const g = girlMap.get(n);
                         let dName = n;
-                        let imgHtml = `<div class="girl-avatar" style="width:40px; height:40px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.1); flex-shrink:0;"><svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
+                        let imgHtml = `<div class="girl-avatar" style="width:42px; height:42px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.1); flex-shrink:0;"><svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
                         if (g) {
                             const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                             dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                            imgHtml = `<img class="girl-avatar" src="${window.getCdnUrl(g.img)}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; object-position:top center; border:1.5px solid ${mainColor}; display:block;" loading="lazy">`;
+                            // ✨ 絕對防擠壓：flex-shrink: 0 加上 aspect-ratio 保證是完美的圓形
+                            imgHtml = `<img class="girl-avatar" src="${window.getCdnUrl(g.img)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; aspect-ratio:1/1; border:1.5px solid ${mainColor}; display:block; flex-shrink:0;" loading="lazy">`;
                         }
                         return `
-                        <div style="display:flex; flex-direction:column; align-items:center; flex: 0 0 auto; margin-right: 12px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; width:48px; flex-shrink: 0;">
                             ${imgHtml}
-                            <span class="girl-name" style="font-size:11px; font-weight:700; color:#cbd5e1; text-align:center; width:48px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:5px;">${dName}</span>
+                            <span class="girl-name" style="font-size:11px; font-weight:700; color:#cbd5e1; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:5px;">${dName}</span>
                         </div>`;
                     }).join('');
                 }
@@ -6782,72 +6791,65 @@ window.renderMinigameStart = function() {
 
                 let girlsColumnHtml = "";
                 if (girlsHtml) {
+                    // ✨ 允許換行 (flex-wrap: wrap) 解決太擠的問題
                     girlsColumnHtml = `
-                    <div class="theme-col-girls" style="display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; padding-right: 20px; margin-right: 20px; border-right: 1px solid rgba(255,255,255,0.08); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+                    <div class="theme-col-girls" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 15px;">
                         ${girlsHtml}
                     </div>`;
                 }
 
-                // ✨ 完美的三欄/雙欄併排佈局，按鈕永遠貼齊最右側！
+                // ✨ 全新佈局：三區塊架構
                 return `
                 <div class="theme-activity-card" style="--card-color: ${mainColor}; background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-sizing: border-box; width:100%; position: relative; transition: 0.2s;">
                     
-                    <div class="theme-card-body" style="padding: 20px 25px; display: flex; align-items: center; position: relative; width: 100%; box-sizing: border-box;">
+                    <div class="theme-card-body" style="padding: 22px 25px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; position: relative; width: 100%; box-sizing: border-box;">
                         
                         <div class="theme-glow-bar" style="position: absolute; left: 0; top: 15px; bottom: 15px; width: 4px; background: ${mainColor}; box-shadow: 0 0 10px ${mainColor}; border-radius: 0 4px 4px 0;"></div>
-                        <div class="mobile-top-border" style="display:none; position: absolute; left: 0; top: 0; width: 100%; height: 3px; background: ${mainColor}; box-shadow: 0 0 10px ${mainColor};"></div>
                         
-                        <div class="theme-col-date" style="flex: 0 0 105px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
-                            <div style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
-                            <div style="font-family: var(--sport-font); font-size: 13px; color: ${mainColor}; font-weight: 900; letter-spacing: 1px; margin-top: 6px; text-transform: uppercase;">${t.safeDate.week}</div>
-                            <div class="theme-venue-text" style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-top: 6px; display:flex; align-items:center;">${iconPin} ${t.venue}</div>
+                        <div class="theme-col-date" style="flex: 0 0 110px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
+                            <div style="display:flex; align-items: baseline; gap: 6px;">
+                                <span style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</span>
+                                <span style="font-family: var(--sport-font); font-size: 13px; color: ${mainColor}; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">${t.safeDate.week}</span>
+                            </div>
+                            <div class="theme-venue-text" style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-top: 10px; display:flex; align-items:center;">${iconPin} ${t.venue}</div>
                         </div>
 
-                        <div class="theme-col-info" style="flex: 1; text-align: left; padding-left: 20px; padding-right: 15px; min-width: 0; box-sizing: border-box; display:flex; flex-direction:column; justify-content:center;">
+                        <div class="theme-col-info" style="flex: 1; min-width: 0; box-sizing: border-box; display:flex; flex-direction:column; justify-content:center;">
                             <div class="theme-title" style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-all; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${t.title}</div>
                             ${matchupHtml}
                         </div>
 
-                        <div class="theme-col-action" style="display: flex; align-items: center; margin-left: auto; flex-shrink: 0;">
+                        <div class="theme-col-action" style="flex: 1.2; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; min-width: 0;">
                             ${girlsColumnHtml}
-                            <button class="theme-btn" onclick="${rosterClickCmd}" style="background: ${mainColor}; color: #000; border: none; padding: 10px 20px; font-size: 13px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${iconRoster}查看名單</button>
+                            <button class="theme-btn" onclick="${rosterClickCmd}" style="background: ${mainColor}; color: #000; border: none; padding: 10px 20px; font-size: 13px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-self: flex-end;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${iconRoster}查看今日應援名單</button>
                         </div>
                     </div>
                 </div>`;
             }).join('');
 
-            // ✨ 手機版終極空間管理：行距極縮、無縫排列
+            // ✨ 手機版黃金切割 CSS：日期不再佔一半，所有物件排列極致緊湊
             let responsiveStyle = `
                 <style>
-                    .theme-col-girls::-webkit-scrollbar { display: none; }
                     @media (max-width: 768px) {
-                        .theme-activity-card { border-radius: 8px !important; margin-bottom: 10px !important; }
-                        /* 卡片整體內距壓縮 */
-                        .theme-card-body { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; padding: 12px 15px !important; }
+                        .theme-activity-card { border-radius: 8px !important; margin-bottom: 12px !important; }
+                        .theme-card-body { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; padding: 15px !important; }
                         
                         .theme-glow-bar { display: none !important; }
-                        .mobile-top-border { display: block !important; }
                         
-                        /* 日期、星期、地點併入同一行，空間最大化 */
-                        .theme-col-date { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding-right: 0 !important; padding-bottom: 6px !important; display: flex !important; align-items: baseline !important; gap: 8px !important; }
-                        .theme-col-date > div:first-child { font-size: 20px !important; }
-                        .theme-col-date > div:nth-child(2) { font-size: 12px !important; }
-                        .theme-venue-text { margin-top: 0 !important; margin-left: auto !important; font-size: 11px !important; }
+                        /* ✨ 手機版日期區：變為頂部橫條，不再切對半！ */
+                        .theme-col-date { width: 100% !important; flex: none !important; border-right: none !important; border-bottom: 1px dashed rgba(255,255,255,0.1) !important; padding-right: 0 !important; padding-bottom: 10px !important; flex-direction: row !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
+                        .theme-col-date > div:first-child span:first-child { font-size: 24px !important; }
+                        .theme-venue-text { margin-top: 0 !important; font-size: 11px !important; }
                         
-                        /* 標題與對戰的間距緊縮 */
-                        .theme-col-info { width: 100% !important; padding: 0 !important; margin-top: 2px !important; }
-                        .theme-title { font-size: 18px !important; line-height: 1.3 !important; }
-                        .theme-matchup { margin-top: 6px !important; padding: 5px 10px !important; }
+                        /* 資訊與 LOGO 區 */
+                        .theme-col-info { width: 100% !important; flex: none !important; margin-top: 2px !important; }
+                        .theme-title { font-size: 18px !important; }
                         
-                        /* 手機版的按鈕區塊：排在最底層，佔滿寬度 */
-                        .theme-col-action { width: 100% !important; flex-direction: column !important; align-items: stretch !important; margin-top: 2px !important; margin-left: 0 !important; gap: 8px !important; }
+                        /* 手機版女孩與按鈕區：緊湊排列 */
+                        .theme-col-action { width: 100% !important; flex: none !important; align-items: stretch !important; margin-top: 5px !important; }
+                        .theme-col-girls { justify-content: flex-start !important; margin-bottom: 12px !important; }
                         
-                        /* 手機版女孩區域：拔掉右邊線，置左對齊，縮減頭像至 36px */
-                        .theme-col-girls { width: 100% !important; justify-content: flex-start !important; padding-right: 0 !important; border-right: none !important; margin-right: 0 !important; padding-top: 4px !important; }
-                        .girl-avatar { width: 36px !important; height: 36px !important; }
-                        .girl-name { font-size: 10px !important; margin-top: 3px !important; width: 44px !important; }
-                        
-                        .theme-btn { width: 100% !important; justify-content: center !important; padding: 10px !important; font-size: 14px !important; }
+                        .theme-btn { width: 100% !important; justify-content: center !important; font-size: 14px !important; align-self: center !important; }
                     }
                 </style>
             `;
