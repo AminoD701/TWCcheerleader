@@ -2009,7 +2009,8 @@
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = parsed.dbNews || []; 
-                        dbMatches = parsed.dbMatches || []; // 👈 補上這行
+                        dbMatches = parsed.dbMatches || []; 
+                        dbThemes = parsed.dbThemes || []; 
                         if (dbGirls.length > 0) {
                             buildGirlMap(); init(); enableEnterButton(); return; 
                         }
@@ -2087,7 +2088,7 @@
                     window.fetchGlobalVotes();
                 }
                 
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches })); } catch(e) {}
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches, dbThemes })); } catch(e) {}
 
             } catch (err) {
                 const btn = document.getElementById('enter-btn');
