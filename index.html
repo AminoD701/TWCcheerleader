@@ -1942,7 +1942,7 @@
             return { num: parseInt(`${String(y).padStart(4,'0')}${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`), mmdd: parseInt(`${String(m).padStart(2,'0')}${String(d_val).padStart(2,'0')}`) };
         }
 
-        let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = [], dbMatches = []; 
+        let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = [], dbMatches = [], dbThemes = [];
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
@@ -2017,16 +2017,22 @@
             const baseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${t}`;
 
             try {
-                const [girlsData, eventsData, schedulesData, newsData, matchesData] = await Promise.all([
+                const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData] = await Promise.all([
                     fetchCSV(`${baseUrl}&gid=0&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=925411186&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=417186374&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=92509162&t=${t}`) // 👈 新增：抓取比賽賽程
+                    fetchCSV(`${baseUrl}&gid=92509162&t=${t}`),
+                    fetchCSV(`${baseUrl}&gid=547736461&t=${t}`)
                 ]);
 
                 dbGirls = girlsData.filter(i => i.realname);
                 dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                dbNews = newsData.filter(n => n.title);
+                if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
+                
+                // ✨ 讀入主題日資料並智慧解析日期
+                if(themesData) dbThemes = themesData.map(t => ({ ...t, safeDate: parseDateFlexible(t.date) })).filter(t => t.safeDate);
                 
                 let flat = [];
                 schedulesData.forEach(row => {
@@ -6592,6 +6598,71 @@ window.renderMinigameStart = function() {
             `;
 
             container.innerHTML = detailHtml;
+        };
+        // =========================================================================
+        // ✨ 全新功能：主題日特區渲染引擎 (球隊主題日 X 賽事中心黃金聯動)
+        // =========================================================================
+        window.renderTeamThemesHub = function() {
+            const container = document.getElementById('news-container'); // 借用中央主容器渲染
+            
+            if (!dbThemes || dbThemes.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前尚未排定球隊主題日活動 🎪</div>`;
+                return;
+            }
+
+            // 依據時間先後排序主題日
+            dbThemes.sort((a,b) => a.safeDate.num - b.safeDate.num);
+
+            let themeCardsHtml = dbThemes.map(t => {
+                const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
+                const tColor = (teamThemes[t.cheerteam] || { accent: "#ff5722" }).accent;
+
+                // ✨ 核心黑魔法 1：一鍵連動賽事中心女孩應援名單彈窗
+                // window.openMatchRosterModal(日期數字, 啦啦隊名, 聯盟, 啦啦隊代表色, 主場球隊名)
+                const rosterClickCmd = `window.openMatchRosterModal(${t.matchdate}, '${t.cheerteam}', 'CPBL', '${tColor}', '${t.team}')`;
+
+                // ✨ 核心黑魔法 2：一鍵跳轉到應援班表大廳
+                // window.goToSchedule(啦啦隊名, 運動種類)
+                const scheduleClickCmd = `window.goToSchedule('${t.cheerteam}', '棒球')`;
+
+                return `
+                <div class="theme-activity-card" style="background: linear-gradient(145deg, #1a1e24 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.05); border-left: 5px solid ${tColor}; border-radius: 12px; padding: 25px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; overflow: hidden; margin-bottom: 20px; box-sizing: border-box; width:100%; transition: 0.3s;"
+                     onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='color-mix(in srgb, ${tColor} 40%, transparent)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,255,255,0.05)';">
+                    
+                    <div style="flex: 0 0 130px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 10px;">
+                        <div style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</div>
+                        <div style="font-family: var(--sport-font); font-size: 13px; color: ${tColor}; font-weight: 900; letter-spacing: 2px; margin-top: 6px; text-transform: uppercase;">${t.safeDate.week}</div>
+                        <div style="font-size: 12px; color: var(--text-sub); font-weight: 700; margin-top: 8px;">📍 ${t.venue}</div>
+                    </div>
+
+                    <div style="flex: 1; text-align: left; padding-left: 25px; padding-right: 20px; min-width: 0;">
+                        <span style="font-size: 11px; background: color-mix(in srgb, ${tColor} 15%, transparent); color: ${tColor}; border: 1px solid color-mix(in srgb, ${tColor} 30%, transparent); padding: 2px 8px; border-radius: 4px; font-weight: 900; letter-spacing: 1px;">CPBL THEME DAY</span>
+                        <div style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.3; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.title}">${t.title}</div>
+                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700; margin-top: 4px;">主辦單位：${t.team} (${t.cheerteam})</div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; align-items: center; flex-shrink:0;">
+                        <button onclick="${rosterClickCmd}" style="background: ${tColor}; color: #000; border: none; padding: 10px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">🗳️ 今日陣容</button>
+                        <button onclick="${scheduleClickCmd}" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#fff'; this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'">🗓️ 應援班表</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // 手機版自動流暢適應堆疊
+            let responsiveStyle = `
+                <style>
+                    @media (max-width: 768px) {
+                        .theme-activity-card { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; padding: 20px !important; }
+                        .theme-activity-card > div { width: 100% !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+                        .theme-activity-card div:first-child { border-bottom: 1px dashed rgba(255,255,255,0.1) !important; padding-bottom: 10px !important; display: flex; align-items: baseline; gap: 10px; }
+                        .theme-activity-card div:first-child div:last-child { margin: 0 0 0 auto !important; }
+                        .theme-activity-card div:nth-child(3) { display: flex; gap: 8px; margin-top: 5px; }
+                        .theme-activity-card button { flex: 1; padding: 12px 10px !important; font-size: 13px !important; }
+                    }
+                </style>
+            `;
+
+            container.innerHTML = responsiveStyle + `<div style="display:flex; flex-direction:column; width:100%; max-width:950px; margin:0 auto;">${themeCardsHtml}</div>`;
         };
         window.onload = loadData;
     </script>
