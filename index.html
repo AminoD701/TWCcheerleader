@@ -2711,13 +2711,11 @@
                    let tHome = teamTranslation[m.hometeam] || m.hometeam;
                     let tAway = teamTranslation[m.awayteam] || m.awayteam;
                     
-                    // ✨ 智慧防錯：先根據當前聯盟決定優先後綴，解決 Wing Stars、Fubon Angels 等跨棲球隊抓錯 Logo 的問題
                     let sportSuffix = "";
                     if (window.currentMatchLeague === "CPBL") sportSuffix = "_棒球";
                     else if (window.currentMatchLeague === "TPBL" || window.currentMatchLeague === "PLG") sportSuffix = "_籃球";
                     else if (window.currentMatchLeague === "TPVL") sportSuffix = "_排球";
 
-                    // 優先使用精準後綴，找不到才往其他球種 fallback
                     const homeCfg = teamThemes[tHome+sportSuffix] || teamThemes[tHome+"_棒球"] || teamThemes[tHome+"_籃球"] || teamThemes[tHome+"_排球"] || teamThemes[tHome] || { logo: "", accent: "#555", noLogo: true };
                     const awayCfg = teamThemes[tAway+sportSuffix] || teamThemes[tAway+"_棒球"] || teamThemes[tAway+"_籃球"] || teamThemes[tAway+"_排球"] || teamThemes[tAway] || { logo: "", noLogo: true };
 
@@ -2727,21 +2725,17 @@
                            <div class="score-display">${hScore}</div>`
                         : `<div class="match-vs-label">VS</div>`;
 
-                    // ✨ 智慧判定特殊狀態：如果 time 欄位寫了「延賽」、「取消」或「因雨」，啟動紅色警戒標籤
                     let matchTimeRaw = String(m.time || "").trim();
                     let isMatchDelayed = matchTimeRaw.includes("延賽") || matchTimeRaw.includes("取消") || matchTimeRaw.includes("因雨");
                     
-                    // ✨ 明星賽專屬判定：提升整個卡片的尊爵感
                     let isAllStar = (m.note || "").includes("明星") || tHome.includes("ALLSTAR") || tAway.includes("ALLSTAR") || tHome.includes("TAIWAN") || tAway.includes("TAIWAN");
                     
                     let badgeBgColor = isMatchDelayed ? "#ff4757" : (isFinished ? "#4a5568" : (isAllStar ? "#ffd700" : homeCfg.accent));
                     let badgeTextColor = isMatchDelayed ? "#ffffff" : (isFinished ? "#ffffff" : "#000000");
                     
                     let cardOpacityStyle = isMatchDelayed ? "opacity: 0.45; filter: grayscale(40%);" : "";
-                    // 明星賽賦予霸氣漸層黑金背景
                     let cardBgStyle = isAllStar ? "background: linear-gradient(135deg, #1f1a14 0%, #111418 100%); border-top: 4px solid #ffd700;" : "";
 
-                    // ✨ 專屬字體徽章製造機 (Typographic Logo Builder)
                     const buildTypoLogo = (teamName, cfg) => {
                         if (cfg.logo && !cfg.noLogo) {
                             return `<img src="${cfg.logo}" class="match-team-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="match-no-logo" style="display:none;">${teamName.substring(0,3)}</div>`;
@@ -2750,18 +2744,34 @@
                         let displayHtml = teamName.substring(0, 3).toUpperCase();
                         let customFont = '24px';
                         
-                        // 針對明星賽隊伍給予霸氣圖騰與排版
                         if (teamName.toUpperCase().includes('ALLSTAR')) {
                             displayHtml = `<svg viewBox="0 0 24 24" style="width:45px; height:45px; fill:${cfg.accent}; filter:drop-shadow(0 0 6px ${cfg.accent});"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>`;
                         } else if (teamName.toUpperCase().includes('TAIWAN')) {
                             displayHtml = `<div style="line-height:1.1; font-size:14px;">TEAM<br><span style="font-size:26px;">TW</span></div>`;
                         }
 
-                        // ✨ 加入 border: 3px solid 強制覆蓋掉原本的虛線！並加入內外雙重發光特效！
                         return `<div class="match-no-logo" style="border: 3px solid ${cfg.accent}; color: ${cfg.accent}; background: radial-gradient(circle, color-mix(in srgb, ${cfg.accent} 25%, transparent) 0%, #111418 80%); box-shadow: 0 0 20px color-mix(in srgb, ${cfg.accent} 30%, transparent), inset 0 0 15px color-mix(in srgb, ${cfg.accent} 30%, transparent); font-size: ${customFont}; font-family: var(--sport-font); text-transform: uppercase; text-shadow: 0 0 8px ${cfg.accent};">${displayHtml}</div>`;
                     };
 
-                    // ✨ 綁定彈窗：點擊對戰卡片直接呼叫「主場應援名單」！
+                    // =================================================================
+                    // ✨ 主題日智慧雷達：跨庫掃描，有主題日就自動產生美美的高亮徽章！
+                    // =================================================================
+                    let themeBadgeHtml = "";
+                    if (typeof dbThemes !== 'undefined' && dbThemes.length > 0) {
+                        const hTeamName = (m.hometeam || m.team || "").split(/vs/i)[0].trim();
+                        const matchedTheme = dbThemes.find(t => 
+                            parseInt(t.safeDate.num, 10) === parseInt(m.safeDate.num, 10) && 
+                            (t.home_team || t.hometeam || t.team || "").includes(hTeamName)
+                        );
+                        if (matchedTheme) {
+                            themeBadgeHtml = `
+                            <div style="background: linear-gradient(90deg, color-mix(in srgb, ${homeCfg.accent} 20%, transparent), transparent); border-left: 3px solid ${homeCfg.accent}; padding: 8px 12px; margin: 5px 20px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; position: relative; z-index: 2;">
+                                <span style="background: ${homeCfg.accent}; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; font-family: var(--sport-font);">THEME</span>
+                                <span style="font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${matchedTheme.title}">${matchedTheme.title}</span>
+                            </div>`;
+                        }
+                    }
+
                     cardsHtml += `
                         <div class="match-card ${isFinished ? 'is-finished' : ''} ${isMatchDelayed ? 'is-delayed' : ''}" 
                              style="--event-accent: ${homeCfg.accent}; ${cardOpacityStyle} ${cardBgStyle} position: relative; overflow: hidden;" 
@@ -2795,6 +2805,8 @@
                                     <span class="match-team-name">${m.hometeam}</span>
                                 </div>
                             </div>
+                            
+                            ${themeBadgeHtml}
                             
                             ${m.note ? `<div class="match-note" style="position: relative; z-index: 2; ${isAllStar ? 'background: rgba(255,215,0,0.1); border-top: 1px solid rgba(255,215,0,0.3); color: #ffd700;' : ''}">🏆 ${m.note}</div>` : ''}
                         </div>`;
