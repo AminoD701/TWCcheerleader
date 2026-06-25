@@ -1611,20 +1611,6 @@
             </style>
         </div>
     </div>
-    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1f1a0d 0%, #050505 80%); z-index: 99998; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-out, visibility 0.8s;">
-        <div id="mvp-splash-content" style="display: flex; flex-direction: column; align-items: center; opacity: 0; transform: scale(0.9); transition: all 1s ease-out;">
-            <div style="font-family: var(--sport-font); font-size: 16px; color: #ffd700; letter-spacing: 6px; margin-bottom: -10px; z-index: 2;">2026 SEASON MVP</div>
-            <div style="font-family: var(--sport-font); font-size: clamp(40px, 8vw, 70px); font-weight: 900; color: #fff; text-shadow: 0 0 20px #ffd700; z-index: 2; margin-bottom: 20px;">全民應援總冠軍</div>
-            
-            <img src="這裡放冠軍的高清去背照片網址.png" style="height: 40vh; max-height: 400px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); z-index: 3;" onerror="this.style.display='none'">
-            
-            <div style="font-size: 28px; font-weight: 900; color: #fff; margin-top: 15px; z-index: 2; border-top: 1px solid #ffd700; padding-top: 10px;">冠軍女孩名字</div>
-        </div>
-        <style>
-            .fade-out-complete { opacity: 0 !important; visibility: hidden !important; }
-            .mvp-reveal { opacity: 1 !important; transform: scale(1) !important; }
-        </style>
-    </div>
 
     <div id="gacha-overlay" class="gacha-overlay">
         <div id="gacha-animation" class="gacha-animation">
@@ -1983,9 +1969,6 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        // 🏆 2026 應援大賞 總冠軍設定 (請填入冠軍的 UID，例如 '李多慧|' 或 '安芝儇|')
-        window.CHAMPION_UID = "這裡先填入您想測試的女孩UID";
-
         const CACHE_KEY = "tw_cheerleader_cache_v26";
         const CACHE_TIME = 60 * 60 * 1000; 
 
@@ -2004,41 +1987,23 @@
 
             if(btn) {
                 btn.onclick = () => {
-                    // ✨ 寫入短暫記憶：告訴瀏覽器這回合進來過了
+                    // ✨ 2. 寫入記憶：告訴瀏覽器「我進來過了」，下次重整請直接放行
                     sessionStorage.setItem('cheer_has_entered', 'true');
                     
-                    const todayStr = new Date().toDateString();
-                    const lastMvpSplash = localStorage.getItem('seen_mvp_splash_2026'); 
-                    const overlay = document.getElementById('loading-overlay'); 
-                    
-                    // 🏆 判斷：如果今天已經看過 MVP，或者還沒設定 MVP，就照舊極速進站
-                    if (lastMvpSplash === todayStr || !window.CHAMPION_UID) {
-                        if(landing) landing.style.opacity = '0';
-                        setTimeout(() => {
-                            if(landing) landing.style.display = 'none';
-                            if(overlay) overlay.style.display = 'none'; // 順便藏起 MVP 預備圖
-                            document.body.classList.remove('no-scroll');
-                        }, 500);
-                    } else {
-                        // 🏆 判斷：今天第一次點擊進入！播放 MVP 霸榜動畫！
-                        if(landing) landing.style.display = 'none'; // 瞬間隱藏黑色進站畫面，露出底下的 MVP
-                        
-                        const mvpContent = document.getElementById('mvp-splash-content');
-                        if (mvpContent) mvpContent.classList.add('mvp-reveal'); // 觸發 MVP 浮現動畫
-                        
-                        if(typeof createConfetti === 'function') createConfetti(); // 噴發慶祝彩帶
-                        
-                        // 3.5秒後讓 MVP 畫面優雅淡出
-                        setTimeout(() => {
-                            if(overlay) overlay.classList.add('fade-out-complete');
-                            setTimeout(() => { 
-                                if(overlay) overlay.style.display = 'none'; 
-                                document.body.classList.remove('no-scroll');
-                            }, 800);
-                            localStorage.setItem('seen_mvp_splash_2026', todayStr); // 寫入永久記憶，今天不再顯示
-                        }, 3500);
-                    }
+                    if(landing) landing.style.opacity = '0';
+                    setTimeout(() => {
+                        if(landing) landing.style.display = 'none';
+                        document.body.classList.remove('no-scroll');
+                    }, 500);
                 };
+                btn.disabled = false;
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
+                btn.style.boxShadow = '6px 6px 0px var(--event-accent)';
+                if(spinner) spinner.style.display = 'none';
+                if(text) text.innerHTML = '進入賽季 ENTER SEASON';
+            }
+        }
 
         function fetchCSV(url) {
             return new Promise((resolve, reject) => {
@@ -4706,20 +4671,6 @@
                 
                 const isFav = favSet.has(c.uid);
                 
-                // =========================================================
-                // 🏆 MVP 冠軍專屬 SSR 榮耀特效判斷
-                // =========================================================
-                const isMVP = (c.uid === window.CHAMPION_UID);
-                const mvpCrownHtml = isMVP ? `<div style="position:absolute; top:-15px; right:-10px; font-size:32px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.6)); z-index:30; transform: rotate(15deg); animation: float-crown 3s infinite ease-in-out;">👑</div>` : '';
-                const mvpBorderStyle = isMVP ? `border-color: #ffd700 !important; box-shadow: 0 0 20px rgba(255,215,0,0.6), inset 0 0 10px rgba(255,215,0,0.3) !important;` : `border-bottom: 6px solid ${cardAccent};`;
-                const mvpBgStyle = isMVP ? `background: linear-gradient(135deg, #1f1a0d 0%, #0d0f12 100%);` : ``;
-
-                // 原始發光特效 (MVP 給予專屬金色流光，一般最愛給予銀色流光)
-                const shineEffect = isMVP 
-                    ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(105deg, transparent 20%, rgba(255,215,0,0.3) 25%, transparent 30%); z-index: 15; pointer-events: none; animation: card-shine 3s infinite ease-in-out;"></div>` 
-                    : (isFav ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.25) 25%, transparent 30%); z-index: 15; pointer-events: none; animation: card-shine 2.5s infinite ease-in-out;"></div>` : '');
-                // =========================================================
-
                 let sportTags = sports.map(s => {
                     let type = s.includes("棒") ? 'baseball' : s.includes("籃") ? 'basketball' : s.includes("排") ? 'volleyball' : 'other';
                     return type === 'other' ? `<div class="sport-tag tag-other" title="${s}">其他</div>` : `<div class="sport-tag tag-${type}" title="${s}"></div>`;
@@ -4727,8 +4678,11 @@
                 
                 let displayNum = (c.mN||[c.num]).filter(n=>n && n!=="-").map(n => '#' + String(n).replace(/#/g,'')).join(' ') || "-";
                 let rawNoteText = (c.note || c['備註'] || c.備註 || "").trim();
+
+                // ✨ 隱形斗篷：把「合作夥伴」相關字眼從圖鑑的顯示字串中抹除！
                 let cleanNote = rawNoteText.replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
 
+                // ✨ 改為右下角高質感專屬動態標籤
                 let badgeHtml = '';
                 if (cleanNote.includes('隊長') || cleanNote.includes('總監') || cleanNote.includes('經理')) {
                     badgeHtml = `<div class="photo-note-tag" style="z-index: 20; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; font-weight: 900; border: 1px solid #fff;">${cleanNote}</div>`;
@@ -4738,17 +4692,19 @@
                     badgeHtml = `<div class="photo-note-tag" style="z-index: 20;">${cleanNote}</div>`;
                 }
 
+                // ✨ 升級 2：本命女孩(加入最愛)專屬「SSR全像閃卡光暈」
+                const shineEffect = isFav ? `
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.25) 25%, transparent 30%); z-index: 15; pointer-events: none; animation: card-shine 2.5s infinite ease-in-out;"></div>
+                    <style>@keyframes card-shine { 0% { transform: translateX(-150%); } 100% { transform: translateX(150%); } }</style>
+                ` : '';
+
+                // ✨ 智慧國籍分流：台港馬顯示綽號(若無則本名)，且不顯示副標題本名；外籍則顯示本名
                 const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬") || (c.team || "").toLowerCase().includes("luxygirls");
                 const mainName = isLocal ? (c.nickname || c.realname) : c.realname;
                 const subNameHtml = (!isLocal && c.nickname && c.nickname !== c.realname) ? `<div class="realname" style="font-size:14px; color:var(--text-sub); font-weight:700; margin-top:8px; letter-spacing:1px;">${c.nickname}</div>` : '';
 
-                // ✨ 將剛剛判斷好的 mvpBorderStyle, mvpBgStyle, mvpCrownHtml 塞進卡片中！
                 return `
-                <style>@keyframes float-crown { 0%, 100% { transform: translateY(0) rotate(15deg); } 50% { transform: translateY(-8px) rotate(5deg); } }</style>
-                <div class="card" style="${mvpBorderStyle} ${mvpBgStyle} --team-accent: ${isMVP ? '#ffd700' : cardAccent}; position: relative;" onclick="window.openModal('${c.uid}')" onmouseover="this.style.boxShadow='${isMVP ? '0 0 30px rgba(255,215,0,0.8)' : `0 15px 35px ${cardAccent}60`}'; this.style.borderColor='${isMVP ? '#fff' : cardAccent}'; this.style.transform='translateY(-6px) scale(1.02)';" onmouseout="this.style.boxShadow='${isMVP ? '0 0 20px rgba(255,215,0,0.6), inset 0 0 10px rgba(255,215,0,0.3)' : '8px 8px 0px rgba(0,0,0,0.6)'}'; this.style.borderColor='${isMVP ? '#ffd700' : 'var(--border-color)'}'; this.style.transform='none';">
-                    
-                    ${mvpCrownHtml}
-                    
+                <div class="card" style="border-bottom: 6px solid ${cardAccent}; --team-accent: ${cardAccent}; position: relative;" onclick="window.openModal('${c.uid}')" onmouseover="this.style.boxShadow='0 15px 35px ${cardAccent}60'; this.style.borderColor='${cardAccent}'; this.style.transform='translateY(-6px) scale(1.02)';" onmouseout="this.style.boxShadow='8px 8px 0px rgba(0,0,0,0.6)'; this.style.borderColor='var(--border-color)'; this.style.transform='none';">
                     <div class="photo-area" style="position: relative; overflow: hidden;">
                         ${shineEffect}
                         <div class="sport-tags" style="z-index: 20;">${sportTags}</div>
@@ -4758,12 +4714,11 @@
                         ${badgeHtml}
                         ${c.img?`<img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">`:''}
                     </div>
-                    
                     <div class="info-section">
                         <div class="header-info">
                             <div>
                                 <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                    <div class="nickname" style="color:${isMVP ? '#ffd700' : cardAccent}">${mainName}</div>
+                                    <div class="nickname" style="color:${cardAccent}">${mainName}</div>
                                     ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
                                 </div>
                                 ${subNameHtml}
@@ -4774,7 +4729,7 @@
                             <div class="data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; align-items: center;">
                                 <span class="data-label">球隊 UNIT</span>
                                 <div class="team-tags-wrapper">
-                                    ${teams.map(t => `<span class="team-tag-mini" style="color:${isMVP ? '#ffd700' : cardAccent};">${t}</span>`).join('')}
+                                    ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
                                 </div>
                             </div>
                         </div>
@@ -4787,9 +4742,12 @@
                                 <span class="stat-value">
                                     ${(() => {
                                         if(!c.dob) return "-";
+                                        // 隱藏出生年份，僅顯示月/日
                                         let cleanDob = String(c.dob).replace(/年|月|-/g, '/').replace(/日/g, '').trim();
                                         let parts = cleanDob.split('/').filter(x => x !== '');
-                                        if (parts.length >= 3) return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
+                                        if (parts.length >= 3) {
+                                            return `${String(parts[1]).padStart(2,'0')}/${String(parts[2]).padStart(2,'0')}`;
+                                        }
                                         return c.dob; 
                                     })()}
                                 </span>
