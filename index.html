@@ -2561,11 +2561,11 @@
                     // ✨ 徽章字體加大、間距拉開
                     const taskBadge = sRecord && sRecord.note ? `<div class="mc-task-badge" style="font-size:11px; background:${tColor}; color:#000; padding:2px 8px; border-radius:4px; font-weight:900; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${sRecord.note}</div>` : '';
 
-                    // ✨ 膠囊卡片全面放大！大頭貼變 56px，名字變 17px，寬度上限解放到 240px
-                    return `
-                    <div class="mc-roster-item" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="flex: 1 1 180px; max-width: 240px; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 10px; border-radius: 50px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
+                // 🟢 修正後：拔除彈性，給予絕對寬度，保證每顆膠囊長得一模一樣！
+                return `
+                    <div class="mc-roster-item" onclick="event.stopPropagation(); window.openModal('${targetId}')" style="width: 190px; flex: 0 0 auto; background: #111418; border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px 10px 10px; border-radius: 50px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none';">
                         
-                        <img src="${imgUrl}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid ${tColor}; background:#252c36; flex-shrink: 0; aspect-ratio: 1/1;" onerror="this.src='https://via.placeholder.com/60'">
+                        <img src="${imgUrl}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; object-position: top center; border:2px solid ${tColor}; background:#252c36; flex-shrink: 0; aspect-ratio: 1/1;" onerror="this.src='https://via.placeholder.com/60'">
                         
                         <div style="display:flex; flex-direction:column; line-height:1.2; min-width:0; width:100%;">
                             <span style="font-size:17px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
@@ -6858,7 +6858,7 @@ window.renderMinigameStart = function() {
                         if (g) {
                             const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                             dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                            imgHtml = `<img class="girl-avatar" src="${window.getCdnUrl(g.img)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; aspect-ratio:1/1; border:1.5px solid ${mainColor}; display:block; flex-shrink:0;" loading="lazy">`;
+                            imgHtml = `<img class="girl-avatar" src="${window.getCdnUrl(g.img)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; object-position: top center; aspect-ratio:1/1; border:1.5px solid ${mainColor}; display:block; flex-shrink:0;" loading="lazy">`;
                         }
                         return `
                         <div style="display:flex; flex-direction:column; align-items:center; width:48px; flex-shrink: 0;">
