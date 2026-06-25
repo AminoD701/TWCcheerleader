@@ -2865,7 +2865,9 @@
                 'matches': '<svg viewBox="0 0 24 24" class="menu-icon"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16V7H4v15zM7.5 4c0-1.1.9-2 2-2h5a2 2 0 0 1 2 2v3h-9V4z"></path></svg>',
                 'passport': '<svg viewBox="0 0 24 24" class="menu-icon"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
                 'games': '<svg viewBox="0 0 24 24" class="menu-icon"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line></svg>',
-                // 為了讓內部呼叫時不斷掉，保留原本的映射但不顯示在主選單
+                'themes': '<svg viewBox="0 0 24 24" class="menu-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+                
+                // 隱藏的內部模式
                 'vote': '<svg viewBox="0 0 24 24" class="menu-icon"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
                 'minigame': '🎮', 'dreamteam': '🌟', 'feedback': '💡', 'agency': '🏢'
             };
@@ -6674,7 +6676,7 @@ window.renderMinigameStart = function() {
             const iconRoster = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; margin-right:6px; vertical-align:text-bottom;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
 
             // =====================================================================
-            // 🏷️ 【第一層：主場球隊選擇大廳】
+            // 🏷️ 【第一層：主場球隊選擇大廳】 (聯盟分類引擎 + 動態排程文字)
             // =====================================================================
             if (!selectedTeam) {
                 let teamGroups = {};
@@ -6685,30 +6687,69 @@ window.renderMinigameStart = function() {
                     teamGroups[homeTeam].list.push(t);
                 });
 
-                let teamBlocksHtml = Object.values(teamGroups).map(tg => {
-                    const tColor = resolveTeamColor(tg.name + " " + tg.cheerteam);
-                    const count = tg.list.length;
+                // ✨ 智慧聯盟判斷引擎
+                const getLeagueByTeam = (teamNameStr) => {
+                    const s = (teamNameStr || "").toLowerCase();
+                    if (s.includes('兄弟') || s.includes('統一') || s.includes('樂天') || s.includes('富邦') || s.includes('味全') || s.includes('台鋼') || s.includes('雄鷹')) return 'CPBL 中華職棒';
+                    if (s.includes('特攻') || s.includes('戰神') || s.includes('國王') || s.includes('攻城獅') || s.includes('夢想家') || s.includes('海神') || s.includes('雲豹')) return 'TPBL 台灣職籃';
+                    if (s.includes('勇士') || s.includes('領航猿') || s.includes('鋼鐵人') || s.includes('獵鷹')) return 'P. LEAGUE+';
+                    return '其他賽事';
+                };
 
-                    return `
-                    <div class="team-theme-hub-block" onclick="window.renderTeamThemesHub('${tg.name}')" 
-                         style="background: #111418; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 25px; cursor: pointer; text-align: center; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4);"
-                         onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.6), 0 0 15px color-mix(in srgb, ${tColor} 30%, transparent)';" 
-                         onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.4)';" >
-                        <div style="width: 8px; height: 40px; background: ${tColor}; position: absolute; left: 0; top: 50%; transform: translateY(-50%); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px ${tColor};"></div>
-                        <div style="font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px;">${tg.name}</div>
-                        <div style="font-size: 12px; color: ${tColor}; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 15px;">${tg.cheerteam}</div>
-                        <div style="display: inline-block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 20px; font-size: 13px; color: var(--text-sub); font-weight: 700;">
-                            下半季共 <span style="color: #fff; font-weight: 900; font-family: var(--sport-font); font-size: 16px; margin: 0 2px;">${count}</span> 個主題日
+                const leagueOrder = ['CPBL 中華職棒', 'TPBL 台灣職籃', 'P. LEAGUE+', '其他賽事'];
+                let leagueGroups = {};
+                leagueOrder.forEach(l => leagueGroups[l] = []);
+
+                Object.values(teamGroups).forEach(tg => {
+                    let lg = getLeagueByTeam(tg.name);
+                    if (!leagueGroups[lg]) leagueGroups[lg] = [];
+                    leagueGroups[lg].push(tg);
+                });
+
+                let finalLobbyHtml = '';
+                leagueOrder.forEach(league => {
+                    if (leagueGroups[league].length === 0) return;
+                    
+                    // 給予不同聯盟專屬的標題顏色
+                    let lColor = league.includes('CPBL') ? '#00b0ff' : (league.includes('TPBL') ? '#ff9800' : (league.includes('PLG') ? '#ffeb3b' : '#a0aec0'));
+
+                    let blocksHtml = leagueGroups[league].map(tg => {
+                        const tColor = resolveTeamColor(tg.name + " " + tg.cheerteam);
+                        const count = tg.list.length;
+
+                        // ✨ 拔除「下半季」字眼，統一改為「已排定」
+                        return `
+                        <div class="team-theme-hub-block" onclick="window.renderTeamThemesHub('${tg.name}')" 
+                             style="background: #111418; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 25px; cursor: pointer; text-align: center; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4);"
+                             onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.6), 0 0 15px color-mix(in srgb, ${tColor} 30%, transparent)';" 
+                             onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.4)';" >
+                            <div style="width: 8px; height: 40px; background: ${tColor}; position: absolute; left: 0; top: 50%; transform: translateY(-50%); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px ${tColor};"></div>
+                            <div style="font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px;">${tg.name}</div>
+                            <div style="font-size: 12px; color: ${tColor}; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 15px;">${tg.cheerteam}</div>
+                            <div style="display: inline-block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 20px; font-size: 13px; color: var(--text-sub); font-weight: 700;">
+                                已排定 <span style="color: #fff; font-weight: 900; font-family: var(--sport-font); font-size: 16px; margin: 0 2px;">${count}</span> 個主題日
+                            </div>
+                        </div>`;
+                    }).join('');
+
+                    // ✨ 組裝該聯盟的專屬標題與卡片陣列
+                    finalLobbyHtml += `
+                        <div style="text-align: left; margin: 30px auto 15px; max-width: 1000px; padding: 0 10px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 4px; height: 18px; background: ${lColor}; border-radius: 2px;"></div>
+                            <div style="font-size: 18px; font-weight: 900; color: ${lColor}; font-family: var(--sport-font); letter-spacing: 1px;">${league}</div>
                         </div>
-                    </div>`;
-                }).join('');
+                        <div class="theme-hub-grid">${blocksHtml}</div>
+                    `;
+                });
 
-                container.innerHTML = `<style>.theme-hub-grid { display: grid !important; grid-template-columns: repeat(3, 11fr) !important; gap: 20px !important; width: 100% !important; max-width: 1000px !important; margin: 0 auto !important; padding: 10px; box-sizing: border-box !important; } @media (max-width: 900px) { .theme-hub-grid { grid-template-columns: repeat(2, 11fr) !important; } } @media (max-width: 600px) { .theme-hub-grid { grid-template-columns: 11fr !important; gap: 15px !important; } }</style>
-                <div style="text-align:center; margin-bottom: 35px; width:100%;">
-                    <div style="font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px;">球隊主題日特區</div>
-                    <div style="font-size: 14px; color: var(--text-sub); margin-top: 6px; font-weight: 700;">請選擇主場球隊查看完整下半季活動時程與應援名單</div>
+                let mainStyle = `<style>.theme-hub-grid { display: grid !important; grid-template-columns: repeat(3, 11fr) !important; gap: 20px !important; width: 100% !important; max-width: 1000px !important; margin: 0 auto !important; padding: 10px; box-sizing: border-box !important; } @media (max-width: 900px) { .theme-hub-grid { grid-template-columns: repeat(2, 11fr) !important; } } @media (max-width: 600px) { .theme-hub-grid { grid-template-columns: 11fr !important; gap: 15px !important; } }</style>`;
+
+                container.innerHTML = mainStyle + `
+                <div style="text-align:center; margin-bottom: 10px; width:100%;">
+                    <div style="font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px;">球隊主題日大廳</div>
+                    <div style="font-size: 14px; color: var(--text-sub); margin-top: 6px; font-weight: 700;">請選擇主場球隊查看詳細活動時程與應援名單</div>
                 </div>
-                <div class="theme-hub-grid">${teamBlocksHtml}</div>`;
+                ${finalLobbyHtml}`;
                 return;
             }
 
