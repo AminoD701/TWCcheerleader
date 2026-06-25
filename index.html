@@ -1587,14 +1587,19 @@
     </div>
 
     <div id="landing-page" class="landing-page">
-        <div class="landing-content">
-            <h1 class="landing-title">台灣啦啦隊資料庫</h1>
-            <p class="landing-subtitle">TAIWAN CHEERLEADER DATABASE</p>
-            <br>
-            <button id="enter-btn" class="enter-btn" disabled onclick="document.getElementById('landing-page').style.opacity='0'; setTimeout(()=>{document.getElementById('landing-page').style.display='none'; document.body.classList.remove('no-scroll');},500);">
-                <span class="spinner" id="loading-spinner"></span>
-                <span id="enter-text" style="display:inline-block; transform: skewX(10deg);">資料載入中 LOADING...</span>
-            </button>
+        <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.6s;">
+            <div style="font-family: var(--sport-font); font-size: clamp(20px, 4vw, 28px); font-weight: 900; color: #fff; letter-spacing: 6px; margin-bottom: 25px; animation: pulse-text 1.5s infinite;">
+                SYSTEM INITIALIZING...
+            </div>
+            <div style="width: 220px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; height: 100%; width: 40%; background: #fff; box-shadow: 0 0 15px #fff, 0 0 5px #fff; animation: loading-swipe 1.5s infinite ease-in-out; border-radius: 4px;"></div>
+            </div>
+            
+            <style>
+                @keyframes pulse-text { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 15px rgba(255,255,255,0.4); } }
+                @keyframes loading-swipe { 0% { left: -40%; } 100% { left: 100%; } }
+                .fade-out-complete { opacity: 0 !important; visibility: hidden !important; }
+            </style>
         </div>
     </div>
 
@@ -1622,9 +1627,6 @@
         <img src="https://s3.ap-southeast-1.amazonaws.com/media.anyonelab.com/images/boba/boba-embed-icon.png" alt="boba-icon"/>
         <span>請我喝珍奶</span>
     </a>
-    <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
-        <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
-    </div>
     <div class="floating-hub-btn" onclick="toggleHub(true)" title="數據中心">
         <svg viewBox="0 0 24 24"><path d="M20,6H17.22a3,3,0,0,0-5.22-2,3,3,0,0,0-5.22,2H4A2,2,0,0,0,2,8v2a2,2,0,0,0,2,2H4v7a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V12h0a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM10,6a1,1,0,1,1,1,1A1,1,0,0,1,10,6Zm3,0a1,1,0,1,1,1,1A1,1,0,0,1,13,6ZM4,8H20v2H4Zm14,11H6V12H18Z"/></svg>
     </div>
@@ -1692,7 +1694,15 @@
     </svg>
 
     <header class="header">
-        <h1 class="title">TAIWAN CHEERLEADER DATABASE</h1>
+        <div class="site-header-brand" style="text-align: center; padding: 25px 15px 15px; position: relative; z-index: 10;">
+            <div style="font-family: var(--sport-font); font-size: clamp(24px, 5vw, 42px); font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 15px rgba(255,255,255,0.15); margin-bottom: 6px; line-height: 1.2;">
+                TAIWAN CHEERLEADER DATABASE
+            </div>
+            <div style="font-size: 11px; color: var(--event-accent, #38bdf8); font-weight: 900; letter-spacing: 6px; text-transform: uppercase; opacity: 0.9; font-family: var(--tc-font);">
+                Official Roster & Match Center • Season 2026
+            </div>
+        </div>
+
         <div class="controls-container">
             <div class="dropdowns-row">
                 
@@ -1723,9 +1733,9 @@
                             賽事中心 MATCHES
                         </button>
                         <button class="dropdown-item" onclick="window.setMode('themes')">
-    <svg viewBox="0 0 24 24" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-    主題日活動 THEMES
-</button>
+                            <svg viewBox="0 0 24 24" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            主題日活動 THEMES
+                        </button>
                         <button class="dropdown-item" onclick="window.setMode('agency')">
                             <svg viewBox="0 0 24 24" class="menu-icon"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-2"></path><path d="M9 9v.01"></path><path d="M9 13v.01"></path><path d="M9 17v.01"></path></svg>
                             經紀公司 AGENCIES
@@ -2006,17 +2016,24 @@
                     const parsed = JSON.parse(cached);
                     
                     // ✨ 智慧自癒核心：除了檢查時間，還要檢查快取記憶裡有沒有 dbThemes！
-                    // 如果沒有 dbThemes，代表這是舊的壞快取，直接作廢，強制去抓 Google Sheet 最新資料！
                     if (Date.now() - parsed.timestamp < CACHE_TIME && parsed.dbThemes) {
                         dbGirls = parsed.dbGirls || []; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = parsed.dbNews || []; 
                         dbMatches = parsed.dbMatches || []; 
-                        dbThemes = parsed.dbThemes || []; // 🟢 智慧讀取主題日快取
+                        dbThemes = parsed.dbThemes || []; 
                         
                         if (dbGirls.length > 0) {
-                            buildGirlMap(); init(); enableEnterButton(); return; 
+                            buildGirlMap(); init(); enableEnterButton(); 
+                            
+                            // ✨ 第一處：有快取時，瞬間優雅淡出載入畫面！
+                            const overlay = document.getElementById('loading-overlay');
+                            if (overlay) {
+                                overlay.classList.add('fade-out-complete');
+                                setTimeout(() => { overlay.style.display = 'none'; }, 600);
+                            }
+                            return; 
                         }
                     }
                 }
@@ -2083,11 +2100,18 @@
                 init(); 
                 enableEnterButton();
                 
+                // ✨ 第二處：從 Google 下載完畢時，優雅淡出載入畫面！
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.add('fade-out-complete');
+                    setTimeout(() => { overlay.style.display = 'none'; }, 600);
+                }
+                
                 if (typeof window.fetchGlobalVotes === 'function') {
                     window.fetchGlobalVotes();
                 }
                 
-                // 🟢 將下載好的全新完整資料（包含 dbThemes）重新寫入快取，覆蓋舊的壞回憶！
+                // 🟢 將下載好的全新完整資料重新寫入快取
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches, dbThemes })); } catch(e) {}
 
             } catch (err) {
@@ -2109,14 +2133,9 @@
         function buildGirlMap() {
             girlMap.clear();
             dbGirls.forEach(g => {
-                // ✨ 戰術二核心：產生獨一無二的 UID (本名|綽號)
                 g.uid = (g.realname || "").trim() + '|' + (g.nickname || "").trim();
-                
-                // 讓名字跟綽號都能查得到 (給班表跟行程用)
                 if(!girlMap.has(g.realname.trim())) girlMap.set(g.realname.trim(), g);
                 if(g.nickname && !girlMap.has(g.nickname.trim())) girlMap.set(g.nickname.trim(), g);
-                
-                // UID 絕對精準對應
                 girlMap.set(g.uid, g);
             });
         }
