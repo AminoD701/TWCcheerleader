@@ -2024,7 +2024,6 @@
                 if (cached) {
                     const parsed = JSON.parse(cached);
                     
-                    // ✨ 智慧自癒核心：除了檢查時間，還要檢查快取記憶裡有沒有 dbThemes！
                     if (Date.now() - parsed.timestamp < CACHE_TIME && parsed.dbThemes) {
                         dbGirls = parsed.dbGirls || []; 
                         dbEvents = parsed.dbEvents || []; 
@@ -2035,14 +2034,7 @@
                         
                         if (dbGirls.length > 0) {
                             buildGirlMap(); init(); enableEnterButton(); 
-                            
-                            // ✨ 第一處：有快取時，瞬間優雅淡出載入畫面！
-                            const overlay = document.getElementById('loading-overlay');
-                            if (overlay) {
-                                overlay.classList.add('fade-out-complete');
-                                setTimeout(() => { overlay.style.display = 'none'; }, 600);
-                            }
-                            return; 
+                            return; // ✨ 移除了會導致黑屏的錯誤自動淡出代碼
                         }
                     }
                 }
@@ -2065,8 +2057,6 @@
                 dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
                 dbNews = newsData.filter(n => n.title);
                 if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
-                
-                // ✨ 智慧解析並讀入主題日最新資料
                 if(themesData) dbThemes = themesData.map(t => ({ ...t, safeDate: parseDateFlexible(t.date) })).filter(t => t.safeDate);
                 
                 let flat = [];
@@ -2086,12 +2076,8 @@
                                 let safeD = d.replace(/\//g, '\\/');
                                 let regex = new RegExp(`(?:^|[^\\d/])` + safeD + `[\\s：:]*([^\\s,，、]+)`);
                                 let match = rawNote.match(regex);
-                                
-                                if (match) {
-                                    specificNote = match[1]; 
-                                } else if (!/\d+\/\d+/.test(rawNote)) {
-                                    specificNote = rawNote;
-                                }
+                                if (match) specificNote = match[1]; 
+                                else if (!/\d+\/\d+/.test(rawNote)) specificNote = rawNote;
                             }
                             flat.push({ sport, team, name, safeDate: p, note: specificNote });
                         }
@@ -2100,27 +2086,16 @@
                 dbSchedules = flat;
 
                 dbNews = newsData.filter(n => n.title);
-                
-                if(matchesData) {
-                    dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
-                }
+                if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
 
                 buildGirlMap(); 
                 init(); 
-                enableEnterButton();
-                
-                // ✨ 第二處：從 Google 下載完畢時，優雅淡出載入畫面！
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.classList.add('fade-out-complete');
-                    setTimeout(() => { overlay.style.display = 'none'; }, 600);
-                }
+                enableEnterButton(); // ✨ 移除了會導致黑屏的錯誤自動淡出代碼
                 
                 if (typeof window.fetchGlobalVotes === 'function') {
                     window.fetchGlobalVotes();
                 }
                 
-                // 🟢 將下載好的全新完整資料重新寫入快取
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches, dbThemes })); } catch(e) {}
 
             } catch (err) {
