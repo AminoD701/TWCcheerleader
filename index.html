@@ -6607,7 +6607,7 @@ window.renderMinigameStart = function() {
             container.innerHTML = detailHtml;
         };
         // =========================================================================
-        // ✨ 主題日特區渲染引擎 (真實隊徽 + 完美防變形換行 + 手機黃金比例版)
+        // ✨ 主題日特區渲染引擎 (真實對戰LOGO + 智慧主題色彩高亮 + 極致壓縮排版)
         // =========================================================================
         window.renderTeamThemesHub = function(selectedTeam = null) {
             const container = document.getElementById('news-container'); 
@@ -6638,26 +6638,38 @@ window.renderMinigameStart = function() {
                 return '#ff5722'; 
             };
 
-            // ✨ 真實隊徽渲染引擎：去 teamThemes 撈取真正的 LOGO 圖片
-            const getTeamLogo = (tName) => {
+            const getTeamLogoImg = (tName) => {
                 if (!tName) return '';
-                let logoUrl = '';
-                if (window.teamThemes) {
-                    for (let key in window.teamThemes) {
-                        if (window.teamThemes[key].name === tName || key === tName) {
-                            logoUrl = window.teamThemes[key].logo;
-                            break;
-                        }
-                    }
+                const logoMap = {
+                    '中信兄弟': 'https://upload.wikimedia.org/wikipedia/zh/thumb/4/47/CTBC_Brothers_logo.svg/300px-CTBC_Brothers_logo.svg.png',
+                    '樂天桃猿': 'https://upload.wikimedia.org/wikipedia/zh/thumb/1/1b/Rakuten_Monkeys_logo.svg/300px-Rakuten_Monkeys_logo.svg.png',
+                    '統一獅': 'https://upload.wikimedia.org/wikipedia/zh/thumb/7/77/Uni-President_7-Eleven_Lions_logo.svg/300px-Uni-President_7-Eleven_Lions_logo.svg.png',
+                    '富邦悍將': 'https://upload.wikimedia.org/wikipedia/zh/thumb/9/90/Fubon_Guardians_logo.svg/300px-Fubon_Guardians_logo.svg.png',
+                    '味全龍': 'https://upload.wikimedia.org/wikipedia/zh/thumb/f/f6/Wei_Chuan_Dragons_logo.svg/300px-Wei_Chuan_Dragons_logo.svg.png',
+                    '台鋼雄鷹': 'https://upload.wikimedia.org/wikipedia/zh/thumb/5/53/TSG_Hawks_logo.svg/300px-TSG_Hawks_logo.svg.png'
+                };
+                let finalUrl = '';
+                for(let key in logoMap) {
+                    if (tName.includes(key) || key.includes(tName)) { finalUrl = logoMap[key]; break; }
                 }
-                if (logoUrl) {
-                    return `<img src="${window.getCdnUrl(logoUrl)}" style="width:32px; height:32px; object-fit:contain; drop-shadow: 0 2px 4px rgba(0,0,0,0.6); flex-shrink: 0;" alt="${tName}">`;
+                if (!finalUrl) finalUrl = window.getCdnUrl ? window.getCdnUrl(`img/${tName}.png`) : `img/${tName}.png`;
+                return `<img src="${finalUrl}" style="width:55px; height:55px; object-fit:contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); flex-shrink: 0;" onerror="this.style.display='none'">`;
+            };
+
+            // ✨ 智慧字串調色盤：給予不同主題獨特的螢光色彩，同名主題則保持同色
+            const getTitleColor = (titleText) => {
+                if (!titleText) return '#fff';
+                // 準備一組高辨識度、適合暗黑模式的高亮色彩
+                const colors = ['#38bdf8', '#34d399', '#f472b6', '#a78bfa', '#fb923c', '#2dd4bf', '#f87171', '#e879f9', '#fbbf24', '#818cf8'];
+                let hash = 0;
+                for (let i = 0; i < titleText.length; i++) {
+                    hash = titleText.charCodeAt(i) + ((hash << 5) - hash);
                 }
-                return ``; // 如果沒有LOGO就留空，只顯示文字
+                return colors[Math.abs(hash) % colors.length];
             };
 
             const iconPin = `<svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:currentColor; stroke-width:2; fill:none; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
-            const iconRoster = `<svg viewBox="0 0 24 24" style="width:15px; height:15px; stroke:currentColor; stroke-width:2; fill:none; margin-right:6px; vertical-align:text-bottom;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
+            const iconRoster = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; margin-right:6px; vertical-align:text-bottom;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
 
             // =====================================================================
             // 🏷️ 【第一層：主場球隊選擇大廳】
@@ -6667,9 +6679,7 @@ window.renderMinigameStart = function() {
                 dbThemes.forEach(t => {
                     const homeTeam = (t.home_team || t.hometeam || "").trim();
                     if (!homeTeam) return;
-                    if (!teamGroups[homeTeam]) {
-                        teamGroups[homeTeam] = { name: homeTeam, cheerteam: t.cheerteam, list: [] };
-                    }
+                    if (!teamGroups[homeTeam]) { teamGroups[homeTeam] = { name: homeTeam, cheerteam: t.cheerteam, list: [] }; }
                     teamGroups[homeTeam].list.push(t);
                 });
 
@@ -6682,21 +6692,16 @@ window.renderMinigameStart = function() {
                          style="background: #111418; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 25px; cursor: pointer; text-align: center; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4);"
                          onmouseover="this.style.borderColor='${tColor}'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.6), 0 0 15px color-mix(in srgb, ${tColor} 30%, transparent)';" 
                          onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.4)';" >
-                        
                         <div style="width: 8px; height: 40px; background: ${tColor}; position: absolute; left: 0; top: 50%; transform: translateY(-50%); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px ${tColor};"></div>
-                        
                         <div style="font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px;">${tg.name}</div>
                         <div style="font-size: 12px; color: ${tColor}; font-weight: 900; font-family: var(--sport-font); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 15px;">${tg.cheerteam}</div>
-                        
                         <div style="display: inline-block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 20px; font-size: 13px; color: var(--text-sub); font-weight: 700;">
                             下半季共 <span style="color: #fff; font-weight: 900; font-family: var(--sport-font); font-size: 16px; margin: 0 2px;">${count}</span> 個主題日
                         </div>
                     </div>`;
                 }).join('');
 
-                let mainStyle = `<style>.theme-hub-grid { display: grid !important; grid-template-columns: repeat(3, 11fr) !important; gap: 20px !important; width: 100% !important; max-width: 1000px !important; margin: 0 auto !important; padding: 10px; box-sizing: border-box !important; } @media (max-width: 900px) { .theme-hub-grid { grid-template-columns: repeat(2, 11fr) !important; } } @media (max-width: 600px) { .theme-hub-grid { grid-template-columns: 11fr !important; gap: 15px !important; } }</style>`;
-
-                container.innerHTML = mainStyle + `
+                container.innerHTML = `<style>.theme-hub-grid { display: grid !important; grid-template-columns: repeat(3, 11fr) !important; gap: 20px !important; width: 100% !important; max-width: 1000px !important; margin: 0 auto !important; padding: 10px; box-sizing: border-box !important; } @media (max-width: 900px) { .theme-hub-grid { grid-template-columns: repeat(2, 11fr) !important; } } @media (max-width: 600px) { .theme-hub-grid { grid-template-columns: 11fr !important; gap: 15px !important; } }</style>
                 <div style="text-align:center; margin-bottom: 35px; width:100%;">
                     <div style="font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 1px;">球隊主題日特區</div>
                     <div style="font-size: 14px; color: var(--text-sub); margin-top: 6px; font-weight: 700;">請選擇主場球隊查看完整下半季活動時程與應援名單</div>
@@ -6718,43 +6723,33 @@ window.renderMinigameStart = function() {
                 if (rawImg.trim()) { teamPosterUrl = window.getCdnUrl(rawImg.trim()); break; }
             }
 
-            let posterHeaderHtml = '';
-            if (teamPosterUrl) {
-                posterHeaderHtml = `
+            let posterHeaderHtml = teamPosterUrl ? `
                 <div class="theme-master-header" style="position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 450px; background: #050505; overflow: hidden; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-bottom: 30px; box-sizing: border-box;">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${teamPosterUrl}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.25); z-index: 1;"></div>
                     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${teamPosterUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2;"></div>
-                </div>`;
-            }
+                </div>` : '';
 
             let themeCardsHtml = filteredThemes.map(t => {
                 const dateStr = `${t.safeDate.month}/${String(t.safeDate.day).padStart(2,'0')}`;
                 const awayTeam = (t.away_team || t.awayteam || "").trim();
+                
+                // ✨ 取得專屬的智慧主題顏色
+                const titleHighlightColor = getTitleColor(t.title);
 
-                // ✨ 完美複刻賽事中心的對戰 LOGO 排版
-                let matchupHtml = '';
-                if (awayTeam) {
-                    matchupHtml = `
-                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            ${getTeamLogo(selectedTeam)}
-                            <span style="font-size:15px; font-weight:900; color:#fff;">${selectedTeam}</span>
+                let matchupHtml = `
+                    <div class="theme-matchup-container" style="display:flex; align-items:center; gap: 20px; margin-top: 15px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            ${getTeamLogoImg(selectedTeam)}
+                            <span style="font-size:14px; font-weight:900; color:#fff;">${selectedTeam}</span>
                         </div>
-                        <span style="color:#64748b; font-size:13px; font-weight:900; font-family:var(--sport-font); font-style:italic;">VS</span>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            ${getTeamLogo(awayTeam)}
-                            <span style="font-size:15px; font-weight:900; color:#cbd5e1;">${awayTeam}</span>
+                        ${awayTeam ? `
+                        <div style="font-size: 22px; font-weight: 900; color: rgba(255,255,255,0.2); font-family: var(--sport-font); font-style: italic;">VS</div>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            ${getTeamLogoImg(awayTeam)}
+                            <span style="font-size:14px; font-weight:900; color:#cbd5e1;">${awayTeam}</span>
                         </div>
+                        ` : ''}
                     </div>`;
-                } else {
-                    matchupHtml = `
-                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            ${getTeamLogo(selectedTeam)}
-                            <span style="font-size:15px; font-weight:900; color:#fff;">${selectedTeam}</span>
-                        </div>
-                    </div>`;
-                }
 
                 let foundGirlsStr = "";
                 const targetMatchNum = parseInt(t.matchdate || t.date || 0, 10); 
@@ -6763,7 +6758,7 @@ window.renderMinigameStart = function() {
                     if (matchedGame && matchedGame.girls) foundGirlsStr = matchedGame.girls;
                 }
                 if (!foundGirlsStr) foundGirlsStr = t.girls || t['女孩'] || t['出席名單'] || t['名單'] || "";
-                
+
                 const attendGirls = (foundGirlsStr || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
                 
                 let girlsHtml = "";
@@ -6775,7 +6770,6 @@ window.renderMinigameStart = function() {
                         if (g) {
                             const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                             dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                            // ✨ 絕對防擠壓：flex-shrink: 0 加上 aspect-ratio 保證是完美的圓形
                             imgHtml = `<img class="girl-avatar" src="${window.getCdnUrl(g.img)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; aspect-ratio:1/1; border:1.5px solid ${mainColor}; display:block; flex-shrink:0;" loading="lazy">`;
                         }
                         return `
@@ -6791,14 +6785,12 @@ window.renderMinigameStart = function() {
 
                 let girlsColumnHtml = "";
                 if (girlsHtml) {
-                    // ✨ 允許換行 (flex-wrap: wrap) 解決太擠的問題
                     girlsColumnHtml = `
-                    <div class="theme-col-girls" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 15px;">
+                    <div class="theme-col-girls" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 15px; width: 100%;">
                         ${girlsHtml}
                     </div>`;
                 }
 
-                // ✨ 全新佈局：三區塊架構
                 return `
                 <div class="theme-activity-card" style="--card-color: ${mainColor}; background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-sizing: border-box; width:100%; position: relative; transition: 0.2s;">
                     
@@ -6806,57 +6798,56 @@ window.renderMinigameStart = function() {
                         
                         <div class="theme-glow-bar" style="position: absolute; left: 0; top: 15px; bottom: 15px; width: 4px; background: ${mainColor}; box-shadow: 0 0 10px ${mainColor}; border-radius: 0 4px 4px 0;"></div>
                         
-                        <div class="theme-col-date" style="flex: 0 0 110px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
-                            <div style="display:flex; align-items: baseline; gap: 6px;">
+                        <div class="theme-col-date" style="flex: 0 0 120px; border-right: 1px solid rgba(255,255,255,0.08); padding-right: 15px; box-sizing: border-box;">
+                            <div class="date-wrap" style="display:flex; align-items:baseline; gap:6px;">
                                 <span style="font-family: var(--sport-font); font-size: 32px; font-weight: 900; color: #fff; line-height: 1;">${dateStr}</span>
-                                <span style="font-family: var(--sport-font); font-size: 13px; color: ${mainColor}; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">${t.safeDate.week}</span>
+                                <span style="font-family: var(--sport-font); font-size: 13px; color: ${mainColor}; font-weight: 900;">${t.safeDate.week}</span>
                             </div>
-                            <div class="theme-venue-text" style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-top: 10px; display:flex; align-items:center;">${iconPin} ${t.venue}</div>
+                            <div class="theme-venue-text" style="font-size: 12px; color: #94a3b8; font-weight: 700; display:flex; align-items:center; margin-top: 8px;">${iconPin} ${t.venue}</div>
                         </div>
 
                         <div class="theme-col-info" style="flex: 1; min-width: 0; box-sizing: border-box; display:flex; flex-direction:column; justify-content:center;">
-                            <div class="theme-title" style="font-size: 22px; font-weight: 900; color: #fff; line-height: 1.3; word-break: break-all; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${t.title}</div>
+                            <div class="theme-title" style="font-size: 24px; font-weight: 900; color: ${titleHighlightColor}; line-height: 1.3; word-break: break-all; text-shadow: 0 2px 5px rgba(0,0,0,0.6);">${t.title}</div>
                             ${matchupHtml}
                         </div>
 
-                        <div class="theme-col-action" style="flex: 1.2; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; min-width: 0;">
+                        <div class="theme-col-action" style="flex: 1.2; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 0;">
                             ${girlsColumnHtml}
-                            <button class="theme-btn" onclick="${rosterClickCmd}" style="background: ${mainColor}; color: #000; border: none; padding: 10px 20px; font-size: 13px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-self: flex-end;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${iconRoster}查看今日應援名單</button>
+                            <button class="theme-btn" onclick="${rosterClickCmd}" style="background: ${mainColor}; color: #000; border: none; padding: 10px 20px; font-size: 14px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-self: flex-end;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${iconRoster}查看當日應援名單</button>
                         </div>
                     </div>
                 </div>`;
             }).join('');
 
-            // ✨ 手機版黃金切割 CSS：日期不再佔一半，所有物件排列極致緊湊
             let responsiveStyle = `
                 <style>
+                    .theme-col-girls::-webkit-scrollbar { display: none; }
                     @media (max-width: 768px) {
                         .theme-activity-card { border-radius: 8px !important; margin-bottom: 12px !important; }
-                        .theme-card-body { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; padding: 15px !important; }
+                        .theme-card-body { flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 15px !important; }
                         
                         .theme-glow-bar { display: none !important; }
                         
-                        /* ✨ 手機版日期區：變為頂部橫條，不再切對半！ */
-                        .theme-col-date { width: 100% !important; flex: none !important; border-right: none !important; border-bottom: 1px dashed rgba(255,255,255,0.1) !important; padding-right: 0 !important; padding-bottom: 10px !important; flex-direction: row !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
-                        .theme-col-date > div:first-child span:first-child { font-size: 24px !important; }
-                        .theme-venue-text { margin-top: 0 !important; font-size: 11px !important; }
+                        /* 手機版日期區 */
+                        .theme-col-date { width: 100% !important; flex: none !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding-right: 0 !important; padding-bottom: 8px !important; margin-bottom: 10px !important; flex-direction: row !important; display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                        .date-wrap span:first-child { font-size: 24px !important; }
+                        .theme-venue-text { margin-top: 0 !important; }
                         
-                        /* 資訊與 LOGO 區 */
-                        .theme-col-info { width: 100% !important; flex: none !important; margin-top: 2px !important; }
-                        .theme-title { font-size: 18px !important; }
+                        /* 標題與對戰區 */
+                        .theme-col-info { width: 100% !important; flex: none !important; padding: 0 !important; }
+                        .theme-title { text-align: center !important; font-size: 20px !important; margin-bottom: 15px !important; }
+                        .theme-matchup-container { justify-content: center !important; background: rgba(0,0,0,0.2) !important; padding: 15px 0 !important; border-radius: 10px !important; margin-top: 0 !important; margin-bottom: 15px !important; }
                         
-                        /* 手機版女孩與按鈕區：緊湊排列 */
-                        .theme-col-action { width: 100% !important; flex: none !important; align-items: stretch !important; margin-top: 5px !important; }
-                        .theme-col-girls { justify-content: flex-start !important; margin-bottom: 12px !important; }
-                        
-                        .theme-btn { width: 100% !important; justify-content: center !important; font-size: 14px !important; align-self: center !important; }
+                        /* 女孩名單與按鈕區 */
+                        .theme-col-action { width: 100% !important; flex: none !important; align-items: center !important; }
+                        .theme-col-girls { justify-content: center !important; margin-bottom: 12px !important; }
+                        .theme-btn { width: 100% !important; justify-content: center !important; padding: 12px !important; font-size: 15px !important; align-self: stretch !important; }
                     }
                 </style>
             `;
 
             container.innerHTML = responsiveStyle + `
                 <div style="display:flex; flex-direction:column; width:100%; max-width:950px; margin:0 auto; padding: 0 10px; box-sizing:border-box;">
-                    
                     <div style="width: 100%; text-align: left; margin-bottom: 20px;">
                         <button onclick="window.renderTeamThemesHub()" 
                                 style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.08); padding: 8px 18px; border-radius: 6px; font-weight: 900; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;"
@@ -6864,14 +6855,11 @@ window.renderMinigameStart = function() {
                             ❮ 返回主題大廳
                         </button>
                     </div>
-
                     ${posterHeaderHtml}
-                    
                     <div style="text-align:left; margin-bottom: 20px; border-left: 4px solid ${mainColor}; padding-left: 12px;">
                         <div style="font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px;">${selectedTeam} 限定主題活動</div>
                         <div style="font-size: 13px; color: #64748b; margin-top: 6px; font-weight: 700;">以下為 ${selectedTeam} 主場限定活動與應援陣容</div>
                     </div>
-
                     <div style="display:flex; flex-direction:column; width:100%;">${themeCardsHtml}</div>
                 </div>`;
         };
