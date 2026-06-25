@@ -5173,7 +5173,7 @@
         };
 
         // =========================================================================
-        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (全寬橫幅 Banner + 數據裝飾版)
+        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (全寬橫幅 Banner + 主辦單位顯示版)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5234,8 +5234,11 @@
                     
                     const timeBadge = e.time ? `<div style="color: #fff; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 6px; width: fit-content; border: 1px solid rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:var(--event-accent); stroke-width:3;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${e.time}</div>` : `<div style="color: var(--text-sub); font-family: var(--sport-font); font-size: 14px; font-weight: 900; letter-spacing: 1px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; width: fit-content;">TBA</div>`;
 
+                    // ✨ 核心升級：加入主辦單位 HTML
+                    const hostHtml = e.host ? `<div style="font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-family: var(--tc-font);" title="主辦單位：${e.host}">🏢 ${e.host}</div>` : '';
+
                     return `
-                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 130px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
+                    <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 135px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
                          onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='color-mix(in srgb, var(--event-accent) 50%, transparent)'; this.style.transform='scale(1.01)'; this.querySelector('.slot-accent-bar').style.opacity='1'; this.querySelector('.slot-accent-bar').style.boxShadow='0 0 12px var(--event-accent)';" 
                          onmouseout="this.style.background='rgba(255,255,255,0.015)'; this.style.borderColor='rgba(255,255,255,0.04)'; this.style.transform='none'; this.querySelector('.slot-accent-bar').style.opacity='0.2'; this.querySelector('.slot-accent-bar').style.boxShadow='none';">
                         
@@ -5251,6 +5254,7 @@
 
                         <div class="event-slot-info-col" style="flex: 0 0 30%; min-width: 200px; text-align: right; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid rgba(255,255,255,0.08);">
                             <div style="font-size: 19px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${e.eventname || "活動賽事"}">${e.eventname || "活動賽事"}</div>
+                            ${hostHtml}
                             <div style="font-size: 13px; color: var(--text-sub); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${e.address ? e.address : '地點請見官方公告'}">📍 ${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}</div>
                         </div>
                         
@@ -5259,7 +5263,6 @@
 
                 const currentYear = date.year || new Date().getFullYear();
 
-                // ✨ 終極升級：取消側邊排版，改為頂部全寬 Banner！
                 return `
                 <div class="event-date-card ${isExp?'expired':''}" style="background: linear-gradient(145deg, #15191e 0%, #0d0f12 100%); border: 1px solid #2d3748; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: 0.3s; width: 100%; box-sizing: border-box; position: relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
                     
@@ -5301,7 +5304,6 @@
             const groupedUp = groupEventsByDate(up);
             const groupedEx = groupEventsByDate(ex);
 
-            // ✨ CSS 注入：因為已經改為上下堆疊，移除對外層 card 錯誤的 flex-direction: row 設定
             let styleInjection = `
                 <style>
                     #event-container .event-grid {
