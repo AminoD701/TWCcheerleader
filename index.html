@@ -1586,19 +1586,28 @@
         <div class="slide slide-3"></div>
     </div>
 
-    <div id="landing-page" class="landing-page">
-        <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), visibility 0.6s;">
-            <div style="font-family: var(--sport-font); font-size: clamp(20px, 4vw, 28px); font-weight: 900; color: #fff; letter-spacing: 6px; margin-bottom: 25px; animation: pulse-text 1.5s infinite;">
-                SYSTEM INITIALIZING...
+    <div id="landing-page" class="landing-page" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #050505; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; transition: opacity 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);">
+        <div class="landing-content" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            
+            <div style="font-family: var(--sport-font); font-size: clamp(24px, 5vw, 42px); font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 15px rgba(255,255,255,0.15); margin-bottom: 6px; line-height: 1.2;">
+                TAIWAN CHEERLEADER DATABASE
             </div>
-            <div style="width: 220px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative;">
-                <div style="position: absolute; top: 0; left: 0; height: 100%; width: 40%; background: #fff; box-shadow: 0 0 15px #fff, 0 0 5px #fff; animation: loading-swipe 1.5s infinite ease-in-out; border-radius: 4px;"></div>
+            <div style="font-size: 11px; color: #38bdf8; font-weight: 900; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 50px; font-family: var(--tc-font);">
+                Official Roster & Match Center
             </div>
             
+            <button id="enter-btn" class="enter-btn" disabled onclick="document.getElementById('landing-page').style.opacity='0'; setTimeout(()=>{document.getElementById('landing-page').style.display='none'; document.body.classList.remove('no-scroll');},500);" style="position: relative; overflow: hidden; padding: 15px 40px; font-size: 16px; letter-spacing: 2px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; transition: 0.3s; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+                <div id="loading-light-bar" style="position: absolute; top: 0; left: -100%; height: 100%; width: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: loading-swipe 1.5s infinite ease-in-out;"></div>
+                <span class="spinner" id="loading-spinner" style="display:inline-block; width:15px; height:15px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; margin-right:10px; vertical-align:middle;"></span>
+                <span id="enter-text" style="display:inline-block; font-weight: 900; font-family: var(--sport-font); z-index: 2; position: relative;">SYSTEM INITIALIZING...</span>
+            </button>
+            
             <style>
-                @keyframes pulse-text { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 15px rgba(255,255,255,0.4); } }
-                @keyframes loading-swipe { 0% { left: -40%; } 100% { left: 100%; } }
-                .fade-out-complete { opacity: 0 !important; visibility: hidden !important; }
+                @keyframes loading-swipe { 0% { left: -100%; } 100% { left: 200%; } }
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+                .enter-btn:not([disabled]) { background: #00b0ff !important; border-color: #00b0ff !important; color: #fff !important; box-shadow: 0 0 20px rgba(0,176,255,0.4) !important; }
+                .enter-btn:not([disabled]):hover { background: #fff !important; border-color: #fff !important; color: #000 !important; box-shadow: 0 0 20px rgba(255,255,255,0.6) !important; transform: scale(1.05); }
+                .enter-btn:not([disabled]) #loading-light-bar { display: none; }
             </style>
         </div>
     </div>
