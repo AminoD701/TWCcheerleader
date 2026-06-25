@@ -2595,10 +2595,17 @@
                             display: grid !important;
                             grid-template-columns: repeat(3, 1fr) !important;
                             gap: 8px !important;
+                            width: 100% !important;
+                            box-sizing: border-box !important;
                         }
                         .mc-roster-item {
                             flex: none !important;
                             max-width: none !important;
+                            
+                            /* ✨ 核心修復：強制覆蓋原本寫死的 190px，讓它乖乖配合手機螢幕縮放！ */
+                            width: 100% !important; 
+                            box-sizing: border-box !important;
+                            
                             flex-direction: column !important;
                             border-radius: 12px !important;
                             padding: 8px 4px !important;
