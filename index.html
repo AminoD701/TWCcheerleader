@@ -5173,7 +5173,7 @@
         };
 
         // =========================================================================
-        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (全寬橫幅 Banner + 主辦單位顯示版)
+        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (主辦單位高光凸顯 + 精緻SVG圖示版)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5199,6 +5199,11 @@
                 });
                 return Array.from(map.values());
             }
+
+            // ✨ 準備一組高階的向量圖示 (取代俗氣的 Emoji)
+            const svgHost = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:6px; vertical-align:text-bottom;"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-2"></path><path d="M9 9v.01"></path><path d="M9 13v.01"></path><path d="M9 17v.01"></path></svg>`;
+            const svgTag = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:5px; vertical-align:text-bottom;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+            const svgPin = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:5px; vertical-align:text-bottom;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
 
             const buildDateCard = (group, isExp) => {
                 const { date, events } = group;
@@ -5234,8 +5239,32 @@
                     
                     const timeBadge = e.time ? `<div style="color: #fff; font-family: var(--sport-font); font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 6px; width: fit-content; border: 1px solid rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:var(--event-accent); stroke-width:3;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${e.time}</div>` : `<div style="color: var(--text-sub); font-family: var(--sport-font); font-size: 14px; font-weight: 900; letter-spacing: 1px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; width: fit-content;">TBA</div>`;
 
-                    // ✨ 核心升級：加入主辦單位 HTML
-                    const hostHtml = e.host ? `<div style="font-size: 12px; color: var(--event-accent); font-weight: 900; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-family: var(--tc-font);" title="主辦單位：${e.host}">🏢 ${e.host}</div>` : '';
+                    // ✨ 核心升級：主辦單位與活動名稱的「主從翻轉」邏輯！
+                    let infoColHtml = '';
+                    if (e.host) {
+                        // 有主辦單位：主辦單位當大標，活動名稱當副標（霓虹色）
+                        infoColHtml += `
+                            <div style="font-size: 20px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${e.host}">
+                                ${svgHost}${e.host}
+                            </div>
+                            <div style="font-size: 13px; color: var(--event-accent); font-weight: 900; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; font-family: var(--tc-font);" title="${e.eventname || "活動賽事"}">
+                                ${svgTag}${e.eventname || "活動賽事"}
+                            </div>
+                        `;
+                    } else {
+                        // 沒主辦單位：活動名稱維持大標
+                        infoColHtml += `
+                            <div style="font-size: 20px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${e.eventname || "活動賽事"}">
+                                ${svgTag}${e.eventname || "活動賽事"}
+                            </div>
+                        `;
+                    }
+                    // 加入地點（替換成 SVG 地標）
+                    infoColHtml += `
+                        <div style="font-size: 13px; color: var(--text-sub); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${e.address ? e.address : '地點請見官方公告'}">
+                            ${svgPin}${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}
+                        </div>
+                    `;
 
                     return `
                     <div class="event-slot-item" onclick="window.openEventModal(${e.originalIndex})" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 20px 25px; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 20px; height: 135px; box-sizing: border-box; width: 100%; position: relative; overflow: hidden;" 
@@ -5252,10 +5281,8 @@
                             ${girlsHtml || '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">名單確認中</div>'}
                         </div>
 
-                        <div class="event-slot-info-col" style="flex: 0 0 30%; min-width: 200px; text-align: right; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid rgba(255,255,255,0.08);">
-                            <div style="font-size: 19px; font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="${e.eventname || "活動賽事"}">${e.eventname || "活動賽事"}</div>
-                            ${hostHtml}
-                            <div style="font-size: 13px; color: var(--text-sub); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${e.address ? e.address : '地點請見官方公告'}">📍 ${e.address ? e.address.split(' ')[0] : '地點請見官方公告'}</div>
+                        <div class="event-slot-info-col" style="flex: 0 0 35%; min-width: 220px; text-align: right; padding-left: 20px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid rgba(255,255,255,0.08);">
+                            ${infoColHtml}
                         </div>
                         
                     </div>`;
@@ -5324,9 +5351,7 @@
                         .desktop-only-info { display: none !important; }
                         
                         /* 手機版：日期橫幅縮小 Padding */
-                        .event-date-header { 
-                            padding: 15px 20px !important; 
-                        }
+                        .event-date-header { padding: 15px 20px !important; }
                         
                         .event-slots-container { padding: 15px !important; gap: 15px !important; }
                         
