@@ -5154,8 +5154,6 @@
 
                     let tHome = tHomeRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
                     let tCheer = tCheerRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    let tHome = tHomeRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    let tCheer = tCheerRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
                     return tHome.includes(targetTeamClean) || targetTeamClean.includes(tHome) || tCheer.includes(targetTeamClean) || targetTeamClean.includes(tCheer);
                 }) : null;
 
