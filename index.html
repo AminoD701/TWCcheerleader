@@ -5116,14 +5116,21 @@
 
             const dateExtraInfo = {};
             dates.forEach(dNum => {
+                // 將當前班表球隊名稱標準化（轉小寫、去空格、去掉常見後綴）
+                let targetTeamClean = currentScheduleTeam.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+
                 let matchInfo = typeof dbMatches !== 'undefined' ? dbMatches.find(m => {
-                    let hTeam = teamTranslation[m.hometeam] || m.hometeam;
-                    let aTeam = teamTranslation[m.awayteam] || m.awayteam;
-                    return m.safeDate && m.safeDate.num === dNum && (hTeam === currentScheduleTeam || aTeam === currentScheduleTeam);
+                    let hTeam = (teamTranslation[m.hometeam] || m.hometeam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let aTeam = (teamTranslation[m.awayteam] || m.awayteam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    return m.safeDate && m.safeDate.num === dNum && (hTeam.includes(targetTeamClean) || targetTeamClean.includes(hTeam) || aTeam.includes(targetTeamClean) || targetTeamClean.includes(aTeam));
                 }) : null;
+
                 let themeInfo = typeof dbThemes !== 'undefined' ? dbThemes.find(t => {
-                    return t.safeDate && t.safeDate.num === dNum && (t.home_team || t.hometeam || t.cheerteam || "").includes(currentScheduleTeam);
+                    let tHome = (t.home_team || t.hometeam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let tCheer = (t.cheerteam || t.cheerleader || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    return t.safeDate && t.safeDate.num === dNum && (tHome.includes(targetTeamClean) || targetTeamClean.includes(tHome) || tCheer.includes(targetTeamClean) || targetTeamClean.includes(tCheer));
                 }) : null;
+
                 dateExtraInfo[dNum] = {
                     venue: matchInfo ? matchInfo.venue : (themeInfo ? themeInfo.venue : ""),
                     themeTitle: themeInfo ? themeInfo.title : ""
