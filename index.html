@@ -5116,19 +5116,45 @@
 
             const dateExtraInfo = {};
             dates.forEach(dNum => {
-                // 將當前班表球隊名稱標準化（轉小寫、去空格、去掉常見後綴）
                 let targetTeamClean = currentScheduleTeam.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                
+                // 🌟 明星賽特赦條款：判定今天是不是 2026 年的中職明星賽週末
+                let isAllStarDate = (dNum === 20260718 || dNum === 20260719);
 
                 let matchInfo = typeof dbMatches !== 'undefined' ? dbMatches.find(m => {
-                    let hTeam = (teamTranslation[m.hometeam] || m.hometeam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    let aTeam = (teamTranslation[m.awayteam] || m.awayteam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    return m.safeDate && m.safeDate.num === dNum && (hTeam.includes(targetTeamClean) || targetTeamClean.includes(hTeam) || aTeam.includes(targetTeamClean) || targetTeamClean.includes(aTeam));
+                    if (!m.safeDate || m.safeDate.num !== dNum) return false;
+                    
+                    let hTeamRaw = m.hometeam || "";
+                    let aTeamRaw = m.awayteam || "";
+                    let mNoteRaw = m.note || "";
+                    
+                    // 如果是明星賽日期，且賽程欄位有出現「明星」相關字眼，直接特赦放行！
+                    if (isAllStarDate) {
+                        let isAllStarMatch = hTeamRaw.includes("明星") || aTeamRaw.includes("明星") || mNoteRaw.includes("明星") || hTeamRaw.toUpperCase().includes("ALLSTAR") || aTeamRaw.toUpperCase().includes("TAIWAN");
+                        if (isAllStarMatch) return true;
+                    }
+
+                    let hTeam = (teamTranslation[hTeamRaw] || hTeamRaw).toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let aTeam = (teamTranslation[aTeamRaw] || aTeamRaw).toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    return hTeam.includes(targetTeamClean) || targetTeamClean.includes(hTeam) || aTeam.includes(targetTeamClean) || targetTeamClean.includes(aTeam);
                 }) : null;
 
                 let themeInfo = typeof dbThemes !== 'undefined' ? dbThemes.find(t => {
-                    let tHome = (t.home_team || t.hometeam || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    let tCheer = (t.cheerteam || t.cheerleader || "").toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
-                    return t.safeDate && t.safeDate.num === dNum && (tHome.includes(targetTeamClean) || targetTeamClean.includes(tHome) || tCheer.includes(targetTeamClean) || targetTeamClean.includes(tCheer));
+                    if (!t.safeDate || t.safeDate.num !== dNum) return false;
+
+                    let tHomeRaw = t.home_team || t.hometeam || "";
+                    let tCheerRaw = t.cheerteam || t.cheerleader || "";
+                    let tTitleRaw = t.title || "";
+
+                    // 如果是明星賽日期，且主題日欄位有出現「明星」相關字眼，直接特赦放行！
+                    if (isAllStarDate) {
+                        let isAllStarTheme = tHomeRaw.includes("明星") || tCheerRaw.includes("明星") || tTitleRaw.includes("明星") || tTitleRaw.toUpperCase().includes("ALLSTAR");
+                        if (isAllStarTheme) return true;
+                    }
+
+                    let tHome = tHomeRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let tCheer = tCheerRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    return tHome.includes(targetTeamClean) || targetTeamClean.includes(tHome) || tCheer.includes(targetTeamClean) || targetTeamClean.includes(tCheer);
                 }) : null;
 
                 dateExtraInfo[dNum] = {
