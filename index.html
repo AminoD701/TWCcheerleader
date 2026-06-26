@@ -5154,12 +5154,19 @@
 
                     let tHome = tHomeRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
                     let tCheer = tCheerRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let tHome = tHomeRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
+                    let tCheer = tCheerRaw.toLowerCase().replace(/[\s_棒球籃球排球]/g, "");
                     return tHome.includes(targetTeamClean) || targetTeamClean.includes(tHome) || tCheer.includes(targetTeamClean) || targetTeamClean.includes(tCheer);
                 }) : null;
 
+                // ✨ 修正：把賽程表的 NOTE 抓出來
+                let matchNote = matchInfo && matchInfo.note ? matchInfo.note.trim() : "";
+                let themeTitle = themeInfo && themeInfo.title ? themeInfo.title.trim() : "";
+
                 dateExtraInfo[dNum] = {
-                    venue: matchInfo ? matchInfo.venue : (themeInfo ? themeInfo.venue : ""),
-                    themeTitle: themeInfo ? themeInfo.title : ""
+                    venue: matchInfo && matchInfo.venue ? matchInfo.venue : (themeInfo && themeInfo.venue ? themeInfo.venue : ""),
+                    // ✨ 優先顯示主題日名稱，如果沒有，就顯示賽程表的 NOTE (例如：明星賽)
+                    themeTitle: themeTitle || matchNote 
                 };
             });
 
