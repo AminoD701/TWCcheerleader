@@ -3422,6 +3422,63 @@
                     leaderboard.innerHTML = `<div class="poster-leaderboard">${podiumHtml}${restHtml}</div>`;
                 }
             }
+            // =============== ✨ 閉幕模式特化：榮譽殿堂與冠軍特寫 ===============
+            const lbContainer = document.getElementById('vote-leaderboard-container');
+            if (lbContainer) {
+                const titleEl = lbContainer.querySelector('div');
+                if (titleEl) {
+                    // 針對 Q3: 美化前十名，讓標題變金黃色，並讓整個排行榜發出黃金光暈
+                    titleEl.innerHTML = phase === 'closed' ? '🏆 最終榮耀 TOP 10 殿堂' : '🔥 即時戰況 TOP 10';
+                    titleEl.style.color = phase === 'closed' ? '#ffd700' : '#fff';
+                    lbContainer.style.borderColor = phase === 'closed' ? '#ffd700' : 'var(--border-color)';
+                    lbContainer.style.boxShadow = phase === 'closed' ? '0 0 30px rgba(255,215,0,0.2)' : '0 10px 20px rgba(0,0,0,0.5)';
+                }
+            }
+
+            if (phase === 'closed') {
+                // 針對 Q2: 隱藏投票搜尋與下拉選單，因為活動已經結束了
+                const searchInput = document.getElementById('vote-search-input');
+                const teamSelect = document.getElementById('vote-team-select');
+                if (searchInput) searchInput.style.display = 'none';
+                if (teamSelect) teamSelect.style.display = 'none';
+
+                // 針對 Q4: 抓取第一名，給予特別海報大特寫
+                const champion = regionGirls[0];
+                if (champion) {
+                    const isLocal = (champion.nat || "").includes("台") || (champion.nat || "").includes("臺") || (champion.nat || "").includes("港") || (champion.nat || "").includes("馬");
+                    const champName = isLocal ? (champion.nickname || champion.realname) : champion.realname;
+                    
+                    grid.style.display = 'block'; // 解除原本的 Grid 排版，讓海報霸氣置中
+                    grid.innerHTML = `
+                        <div style="width: 100%; margin: 40px auto 60px; text-align: center; animation: destiny-pop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                            <div style="font-family: var(--sport-font); font-size: 36px; color: #ffd700; letter-spacing: 4px; text-shadow: 2px 2px 0px #b8860b; margin-bottom: 10px;">🏆 GRAND CHAMPION 🏆</div>
+                            <div style="font-size: 18px; color: #cbd5e1; font-weight: 900; margin-bottom: 35px; letter-spacing: 2px;">感謝全台粉絲熱情參與，最終榮耀得主誕生！</div>
+                            
+                            <div class="card winner-card" style="border-bottom: 6px solid #ffd700; --team-accent: #ffd700; pointer-events: none; width: 100%; max-width: 480px; height: 65vh; min-height: 500px; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 60px rgba(255,215,0,0.6);">
+                                <div style="position:absolute; top:-30px; left:-25px; font-size:80px; filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.8)); z-index:20; transform: rotate(-15deg);">👑</div>
+                                <div class="photo-area" style="flex: 1; height: auto; border-bottom: 4px solid #ffd700;">
+                                    <img src="${window.getCdnUrl(champion.img)}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.onerror=null; this.src='${champion.img}';">
+                                </div>
+                                <div class="info-section" style="flex: none; height: auto; padding: 25px 15px; background: linear-gradient(135deg, #111, #1a1a24); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <div style="font-size:16px; color:#ffd700; font-weight:900; margin-bottom:6px; letter-spacing: 2px;">第一屆·全民應援大賞 總冠軍</div>
+                                    <div style="font-size:46px; font-weight:900; color:#fff; text-align:center; line-height: 1; text-shadow: 0 0 15px rgba(255,255,255,0.4); margin-bottom: 12px;">${champName}</div>
+                                    <div style="font-size:22px; font-weight:900; color:#fff; font-family:var(--sport-font); background: #e50012; padding: 6px 25px; border-radius: 30px; border: 2px solid #000; box-shadow: 3px 3px 0 rgba(0,0,0,0.8);">${champion.votes.toLocaleString()} 票</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    // 噴發慶祝彩帶
+                    if(typeof createConfetti === 'function' && !window.hasFiredChampConfetti) {
+                        createConfetti();
+                        window.hasFiredChampConfetti = true;
+                    }
+                }
+                return; // 🛑 結束執行，不再渲染下方原本的百人投票網格！
+            } else {
+                // 如果還在活動期間，確保網格排版恢復正常
+                grid.style.display = ''; 
+            }
+            // ====================================================================
 
             let filtered = regionGirls.filter(g => {
                 if (voteState.selectedTeam !== '全部' && !(g.combinedTeam || "").includes(voteState.selectedTeam)) return false;
