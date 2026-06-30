@@ -2072,9 +2072,11 @@
                         const p = parseDateFlexible(d);
                         if(p && name) {
                             let specificNote = "";
-                            if (rawNote) {
+                           if (rawNote) {
                                 let safeD = d.replace(/\//g, '\\/');
-                                let regex = new RegExp(`(?:^|[^\\d/])` + safeD + `[\\s：:]*([^\\s,，、]+)`);
+                                // ✨ 核心修復：加上 (?!\\d) 負向先行斷言
+                                // 意思是「7/1 的後面絕對不能緊接著其他數字」，防止它把 7/18 或 7/19 誤認！
+                                let regex = new RegExp(`(?:^|[^\\d/])` + safeD + `(?!\\d)[\\s：:]*([^\\s,，、]+)`);
                                 let match = rawNote.match(regex);
                                 if (match) specificNote = match[1]; 
                                 else if (!/\d+\/\d+/.test(rawNote)) specificNote = rawNote;
