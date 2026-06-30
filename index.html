@@ -2095,7 +2095,12 @@
                 enableEnterButton(); // ✨ 移除了會導致黑屏的錯誤自動淡出代碼
                 
                 if (typeof window.fetchGlobalVotes === 'function') {
-                    window.fetchGlobalVotes();
+                    window.fetchGlobalVotes().then(() => {
+                        // 確保票數抓完後，女孩圖鑑能立刻掛上皇冠！
+                        if (currentMode === 'girls' && typeof renderGirls === 'function') {
+                            window.renderGirls();
+                        }
+                    });
                 }
                 
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), dbGirls, dbEvents, dbSchedules, dbNews, dbMatches, dbThemes })); } catch(e) {}
@@ -4727,6 +4732,24 @@
 
             window.currentDisplayLimit = window.currentDisplayLimit || 24;
 
+            // ✨ 新增：即時計算全網 TOP 10 女孩，給予專屬榮耀皇冠
+            let girlVotes = [];
+            dbGirls.forEach(g => {
+                let v = 0;
+                if (window.globalVoteData) {
+                    for (let k in window.globalVoteData) {
+                        // 排除新聞心情，將所有賽區的票數加總
+                        if (!k.startsWith('news_') && k.endsWith(g.uid)) {
+                            v += parseInt(window.globalVoteData[k]) || 0;
+                        }
+                    }
+                }
+                if (v > 0) girlVotes.push({uid: g.uid, votes: v});
+            });
+            // 排序並抓取前十名的 UID
+            girlVotes.sort((a, b) => b.votes - a.votes);
+            let top10Uids = new Set(girlVotes.slice(0, 10).map(g => g.uid));
+
             let htmlContent = result.slice(0, window.currentDisplayLimit).map(c => {
                 const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
                 const sports = (c.mS || [c.sport || ""]);
@@ -4780,10 +4803,31 @@
                     <div class="info-section">
                         <div class="header-info">
                             <div>
-                                <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
-                                    <div class="nickname" style="color:${cardAccent}">${mainName}</div>
-                                    ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
-                                </div>
+                                <!-- ✨ 製作專屬 TOP 10 高質感 SVG 小皇冠徽章 -->
+                                ${(() => {
+                                    let isTop10 = top10Uids.has(c.uid);
+                                    let crownBadgeHtml = isTop10 ? `
+                                        <div style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #1a1e24, #0d0f12); border:1px solid #ffd700; border-radius:50%; width:22px; height:22px; box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 0 4px rgba(255,215,0,0.3); margin-left:6px;" title="第一屆應援大賞 TOP 10">
+                                            <svg viewBox="0 0 24 24" style="width:12px; height:12px; transform:translateY(-1px);">
+                                                <defs>
+                                                    <linearGradient id="roster-gold-${c.uid.replace(/[^\w-]/g, '')}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                        <stop offset="0%" stop-color="#fff7b0" />
+                                                        <stop offset="30%" stop-color="#ffd700" />
+                                                        <stop offset="70%" stop-color="#f59e0b" />
+                                                        <stop offset="100%" stop-color="#b8860b" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" fill="url(#roster-gold-${c.uid.replace(/[^\w-]/g, '')})" stroke="#fff" stroke-width="0.5" stroke-linejoin="round"/>
+                                            </svg>
+                                        </div>` : '';
+                                    return `
+                                    <div class="nickname-container" style="display:flex; align-items:center; gap:8px;">
+                                        <div class="nickname" style="color:${cardAccent}; display:flex; align-items:center;">
+                                            ${mainName} ${crownBadgeHtml}
+                                        </div>
+                                        ${c.ig ? `<a href="${c.ig}" target="_blank" class="ig-link" onclick="event.stopPropagation()"><svg class="ig-icon"><use xlink:href="#icon-ig"></use></svg></a>` : ''}
+                                    </div>`;
+                                })()}
                                 ${subNameHtml}
                             </div>
                             <div class="number">${displayNum}</div>
