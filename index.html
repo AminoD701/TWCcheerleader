@@ -1483,10 +1483,17 @@
             /* ✨ 關鍵修正 2：資訊區塊縮減至精緻的 40%，讓排版更緊湊俐落！ */
             .modal-layout:has(.modal-photo) .modal-body { 
                 width: 40% !important; 
-                padding: 45px 35px !important; /* 配合寬度縮減，微調 Padding 避免文字太擠 */
+                padding: 45px 35px !important; 
                 display: flex; 
                 flex-direction: column; 
-                justify-content: center; 
+                justify-content: flex-start; /* 🛑 拔除強制置中，改為靠上對齊避免過度裁切 */
+            }
+            /* ✨ 新增：內部包裝容器，實現內容少時置中，內容多時正常往下捲動的完美邏輯 */
+            .modal-inner-wrapper {
+                margin: auto 0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
             }
 
             /* 3. 將原本絕對定位的運動標籤，拉回右側內文中排版 */
@@ -5045,34 +5052,45 @@
             document.getElementById('modal-dynamic-content').innerHTML = `
                 ${finalImgUrl ? `<img src="${finalImgUrl}" class="modal-photo">` : ''}
                 <div class="modal-body">
-                    <div class="sport-tags">${tags}</div>
-                    
-                    <div class="modal-header-info">
-                        <div>
-                            <div class="modal-nickname" style="color:${cardAccent}">${c.realname}</div>
-                            ${(c.nickname && c.nickname !== c.realname) ? `<div class="modal-realname">${c.nickname}</div>` : ''}
+                    <!-- ✨ 新增外層包裝：完美處理垂直置中與捲動 -->
+                    <div class="modal-inner-wrapper">
+                        
+                        <div class="sport-tags" style="flex-shrink: 0;">${tags}</div>
+                        
+                        <div class="modal-header-info" style="flex-shrink: 0;">
+                            <div>
+                                <div class="modal-nickname" style="color:${cardAccent}">${c.realname}</div>
+                                ${(c.nickname && c.nickname !== c.realname) ? `<div class="modal-realname">${c.nickname}</div>` : ''}
+                            </div>
+                            <div class="modal-number">${nums.join(' ') || "-"}</div>
                         </div>
-                        <div class="modal-number">${nums.join(' ') || "-"}</div>
-                    </div>
-                    
-                    <div class="modal-data-grid">
-                        <div class="modal-data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 5px; align-items: flex-start;">
-                            <span class="modal-data-label" style="margin-top: 5px;">所屬球隊 UNIT</span>
-                            <div class="team-tags-wrapper">
-                                ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
+                        
+                        <div class="modal-data-grid" style="flex-shrink: 0;">
+                            <div class="modal-data-row" style="border-bottom: 2px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 5px; align-items: flex-start;">
+                                <span class="modal-data-label" style="margin-top: 5px;">所屬球隊 UNIT</span>
+                                <div class="team-tags-wrapper">
+                                    ${teams.map(t => `<span class="team-tag-mini" style="color:${cardAccent};">${t}</span>`).join('')}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
-                        <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : 'N/A'}</span></div>
-                        <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
-                        <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
-                    </div>
-                    ${noteText ? `<div class="note-box">${noteText}</div>` : ''}
+                        
+                        <!-- ✨ 加入 flex-shrink: 0，宣告不准被壓縮！ -->
+                        <div class="stats-grid" style="flex-shrink: 0;">
+                            <div class="stat-box"><span class="stat-label">國籍 NAT</span><span class="stat-value">${c.nat || "-"}</span></div>
+                            <div class="stat-box"><span class="stat-label">身高 HEIGHT</span><span class="stat-value">${c.height ? c.height + ' cm' : 'N/A'}</span></div>
+                            <div class="stat-box"><span class="stat-label">星座 SIGN</span><span class="stat-value">${c.zodiac || "-"}</span></div>
+                            <div class="stat-box"><span class="stat-label">生日 DOB</span><span class="stat-value">${c.dob || "-"}</span></div>
+                        </div>
+                        
+                        ${noteText ? `<div class="note-box" style="flex-shrink: 0;">${noteText}</div>` : ''}
+                        
+                        <!-- ✨ 所有功能按鈕與班表區塊，皆加入防壓保護 -->
+                        <div style="flex-shrink: 0;">${voteBtnHtml}</div>
+                        <div style="flex-shrink: 0;">${scheduleHtml}</div>
+                        
+                        ${c.ig ? `<div style="flex-shrink: 0; margin-top: 20px;"><a href="${c.ig}" target="_blank" class="modal-ig-btn" style="margin-top: 0;"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>前往 INSTAGRAM</span></a></div>` : ''}
                     
-                    ${voteBtnHtml} ${scheduleHtml}
-                    ${c.ig ? `<a href="${c.ig}" target="_blank" class="modal-ig-btn"><svg viewBox="0 0 24 24"><use xlink:href="#icon-ig"></use></svg><span>前往 INSTAGRAM</span></a>` : ''}
+                    </div>
                 </div>
             `;
 
