@@ -6494,31 +6494,57 @@ window.renderMinigameStart = function() {
                 heroHtml = `
                 <style>
                     .hero-carousel-container { width: 100%; margin-bottom: 30px; position: relative; }
-                    .hero-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding-bottom: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                    .hero-carousel-wrapper { position: relative; width: 100%; }
+                    .hero-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding-bottom: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
                     .hero-carousel::-webkit-scrollbar { display: none; }
+                    
+                    /* ✨ 修正：改為 scroll-snap-align: start 讓卡片切換時完美貼齊邊緣 */
                     .news-hero-card {
-                        flex: 0 0 100%; scroll-snap-align: center;
+                        flex: 0 0 100%; scroll-snap-align: start; 
                         position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: 0.3s; display: flex; background: #050505;
                     }
                     .hero-img-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
                     .hero-text-content { position: relative; z-index: 4; padding: 25px; width: 100%; align-self: flex-end; background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 40%, rgba(5,5,5,0.95) 100%); }
                     
+                    /* ✨ 新增：電腦版專屬的左右切換箭頭 */
+                    .hero-nav-btn {
+                        position: absolute; top: 50%; transform: translateY(-50%);
+                        width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff;
+                        border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        cursor: pointer; z-index: 10; transition: 0.2s; font-size: 18px; font-weight: 900;
+                        backdrop-filter: blur(4px);
+                    }
+                    .hero-nav-btn:hover { background: var(--event-accent); border-color: transparent; transform: translateY(-50%) scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+                    .hero-nav-prev { left: 10px; }
+                    .hero-nav-next { right: 10px; }
+
                     @media (min-width: 769px) { 
                         .news-hero-card { aspect-ratio: 16 / 9; max-height: 480px; align-items: flex-end; } 
                     }
                     @media (max-width: 768px) { 
-                        /* ✨ 手機版：寬度設為 92%，讓下一張卡片「微微露出一角」，暗示球迷可以往左滑動！ */
                         .news-hero-card { flex: 0 0 92%; flex-direction: column; } 
                         .hero-carousel { padding-right: 8%; scroll-padding-left: 0; }
                         .hero-img-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; height: auto; } 
                         .hero-text-content { background: #0a0c0f; padding: 15px 15px 20px; align-self: stretch; } 
+                        /* ✨ 手機版隱藏箭頭，保留原生手勢滑動 */
+                        .hero-nav-btn { display: none; } 
                     }
                 </style>
                 <div class="hero-carousel-container">
-                    ${heroList.length > 1 ? `<div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; padding-right: 5px; animation: slide-hint 2s infinite;">滑動查看更多頭條 ➔</div>` : ''}
-                    <div class="hero-carousel">
-                        ${heroCards}
+                    ${heroList.length > 1 ? `<div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; padding-right: 5px; animation: slide-hint 2s infinite;">滑動或點擊箭頭查看更多頭條 ➔</div>` : ''}
+                    
+                    <!-- ✨ 新增：左右箭頭控制結構與滾動指令 -->
+                    <div class="hero-carousel-wrapper">
+                        ${heroList.length > 1 ? `<button class="hero-nav-btn hero-nav-prev" onclick="event.stopPropagation(); document.getElementById('news-hero-carousel').scrollBy({left: -document.getElementById('news-hero-carousel').offsetWidth, behavior: 'smooth'})">❮</button>` : ''}
+                        
+                        <div class="hero-carousel" id="news-hero-carousel">
+                            ${heroCards}
+                        </div>
+
+                        ${heroList.length > 1 ? `<button class="hero-nav-btn hero-nav-next" onclick="event.stopPropagation(); document.getElementById('news-hero-carousel').scrollBy({left: document.getElementById('news-hero-carousel').offsetWidth, behavior: 'smooth'})">❯</button>` : ''}
                     </div>
+
                 </div>
                 <style>@keyframes slide-hint { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }</style>
                 `;
