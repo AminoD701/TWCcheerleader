@@ -6447,44 +6447,37 @@ window.renderMinigameStart = function() {
             let displayList = sortedNews.slice(0, window.currentDisplayLimit);
             let isDefaultView = (searchKeyword === "" && window.currentMainCategory === "全部" && window.currentSubCategory === "全部" && !window.currentNewsHashtag);
             
-            let cardsHtml = displayList.map((n, index) => {
-                const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-                const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
-                const rawContent = getField(n, ['content', '內文', '內容']);
-                const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
-                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                const titleText = getField(n, ['title', '標題'], '無標題');
-                const dateText = getField(n, ['date', '日期'], '-');
+            // ✨ 分拆「頭條新聞 (Top 5)」與「一般新聞列表」
+            let heroList = [];
+            let standardList = [];
+            
+            if (isDefaultView) {
+                // 預設大廳模式下，提取前 5 篇作為可滑動的頭條看板
+                heroList = displayList.slice(0, 5);
+                standardList = displayList.slice(5);
+            } else {
+                // 如果是在搜尋或篩選模式，全部用一般清單顯示，一目了然
+                standardList = displayList;
+            }
 
-                if (index === 0 && isDefaultView && imgUrl) {
+            let heroHtml = '';
+            if (heroList.length > 0) {
+                let heroCards = heroList.map((n, index) => {
+                    const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+                    const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
+                    const rawContent = getField(n, ['content', '內文', '內容']);
+                    const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
+                    const titleText = getField(n, ['title', '標題'], '無標題');
+                    const dateText = getField(n, ['date', '日期'], '-');
+
+                    // 如果這篇剛好沒附圖，給它一個有質感的黑色漸層底，避免破圖
+                    const bgStyle = imgUrl ? `background-image: url('${imgUrl}');` : `background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%);`;
+
                     return `
-                    <style>
-                        .news-hero-card {
-                            position: relative; width: 100%; border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: 0.3s; display: flex; background: #050505;
-                        }
-                        .hero-img-wrapper {
-                            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
-                        }
-                        .hero-text-content {
-                            position: relative; z-index: 4; padding: 25px; width: 100%; align-self: flex-end;
-                            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 40%, rgba(5,5,5,0.95) 100%);
-                        }
-                        /* 電腦版：維持 16:9 劇院海報模式 */
-                        @media (min-width: 769px) {
-                            .news-hero-card { aspect-ratio: 16 / 9; max-height: 480px; align-items: flex-end; }
-                        }
-                        /* 手機版：上下堆疊，圖片維持 16:9，文字退到底下不干擾 */
-                        @media (max-width: 768px) {
-                            .news-hero-card { flex-direction: column; }
-                            .hero-img-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; height: auto; }
-                            .hero-text-content { background: #0a0c0f; padding: 15px 15px 20px; align-self: stretch; }
-                        }
-                    </style>
                     <div class="news-hero-card" onclick="window.openNewsModal(${n._idx})" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--event-accent)'; this.querySelector('.hero-img-contain').style.transform='scale(1.03)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.querySelector('.hero-img-contain').style.transform='none';">
-                        
                         <div class="hero-img-wrapper">
-                            <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgUrl}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
-                            <div class="hero-img-contain" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${imgUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; transition: 0.5s ease-out; z-index: 2;"></div>
+                            <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; ${bgStyle} background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
+                            <div class="hero-img-contain" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; ${bgStyle} background-size: contain; background-repeat: no-repeat; background-position: center; transition: 0.5s ease-out; z-index: 2;"></div>
                         </div>
                         
                         <div class="hero-text-content">
@@ -6496,7 +6489,50 @@ window.renderMinigameStart = function() {
                             <div style="font-size: clamp(13px, 2vw, 15px); color: #a0aec0; font-weight: 700; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">${summary}</div>
                         </div>
                     </div>`;
-                }
+                }).join('');
+
+                heroHtml = `
+                <style>
+                    .hero-carousel-container { width: 100%; margin-bottom: 30px; position: relative; }
+                    .hero-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding-bottom: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                    .hero-carousel::-webkit-scrollbar { display: none; }
+                    .news-hero-card {
+                        flex: 0 0 100%; scroll-snap-align: center;
+                        position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: 0.3s; display: flex; background: #050505;
+                    }
+                    .hero-img-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+                    .hero-text-content { position: relative; z-index: 4; padding: 25px; width: 100%; align-self: flex-end; background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 40%, rgba(5,5,5,0.95) 100%); }
+                    
+                    @media (min-width: 769px) { 
+                        .news-hero-card { aspect-ratio: 16 / 9; max-height: 480px; align-items: flex-end; } 
+                    }
+                    @media (max-width: 768px) { 
+                        /* ✨ 手機版：寬度設為 92%，讓下一張卡片「微微露出一角」，暗示球迷可以往左滑動！ */
+                        .news-hero-card { flex: 0 0 92%; flex-direction: column; } 
+                        .hero-carousel { padding-right: 8%; scroll-padding-left: 0; }
+                        .hero-img-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; height: auto; } 
+                        .hero-text-content { background: #0a0c0f; padding: 15px 15px 20px; align-self: stretch; } 
+                    }
+                </style>
+                <div class="hero-carousel-container">
+                    ${heroList.length > 1 ? `<div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; padding-right: 5px; animation: slide-hint 2s infinite;">滑動查看更多頭條 ➔</div>` : ''}
+                    <div class="hero-carousel">
+                        ${heroCards}
+                    </div>
+                </div>
+                <style>@keyframes slide-hint { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }</style>
+                `;
+            }
+
+            // 一般新聞的渲染邏輯 (從第 6 篇開始)
+            let standardHtml = standardList.map((n, index) => {
+                const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+                const imgUrl = imgRaw ? window.getCdnUrl(imgRaw) : '';
+                const rawContent = getField(n, ['content', '內文', '內容']);
+                const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
+                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
+                const titleText = getField(n, ['title', '標題'], '無標題');
+                const dateText = getField(n, ['date', '日期'], '-');
 
                 const imgHtml = imgUrl 
                     ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
@@ -6524,7 +6560,8 @@ window.renderMinigameStart = function() {
                 </div>`;
             }).join('');
 
-            let html = `<div style="display:flex; flex-direction:column; gap:20px;">${cardsHtml || '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>'}</div>`;
+            // ✨ 將頭條輪播區塊 (heroHtml) 與下方一般清單合併
+            let html = heroHtml + `<div style="display:flex; flex-direction:column; gap:20px;">${standardHtml || (heroHtml ? '' : '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>')}</div>`;
 
             if (sortedNews.length > window.currentDisplayLimit) {
                 html += `
