@@ -6464,9 +6464,9 @@ window.renderMinigameStart = function() {
             if (heroList.length > 0) {
                 let heroCards = heroList.map((n, index) => {
                     const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-                    // ✨ 遇到多圖時，切開網址並只取第一張當作封面
-                    const firstImg = imgRaw ? imgRaw.split(/[,\n]+/).map(u => u.trim()).filter(u => u)[0] : '';
-                    const imgUrl = firstImg ? window.getCdnUrl(firstImg) : '';
+                    // ✨ 終極升級：無視半形逗號、全形逗號、空白、換行或 |，全部完美切開取第一張當封面！
+                    const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
+                    const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
                     const rawContent = getField(n, ['content', '內文', '內容']);
                     const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                     const titleText = getField(n, ['title', '標題'], '無標題');
@@ -6555,9 +6555,9 @@ window.renderMinigameStart = function() {
             // 一般新聞的渲染邏輯 (從第 6 篇開始)
             let standardHtml = standardList.map((n, index) => {
                 const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-                // ✨ 一樣只取第一張圖當列表封面
-                const firstImg = imgRaw ? imgRaw.split(/[,\n]+/).map(u => u.trim()).filter(u => u)[0] : '';
-                const imgUrl = firstImg ? window.getCdnUrl(firstImg) : '';
+                // ✨ 一樣使用終極分割器抓取封面
+                const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
+                const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
                 const rawContent = getField(n, ['content', '內文', '內容']);
                 const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                 const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
@@ -6617,9 +6617,9 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 解析多圖：用逗號或換行切開，收集所有有效網址
+            // ✨ 升級解析多圖：確保陣列完美乾淨
             const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-            const imgUrls = imgRaw ? imgRaw.split(/[,\n]+/).map(u => u.trim()).filter(u => u) : [];
+            const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
             const titleText = getField(n, ['title', '標題'], '無標題');
             let contentText = getField(n, ['content', '內文', '內容'], '暫無內文'); // 注意這裡要用 let
             const dateText = getField(n, ['date', '日期'], '-');
@@ -6713,19 +6713,21 @@ window.renderMinigameStart = function() {
                     <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${tempCount}</span>
                 </div>`;
             }).join('');
-            // ✨ 製造多圖輪播區塊
+            // ✨ 製造多圖輪播區塊 (終極防破圖排版 + IG張數標籤)
             let modalImgSection = '';
             if (imgUrls.length === 1) {
-                // 只有一張圖，維持原本的置中顯示
                 modalImgSection = `
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center;">
-                    <img src="${window.getCdnUrl(imgUrls[0])}" style="max-width: 100%; height: auto; max-height: 62vh; display: inline-block; vertical-align: middle;">
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; height: 62vh; display: flex; align-items: center; justify-content: center;">
+                    <img src="${window.getCdnUrl(imgUrls[0])}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                 </div>`;
             } else if (imgUrls.length > 1) {
-                // 超過一張圖，自動轉換為 IG 風格左右滑動相簿
-                let slidesHtml = imgUrls.map(u => `
-                    <div style="flex: 0 0 100%; scroll-snap-align: center; position: relative; display: flex; align-items: center; justify-content: center;">
-                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="max-width: 100%; height: auto; max-height: 62vh; object-fit: contain;">
+                // 產生每張照片的 Slide，並在右上角壓上 1/5 這種頁數標籤
+                let slidesHtml = imgUrls.map((u, idx) => `
+                    <div style="flex: 0 0 100%; min-width: 100%; height: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        <div style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+                            ${idx + 1} / ${imgUrls.length}
+                        </div>
                     </div>
                 `).join('');
 
@@ -6734,19 +6736,16 @@ window.renderMinigameStart = function() {
                     #modal-img-slider::-webkit-scrollbar { display: none; }
                     @media (max-width: 768px) { .modal-slider-btn { display: none !important; } }
                 </style>
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; height: 62vh; display: flex; align-items: center;">
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; height: 62vh;">
                     
                     <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: -document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❮</button>
 
-                    <div id="modal-img-slider" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%;">
+                    <div id="modal-img-slider" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%;">
                         ${slidesHtml}
                     </div>
 
                     <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❯</button>
                     
-                    <div style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: #fff; font-size: 12px; padding: 6px 14px; border-radius: 20px; font-weight: 900; letter-spacing: 1px; z-index: 10; pointer-events: none; border: 1px solid rgba(255,255,255,0.2);">
-                        📸 滑動查看 (${imgUrls.length})
-                    </div>
                 </div>
                 `;
             }
