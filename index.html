@@ -7454,7 +7454,7 @@ window.renderMinigameStart = function() {
             }
 
             // --- ✨ 升級：擴充細節分區按鈕 ---
-            const zones = ['一壘', '一壘二樓', '一壘樓梯', '三壘', '三壘二樓', '三壘樓梯', '左外野', '右外野', '外野'];
+            const zones = ['一壘', '一壘二樓', '一壘樓梯', '三壘', '三壘二樓', '三壘樓梯', '左外野', '右外野'];
             let zoneBtns = zones.map(z => `
                 <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#fff' : '#15191e'}; color:${window.allStarFilterZone===z ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterZone===z ? '#fff' : '#2d3748'}; padding:6px 14px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; flex-shrink:0;">${z}</button>
             `).join('');
