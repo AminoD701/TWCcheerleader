@@ -7314,8 +7314,8 @@ window.renderMinigameStart = function() {
                 </div>`;
         };
         window.onload = loadData;
-        // =========================================================================
-        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map) - 電競質感與智慧排序版
+       // =========================================================================
+        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map) - 自動正名與細部分區版
         // =========================================================================
         window.allStarCurrentDate = 20260718; // 預設先顯示 7/18
         window.allStarFilterZone = "";   // 區域過濾
@@ -7340,14 +7340,13 @@ window.renderMinigameStart = function() {
             // --- ✨ 核心工具 1：字串解析與自動排序 ---
             const parseBlocks = (posStr) => {
                 if (!posStr || posStr.trim() === "") return [{ text: "尚未公佈", num: 999, raw: "尚未公佈" }];
-                // 支援用逗號、直線、頓號分割
                 let parts = posStr.split(/[,，|、]+/).map(s => s.trim()).filter(s => s);
                 return parts.map(p => {
                     let match = p.match(/(\d+)/);
                     let num = match ? parseInt(match[1]) : 999;
-                    let text = p.replace(/[：:]/g, ' '); // 移除冒號換成空格，更簡潔
+                    let text = p.replace(/[：:]/g, ' '); 
                     return { text, num, raw: p };
-                }).sort((a,b) => a.num - b.num); // 確保 1-3局 永遠排在 7-9局 前面
+                }).sort((a,b) => a.num - b.num); 
             };
 
             // --- ✨ 核心工具 2：局數交叉比對引擎 ---
@@ -7355,12 +7354,10 @@ window.renderMinigameStart = function() {
                 if (!inningStr) return true;
                 let inning = parseInt(inningStr);
                 let prefix = str.split('局')[0] || str;
-                // 檢查是否在 1-3 或 4~6 的區間內
                 let ranges = [...prefix.matchAll(/(\d+)\s*[-~到]\s*(\d+)/g)];
                 for (let r of ranges) {
                     if (inning >= parseInt(r[1]) && inning <= parseInt(r[2])) return true;
                 }
-                // 檢查是否有直接寫出數字 (如 1/2/3局)
                 let nums = prefix.match(/\b\d+\b/g);
                 if (nums && nums.includes(String(inning))) return true;
                 return false;
@@ -7371,7 +7368,16 @@ window.renderMinigameStart = function() {
             allStarSchedules.forEach(s => {
                 if (!teamsMap[s.team]) teamsMap[s.team] = [];
                 let g = girlMap.get(s.name) || dbGirls.find(x => x.realname === s.name || x.nickname === s.name);
-                teamsMap[s.team].push({ name: s.name, girl: g, team: s.team, pos: s.allstarPos || "尚未公佈" });
+                
+                // ✨ 終極正名系統：無論試算表打什麼，一律統一轉換為標準國字樓層
+                let rawPos = s.allstarPos || "尚未公佈";
+                rawPos = rawPos.replace(/1樓/g, "一樓")
+                               .replace(/2樓/g, "二樓")
+                               .replace(/3樓/g, "三樓")
+                               .replace(/4樓/g, "四樓")
+                               .replace(/5樓/g, "五樓");
+
+                teamsMap[s.team].push({ name: s.name, girl: g, team: s.team, pos: rawPos });
             });
 
             let contentHtml = '';
@@ -7386,7 +7392,6 @@ window.renderMinigameStart = function() {
                     const matchSearch = searchKeyword === "" || searchStr.includes(searchKeyword);
                     
                     const blocks = parseBlocks(item.pos);
-                    // 只要女孩的其中「一個時段」同時滿足區域與局數條件，就顯示她！
                     const matchAdvanced = blocks.some(b => {
                         let mZone = window.allStarFilterZone === "" || b.raw.includes(window.allStarFilterZone);
                         let mInning = window.allStarFilterInning === "" || matchesInning(b.raw, window.allStarFilterInning);
@@ -7409,7 +7414,6 @@ window.renderMinigameStart = function() {
                     const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
                     const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : item.name;
 
-                    // ✨ 將排序好的區塊組裝成視覺化路線
                     let blocks = parseBlocks(item.pos);
                     let arrowSvg = `<svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:${tCfg.accent}; stroke-width:3; fill:none; margin: 0 4px; vertical-align: middle; opacity:0.8;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
                     
@@ -7430,7 +7434,7 @@ window.renderMinigameStart = function() {
 
                 contentHtml += `
                 <div style="margin-bottom: 30px;">
-                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px dashed rgba(255,255,255,0.1);">
                         <span style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: ${tCfg.accent}; letter-spacing: 1px;">${tName}</span>
                         <span style="font-size: 12px; color: var(--text-sub); font-weight: 700;">共 ${girlsInTeam.length} 名</span>
                     </div>
@@ -7444,18 +7448,17 @@ window.renderMinigameStart = function() {
                 contentHtml = `<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700; display:flex; flex-direction:column; align-items:center;">${iconError}找不到符合該局數或站位的女孩</div>`;
             }
 
-            // --- ✨ 建立高質感過濾器 UI ---
-            const zones = ['一壘', '三壘', '內野', '外野'];
+            // --- ✨ 升級：擴充細節分區按鈕 ---
+            const zones = ['一壘', '一壘二樓', '一壘樓梯', '三壘', '三壘二樓', '三壘樓梯', '內野', '左外野', '右外野', '外野'];
             let zoneBtns = zones.map(z => `
-                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#fff' : '#15191e'}; color:${window.allStarFilterZone===z ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterZone===z ? '#fff' : '#2d3748'}; padding:6px 14px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s;">${z}</button>
+                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#fff' : '#15191e'}; color:${window.allStarFilterZone===z ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterZone===z ? '#fff' : '#2d3748'}; padding:6px 14px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; flex-shrink:0;">${z}</button>
             `).join('');
 
             const innings = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
             let inningBtns = innings.map(i => `
-                <button onclick="window.allStarFilterInning='${window.allStarFilterInning===i ? '' : i}'; window.renderAllStarMap();" style="background:${window.allStarFilterInning===i ? '#fff' : '#15191e'}; color:${window.allStarFilterInning===i ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterInning===i ? '#fff' : '#2d3748'}; padding:6px 12px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; font-family:var(--sport-font);">${i}</button>
+                <button onclick="window.allStarFilterInning='${window.allStarFilterInning===i ? '' : i}'; window.renderAllStarMap();" style="background:${window.allStarFilterInning===i ? '#fff' : '#15191e'}; color:${window.allStarFilterInning===i ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterInning===i ? '#fff' : '#2d3748'}; padding:6px 12px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; font-family:var(--sport-font); flex-shrink:0;">${i}</button>
             `).join('');
 
-            // 選單按鈕樣式
             const btnActiveStyle = `border-bottom: 3px solid #fff; color: #fff; background: rgba(255,255,255,0.05);`;
             const btnInactiveStyle = `border-bottom: 3px solid transparent; color: #64748b; background: transparent;`;
 
@@ -7478,12 +7481,12 @@ window.renderMinigameStart = function() {
                     </div>
                     
                     <div style="display:flex; flex-direction:column; gap:15px;">
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px;">局數</span>
+                        <div style="display:flex; align-items:center; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px; flex-shrink:0;">局數</span>
                             ${inningBtns}
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px;">區域</span>
+                        <div style="display:flex; align-items:center; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px; flex-shrink:0;">區域</span>
                             ${zoneBtns}
                         </div>
                     </div>
