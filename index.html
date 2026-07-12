@@ -7422,12 +7422,17 @@ window.renderMinigameStart = function() {
                         prettyPos = `<span style="color:#64748b;">尚未公佈</span>`;
                     }
 
+                    // ✨ 核心邏輯：如果局數與區域「同時」被選取，就隱藏站位路線！
+                    let isFullyFiltered = (window.allStarFilterZone !== "" && window.allStarFilterInning !== "");
+                    let posHtml = isFullyFiltered ? '' : `<div style="font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.4; word-break: break-word;">${iconPin}${prettyPos}</div>`;
+
+                    // ✨ 加上 justify-content: center; 讓只有名字時能完美垂直置中
                     return `
                     <div onclick="window.openModal('${targetId}')" style="display: flex; align-items: center; gap: 15px; background: #111418; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid ${tCfg.accent}; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#111418'; this.style.transform='none';">
                         <img src="${imgUrl}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid rgba(255,255,255,0.2); background: #252c36; flex-shrink: 0;" onerror="this.src='https://via.placeholder.com/55'">
-                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 5px;">
                             <div style="font-size: 16px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px;">${dName}</div>
-                            <div style="font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.4; word-break: break-word;">${iconPin}${prettyPos}</div>
+                            ${posHtml}
                         </div>
                     </div>`;
                 }).join('');
@@ -7449,7 +7454,7 @@ window.renderMinigameStart = function() {
             }
 
             // --- ✨ 升級：擴充細節分區按鈕 ---
-            const zones = ['一壘', '一壘二樓', '一壘樓梯', '三壘', '三壘二樓', '三壘樓梯', '內野', '左外野', '右外野', '外野'];
+            const zones = ['一壘', '一壘二樓', '一壘樓梯', '三壘', '三壘二樓', '三壘樓梯', '左外野', '右外野', '外野'];
             let zoneBtns = zones.map(z => `
                 <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#fff' : '#15191e'}; color:${window.allStarFilterZone===z ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterZone===z ? '#fff' : '#2d3748'}; padding:6px 14px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; flex-shrink:0;">${z}</button>
             `).join('');
