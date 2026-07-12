@@ -7315,10 +7315,11 @@ window.renderMinigameStart = function() {
         };
         window.onload = loadData;
         // =========================================================================
-        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map) - 高質感排版與精準正名版
+        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map) - 電競質感與智慧排序版
         // =========================================================================
         window.allStarCurrentDate = 20260718; // 預設先顯示 7/18
-        window.allStarFilterZone = ""; // 快速過濾區塊
+        window.allStarFilterZone = "";   // 區域過濾
+        window.allStarFilterInning = ""; // 局數過濾
         
         window.renderAllStarMap = function() {
             const container = document.getElementById('allstar-container');
@@ -7326,17 +7327,51 @@ window.renderMinigameStart = function() {
             
             let allStarSchedules = dbSchedules.filter(s => s.safeDate.num === window.allStarCurrentDate);
             
+            // 替換掉 Emoji 的高質感 SVG 圖示
+            const iconPin = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+            const iconSearch = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; position:absolute; left:15px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+            const iconError = `<svg viewBox="0 0 24 24" style="width:32px; height:32px; stroke:currentColor; stroke-width:2; fill:none; margin-bottom:10px; opacity:0.5;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+
             if (allStarSchedules.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--text-sub); font-weight:700;">目前尚未讀取到 ${window.allStarCurrentDate} 的班表資料！</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--text-sub); font-weight:700; display:flex; flex-direction:column; align-items:center;">${iconError}目前尚未讀取到 ${window.allStarCurrentDate} 的班表資料。</div>`;
                 return;
             }
+
+            // --- ✨ 核心工具 1：字串解析與自動排序 ---
+            const parseBlocks = (posStr) => {
+                if (!posStr || posStr.trim() === "") return [{ text: "尚未公佈", num: 999, raw: "尚未公佈" }];
+                // 支援用逗號、直線、頓號分割
+                let parts = posStr.split(/[,，|、]+/).map(s => s.trim()).filter(s => s);
+                return parts.map(p => {
+                    let match = p.match(/(\d+)/);
+                    let num = match ? parseInt(match[1]) : 999;
+                    let text = p.replace(/[：:]/g, ' '); // 移除冒號換成空格，更簡潔
+                    return { text, num, raw: p };
+                }).sort((a,b) => a.num - b.num); // 確保 1-3局 永遠排在 7-9局 前面
+            };
+
+            // --- ✨ 核心工具 2：局數交叉比對引擎 ---
+            const matchesInning = (str, inningStr) => {
+                if (!inningStr) return true;
+                let inning = parseInt(inningStr);
+                let prefix = str.split('局')[0] || str;
+                // 檢查是否在 1-3 或 4~6 的區間內
+                let ranges = [...prefix.matchAll(/(\d+)\s*[-~到]\s*(\d+)/g)];
+                for (let r of ranges) {
+                    if (inning >= parseInt(r[1]) && inning <= parseInt(r[2])) return true;
+                }
+                // 檢查是否有直接寫出數字 (如 1/2/3局)
+                let nums = prefix.match(/\b\d+\b/g);
+                if (nums && nums.includes(String(inning))) return true;
+                return false;
+            };
 
             // 將女孩按球隊分群
             let teamsMap = {};
             allStarSchedules.forEach(s => {
                 if (!teamsMap[s.team]) teamsMap[s.team] = [];
                 let g = girlMap.get(s.name) || dbGirls.find(x => x.realname === s.name || x.nickname === s.name);
-                teamsMap[s.team].push({ name: s.name, girl: g, team: s.team, pos: s.allstarPos || "全場游走 / 尚未公佈" });
+                teamsMap[s.team].push({ name: s.name, girl: g, team: s.team, pos: s.allstarPos || "尚未公佈" });
             });
 
             let contentHtml = '';
@@ -7345,12 +7380,20 @@ window.renderMinigameStart = function() {
             Object.keys(teamsMap).sort().forEach(tName => {
                 let girlsInTeam = teamsMap[tName];
                 
-                // 套用搜尋與按鈕過濾
+                // --- ✨ 實裝十字交叉過濾器 ---
                 girlsInTeam = girlsInTeam.filter(item => {
                     const searchStr = `${item.name} ${(item.girl?.nickname || '')} ${item.pos}`.toLowerCase();
                     const matchSearch = searchKeyword === "" || searchStr.includes(searchKeyword);
-                    const matchZone = window.allStarFilterZone === "" || item.pos.includes(window.allStarFilterZone);
-                    return matchSearch && matchZone;
+                    
+                    const blocks = parseBlocks(item.pos);
+                    // 只要女孩的其中「一個時段」同時滿足區域與局數條件，就顯示她！
+                    const matchAdvanced = blocks.some(b => {
+                        let mZone = window.allStarFilterZone === "" || b.raw.includes(window.allStarFilterZone);
+                        let mInning = window.allStarFilterInning === "" || matchesInning(b.raw, window.allStarFilterInning);
+                        return mZone && mInning;
+                    });
+
+                    return matchSearch && matchAdvanced;
                 });
 
                 if (girlsInTeam.length === 0) return;
@@ -7363,27 +7406,31 @@ window.renderMinigameStart = function() {
                     const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                     const targetId = g ? g.uid : item.name;
                     
-                    // ✨ 核心修復：精準的國籍分流邏輯 (台、臺、港、馬一律用綽號，日韓等外援用本名)
                     const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
                     const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : item.name;
 
-                    // ✨ 美化站位顯示：自動把逗號替換成醒目的紅色箭頭，呈現移動路線感
-                    let prettyPos = item.pos.replace(/[,，]/g, ' <strong style="color:#ff0044;">➔</strong> ');
+                    // ✨ 將排序好的區塊組裝成視覺化路線
+                    let blocks = parseBlocks(item.pos);
+                    let arrowSvg = `<svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:${tCfg.accent}; stroke-width:3; fill:none; margin: 0 4px; vertical-align: middle; opacity:0.8;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+                    
+                    let prettyPos = blocks.map(b => `<span style="display:inline-block;">${b.text}</span>`).join(arrowSvg);
+                    if (blocks.length === 1 && blocks[0].num === 999) {
+                        prettyPos = `<span style="color:#64748b;">尚未公佈</span>`;
+                    }
 
-                    // ✨ 全新高質感排版：俐落的左側色條卡片，讓長備註也能完美換行不斷掉
                     return `
                     <div onclick="window.openModal('${targetId}')" style="display: flex; align-items: center; gap: 15px; background: #111418; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid ${tCfg.accent}; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#111418'; this.style.transform='none';">
                         <img src="${imgUrl}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid rgba(255,255,255,0.2); background: #252c36; flex-shrink: 0;" onerror="this.src='https://via.placeholder.com/55'">
                         <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
-                            <div style="font-size: 16px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dName}</div>
-                            <div style="font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.4; word-break: break-word;">📍 ${prettyPos}</div>
+                            <div style="font-size: 16px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px;">${dName}</div>
+                            <div style="font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.4; word-break: break-word;">${iconPin}${prettyPos}</div>
                         </div>
                     </div>`;
                 }).join('');
 
                 contentHtml += `
                 <div style="margin-bottom: 30px;">
-                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px dashed rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
                         <span style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: ${tCfg.accent}; letter-spacing: 1px;">${tName}</span>
                         <span style="font-size: 12px; color: var(--text-sub); font-weight: 700;">共 ${girlsInTeam.length} 名</span>
                     </div>
@@ -7393,32 +7440,54 @@ window.renderMinigameStart = function() {
                 </div>`;
             });
 
-            if (!hasVisibleGirls) contentHtml = `<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">找不到符合站位或名稱的女孩 😢</div>`;
+            if (!hasVisibleGirls) {
+                contentHtml = `<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700; display:flex; flex-direction:column; align-items:center;">${iconError}找不到符合該局數或站位的女孩</div>`;
+            }
 
-            // 建立快速過濾按鈕
+            // --- ✨ 建立高質感過濾器 UI ---
             const zones = ['一壘', '三壘', '內野', '外野'];
             let zoneBtns = zones.map(z => `
-                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#ff0044' : '#15191e'}; color:#fff; border:1px solid ${window.allStarFilterZone===z ? '#ff0044' : '#2d3748'}; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s;">${z}</button>
+                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#fff' : '#15191e'}; color:${window.allStarFilterZone===z ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterZone===z ? '#fff' : '#2d3748'}; padding:6px 14px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s;">${z}</button>
             `).join('');
+
+            const innings = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let inningBtns = innings.map(i => `
+                <button onclick="window.allStarFilterInning='${window.allStarFilterInning===i ? '' : i}'; window.renderAllStarMap();" style="background:${window.allStarFilterInning===i ? '#fff' : '#15191e'}; color:${window.allStarFilterInning===i ? '#000' : '#a0aec0'}; border:1px solid ${window.allStarFilterInning===i ? '#fff' : '#2d3748'}; padding:6px 12px; border-radius:4px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s; font-family:var(--sport-font);">${i}</button>
+            `).join('');
+
+            // 選單按鈕樣式
+            const btnActiveStyle = `border-bottom: 3px solid #fff; color: #fff; background: rgba(255,255,255,0.05);`;
+            const btnInactiveStyle = `border-bottom: 3px solid transparent; color: #64748b; background: transparent;`;
 
             container.innerHTML = `
                 <div style="text-align: center; margin-bottom: 25px;">
-                    <div style="font-family: var(--sport-font); font-size: clamp(28px, 6vw, 42px); color: #ffd700; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 0px #b8860b;">🌟 中職明星賽 應援站位圖</div>
-                    <div style="font-size: 14px; color: var(--text-sub); font-weight: 700; margin-top: 5px;">快速掌握本命女孩的移動路線！</div>
+                    <div style="font-family: var(--sport-font); font-size: clamp(26px, 6vw, 36px); color: #fff; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">ALL-STAR ROSTER</div>
+                    <div style="font-size: 13px; color: var(--event-accent); font-weight: 900; margin-top: 5px; letter-spacing: 2px;">中職明星賽 應援站位地圖</div>
                 </div>
 
-                <div style="display:flex; justify-content:center; gap:10px; margin-bottom: 20px;">
-                    <button onclick="window.allStarCurrentDate=20260718; window.allStarFilterZone=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; border-radius:8px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; border:2px solid ${window.allStarCurrentDate===20260718 ? '#ff0044' : '#2d3748'}; background:${window.allStarCurrentDate===20260718 ? '#ff0044' : '#15191e'}; color:#fff;">7/18 (六) 站位</button>
-                    <button onclick="window.allStarCurrentDate=20260719; window.allStarFilterZone=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; border-radius:8px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; border:2px solid ${window.allStarCurrentDate===20260719 ? '#ff0044' : '#2d3748'}; background:${window.allStarCurrentDate===20260719 ? '#ff0044' : '#15191e'}; color:#fff;">7/19 (日) 站位</button>
+                <div style="display:flex; justify-content:center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <button onclick="window.allStarCurrentDate=20260718; window.allStarFilterZone=''; window.allStarFilterInning=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; outline:none; border:none; ${window.allStarCurrentDate===20260718 ? btnActiveStyle : btnInactiveStyle}">7/18 SAT.</button>
+                    <button onclick="window.allStarCurrentDate=20260719; window.allStarFilterZone=''; window.allStarFilterInning=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; outline:none; border:none; ${window.allStarCurrentDate===20260719 ? btnActiveStyle : btnInactiveStyle}">7/19 SUN.</button>
                 </div>
 
-                <div style="max-width: 600px; margin: 0 auto 25px;">
-                    <input type="text" id="allstar-search" placeholder="🔍 輸入女孩姓名或自訂站位..." value="${searchKeyword}" oninput="window.renderAllStarMap()" style="width: 100%; padding: 12px 15px; background: #111; border: 2px solid #ff0044; border-radius: 8px; color: #fff; font-weight: 700; font-size: 15px; outline: none; box-shadow: 0 4px 15px rgba(255,0,68,0.2); margin-bottom: 15px;">
+                <div style="max-width: 800px; margin: 0 auto 30px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
                     
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <span style="font-size:12px; color:var(--text-sub); font-weight:900;">📍 快速尋找：</span>
-                        ${zoneBtns}
+                    <div style="position: relative; margin-bottom: 20px;">
+                        ${iconSearch}
+                        <input type="text" id="allstar-search" placeholder="輸入女孩姓名或自訂站位..." value="${searchKeyword}" oninput="window.renderAllStarMap()" style="width: 100%; padding: 12px 15px 12px 40px; background: #111; border: 1px solid #2d3748; border-radius: 6px; color: #fff; font-weight: 700; font-size: 14px; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='#2d3748'">
                     </div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:15px;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px;">局數</span>
+                            ${inningBtns}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px;">區域</span>
+                            ${zoneBtns}
+                        </div>
+                    </div>
+                    
                 </div>
 
                 <div id="allstar-zones-container">
