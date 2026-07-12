@@ -7315,7 +7315,7 @@ window.renderMinigameStart = function() {
         };
         window.onload = loadData;
         // =========================================================================
-        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map)
+        // 🌟 明星賽專屬站位地圖引擎 (All-Star Map) - 高質感排版與精準正名版
         // =========================================================================
         window.allStarCurrentDate = 20260718; // 預設先顯示 7/18
         window.allStarFilterZone = ""; // 快速過濾區塊
@@ -7336,7 +7336,6 @@ window.renderMinigameStart = function() {
             allStarSchedules.forEach(s => {
                 if (!teamsMap[s.team]) teamsMap[s.team] = [];
                 let g = girlMap.get(s.name) || dbGirls.find(x => x.realname === s.name || x.nickname === s.name);
-                // 抓取剛才寫入的 allstarPos，如果沒寫就顯示未公佈
                 teamsMap[s.team].push({ name: s.name, girl: g, team: s.team, pos: s.allstarPos || "全場游走 / 尚未公佈" });
             });
 
@@ -7363,28 +7362,32 @@ window.renderMinigameStart = function() {
                     const g = item.girl;
                     const imgUrl = g && g.img ? window.getCdnUrl(g.img) : '';
                     const targetId = g ? g.uid : item.name;
-                    const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("港"));
+                    
+                    // ✨ 核心修復：精準的國籍分流邏輯 (台、臺、港、馬一律用綽號，日韓等外援用本名)
+                    const isLocal = g && ((g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls"));
                     const dName = g ? (isLocal ? (g.nickname || g.realname) : g.realname) : item.name;
 
                     // ✨ 美化站位顯示：自動把逗號替換成醒目的紅色箭頭，呈現移動路線感
                     let prettyPos = item.pos.replace(/[,，]/g, ' <strong style="color:#ff0044;">➔</strong> ');
 
+                    // ✨ 全新高質感排版：俐落的左側色條卡片，讓長備註也能完美換行不斷掉
                     return `
-                    <div onclick="window.openModal('${targetId}')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='${tCfg.accent}'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.transform='none';">
-                        <img src="${imgUrl}" style="width:65px; height:65px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid ${tCfg.accent}; background:#252c36; flex-shrink:0;" onerror="this.src='https://via.placeholder.com/65'">
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-size:16px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;">${dName}</div>
-                            <div style="font-size:12px; color:#cbd5e1; font-weight:700; line-height:1.4; background:rgba(0,0,0,0.3); padding:6px 10px; border-radius:6px; border-left:3px solid ${tCfg.accent}; word-break: break-word;">📍 ${prettyPos}</div>
+                    <div onclick="window.openModal('${targetId}')" style="display: flex; align-items: center; gap: 15px; background: #111418; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid ${tCfg.accent}; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#111418'; this.style.transform='none';">
+                        <img src="${imgUrl}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid rgba(255,255,255,0.2); background: #252c36; flex-shrink: 0;" onerror="this.src='https://via.placeholder.com/55'">
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+                            <div style="font-size: 16px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dName}</div>
+                            <div style="font-size: 13px; color: #cbd5e1; font-weight: 700; line-height: 1.4; word-break: break-word;">📍 ${prettyPos}</div>
                         </div>
                     </div>`;
                 }).join('');
 
                 contentHtml += `
-                <div style="margin-bottom: 25px;">
-                    <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:${tCfg.accent}; border-bottom:2px dashed rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom:12px; display:flex; align-items:baseline; gap:10px;">
-                        ${tName} <span style="font-size:12px; color:var(--text-sub); font-family:var(--tc-font);">共 ${girlsInTeam.length} 名</span>
+                <div style="margin-bottom: 30px;">
+                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px dashed rgba(255,255,255,0.1);">
+                        <span style="font-family: var(--sport-font); font-size: 20px; font-weight: 900; color: ${tCfg.accent}; letter-spacing: 1px;">${tName}</span>
+                        <span style="font-size: 12px; color: var(--text-sub); font-weight: 700;">共 ${girlsInTeam.length} 名</span>
                     </div>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:15px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
                         ${girlsHtml}
                     </div>
                 </div>`;
@@ -7395,7 +7398,7 @@ window.renderMinigameStart = function() {
             // 建立快速過濾按鈕
             const zones = ['一壘', '三壘', '內野', '外野'];
             let zoneBtns = zones.map(z => `
-                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#ff0044' : '#15191e'}; color:#fff; border:1px solid ${window.allStarFilterZone===z ? '#ff0044' : '#2d3748'}; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s;">${z}</button>
+                <button onclick="window.allStarFilterZone='${window.allStarFilterZone===z ? '' : z}'; window.renderAllStarMap();" style="background:${window.allStarFilterZone===z ? '#ff0044' : '#15191e'}; color:#fff; border:1px solid ${window.allStarFilterZone===z ? '#ff0044' : '#2d3748'}; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; transition:0.2s;">${z}</button>
             `).join('');
 
             container.innerHTML = `
@@ -7410,7 +7413,7 @@ window.renderMinigameStart = function() {
                 </div>
 
                 <div style="max-width: 600px; margin: 0 auto 25px;">
-                    <input type="text" id="allstar-search" placeholder="🔍 輸入女孩姓名或自訂站位..." value="${searchKeyword}" oninput="window.renderAllStarMap()" style="width: 100%; padding: 12px 15px; background: #111; border: 2px solid #ff0044; border-radius: 8px; color: #fff; font-weight: 700; font-size: 15px; outline: none; box-shadow: 0 4px 15px rgba(255,0,68,0.2); margin-bottom: 12px;">
+                    <input type="text" id="allstar-search" placeholder="🔍 輸入女孩姓名或自訂站位..." value="${searchKeyword}" oninput="window.renderAllStarMap()" style="width: 100%; padding: 12px 15px; background: #111; border: 2px solid #ff0044; border-radius: 8px; color: #fff; font-weight: 700; font-size: 15px; outline: none; box-shadow: 0 4px 15px rgba(255,0,68,0.2); margin-bottom: 15px;">
                     
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                         <span style="font-size:12px; color:var(--text-sub); font-weight:900;">📍 快速尋找：</span>
