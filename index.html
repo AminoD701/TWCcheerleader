@@ -7321,35 +7321,6 @@ window.renderMinigameStart = function() {
         window.allStarFilterZone = "";   // 區域過濾
         window.allStarFilterInning = ""; // 局數過濾
         
-        // ✨ 新增：大巨蛋座位圖專屬縮放引擎
-        window.currentDomeZoom = 100;
-        window.zoomDomeMap = function(delta) {
-            window.currentDomeZoom += delta;
-            if(window.currentDomeZoom < 50) window.currentDomeZoom = 50;
-            if(window.currentDomeZoom > 500) window.currentDomeZoom = 500; // 最高可放大至原尺寸的 5 倍
-            
-            const img = document.getElementById('dome-map-img');
-            const wrapper = document.getElementById('dome-map-wrapper');
-            if(img && wrapper) {
-                // 解除置中限制，讓圖片放大後可以自由拖曳邊緣
-                wrapper.style.alignItems = window.currentDomeZoom > 100 ? 'flex-start' : 'center';
-                img.style.maxWidth = 'none';
-                img.style.maxHeight = 'none';
-                img.style.width = window.currentDomeZoom + 'vw';
-            }
-        };
-        window.resetDomeMap = function() {
-            window.currentDomeZoom = 100;
-            const img = document.getElementById('dome-map-img');
-            const wrapper = document.getElementById('dome-map-wrapper');
-            if(img && wrapper) {
-                wrapper.style.alignItems = 'center';
-                img.style.maxWidth = '100%';
-                img.style.maxHeight = '90vh';
-                img.style.width = 'auto';
-            }
-        };
-        
         window.renderAllStarMap = function() {
             const container = document.getElementById('allstar-container');
             const searchKeyword = (document.getElementById('allstar-search')?.value || "").toLowerCase().trim();
@@ -7501,29 +7472,49 @@ window.renderMinigameStart = function() {
 
             container.innerHTML = `
                 <div style="text-align: center; margin-bottom: 25px;">
+                    <div style="font-family: var(--sport-font); font-size: clamp(26px, 6vw, 36px); color: #fff; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">ALL-STAR ROSTER</div>
+                    <div style="font-size: 13px; color: var(--event-accent); font-weight: 900; margin-top: 5px; letter-spacing: 2px;">中職明星賽 應援站位地圖</div>
+                </div>
+
+                <div style="display:flex; justify-content:center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <button onclick="window.allStarCurrentDate=20260718; window.allStarFilterZone=''; window.allStarFilterInning=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; outline:none; border:none; ${window.allStarCurrentDate===20260718 ? btnActiveStyle : btnInactiveStyle}">7/18 SAT.</button>
+                    <button onclick="window.allStarCurrentDate=20260719; window.allStarFilterZone=''; window.allStarFilterInning=''; window.renderAllStarMap();" style="flex:1; max-width:200px; padding:12px; font-family:var(--sport-font); font-size:16px; font-weight:900; cursor:pointer; transition:0.3s; outline:none; border:none; ${window.allStarCurrentDate===20260719 ? btnActiveStyle : btnInactiveStyle}">7/19 SUN.</button>
+                </div>
+
+                <div style="max-width: 800px; margin: 0 auto 30px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+                    
+                    <div style="position: relative; margin-bottom: 20px;">
+                        ${iconSearch}
+                        <input type="text" id="allstar-search" placeholder="輸入女孩姓名或自訂站位..." value="${searchKeyword}" oninput="window.renderAllStarMap()" style="width: 100%; padding: 12px 15px 12px 40px; background: #111; border: 1px solid #2d3748; border-radius: 6px; color: #fff; font-weight: 700; font-size: 14px; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='#2d3748'">
                     </div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:15px;">
+                        <div style="display:flex; align-items:center; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px; flex-shrink:0;">局數</span>
+                            ${inningBtns}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+                            <span style="font-size:12px; color:var(--text-sub); font-weight:900; width:45px; flex-shrink:0;">區域</span>
+                            ${zoneBtns}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 12px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px;">找不到對應區域？</span>
+                        <button onclick="document.getElementById('dome-map-modal').style.display='flex'" style="background: transparent; color: #fff; border: 1px solid #4a5568; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; display: flex; align-items: center;" onmouseover="this.style.background='#fff'; this.style.color='#000';">
+                            ${iconMap} 查看大巨蛋座位圖
+                        </button>
+                    </div>
+                    
+                </div>
 
                 <div id="allstar-zones-container">
                     ${contentHtml}
                 </div>
 
-                <div id="dome-map-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 99999; backdrop-filter: blur(5px); flex-direction: column;">
-                    
-                    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-                        <button onclick="document.getElementById('dome-map-modal').style.display='none'; window.resetDomeMap();" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 44px; height: 44px; font-size: 18px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='#ff0044'; this.style.borderColor='transparent';">✖</button>
-                    </div>
-
-                    <div id="dome-map-wrapper" style="flex: 1; overflow: auto; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; -webkit-overflow-scrolling: touch; padding: 20px;">
-                        <img id="dome-map-img" src="https://i.meee.com.tw/QBO8g1pmm8hHDHdwl4SkOYZfvGo3ak.jpg" style="max-width: 100%; max-height: 90vh; width: auto; height: auto; transition: width 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border-radius: 8px;">
-                    </div>
-
-                    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(15, 20, 25, 0.9); border: 1px solid rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 40px; display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.9); z-index: 10; backdrop-filter: blur(8px);">
-                        <button onclick="window.zoomDomeMap(-50)" style="background: transparent; color: #fff; border: none; font-size: 26px; font-weight: 900; cursor: pointer; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; transition: 0.2s;" onmouseover="this.style.color='#ff0044'">－</button>
-                        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
-                        <button onclick="window.resetDomeMap()" style="background: transparent; color: #cbd5e1; border: none; font-size: 13px; font-weight: 900; font-family: var(--sport-font); cursor: pointer; letter-spacing: 1px; transition: 0.2s;" onmouseover="this.style.color='#fff'">還原視角</button>
-                        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
-                        <button onclick="window.zoomDomeMap(50)" style="background: transparent; color: #fff; border: none; font-size: 24px; font-weight: 900; cursor: pointer; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; transition: 0.2s;" onmouseover="this.style.color='#ff0044'">＋</button>
-                    </div>
+                <div id="dome-map-modal" onclick="this.style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; backdrop-filter: blur(5px); justify-content: center; align-items: center; flex-direction: column; cursor: zoom-out;">
+                    <img src="https://i.meee.com.tw/Ey8rg2K.jpg" style="max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+                    <div style="color: #fff; font-weight: 900; margin-top: 20px; letter-spacing: 2px; font-size: 13px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">點擊任意處關閉</div>
                 </div>
             `;
             
