@@ -3218,31 +3218,21 @@
         }
 
         function updateVoteTeamDropdown() {
-            const currentCat = voteState.currentCategory;
-            const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
-            const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
-            
             let validTeams = new Set();
 
             dbGirls.forEach(g => {
                 if (!g.img || !g.team) return;
-                const natStr = g.nat || "";
-                const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
-                const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
-                const isLuxy = (g.team || "").includes("LuxyGirls");
-                const isBaseball = (g.sport || "").includes("棒");
-                const isVolleyball = (g.sport || "").includes("排");
-                const isTPBL = tpblTeams.some(t => (g.team || "").includes(t));
-                const isPLG = plgTeams.some(t => (g.team || "").includes(t));
-                const isInProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
+                
+                // ✨ 排除團長與不符資格的女孩 (與名單邏輯保持一致)
+                const note = (g.note || g['備註'] || g.備註 || "").trim();
+                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return;
 
-                let isMatch = false;
-                switch(currentCat) {
-                    case 'baseball':    isMatch = isBaseball; break;
-                    case 'korea_pro':   isMatch = isKoreanOrJapanese && isInProLeague; break;
-                    case 'local_pro':   isMatch = !isKoreanOrJapanese && !isLuxy; break;
+                // ✨ 鎖定第二屆台港馬賽道
+                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls");
+
+                if (isLocal && g.team.trim() !== "") {
+                    validTeams.add(g.team.trim());
                 }
-                if (isMatch && g.team.trim() !== "") validTeams.add(g.team.trim());
             });
 
             const selectBox = document.getElementById('vote-team-select');
@@ -3254,42 +3244,24 @@
             }
         }
 
-        // ✨ 建立獨立的抓取全網票數引擎 (✨ 破除暫存黑魔法)
-        window.fetchGlobalVotes = async function() {
-            try {
-                if(VOTE_API_URL && VOTE_API_URL.startsWith("http")) {
-                    // 加上 &t=現在時間，逼迫瀏覽器去抓最新票數！
-                    const response = await fetch(VOTE_API_URL + "?t=" + new Date().getTime());
-                    const data = await response.json();
-                    if(data && Object.keys(data).length > 0) {
-                        window.globalVoteData = data;
-                    }
-                }
-            } catch (e) {
-                console.log("讀取全網票數失敗，自動切換為本地快取", e);
-            }
-        };
-
-        // =========================================================================
-        // 🏆 應援大賞啟動引擎 (名人堂 ＆ 台港馬新戰場完美版)
-        // =========================================================================
-        
+        // ✨ 🏆 應援大賞啟動引擎 (極速秒開 + 背景同步)
         window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
+            // ✨ 0. 背景默默預先抓取球迷 IP
             window.fetchClientIP();
 
-            // ✨ 這裡我們不再需要舊的下拉選單分類，因為第二屆只有一個「台/港/馬」賽道
-            // updateVoteTeamDropdown(); 
+            // ✨ 1. 重新啟動球隊選單引擎，瞬間載入最新名單！
+            updateVoteTeamDropdown();
             
+            // 瞬間畫出畫面
             window.renderVoteGrid();
 
+            // ✨ 2. 背景默默去抓最新戰況，抓完再自動更新票數
             window.fetchGlobalVotes().then(() => {
                 window.renderVoteGrid();
             });
         };
-
-        // 為了相容 HTML 結構，保留這些函式但不做多餘動作
         window.switchVoteCategory = async function(category) {
             voteState.currentCategory = category;
             window.renderVoteGrid();
