@@ -7352,7 +7352,7 @@ window.renderMinigameStart = function() {
             }
         };
         // =========================================================================
-        // 🌟 終極個人專屬首頁引擎 (Profile Page) - 巨型照片與行程整合版
+        // 🌟 終極個人專屬首頁引擎 (Profile Page) - 巨型照片與行程分離完美版
         // =========================================================================
         window.currentProfileUid = null;
 
@@ -7391,7 +7391,7 @@ window.renderMinigameStart = function() {
             let mainNumber = nums.length > 0 ? nums[0].replace('#', '') : ''; 
 
             // ==========================================
-            // 📊 專屬情報新聞 (News)
+            // 📰 專屬情報新聞 (News) 聚合
             // ==========================================
             let herNews = typeof dbNews !== 'undefined' ? dbNews.filter(n => {
                 let textToSearch = ((n.title||"") + " " + (n.content||"") + " " + (n.hashtags||"")).toLowerCase();
@@ -7428,11 +7428,11 @@ window.renderMinigameStart = function() {
                         </div>
                     </div>`;
                 }).join('');
-                newsSectionHtml = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px;">${newsHtml}</div>`;
+                newsSectionHtml = `<div style="display: flex; flex-direction: column; gap: 10px;">${newsHtml}</div>`;
             }
 
             // ==========================================
-            // 📊 專屬時間軸 (Schedules + Events)
+            // 📊 專屬時間軸 (Schedules + Events) 聚合
             // ==========================================
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             
@@ -7558,19 +7558,8 @@ window.renderMinigameStart = function() {
             }
 
             // ==========================================
-            // 🎨 組裝全幅專屬首頁 HTML (照片與動態徹底分離版)
+            // 🎨 HTML DOM 組裝 (名片與動態徹底分離版)
             // ==========================================
-            let rawNoteText = (c.note || c['備註'] || c.備註 || "").replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
-            let mainNumber = nums.length > 0 ? nums[0].replace('#', '') : ''; // 抓取主背號供浮水印使用
-
-            // 新聞區塊包裝
-            let newsSectionHtml = '';
-            if (herNews.length === 0) {
-                newsSectionHtml = `<div style="padding:40px 15px; text-align:center; color:var(--text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius:8px; height: 100%; display: flex; align-items: center; justify-content: center;">目前尚無 ${dName} 的相關情報。</div>`;
-            } else {
-                newsSectionHtml = `<div style="display: flex; flex-direction: column; gap: 10px;">${newsHtml}</div>`;
-            }
-
             profileContainer.innerHTML = `
                 <style>
                     /* ✨ 名片區塊：絕對獨立，不受下方行程影響 */
@@ -7696,7 +7685,7 @@ window.renderMinigameStart = function() {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-top: 25px;">
                     
                     <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
-                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 15px; display:flex; align-items:center; gap:8px; flex-shrink: 0;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 15px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 10px; display:flex; align-items:center; gap:8px; flex-shrink: 0;">
                             <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; stroke-width:2; fill:none;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             專屬行程 TRACKER
                         </div>
@@ -7706,7 +7695,7 @@ window.renderMinigameStart = function() {
                     </div>
 
                     <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
-                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 15px; display:flex; align-items:center; gap:8px; flex-shrink: 0;">
+                        <div style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: ${cardAccent}; margin-bottom: 15px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 10px; display:flex; align-items:center; gap:8px; flex-shrink: 0;">
                             <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; stroke-width:2; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             專屬情報 NEWS
                         </div>
