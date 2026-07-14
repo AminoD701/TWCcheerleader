@@ -6631,29 +6631,29 @@ window.renderMinigameStart = function() {
                 let urlRegex = /\[img:([^\]]+)\]/gi;
                 let m;
                 while ((m = urlRegex.exec(matchBlock)) !== null) {
-                    // 順便相容原本的逗號分隔寫法 [img:url1,url2]
                     let splitUrls = m[1].split(/[,，\s\n|]+/).filter(u => u.trim() !== '');
                     inlineUrls.push(...splitUrls);
                 }
 
                 if (inlineUrls.length === 0) return '';
 
-                // 2. 如果只有一張圖，維持原本的單圖置中顯示
+                // 2. 單圖模式：無黑框，完美放大
                 if (inlineUrls.length === 1) {
                     const cleanUrl = window.getCdnUrl(inlineUrls[0]); 
-                    return `<div style="margin: 25px 0; width: 100%; display: flex; justify-content: center;">
-                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; max-width: 550px; height: auto; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
+                    return `<div style="margin: 25px auto; width: 100%; max-width: 800px; display: flex; justify-content: center;">
+                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px;">
                             </div>`;
                 } 
-                // 3. ✨ 如果有多張圖，自動轉換為內文版高級 IG 輪播相簿
+                // 3. ✨ 多圖輪播模式：移除黑底，指示器移至底部居中
                 else {
-                    const sliderId = 'inline-slider-' + Math.random().toString(36).substr(2, 9); // 給每個輪播獨立 ID 避免衝突
+                    const sliderId = 'inline-slider-' + Math.random().toString(36).substr(2, 9);
                     const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
                     
                     let slidesHtml = inlineUrls.map((u, idx) => `
                         <div style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
-                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="max-width: 100%; max-height: 500px; border-radius: 8px; object-fit: contain;">
-                            <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; border-radius: 8px; object-fit: contain;">
+                            
+                            <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(4px);">
                                 ${idx + 1} / ${inlineUrls.length}
                             </div>
                         </div>
@@ -6661,14 +6661,16 @@ window.renderMinigameStart = function() {
 
                     return `
                     <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
-                    <div style="margin: 25px auto; width: 100%; max-width: 550px; position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.6); background: #050505;">
-                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❮</button>
+                    <div style="margin: 25px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px;">
+                        
+                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='rgba(255,255,255,0.2)';">❮</button>
 
-                        <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto; max-height: 500px;">
+                        <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto;">
                             ${slidesHtml}
                         </div>
 
-                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❯</button>
+                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='rgba(255,255,255,0.2)';">❯</button>
+                        
                     </div>
                     `;
                 }
