@@ -7437,13 +7437,17 @@ window.renderMinigameStart = function() {
                 return sName === (c.nickname||"").trim() || sName === (c.realname||"").trim();
             }).map(s => ({ ...s, dataType: 'schedule' }));
 
+            // 2. 抓取本月外籍/商業活動行程
             let herEvents = dbEvents.filter(e => {
+                if (e.safeDate.year !== currentYear || e.safeDate.month !== currentMonth) return false;
                 const girlsStr = (e.girls || "").toLowerCase();
-                return girlsStr.includes((c.realname||"").trim().toLowerCase()) || girlsStr.includes((c.nickname||"").trim().toLowerCase());
+                const cNick = (c.nickname||"").trim().toLowerCase();
+                const cReal = (c.realname||"").trim().toLowerCase();
+                return (cReal && girlsStr.includes(cReal)) || (cNick && girlsStr.includes(cNick));
             }).map(e => ({ ...e, dataType: 'event' }));
 
-            // 合併並過濾掉太久以前的歷史紀錄 (只保留今天以後，或最近一個月的)
-            let combinedItinerary = [...herSchedules, ...herEvents].filter(i => i.safeDate.num >= todayNum - 30);
+            // 3. 兩者合併，並 🌟 強制過濾掉所有已經過去的活動 (只留今日與未來)
+            let combinedItinerary = [...herSchedules, ...herEvents].filter(i => i.safeDate.num >= todayNum);
             combinedItinerary.sort((a, b) => a.safeDate.num - b.safeDate.num);
 
             const teamTranslation = {
@@ -7475,8 +7479,6 @@ window.renderMinigameStart = function() {
                     let monthEvents = groupedItinerary[monthKey];
                     
                     let monthItemsHtml = monthEvents.map(item => {
-                        const isPast = item.safeDate.num < todayNum;
-                        const opacityStyle = isPast ? 'opacity: 0.5; filter: grayscale(1);' : '';
                         const isToday = item.safeDate.num === todayNum;
                         const statusBadge = isToday ? `<span style="background:#ff0044; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:900; margin-left:8px; letter-spacing:1px;">TODAY</span>` : '';
                         
