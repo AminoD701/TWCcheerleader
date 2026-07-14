@@ -7489,6 +7489,10 @@ window.renderMinigameStart = function() {
             const containers = ['grid-container', 'event-container', 'schedule-container', 'passport-container', 'minigame-container', 'dreamteam-container', 'feedback-container', 'news-container', 'vote-container', 'matches-container', 'games-container', 'agency-container', 'allstar-container'];
             containers.forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = 'none'; });
             
+            // ✨ 把上方的搜尋過濾列也暫時藏起來，讓首頁保持絕對乾淨
+            const filterBar = document.getElementById('filter-bar');
+            if (filterBar) filterBar.style.display = 'none';
+
             const profileContainer = document.getElementById('profile-container');
             if (!profileContainer) return; 
             profileContainer.style.display = 'block';
@@ -7512,6 +7516,14 @@ window.renderMinigameStart = function() {
 
             let rawNoteText = (c.note || c['備註'] || c.備註 || "").replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
             let mainNumber = nums.length > 0 ? nums[0].replace('#', '') : ''; 
+
+            // ✨ 智慧記憶返回路徑 (根據當下的 currentMode 決定按鈕文字)
+            let backText = '返回女孩圖鑑';
+            if (currentMode === 'passport') backText = '返回追星護照';
+            else if (currentMode === 'agency') backText = '返回經紀公司';
+            else if (currentMode === 'vote') backText = '返回應援大賞';
+            else if (currentMode === 'allstar') backText = '返回明星賽地圖';
+            else if (currentMode === 'dreamteam') backText = '返回夢幻陣容';
 
             // ==========================================
             // 📰 專屬情報新聞 (News) 聚合
@@ -7745,9 +7757,9 @@ window.renderMinigameStart = function() {
                 </style>
 
                 <div style="padding: 20px 0;">
-                    <button onclick="window.setMode('girls')" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; font-weight: 900; cursor: pointer; transition: 0.2s; display:inline-flex; align-items:center; gap:8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='${cardAccent}';" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                    <button onclick="window.closeProfile()" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; font-weight: 900; cursor: pointer; transition: 0.2s; display:inline-flex; align-items:center; gap:8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='${cardAccent}';" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.1)';">
                         <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:3; fill:none;"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        返回女孩圖鑑
+                        ${backText}
                     </button>
                 </div>
 
@@ -7831,12 +7843,28 @@ window.renderMinigameStart = function() {
             `;
         };
 
-        // ✨ 覆蓋原本的 close 函數，確保關閉時隱藏首頁容器並回歸上一個模式
+        // ✨ 新增：無痕返回引擎 (保留所有篩選與球隊狀態)
+        window.closeProfile = function() {
+            const profileContainer = document.getElementById('profile-container');
+            if (profileContainer) profileContainer.style.display = 'none';
+            
+            // 如果原本的頁面有搜尋過濾列，完美地把它顯示回來
+            if (currentMode === 'girls' || currentMode === 'events' || currentMode === 'news') {
+                const filterBar = document.getElementById('filter-bar');
+                if (filterBar) filterBar.style.display = 'block';
+            }
+
+            // 直接重新渲染原畫面，絕對不觸發 setMode 的重置機制！
+            window.renderContent(true);
+        };
+
+        // ✨ 覆蓋原本的 close 函數，確保關閉其他小彈窗時邏輯依舊正確
         window.closeModal = function() { 
             const m = document.getElementById('girl-modal');
             if (m) m.classList.remove('active'); 
             document.body.classList.remove('no-scroll'); 
-            if (currentMode === 'profile') window.setMode('girls'); 
+            // 若不小心觸發，導向新的安全返回機制
+            if (currentMode === 'profile') window.closeProfile(); 
         };
     </script>
 </body>
