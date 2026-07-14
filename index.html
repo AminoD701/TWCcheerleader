@@ -1832,9 +1832,9 @@
     </div>
 
     <main id="main-content">
-        <div class="marquee-wrapper" onclick="window.setMode('vote')" title="點擊查看最終榮耀榜單！">
+        <div class="marquee-wrapper" onclick="window.setMode('vote')" title="點擊前往第二屆應援大賞！">
             <div class="marquee-content">
-                🏆【第一屆·全民應援大賞】投票活動已圓滿落幕！感謝全台粉絲的熱情參與🔥 <span class="marquee-highlight">最終榮耀 TOP 10 榜單</span> 與 <span class="marquee-highlight">總冠軍</span> 已正式揭曉！快點擊此處前往【應援大賞 VOTE】見證女神加冕時刻！👑
+                🏆【第二屆·台港馬人氣大賞】將於 8/1 ~ 8/30 正式引爆！🔥 <span class="marquee-highlight">目前為全網測試階段</span>，快點擊此處前往【應援大賞 VOTE】搶先為你的本命女孩投票護盤！👑
             </div>
         </div>
         <div class="grid-container" id="grid-container"></div>
@@ -3620,6 +3620,24 @@
             }).join('');
             
             grid.style.display = ''; 
+        };
+        // ✨ 一鍵分享投票戰況引擎 (第二屆專屬文案)
+        window.shareVotePage = function() {
+            // 帶有 mode 參數的專屬分享網址
+            const shareUrl = `${window.location.origin}${window.location.pathname}?mode=vote`;
+            
+            // ✨ 換成第二屆的文案，直接寫死為台港馬大賞
+            const shareText = `【第二屆·台港馬人氣大賞】🏆\n快來看看即時戰況！\n為你的本土本命女孩投下神聖的一票吧！🔥\n\n👇 點擊前往投票大廳：`;
+
+            if (navigator.share) {
+                navigator.share({ title: '第二屆台港馬大賞', text: shareText, url: shareUrl }).catch(e => console.log('分享取消', e));
+            } else {
+                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                    alert('📋 第二屆投票連結已複製！快去各大社群幫女孩催票吧！');
+                }).catch(() => {
+                    alert('📋 連結複製失敗，請手動複製網址。');
+                });
+            }
         };
 
         // ✨ 終極修復版：測試模式下完全解除「重複投票」與「每日3票」限制，防 IP 阻擋！
