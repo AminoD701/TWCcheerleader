@@ -6606,7 +6606,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專屬彈窗 (動態高度防空白 + 內文插圖聚合引擎)
+        // 📰 每日情報專屬彈窗 (終極零縫隙 ＆ 左下角隱形指示器完美版)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
@@ -6658,7 +6658,7 @@ window.renderMinigameStart = function() {
                 return match;
             });
 
-            // ✨ 內文專屬插圖引擎 (Image Parser) - 修復高度自適應，不再產生黑色大縫隙
+            // ✨ 內文專屬插圖引擎 - 圖片與文字零縫隙，指示器移至最左下角
             contentText = contentText.replace(/(?:\[img:[^\]]+\][\s\n]*)+/gi, (matchBlock) => {
                 let inlineUrls = [];
                 let urlRegex = /\[img:([^\]]+)\]/gi;
@@ -6672,8 +6672,8 @@ window.renderMinigameStart = function() {
 
                 if (inlineUrls.length === 1) {
                     const cleanUrl = window.getCdnUrl(inlineUrls[0]); 
-                    return `<div style="margin: 25px auto; width: 100%; max-width: 800px; display: flex; justify-content: center;">
-                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px;">
+                    return `<div style="margin: 20px auto 0px auto; width: 100%; max-width: 800px; display: flex; justify-content: center; padding-bottom: 0px;">
+                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px; display: block;">
                             </div>`;
                 } 
                 else {
@@ -6682,8 +6682,8 @@ window.renderMinigameStart = function() {
                     
                     let slidesHtml = inlineUrls.map((u, idx) => `
                         <div style="flex: 0 0 100%; min-width: 100%; height: auto; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
-                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; border-radius: 8px; object-fit: contain;">
-                            <div style="position: absolute; bottom: 15px; right: 20px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
+                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; border-radius: 8px; object-fit: contain; display: block;">
+                            <div style="position: absolute; bottom: 12px; left: 15px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
                                 ${idx + 1} / ${inlineUrls.length}
                             </div>
                         </div>
@@ -6691,7 +6691,7 @@ window.renderMinigameStart = function() {
 
                     return `
                     <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
-                    <div style="margin: 25px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px; overflow: hidden;">
+                    <div style="margin: 20px auto 0px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px; overflow: hidden; padding-bottom: 0px;">
                         <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.color='rgba(255,255,255,0.8)';">❮</button>
 
                         <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto; align-items: center;">
@@ -6706,18 +6706,18 @@ window.renderMinigameStart = function() {
 
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
 
-            // ✨ 製造情報頂部多圖輪播區塊 (終極防破圖 + 高度自適應)
+            // ✨ 頂部封面圖區塊：清除 padding-bottom 與 margin-bottom，高度自適應
             let modalImgSection = '';
             if (imgUrls.length === 1) {
                 modalImgSection = `
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; max-height: 75vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                    <img src="${window.getCdnUrl(imgUrls[0])}" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain;">
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; max-height: 75vh; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 0px; padding-bottom: 0px;">
+                    <img src="${window.getCdnUrl(imgUrls[0])}" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; display: block;">
                 </div>`;
             } else if (imgUrls.length > 1) {
                 let slidesHtml = imgUrls.map((u, idx) => `
                     <div style="flex: 0 0 100%; min-width: 100%; height: auto; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain;">
-                        <div style="position: absolute; bottom: 15px; right: 20px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
+                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; display: block;">
+                        <div style="position: absolute; bottom: 12px; left: 15px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
                             ${idx + 1} / ${imgUrls.length}
                         </div>
                     </div>
@@ -6728,7 +6728,7 @@ window.renderMinigameStart = function() {
                     #modal-img-slider::-webkit-scrollbar { display: none; }
                     @media (max-width: 768px) { .modal-slider-btn { display: none !important; } }
                 </style>
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; max-height: 75vh; overflow: hidden; display: flex; align-items: center;">
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; max-height: 75vh; overflow: hidden; display: flex; align-items: center; margin-bottom: 0px; padding-bottom: 0px;">
                     
                     <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: -document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❮</button>
 
@@ -6742,9 +6742,9 @@ window.renderMinigameStart = function() {
                 `;
             }
 
-            // YouTube 影片自動嵌入引擎
+            // YouTube 影片嵌入引擎
             contentText = contentText.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s<]*)?/gi, (match, videoId) => {
-                return `<div style="margin: 30px auto; width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1);">
+                return `<div style="margin: 20px auto; width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1);">
                             <div style="position: relative; padding-bottom: 56.25%; height: 0; width: 100%;">
                                 <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                             </div>
@@ -6782,8 +6782,9 @@ window.renderMinigameStart = function() {
                 </div>`;
             }).join('');
 
+            // ✨ 將文字內縮排版的 padding-top 縮小，且將內文一律貼齊頂部，徹底消除多餘空隙！
             document.getElementById('modal-dynamic-content').innerHTML = `
-                <div class="modal-body" style="padding: 0; position: relative;">
+                <div class="modal-body" style="padding: 0; position: relative; background: #0d0f12;">
                     
                     <button onclick="window.shareNews(${absoluteIndex}, '${titleText}')" style="position: absolute; top: 12px; right: 55px; width: 36px; height: 36px; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s;" title="分享此情報" onmouseover="this.style.background='${themeColor}'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">
                         <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:#fff; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
@@ -6791,13 +6792,13 @@ window.renderMinigameStart = function() {
 
                    ${modalImgSection}
                     
-                    <div style="padding: 22px 25px;">
-                        <div class="news-header-meta" style="margin-bottom: 12px;">
+                    <div style="padding: 15px 25px 25px 25px; margin-top: 0px;">
+                        <div class="news-header-meta" style="margin-bottom: 8px;">
                             <span class="news-date">📅 ${dateText}</span>
                             <span class="news-tag" style="color:${themeColor}">${tagText}</span>
                         </div>
-                        <div class="modal-news-title" style="color:${themeColor}">${titleText}</div>
-                        <div class="modal-news-text" style="margin-bottom: 20px;">${contentText}</div>
+                        <div class="modal-news-title" style="color:${themeColor}; margin-bottom: 12px; padding-bottom: 10px;">${titleText}</div>
+                        <div class="modal-news-text" style="margin-bottom: 20px; margin-top: 0px; padding-top: 0px;">${contentText}</div>
                         
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
                             ${tagsArray.map(t => `<span onclick="window.filterByHashtag('${t}')" style="cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text-sub); border: 1px solid rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; transition: 0.2s;" onmouseover="this.style.borderColor='var(--modal-accent)'; this.style.color='#fff';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-sub)';">#${t}</span>`).join('')}
