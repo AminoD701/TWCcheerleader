@@ -3302,7 +3302,7 @@
             if (!container || !grid) return;
 
             // -----------------------------------------------------------------
-            // 🏆 1. 第一屆日韓人氣大賞 - 殿堂級數據定義 (封存常數)
+            // 🏆 1. 第一屆日韓人氣大賞 - 殿堂級數據定義
             // -----------------------------------------------------------------
             const season1Top10 = [
                 { name: "李珠珢", votes: 2711, rank: 1 }, { name: "李雅英", votes: 1777, rank: 2 },
@@ -3367,7 +3367,7 @@
                         </div>
                     </div>
                     <div style="font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                        ✨ 第二屆 👑 <span style="color: #00e676;">台/港/馬人氣大賞</span> (CURRENT BATTLE)
+                        ✨ 第二屆 👑 <span style="color: #ffd700;">台/港/馬人氣大賞</span> (CURRENT BATTLE)
                     </div>
                 `;
                 titleSection.after(hofWrapper);
@@ -3403,7 +3403,7 @@
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為全網測試模式！正式賽期 8/1~8/30 限定每日 5 票,不可重複投同個人。';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為全網測試模式！正式賽期 8/1~8/30 限定每日 3 票。';
                 else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！';
                 else text = `<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/1 ~ 8/30 · 每日限定 3 票。(今日已投：${todayVotes.length}/3)`;
                 
@@ -3434,10 +3434,8 @@
                         const voteKey2 = currentCatKey + '_' + g.uid;
                         const realVotes = (parseInt(window.globalVoteData[voteKey1] || 0)) + (parseInt(window.globalVoteData[voteKey2] || 0));
                         
-                        // ✨ 將第一個球隊存入 combinedTeam
                         localGirlMap.set(g.uid, { ...g, combinedTeam: g.team || "", votes: realVotes });
                     } else {
-                        // ✨ 找到同個人，把不同球隊接在後面，解決多棲女孩消失問題
                         let existing = localGirlMap.get(g.uid);
                         if (g.team && !existing.combinedTeam.includes(g.team)) {
                             existing.combinedTeam += " / " + g.team;
@@ -3501,7 +3499,7 @@
             }
 
             // -----------------------------------------------------------------
-            // ✨ 4.5 隨機探索 ‧ 今日推薦引擎 (實裝按鈕防誤觸版)
+            // ✨ 4.5 隨機探索 ‧ 今日推薦引擎 (柔和星空質感版)
             // -----------------------------------------------------------------
             let recommendContainer = document.getElementById('vote-recommend-container');
             if (!recommendContainer) {
@@ -3511,6 +3509,10 @@
                 searchBox.parentNode.insertBefore(recommendContainer, searchBox);
             }
 
+            // 專屬高質感燙金按鈕 CSS
+            const btnStyle = `background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); color: #ffd700; box-shadow: none; margin-top: 8px; padding: 6px; font-size: 11px; font-family: var(--tc-font); transition: 0.2s; border-radius: 6px;`;
+            const btnHover = `onmouseover="this.style.background='rgba(255,215,0,0.15)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,215,0,0.05)'; this.style.color='#ffd700';"`;
+
             if (searchKeyword === '' && voteState.selectedTeam === '全部' && phase !== 'closed' && uniqueLocalGirls.length > 0) {
                 if (!window.currentRecommendedGirls || window.currentRecommendedGirls.length === 0) {
                     let poolForRec = [...uniqueLocalGirls].sort(() => 0.5 - Math.random());
@@ -3518,44 +3520,43 @@
                 }
 
                 let recHtml = `
-                <div style="margin-bottom: 20px; background: linear-gradient(135deg, rgba(0,230,118,0.1) 0%, rgba(0,176,255,0.05) 100%); border: 1px solid rgba(0,230,118,0.3); border-radius: 12px; padding: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <div style="font-family: var(--sport-font); font-size: 16px; font-weight: 900; color: #00e676; display: flex; align-items: center; gap: 8px;">
-                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:currentColor;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <div style="margin-bottom: 25px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-family: var(--sport-font); font-size: 16px; font-weight: 900; color: #f8fafc; display: flex; align-items: center; gap: 8px; letter-spacing: 1px;">
+                            <span style="font-size: 18px;">✨</span>
                             隨機探索 ‧ 今日推薦
                         </div>
-                        <button onclick="window.currentRecommendedGirls=[]; window.renderVoteGrid();" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 700;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        <button onclick="window.currentRecommendedGirls=[]; window.renderVoteGrid();" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--text-sub); padding: 5px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 700;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--text-sub)';">
                             🔄 換一批
                         </button>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                         ${window.currentRecommendedGirls.map(g => {
                             const dName = g.nickname || g.realname;
                             
-                            // ✨ 在推薦區也實裝與大廳一模一樣的狀態判斷按鈕
                             let btnHtml = '';
                             if (phase === 'closed') {
-                                btnHtml = `<button class="vote-btn-disabled" style="margin-top:6px; padding:4px;" onclick="event.stopPropagation(); alert('🔒 投票活動已圓滿結束囉！')">活動已結束</button>`;
+                                btnHtml = `<button class="vote-btn-disabled" style="margin-top:8px; padding:6px; font-size:11px;" onclick="event.stopPropagation(); alert('🔒 投票活動已圓滿結束囉！')">活動已結束</button>`;
                             } else if (phase === 'official') {
                                 if (todayVotes.includes(g.uid)) {
-                                    btnHtml = `<button class="vote-btn-disabled" style="margin-top:6px; padding:4px;" onclick="event.stopPropagation(); alert('⚠️ 您今天已經把票投給她囉！')">今日已應援</button>`;
+                                    btnHtml = `<button class="vote-btn-disabled" style="margin-top:8px; padding:6px; font-size:11px;" onclick="event.stopPropagation(); alert('⚠️ 您今天已經把票投給她囉！')">今日已應援</button>`;
                                 } else if (isCategoryLocked) {
-                                    btnHtml = `<button class="vote-btn-disabled" style="margin-top:6px; padding:4px;" onclick="event.stopPropagation(); alert('⚠️ 今日票數已用盡！')">票數已盡</button>`;
+                                    btnHtml = `<button class="vote-btn-disabled" style="margin-top:8px; padding:6px; font-size:11px;" onclick="event.stopPropagation(); alert('⚠️ 今日票數已用盡！')">票數已盡</button>`;
                                 } else {
-                                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff); margin-top:6px; padding:6px;">投她一票 🗳️</button>`;
+                                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="${btnStyle}" ${btnHover}>投她一票 🗳️</button>`;
                                 }
                             } else {
-                                btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff); margin-top:6px; padding:6px; font-size:11px;">測試(無限)</button>`;
+                                btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="${btnStyle}" ${btnHover}>測試(無限)</button>`;
                             }
 
                             return `
-                            <div class="vote-card" style="padding: 10px; border-color: rgba(0,230,118,0.4); background: rgba(0,0,0,0.4); min-width: 0;" onclick="window.openProfile('${g.uid}')">
-                                <div class="vote-img-box" style="margin-bottom: 6px; border-width: 2px; border-color: #00e676;">
+                            <div class="vote-card" style="padding: 12px; border-color: rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); min-width: 0; box-shadow: none;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)';">
+                                <div class="vote-img-box" style="margin-bottom: 8px; border-width: 1px; border-color: rgba(255,255,255,0.1); box-shadow: none;">
                                     <img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
                                 </div>
-                                <div style="font-size: 13px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
-                                <div style="font-size: 10px; font-weight: 700; color: #00e676; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${g.combinedTeam || "自由嬌點"}</div>
+                                <div style="font-size: 14px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
+                                <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${g.combinedTeam || "自由嬌點"}</div>
                                 ${btnHtml}
                             </div>`;
                         }).join('')}
@@ -3597,10 +3598,10 @@
                     } else if (isCategoryLocked) {
                         btnHtml = `<button class="vote-btn-disabled" onclick="event.stopPropagation(); alert('⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！')">今日票數已用盡 🔒</button>`;
                     } else {
-                        btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff);">投她一票 🗳️</button>`;
+                        btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="${btnStyle}" ${btnHover}>投她一票 🗳️</button>`;
                     }
                 } else {
-                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff);">連線測試(無限) 🗳️</button>`;
+                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="${btnStyle}" ${btnHover}>連線測試(無限) 🗳️</button>`;
                 }
 
                 const rankColor = g.rank === 1 ? '#ffd700' : g.rank === 2 ? '#c0c0c0' : g.rank === 3 ? '#cd7f32' : '#4a5568';
@@ -3614,7 +3615,7 @@
                     </div>
                     <div style="font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
                     <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${g.combinedTeam || "自由嬌點"}</div>
-                    <div style="font-size: 14px; font-weight: 900; color: #00e676; margin-bottom: 12px; font-family: var(--sport-font);">${g.votes.toLocaleString()} 票</div>
+                    <div style="font-size: 14px; font-weight: 900; color: #cbd5e1; margin-bottom: 12px; font-family: var(--sport-font);">${g.votes.toLocaleString()} 票</div>
                     ${btnHtml}
                 </div>`;
             }).join('');
