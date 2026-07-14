@@ -7445,7 +7445,7 @@ window.renderMinigameStart = function() {
             }
 
             // ==========================================
-            // 模式 B：局數矩陣戰情板 (Matrix View)
+            // 模式 B：局數矩陣戰情板 (Matrix View) - 終極美化版
             // ==========================================
             let matrixContentHtml = '';
             if (window.allStarViewMode === 'matrix') {
@@ -7493,42 +7493,63 @@ window.renderMinigameStart = function() {
                     });
                 });
 
+                // ✨ 注入專屬 CSS：解決表格邊框與 sticky 衝突，並美化滾動條
                 matrixContentHtml = `
-                <div style="width:100%; overflow-x:auto; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <table style="width:100%; border-collapse: collapse; min-width: 900px;">
+                <style>
+                    .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; }
+                    .matrix-table th, .matrix-table td { border-bottom: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); padding: 12px; }
+                    .matrix-table th { background: #15191e; color: var(--event-accent); font-family: var(--sport-font); font-size: 18px; font-weight: 900; position: sticky; top: 0; z-index: 20; text-align: center; border-bottom: 3px solid var(--event-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.5); letter-spacing: 1px; }
+                    .matrix-table td { background: rgba(255,255,255,0.01); vertical-align: top; transition: 0.2s; }
+                    .matrix-table td:hover { background: rgba(255,255,255,0.04); }
+                    .matrix-table .sticky-col { position: sticky; left: 0; background: #111418; z-index: 10; font-weight: 900; color: #fff; text-align: center; white-space: nowrap; box-shadow: 4px 0 10px rgba(0,0,0,0.5); border-right: 2px solid rgba(255,255,255,0.1); vertical-align: middle; }
+                    .matrix-table .corner-cell { position: sticky; top: 0; left: 0; z-index: 30; background: #0d0f12; border-right: 2px solid rgba(255,255,255,0.1); border-bottom: 3px solid var(--event-accent); color: var(--text-sub); font-size: 13px; letter-spacing: 1px; font-family: var(--tc-font); }
+                    
+                    .matrix-wrapper::-webkit-scrollbar { width: 8px; height: 10px; }
+                    .matrix-wrapper::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 6px; margin: 4px; }
+                    .matrix-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 6px; }
+                    .matrix-wrapper::-webkit-scrollbar-thumb:hover { background: var(--event-accent); }
+                </style>
+                <div class="matrix-wrapper" style="width:100%; overflow-x:auto; overflow-y:auto; max-height: 65vh; background:var(--bg-card); border-radius:12px; border:1px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6);">
+                    <table class="matrix-table">
                         <thead>
                             <tr>
-                                <th style="position:sticky; left:0; z-index:20; background:#1a1e24; border-right:2px solid #333; padding:15px; color:#fff; min-width:80px;">區域 / 局數</th>
-                                ${[1,2,3,4,5,6,7,8,9].map(i => `<th style="background:#1a1e24; padding:15px; color:var(--event-accent); font-family:var(--sport-font); font-size:18px; font-weight:900;">${i} 局</th>`).join('')}
+                                <th class="corner-cell">區域 \\ 局數</th>
+                                ${[1,2,3,4,5,6,7,8,9].map(i => `<th>${i} 局</th>`).join('')}
                             </tr>
                         </thead>
                         <tbody>
                 `;
 
                 zoneList.forEach(z => {
-                    matrixContentHtml += `<tr>
-                        <td style="position:sticky; left:0; z-index:10; background:#111418; border-right:2px solid #333; border-top:1px solid #333; padding:15px; font-weight:900; color:#fff; text-align:center; white-space:nowrap;">${z}</td>
-                    `;
+                    matrixContentHtml += `<tr><td class="sticky-col">${z}</td>`;
                     for(let i=1; i<=9; i++) {
                         let girlsInCell = matrix[z][i];
-                        // 將同格子的女孩按照隊伍排序一下比較整齊
-                        girlsInCell.sort((a,b) => a.team.localeCompare(b.team, 'zh-TW'));
+                        // 將同格子的女孩按照隊伍排序，同隊伍再按名字排，看起來更整齊
+                        girlsInCell.sort((a,b) => {
+                            if (a.team !== b.team) return a.team.localeCompare(b.team, 'zh-TW');
+                            return a.name.localeCompare(b.name, 'zh-TW');
+                        });
                         
                         let cellContent = girlsInCell.map(item => {
                             const tCfg = teamThemes[item.team+"_棒球"] || teamThemes[item.team] || { accent: "#fff" };
                             const isLocal = item.girl && ((item.girl.nat || "").includes("台") || (item.girl.nat || "").includes("臺") || (item.girl.nat || "").includes("港") || (item.girl.nat || "").includes("馬") || (item.girl.team || "").toLowerCase().includes("luxygirls"));
                             const dName = item.girl ? (isLocal ? (item.girl.nickname || item.girl.realname) : item.girl.realname) : item.name;
-                            const imgUrl = item.girl && item.girl.img ? window.getCdnUrl(item.girl.img) : 'https://via.placeholder.com/30';
+                            const imgUrl = item.girl && item.girl.img ? window.getCdnUrl(item.girl.img) : 'https://via.placeholder.com/40';
                             const targetId = item.girl ? item.girl.uid : item.name;
                             
+                            // ✨ 卡片升級：加上垂直置中的隊伍簡稱，整齊劃一
                             return `
-                            <div onclick="window.openProfile('${targetId}')" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,0,0,0.6); border:1px solid ${tCfg.accent}; border-left:3px solid ${tCfg.accent}; padding:3px 8px 3px 3px; border-radius:20px; cursor:pointer; margin:3px; transition:0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='none'" title="${dName} (${item.team})">
-                                <img src="${imgUrl}" style="width:22px; height:22px; border-radius:50%; object-fit:cover;">
-                                <span style="font-size:12px; font-weight:900; color:#fff; white-space:nowrap;">${dName}</span>
+                            <div onclick="window.openProfile('${targetId}')" style="display:flex; align-items:center; gap:8px; background:linear-gradient(135deg, rgba(0,0,0,0.7), rgba(20,20,20,0.9)); border:1px solid rgba(255,255,255,0.05); border-left:3px solid ${tCfg.accent}; padding:4px 8px 4px 4px; border-radius:30px; cursor:pointer; transition:0.2s; width:100%; box-sizing:border-box; box-shadow: 0 3px 8px rgba(0,0,0,0.5);" onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='${tCfg.accent}'; this.style.boxShadow='0 5px 12px rgba(0,0,0,0.8)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(255,255,255,0.05)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.5)';" title="${dName} (${item.team})">
+                                <img src="${imgUrl}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid rgba(255,255,255,0.2); background: #222; flex-shrink: 0;">
+                                <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.2; min-width:0;">
+                                    <span style="font-size:13px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${dName}</span>
+                                    <span style="font-size:9px; color:var(--text-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.team.split(' ')[0]}</span>
+                                </div>
                             </div>`;
                         }).join('');
                         
-                        matrixContentHtml += `<td style="border-top:1px solid #333; border-left:1px dashed #333; padding:10px; vertical-align:top;">${cellContent || ''}</td>`;
+                        // ✨ 使用 Flex 讓卡片上下直排，並給予留白
+                        matrixContentHtml += `<td><div style="display:flex; flex-direction:column; gap:6px;">${cellContent || '<div style="text-align:center; color:rgba(255,255,255,0.05); font-size:16px; font-family:var(--sport-font); margin: 10px 0;">-</div>'}</div></td>`;
                     }
                     matrixContentHtml += `</tr>`;
                 });
