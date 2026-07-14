@@ -7486,34 +7486,41 @@ window.renderMinigameStart = function() {
             }
 
             // ==========================================
-            // 🎨 組裝全幅專屬首頁 HTML (固定排版比例 + 資訊壓縮版)
+            // 🎨 組裝全幅專屬首頁 HTML (高質感電競選手卡排版)
             // ==========================================
             let rawNoteText = (c.note || c['備註'] || c.備註 || "").replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
+            let mainNumber = nums.length > 0 ? nums[0].replace('#', '') : ''; // 抓取主背號供浮水印使用
 
             profileContainer.innerHTML = `
                 <style>
                     /* ✨ 首頁專屬響應式定型 CSS */
-                    .profile-hero-card { display: flex; flex-direction: row; background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid var(--border-color); border-top: 5px solid ${cardAccent}; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+                    .profile-hero-card { display: flex; flex-direction: row; background: linear-gradient(145deg, #15191e, #0a0c0f); border: 1px solid var(--border-color); border-top: 5px solid ${cardAccent}; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative; }
                     .profile-img-col { width: 340px; flex-shrink: 0; position: relative; background: #111; border-right: 1px solid rgba(255,255,255,0.05); }
-                    /* 強制鎖死照片比例，保證排版絕對不會忽長忽短 */
                     .profile-img-col img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; object-position: top center; display: block; }
-                    .profile-info-col { flex: 1; min-width: 0; padding: 30px 40px; display: flex; flex-direction: column; justify-content: flex-start; }
                     
-                    /* 基本資料膠囊化 */
-                    .profile-stat-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 30px; white-space: nowrap; }
-                    .profile-stat-label { font-size: 12px; color: var(--text-sub); font-weight: 700; }
-                    .profile-stat-value { font-size: 15px; font-weight: 900; color: #fff; font-family: var(--sport-font); letter-spacing: 1px; }
+                    /* 右側資訊區塊 */
+                    .profile-info-col { flex: 1; min-width: 0; padding: 35px 40px; display: flex; flex-direction: column; justify-content: flex-start; position: relative; overflow: hidden; }
+                    
+                    /* 數據儀表板 */
+                    .profile-stat-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); padding: 15px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+                    .profile-stat-box::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: ${cardAccent}; opacity: 0.8; }
+                    .profile-stat-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+                    .profile-stat-value { font-size: 18px; font-weight: 900; color: #fff; font-family: var(--sport-font); letter-spacing: 1px; }
+
+                    /* 巨大浮水印 */
+                    .profile-watermark { position: absolute; right: -5%; bottom: -10%; font-family: var(--sport-font); font-size: 240px; font-style: italic; font-weight: 900; color: rgba(255,255,255,0.02); line-height: 0.8; pointer-events: none; z-index: 0; }
 
                     @media (max-width: 768px) {
                         .profile-hero-card { flex-direction: column; border-top-width: 4px; }
                         .profile-img-col { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-                        .profile-img-col img { aspect-ratio: 4 / 5; } /* 手機版微調為 4:5 避免佔據全螢幕 */
-                        .profile-info-col { padding: 20px 20px 25px; }
+                        .profile-img-col img { aspect-ratio: 4 / 5; } 
+                        .profile-info-col { padding: 25px 20px; }
+                        .profile-watermark { font-size: 150px; right: -5%; bottom: 0; }
                     }
                 </style>
 
                 <div style="padding: 20px 0;">
-                    <button onclick="window.setMode('girls')" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; font-weight: 900; cursor: pointer; transition: 0.2s; display:inline-flex; align-items:center; gap:8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <button onclick="window.setMode('girls')" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 30px; font-weight: 900; cursor: pointer; transition: 0.2s; display:inline-flex; align-items:center; gap:8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='${cardAccent}';" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.1)';">
                         <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:3; fill:none;"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         返回女孩圖鑑
                     </button>
@@ -7523,7 +7530,7 @@ window.renderMinigameStart = function() {
                     
                     <div class="profile-img-col">
                         <img src="${finalImgUrl}" onerror="this.src='https://via.placeholder.com/340x450/111/fff?text=No+Image'">
-                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; background: linear-gradient(to top, rgba(10,12,15,0.9), transparent); pointer-events: none;"></div>
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(10,12,15,1), transparent); pointer-events: none;"></div>
                         <div class="fav-btn ${isFav ? 'active' : ''}" style="position: absolute; top: 15px; right: 15px; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onclick="window.toggleFavorite('${c.uid}', event, this)">
                             <svg class="fav-icon" viewBox="0 0 24 24"><use xlink:href="#icon-heart"></use></svg>
                         </div>
@@ -7531,43 +7538,44 @@ window.renderMinigameStart = function() {
 
                     <div class="profile-info-col">
                         
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                ${teams.map(t => `<span style="background: rgba(255,255,255,0.05); color: ${cardAccent}; border: 1px solid ${cardAccent}; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 900;">${t}</span>`).join('')}
-                            </div>
-                            <div style="font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: ${cardAccent};">
-                                ${nums.join(' ') || "No.#"}
-                            </div>
-                        </div>
+                        <div class="profile-watermark">${mainNumber}</div>
 
-                        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 25px;">
-                            <h1 style="font-size: clamp(32px, 5vw, 42px); font-weight: 900; color: #fff; margin: 0; line-height: 1.1;">${c.realname}</h1>
-                            ${(c.nickname && c.nickname !== c.realname) ? `<span style="font-size: 16px; color: var(--text-sub); font-weight: 700;">${c.nickname}</span>` : ''}
-                        </div>
+                        <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    ${teams.map(t => `<span style="background: rgba(255,255,255,0.03); color: ${cardAccent}; border: 1px solid ${cardAccent}; padding: 4px 14px; border-radius: 4px; font-size: 13px; font-weight: 900; letter-spacing: 1px;">${t}</span>`).join('')}
+                                </div>
+                                ${c.ig ? `<a href="${c.ig}" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 16px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; text-decoration: none; font-weight: 900; border-radius: 30px; font-size: 12px; font-family: var(--sport-font); letter-spacing: 1px; box-shadow: 0 4px 10px rgba(220,39,67,0.4); transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(220,39,67,0.6)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(220,39,67,0.4)';"><svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:#fff;"><use xlink:href="#icon-ig"></use></svg> INSTAGRAM</a>` : ''}
+                            </div>
 
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px;">
-                            <div class="profile-stat-pill">
-                                <span class="profile-stat-label">國籍</span>
-                                <span class="profile-stat-value">${c.nat || "-"}</span>
+                            <div style="display: flex; align-items: baseline; gap: 15px; margin-bottom: 30px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 20px;">
+                                <div style="font-family: var(--sport-font); font-size: clamp(36px, 5vw, 56px); font-weight: 900; color: ${cardAccent}; line-height: 1; text-shadow: 2px 2px 0px rgba(0,0,0,0.8);">${nums.join(' ') || "No.#"}</div>
+                                <h1 style="font-size: clamp(32px, 5vw, 42px); font-weight: 900; color: #fff; margin: 0; line-height: 1.1;">${c.realname}</h1>
+                                ${(c.nickname && c.nickname !== c.realname) ? `<span style="font-size: 16px; color: var(--text-sub); font-weight: 700;">${c.nickname}</span>` : ''}
                             </div>
-                            <div class="profile-stat-pill">
-                                <span class="profile-stat-label">生日</span>
-                                <span class="profile-stat-value">${c.dob || "-"}</span>
-                            </div>
-                            <div class="profile-stat-pill">
-                                <span class="profile-stat-label">星座</span>
-                                <span class="profile-stat-value">${c.zodiac || "-"}</span>
-                            </div>
-                            <div class="profile-stat-pill">
-                                <span class="profile-stat-label">身高</span>
-                                <span class="profile-stat-value">${c.height ? c.height + ' cm' : '-'}</span>
-                            </div>
-                        </div>
 
-                        ${rawNoteText ? `<div style="background: rgba(255, 255, 255, 0.03); border-left: 3px solid ${cardAccent}; padding: 10px 15px; font-size: 13px; color: #cbd5e1; font-weight: 700; border-radius: 0 6px 6px 0; margin-bottom: 25px; line-height: 1.5;">${rawNoteText}</div>` : ''}
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                                <div class="profile-stat-box">
+                                    <span class="profile-stat-label">國籍 NAT</span>
+                                    <span class="profile-stat-value">${c.nat || "-"}</span>
+                                </div>
+                                <div class="profile-stat-box">
+                                    <span class="profile-stat-label">生日 DOB</span>
+                                    <span class="profile-stat-value">${c.dob || "-"}</span>
+                                </div>
+                                <div class="profile-stat-box">
+                                    <span class="profile-stat-label">星座 SIGN</span>
+                                    <span class="profile-stat-value">${c.zodiac || "-"}</span>
+                                </div>
+                                <div class="profile-stat-box">
+                                    <span class="profile-stat-label">身高 HGT</span>
+                                    <span class="profile-stat-value">${c.height ? c.height + ' cm' : '-'}</span>
+                                </div>
+                            </div>
 
-                        <div style="margin-top: auto;">
-                            ${c.ig ? `<a href="${c.ig}" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; background: #000; color: #fff; text-decoration: none; font-weight: 900; border: 1px solid #333; border-radius: 8px; transition: 0.3s; font-family: var(--sport-font); letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onmouseover="this.style.background='linear-gradient(45deg, #f09433, #dc2743, #bc1888)'; this.style.borderColor='transparent';"><svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:url(#ig-grad-final); background:#fff; border-radius:6px;"><use xlink:href="#icon-ig"></use></svg> INSTAGRAM</a>` : ''}
+                            ${rawNoteText ? `<div style="background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent); border-left: 4px solid ${cardAccent}; padding: 15px 20px; font-size: 14px; color: #cbd5e1; font-weight: 700; border-radius: 0 8px 8px 0; line-height: 1.6; flex: 1; display: flex; align-items: center;">${rawNoteText}</div>` : '<div style="flex: 1;"></div>'}
+                            
                         </div>
                     </div>
                 </div>
