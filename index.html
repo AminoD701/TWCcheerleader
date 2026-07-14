@@ -4161,22 +4161,20 @@
         function renderPassport(skipCountdown = false) {
             const container = document.getElementById('passport-container');
             
+            // ==========================================
+            // 1. 月曆與行程資料準備
+            // ==========================================
             const calYear = window.passportCalDate.getFullYear();
             const calMonth = window.passportCalDate.getMonth();
             const firstDay = new Date(calYear, calMonth, 1).getDay();
             const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
             const monNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             
             let gridHtml = '<div class="calendar-grid">';
             const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
             days.forEach(d => gridHtml += `<div class="cal-day-name">${d}</div>`);
-
-            for(let i=0; i<firstDay; i++) {
-                gridHtml += `<div class="cal-day empty"></div>`;
-            }
-
+            for(let i=0; i<firstDay; i++) gridHtml += `<div class="cal-day empty"></div>`;
             for(let d=1; d<=daysInMonth; d++) {
                 let dNum = parseInt(`${calYear}${String(calMonth+1).padStart(2,'0')}${String(d).padStart(2,'0')}`);
                 let hasEvent = mySchedules.some(s => s.dateNum === dNum);
@@ -4189,8 +4187,7 @@
                 if(isActive) classes.push("active");
 
                 gridHtml += `<div class="${classes.join(' ')}" onclick="window.selectCalDate(${dNum})">
-                    ${d}
-                    ${hasEvent && !isActive ? '<div class="cal-dot"></div>' : ''}
+                    ${d} ${hasEvent && !isActive ? '<div class="cal-dot"></div>' : ''}
                 </div>`;
             }
             gridHtml += '</div>';
@@ -4207,163 +4204,104 @@
 
             let schedHtml = '';
             if (displaySchedules.length === 0) {
-                schedHtml = `<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding: 20px;">
-                    ${window.passportSelectedDateNum ? '這天目前沒有安排追星行程。' : '本月尚未安排未來的行程。'}<br>
-                    💡 請至女孩專屬頁面或外籍行程點擊「➕ 加行程」即可加入月曆！
+                schedHtml = `<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding: 40px 20px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">
+                    ${window.passportSelectedDateNum ? '這天沒有安排追星任務。' : '本月目前尚未安排任何追星任務。'}<br>
+                    <span style="font-size:12px; margin-top:8px; display:inline-block; color:#888;">💡 到女孩專屬頁面點擊「➕ 加行程」即可領取任務！</span>
                 </div>`;
             } else {
                 schedHtml = displaySchedules.map(s => {
+                    let isPast = s.dateNum < todayNum;
                     let extraInfoHtml = '';
-                    let displayTitle = s.title; // 預設使用存檔的標題
+                    let displayTitle = s.title;
 
                     if (s.id && s.id.startsWith('event|')) {
                         const parts = s.id.split('|');
                         const eDateNum = parseInt(parts[1]);
                         const eName = parts[2];
-                        const eGirls = parts[3] || ""; // ✨ 1. 讀取女孩識別碼
-                        
-                        // ✨ 2. 雙重條件比對：除了日期和活動名，還要比對女孩名單，防止撞車！(兼容舊存檔)
-                        const matchedEvent = dbEvents.find(e => {
-                            let matchDateName = e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim();
-                            if (eGirls) return matchDateName && (e.girls || "").trim() === eGirls.trim();
-                            return matchDateName; 
-                        });
+                        const matchedEvent = dbEvents.find(e => e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim());
 
                         if (matchedEvent) {
                             const timeStr = matchedEvent.time || "TBA";
                             const addressRaw = (matchedEvent.address || "").trim();
-                            const locStr = addressRaw 
-                                ? `<a href="https://www.google.com/maps/search/?api=1&query=$?q=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
-                                : "請見球團官網";
-                            const attendGirls = (matchedEvent.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
-                            
-                            let avatarsHtml = '';
-                            if (attendGirls.length > 0) {
-                                avatarsHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">` + attendGirls.map(n => {
-                                    const g = girlMap.get(n);
-                                    if (g) {
-                                        // ✨ 3. 智慧國籍分流補丁：修正外籍女孩顯示綽號的 Bug
-                                        const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                                        const dName = isLocal ? (g.nickname || g.realname) : g.realname;
-
-                                        return `<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); padding:4px 12px 4px 4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.openProfile('${g.uid}')">
-                                                    <img src="${window.getCdnUrl(g.img)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; object-position:top center;">
-                                                    <span style="font-size:13px; color:#fff; font-weight:900;">${dName}</span>
-                                                </div>`;
-                                    }
-                                    return `<span style="font-size:12px; color:var(--text-sub); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:10px;">${n}</span>`;
-                                }).join('') + `</div>`;
-                            }
-
-                            // 完美抓取主辦單位資訊
                             const hostStr = matchedEvent.host || "未定";
-
-                            // 組裝時間地點與主辦單位資訊（加入 🏢 主辦單位圖示，排版更具結構感）
                             extraInfoHtml = `
-                                <div style="font-size:13px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:6px; font-weight:700;">
-                                    <div style="display:flex; align-items:flex-start; gap:6px;">📍 <span style="line-height:1.4;">${locStr}</span></div>
-                                    <div style="display:flex; align-items:center; gap:6px;">⏰ <span>${timeStr}</span></div>
-                                    <div style="display:flex; align-items:center; gap:6px;">🏢 <span style="font-family:var(--tc-font);">${hostStr}</span></div>
-                                </div>
-                                ${avatarsHtml}
-                            `;
+                                <div style="font-size:12px; color:var(--text-sub); margin-top:6px; display:flex; flex-direction:column; gap:4px; font-weight:700;">
+                                    <div>📍 ${addressRaw || '地點見公告'}</div>
+                                    <div style="display:flex; gap:12px;"><span>⏰ ${timeStr}</span> <span>🏢 ${hostStr}</span></div>
+                                </div>`;
                         }
                     } else if (s.id) {
-                        // ✨ 處理一般應援班表
                         const parts = s.id.split('|');
                         if (parts.length >= 4) {
                             const team = parts[1];
                             const sport = parts[2];
-                            const gName = parts[3];
-                            const g = girlMap.get(gName);
-                            
-                            // 強制覆蓋標題，隱藏本名，只顯示「球隊 · 球種 應援」！(直接兼容舊的存檔)
                             displayTitle = `${team} · ${sport} 應援`;
-
-                            if (g) {
-                                // 智慧國籍分流：台港馬顯示綽號(若無則本名)，其餘外籍顯示本名
-                                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                                
-                                extraInfoHtml = `
-                                    <div style="display:flex; align-items:center; gap:10px; margin-top:12px; background:rgba(255,255,255,0.05); padding:6px 14px 6px 6px; border-radius:30px; width:fit-content; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:0.2s;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='var(--schedule-accent)'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)';">
-                                        <img src="${window.getCdnUrl(g.img)}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; object-position:top center; border:1px solid var(--border-color);">
-                                        <span style="font-size:14px; color:#fff; font-weight:900; letter-spacing:1px;">${dName}</span>
-                                    </div>
-                                `;
-                            }
                         }
                     }
 
-                    // ✨ 智慧判斷是否為「歷史紀錄」 (時間小於今天)
-                    const isPast = s.dateNum < todayNum;
-                    const cardStyle = isPast ? 'opacity: 0.5; filter: grayscale(80%); border-left-color: #4a5568;' : '';
-                    const titleStyle = isPast ? 'color: #888;' : 'color: #fff;';
+                    const cardStyle = isPast ? 'opacity: 0.5; filter: grayscale(80%); border-left-color: #4a5568;' : 'border-left-color: var(--schedule-accent);';
                     const dateAccent = isPast ? '#6a7a90' : 'var(--schedule-accent)';
-                    const pastLabel = isPast ? '<span style="font-size:11px; color:#6a7a90; margin-left:8px; font-family:var(--tc-font); border: 1px solid #6a7a90; padding: 2px 6px; border-radius: 4px;">✅ 已完賽</span>' : '';
                     const btnStyle = isPast ? 'background: transparent; color: #888; border: 1px solid #555;' : 'background: var(--fav-accent); color: #fff; border: none;';
-                    const btnText = isPast ? '✖ 刪除紀錄' : '移除';
+                    const btnText = isPast ? '✖ 刪除紀錄' : '移除任務';
 
                     return `
-                    <div class="timeline-item" style="align-items: flex-start; ${cardStyle}">
+                    <div class="timeline-item" style="align-items: flex-start; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); ${cardStyle} margin-bottom: 10px; padding: 15px;">
                         <div style="flex: 1;">
-                            <div style="font-family:var(--sport-font); font-size:18px; font-weight:900; color:${dateAccent};">${s.dateStr}${pastLabel}</div>
-                            <div style="font-size:16px; font-weight:900; margin-top:6px; line-height:1.3; ${titleStyle}">${displayTitle}</div>
+                            <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:${dateAccent};">${s.dateStr} ${isPast ? '<span style="font-size:10px; border:1px solid #6a7a90; padding:1px 4px; border-radius:4px; margin-left:6px;">已結束</span>' : ''}</div>
+                            <div style="font-size:16px; font-weight:900; margin-top:4px; color:#fff;">${displayTitle}</div>
                             ${extraInfoHtml}
                         </div>
-                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="padding:6px 12px; border-radius:4px; font-weight:900; cursor:pointer; margin-top:4px; transition:0.2s; ${btnStyle}" onmouseover="this.style.filter='brightness(1.5)'" onmouseout="this.style.filter='none'">${btnText}</button>
-                    </div>
-                    `;
+                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="padding:6px 12px; border-radius:4px; font-size:11px; font-weight:900; cursor:pointer; transition:0.2s; white-space:nowrap; ${btnStyle}">${btnText}</button>
+                    </div>`;
                 }).join('');
             }
 
-            let favGirlsRaw = dbGirls.filter(g => favSet.has(g.uid));
+            // ==========================================
+            // 2. 本命陣容 (My Oshi)
+            // ==========================================
             let favMap = new Map();
-            favGirlsRaw.forEach(c => {
-                const k = c.uid;
-                if(!favMap.has(k)) { favMap.set(k, { ...c, mT: [c.team || ""] }); }
-                else {
-                    let e = favMap.get(k);
-                    if(!e.mT.includes(c.team || "")) e.mT.push(c.team || "");
-                }
+            dbGirls.filter(g => favSet.has(g.uid)).forEach(c => {
+                if(!favMap.has(c.uid)) favMap.set(c.uid, { ...c, mT: [c.team || ""] });
+                else { let e = favMap.get(c.uid); if(!e.mT.includes(c.team || "")) e.mT.push(c.team || ""); }
             });
             let favGirls = Array.from(favMap.values());
 
             let favHtml = '';
             if (favGirls.length === 0) {
-                 favHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700;">還沒有加入最愛的女孩，快去點擊卡片上的愛心！</div>';
+                favHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding:30px; border:1px dashed rgba(255,255,255,0.1); border-radius:8px;">還沒有加入最愛的女孩，快去圖鑑點擊卡片上的愛心收編！</div>';
             } else {
-                 favHtml = `<div class="grid-container" style="padding:0; margin:0;">` + favGirls.map(c => {
-                     const teams = c.mT.filter(t => t);
-                     const lookupTeam = teams[0] || "全部啦啦隊";
-                     const accent = (teamThemes[lookupTeam] || {accent:"#fff"}).accent;
-                     
-                     const showNick = (c.nickname && c.nickname !== c.realname) ? c.nickname : '';
+                favHtml = `<div class="grid-container" style="padding:0; margin:0; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;">` + favGirls.map(c => {
+                    const teams = c.mT.filter(t => t);
+                    const lookupTeam = teams[0] || "全部啦啦隊";
+                    const accent = (teamThemes[lookupTeam] || {accent:"#fff"}).accent;
+                    const showNick = (c.nickname && c.nickname !== c.realname) ? c.nickname : '';
 
-                     return `
-                     <div class="card" style="border-bottom: 6px solid ${accent};" onclick="window.openProfile('${c.uid}')">
-                        <div class="photo-area">
-                            <div class="fav-btn active" onclick="window.toggleFavorite('${c.uid}', event, this)"><svg class="fav-icon"><use xlink:href="#icon-heart"></use></svg></div>
+                    return `
+                    <div class="card" style="border-bottom: 4px solid ${accent}; min-height:auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onclick="window.openProfile('${c.uid}')">
+                        <div class="photo-area" style="height: 160px; border-bottom: 2px solid var(--border-color);">
+                            <div class="fav-btn active" style="width:24px; height:24px; top:8px; right:8px;" onclick="window.toggleFavorite('${c.uid}', event, this)"><svg class="fav-icon" style="width:12px; height:12px;"><use xlink:href="#icon-heart"></use></svg></div>
                             <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
                         </div>
-                        <div class="info-section" style="padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                            <div class="nickname" style="font-size:14px; font-weight:900; color:${accent}; width:100%;">${c.realname}</div>
+                        <div class="info-section" style="padding: 10px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; background: #111418;">
+                            <div class="nickname" style="font-size:15px; font-weight:900; color:${accent}; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.realname}</div>
                             ${showNick ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${showNick}</div>` : ''}
                         </div>
                      </div>`;
-                 }).join('') + `</div>`;
+                }).join('') + `</div>`;
             }
 
+            // ==========================================
+            // 3. VIP 粉絲專屬通行證 (Fan ID)
+            // ==========================================
             let tasteHtml = '';
             if (favGirls.length < 3) {
                 tasteHtml = `
-                    <div style="background:var(--bg-card); padding:20px; border-radius:8px; text-align:center; border:1px dashed var(--border-color);">
-                        <div style="font-size:14px; color:var(--text-sub); font-weight:700;">🔒 收藏至少 3 位女孩，解鎖你的專屬「偏好大數據解析」！</div>
+                    <div style="background: rgba(255,255,255,0.02); padding: 30px; border-radius: 12px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
+                        <div style="font-size:36px; margin-bottom:10px; filter:grayscale(1); opacity:0.5;">🪪</div>
+                        <div style="font-size:15px; color:#fff; font-weight:900; margin-bottom:5px;">VIP 粉絲通行證尚未解鎖</div>
+                        <div style="font-size:13px; color:var(--text-sub); font-weight:700;">🔒 收藏至少 3 位本命女孩，系統將為您生成專屬粉絲 ID 卡！</div>
                     </div>`;
             } else {
-                let validHeights = favGirls.map(g => parseFloat(g.height)).filter(h => !isNaN(h));
-                let avgHeight = validHeights.length > 0 ? (validHeights.reduce((a,b)=>a+b,0)/validHeights.length).toFixed(1) : "未知";
-
                 let zodiacCounts = {}; let teamCounts = {}; let natCounts = {};
                 favGirls.forEach(g => {
                     let z = (g.zodiac||"").replace("白羊","牡羊").replace("魔羯","摩羯");
@@ -4379,107 +4317,113 @@
                 let teamPct = Math.round((teamCounts[topTeam] / favGirls.length) * 100) || 0;
 
                 let title = "博愛型應援大師";
-                if (teamPct >= 60) title = `死忠的 ${topTeam} 狂粉`;
+                if (teamPct >= 60) title = `死忠 ${topTeam} 狂粉`;
                 else if (topNat === "韓國") title = "韓援魅力無法擋";
-                else if (avgHeight > 165) title = "高挑長腿女孩控";
-                else if (topZodiac !== "未知") title = `命中注定愛 ${topZodiac}`;
+                else if (topZodiac !== "未知") title = `天生絕配 ${topZodiac}`;
 
+                const myHomeTheme = teamThemes[myHomeTeam] || { accent: '#00e676' };
+                const vipColor = myHomeTeam === 'none' ? '#ff0044' : myHomeTheme.accent;
+
+                // ✨ 高質感 VIP 數位卡片排版
                 tasteHtml = `
-                    <div style="background: linear-gradient(135deg, rgba(20,25,30,0.9), rgba(10,12,16,0.95)); padding:25px; border-radius:12px; border:1px solid var(--border-color); border-top: 4px solid var(--event-accent); box-shadow: 0 10px 30px rgba(0,0,0,0.6); position:relative; overflow:hidden;">
+                    <div style="background: linear-gradient(135deg, #1a1e24 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
                         
-                        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, var(--event-accent) 0%, transparent 60%); opacity:0.15; border-radius:50%;"></div>
-                        <div style="position:absolute; bottom:-10px; left:-10px; width:80px; height:80px; background:radial-gradient(circle, var(--event-accent) 0%, transparent 60%); opacity:0.1; border-radius:50%;"></div>
+                        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: ${vipColor}; filter: blur(60px); opacity: 0.2; pointer-events: none;"></div>
+                        <div style="position: absolute; top: 20px; right: 25px; width: 40px; height: 30px; background: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,215,0,0.3) 4px, rgba(255,215,0,0.3) 6px), linear-gradient(135deg, #d4af37, #aa7700); border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); opacity:0.8;"></div>
 
-                        <div style="font-family:var(--sport-font); font-size:12px; color:var(--text-sub); letter-spacing:3px; margin-bottom:8px; text-transform:uppercase;">YOUR CHEERLEADER WRAPPED</div>
-                        <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:25px; line-height:1.4;">專屬粉絲屬性<br><span style="color:var(--event-accent); font-size:26px;">${title}</span></div>
-                        
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; position:relative; z-index:2;">
-                            
-                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
-                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2L3 4l3.5 2"></path><path d="M4 19.5v-15"></path><path d="M9 13h11"></path><path d="M9 9h11"></path><path d="M9 5h11"></path></svg>
-                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">偏好平均身高</div>
-                                </div>
-                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${avgHeight} <span style="font-size:14px; color:var(--text-sub);">cm</span></div>
-                            </div>
-                            
-                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
-                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
-                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">致命吸引星座</div>
-                                </div>
-                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topZodiac}</div>
-                            </div>
-                            
-                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
-                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">陣營傾向</div>
-                                </div>
-                                <div style="font-size:16px; font-weight:900; color:#fff; line-height:1.2;">${topTeam} <div style="font-size:13px; color:var(--event-accent); margin-top:2px;">(${teamPct}%)</div></div>
-                            </div>
-                            
-                            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid var(--event-accent); transition:0.2s;">
-                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                    <svg style="width:14px; height:14px; stroke:var(--text-sub); fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3v0a2 2 0 0 1 2 2v0c0 1.1.9 2 2 2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2v0a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
-                                    <div style="font-size:12px; color:var(--text-sub); font-weight:700;">偏好國籍</div>
-                                </div>
-                                <div style="font-size:20px; font-weight:900; color:#fff; font-family:var(--sport-font);">${topNat}</div>
+                        <div style="padding: 25px 30px;">
+                            <div style="font-family: var(--sport-font); font-size: 11px; color: ${vipColor}; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">OFFICIAL FAN ID</div>
+                            <div style="font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 25px; display: flex; align-items: baseline; gap: 10px;">
+                                ${title}
+                                <span style="font-family: var(--sport-font); font-size: 14px; color: var(--text-sub); font-weight: 700; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">LV.${favGirls.length}</span>
                             </div>
 
+                            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">本命陣營</div>
+                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topTeam} <span style="font-size:11px; color:${vipColor};">(${teamPct}%)</span></div>
+                                </div>
+                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">吸引星座</div>
+                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topZodiac}</div>
+                                </div>
+                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
+                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">國籍傾向</div>
+                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topNat}</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                        <div style="background: rgba(0,0,0,0.5); padding: 10px 30px; font-family: var(--sport-font); font-size: 12px; color: var(--text-sub); letter-spacing: 2px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between;">
+                            <span>MEMBER SINCE 2026</span>
+                            <span style="color: ${vipColor};">VERIFIED</span>
+                        </div>
+                    </div>`;
             }
 
+            // ==========================================
+            // 4. HTML DOM 組裝
+            // ==========================================
             const allTeamNames = Object.keys(teamThemes).filter(t => t !== "全部啦啦隊");
             
-            // ✨ 濃縮版：將本命主場與倒數計時縮小並排，大幅節省空間 (電腦版並排，手機版自動堆疊)
-            let topDashboardHtml = `
+            container.innerHTML = `
+                <style>
+                    /* 護照專屬樣式微調 */
+                    .passport-header-title { font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: #fff; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 10px; margin: 35px 0 20px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+                    .passport-header-title svg { width: 22px; height: 22px; stroke: var(--event-accent); stroke-width: 2; fill: none; }
+                    
+                    @media (max-width: 768px) {
+                        #passport-container .grid-container { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; padding: 5px !important; }
+                        #passport-container .photo-area { height: 130px !important; }
+                        #passport-container .nickname { font-size: 13px !important; }
+                    }
+                </style>
+
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 15px 0 25px;">
-                    <div style="background:var(--bg-card); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center;">
-                        <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:#fff; margin-bottom:8px;">🎨 我的本命主場 (THEME)</div>
-                        <select onchange="window.changeHomeTeam(this.value)" style="width:100%; padding:8px; background:#111; color:#fff; border:1px solid var(--border-color); border-radius:4px; font-family:var(--tc-font); font-weight:700; font-size:14px; outline:none; cursor:pointer;">
+                    <div style="background:var(--bg-card); padding:15px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; justify-content:center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <div style="font-family:var(--sport-font); font-size:13px; font-weight:900; color:var(--text-sub); margin-bottom:8px; letter-spacing:1px;">🎨 網站主題色設定 (THEME)</div>
+                        <select onchange="window.changeHomeTeam(this.value)" style="width:100%; padding:10px 12px; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-family:var(--tc-font); font-weight:900; font-size:14px; outline:none; cursor:pointer; transition:0.2s;" onfocus="this.style.borderColor='var(--event-accent)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
                             <option value="none">預設綜合主題</option>
                             ${allTeamNames.map(t => `<option value="${t}" ${myHomeTeam === t ? 'selected' : ''}>${t}</option>`).join('')}
                         </select>
-                        <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">💡 全站特效將變成你的球隊專屬應援色！</div>
                     </div>
 
-                    <div style="background:var(--bg-card); padding:15px; border-radius:8px; text-align:center; border:2px dashed var(--event-accent); display:flex; flex-direction:column; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                        <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:6px;" id="countdown-title">計算中...</div>
-                        <div style="font-family:var(--sport-font); font-size:22px; font-weight:900; color:var(--event-accent); line-height:1.2;" id="countdown-timer">-- : -- : --</div>
+                    <div style="background:var(--bg-card); padding:15px 20px; border-radius:12px; text-align:center; border: 2px dashed var(--event-accent); display:flex; flex-direction:column; justify-content:center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:4px;" id="countdown-title">計算中...</div>
+                        <div style="font-family:var(--sport-font); font-size:24px; font-weight:900; color:var(--event-accent); line-height:1.2;" id="countdown-timer">-- : -- : --</div>
                     </div>
                 </div>
-            `;
 
-            container.innerHTML = `
-                ${topDashboardHtml}
+                <div class="passport-header-title">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    我的本命陣容 (MY OSHI)
+                </div>
+                ${favHtml}
 
-                <div style="max-width: 480px; margin: 0 auto;">
-                    <div class="passport-section-title" style="margin-top:20px;">
-                        <span>🗓️ 我的專屬月曆 (MY CALENDAR)</span>
-                    </div>
-                    
-                    <div class="calendar-wrapper">
-                        <div class="calendar-header">
-                            <button class="calendar-nav-btn" onclick="window.changeCalMonth(-1)">❮</button>
-                            <span class="calendar-title">${monNames[calMonth]} ${calYear}</span>
-                            <button class="calendar-nav-btn" onclick="window.changeCalMonth(1)">❯</button>
+                <div class="passport-header-title">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    專屬粉絲通行證 (FAN ID)
+                </div>
+                ${tasteHtml}
+
+                <div class="passport-header-title">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    我的應援任務 (MISSIONS)
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                    <div class="calendar-wrapper" style="background: var(--bg-card); border-color: rgba(255,255,255,0.05); box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 12px; height: fit-content;">
+                        <div class="calendar-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                            <button class="calendar-nav-btn" style="background: #111; border: 1px solid rgba(255,255,255,0.1);" onclick="window.changeCalMonth(-1)">❮</button>
+                            <span class="calendar-title" style="color: var(--event-accent);">${monNames[calMonth]} ${calYear}</span>
+                            <button class="calendar-nav-btn" style="background: #111; border: 1px solid rgba(255,255,255,0.1);" onclick="window.changeCalMonth(1)">❯</button>
                         </div>
                         ${gridHtml}
                     </div>
 
-                    <div class="schedule-scroll-box">
+                    <div class="schedule-scroll-box" style="margin-top: 0; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-height: 420px;">
                         ${schedHtml}
                     </div>
                 </div>
-
-                <div class="passport-section-title" style="margin-top:40px;">📊 我的偏好大數據 (MY TASTE)</div>
-                ${tasteHtml}
-
-                <div class="passport-section-title" style="margin-top:40px;">❤️ 我的最愛 (MY FAVORITES)</div>
-                ${favHtml}
             `;
 
             if(!skipCountdown) startCountdown();
