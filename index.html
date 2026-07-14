@@ -4301,31 +4301,61 @@
             if (favGirls.length === 0) {
                 favHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding:30px; border:1px dashed rgba(255,255,255,0.1); border-radius:8px;">還沒有加入最愛的女孩，快去圖鑑點擊卡片上的愛心收編！</div>';
             } else {
-                // ✨ CSS 黑魔法：重疊與懸浮推開特效
+                // ✨ CSS 黑魔法：撲克牌扇形展開與懸浮推開特效 (修復裁切與電腦版滑動問題)
                 const deckStyle = `
                     <style>
-                        .oshi-deck-scroll { display: flex; padding: 20px 20px 40px 20px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-                        .oshi-deck-scroll::-webkit-scrollbar { display: none; }
+                        .oshi-deck-wrapper {
+                            width: 100%;
+                            background: rgba(0,0,0,0.2);
+                            border: 1px solid rgba(255,255,255,0.05);
+                            border-radius: 12px;
+                            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+                            position: relative;
+                        }
+                        .oshi-deck-scroll { 
+                            display: flex; 
+                            /* ✨ 關鍵修復 1：右側給予 80px 的超大 padding，確保卡片往右推開時絕對不會被切斷！ */
+                            padding: 30px 80px 40px 20px; 
+                            overflow-x: auto; 
+                            -webkit-overflow-scrolling: touch;
+                            align-items: center;
+                        }
+                        
+                        /* ✨ 關鍵修復 2：電腦版解鎖橫向捲軸，讓滑鼠可以順暢拖曳瀏覽所有女孩！ */
+                        .oshi-deck-scroll::-webkit-scrollbar { height: 8px; }
+                        .oshi-deck-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; margin: 0 20px; }
+                        .oshi-deck-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; transition: 0.3s; border: 2px solid #111; }
+                        .oshi-deck-scroll::-webkit-scrollbar-thumb:hover { background: var(--event-accent, #ffd700); }
                         
                         .oshi-card { 
                             flex-shrink: 0; width: 140px; height: 210px; border-radius: 12px; 
-                            margin-left: -60px; /* ✨ 撲克牌重疊的關鍵 */
-                            position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                            box-shadow: -5px 0 20px rgba(0,0,0,0.8); cursor: pointer; background: #111;
+                            margin-left: -55px; /* 撲克牌重疊幅度 */
+                            position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                            box-shadow: -8px 0 20px rgba(0,0,0,0.8); cursor: pointer; background: #111;
                             border: 2px solid; overflow: hidden;
+                            transform-origin: bottom center; /* 扇形展開的軸心 */
                         }
-                        .oshi-card:first-child { margin-left: 0; } /* 第一張不往左縮 */
+                        .oshi-card:first-child { margin-left: 0; box-shadow: 0 0 20px rgba(0,0,0,0.5); } 
                         
-                        /* ✨ 滑鼠懸浮時，自己往上浮，後面的卡片全部往右退開！ */
-                        .oshi-card:hover { transform: translateY(-20px) scale(1.05); z-index: 20; box-shadow: 0 15px 30px rgba(0,0,0,0.9); }
-                        .oshi-card:hover ~ .oshi-card { transform: translateX(60px); }
+                        /* ✨ 扇形抽牌特效：懸浮的牌往上抽出，後面的牌往右退開並產生微幅旋轉（扇形）！ */
+                        .oshi-card:hover { 
+                            transform: translateY(-25px) scale(1.08) rotate(-3deg); 
+                            z-index: 50 !important; 
+                            box-shadow: 0 15px 35px rgba(0,0,0,0.9); 
+                        }
+                        .oshi-card:hover ~ .oshi-card { 
+                            transform: translateX(55px) rotate(3deg); /* 推開的距離必須 >= margin-left 的重疊量 */
+                        }
                         
                         .oshi-card img { width: 100%; height: 75%; object-fit: cover; object-position: top center; border-bottom: 2px solid rgba(255,255,255,0.1); }
                         .oshi-card-info { height: 25%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(to top, #0a0c0f, #1a1e24); padding: 5px; }
                         
                         @media (max-width: 768px) {
-                            .oshi-card { width: 110px; height: 165px; margin-left: -40px; }
-                            .oshi-card:hover ~ .oshi-card { transform: translateX(40px); }
+                            .oshi-deck-scroll { padding: 25px 60px 30px 15px; }
+                            .oshi-card { width: 110px; height: 165px; margin-left: -45px; }
+                            .oshi-card:hover { transform: translateY(-15px) scale(1.05) rotate(-2deg); }
+                            .oshi-card:hover ~ .oshi-card { transform: translateX(45px) rotate(2deg); }
+                            .oshi-deck-scroll::-webkit-scrollbar { display: none; } /* 手機版隱藏捲軸保持乾淨，純靠手勢滑動 */
                         }
                     </style>
                 `;
@@ -4349,8 +4379,11 @@
                     </div>`;
                 }).join('');
 
-                favHtml = deckStyle + `<div class="oshi-deck-scroll">${cardsHtml}</div>
-                <div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-top: -15px; margin-bottom: 10px; letter-spacing: 1px; padding-right: 15px; animation: slide-hint 2s infinite;">點擊抽出您的本命女孩 ➔</div>`;
+                favHtml = deckStyle + `
+                <div class="oshi-deck-wrapper">
+                    <div class="oshi-deck-scroll">${cardsHtml}</div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-top: 10px; letter-spacing: 1px; padding-right: 5px; animation: slide-hint 2s infinite;">滑動或點擊抽出本命女孩 ➔</div>`;
             }
 
             // ==========================================
