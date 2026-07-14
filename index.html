@@ -6624,12 +6624,20 @@ window.renderMinigameStart = function() {
                 return match;
             });
 
-            // ✨ 內文專屬插圖引擎 (Image Parser) - 多圖輪播升級版
-            contentText = contentText.replace(/\[img:(.+?)\]/gi, (match, urlsStr) => {
-                // 1. 強力分割器：把逗號、換行等分隔符號切開
-                const inlineUrls = urlsStr.split(/[,，\s\n|]+/).filter(u => u.trim() !== '');
+            // ✨ 內文專屬插圖引擎 (Image Parser) - 支援連續 [img:url] 自動聚合成輪播
+            contentText = contentText.replace(/(?:\[img:[^\]]+\][\s\n]*)+/gi, (matchBlock) => {
+                // 1. 把這整塊連續的 [img:xxx] 裡面的網址全部抽出來
+                let inlineUrls = [];
+                let urlRegex = /\[img:([^\]]+)\]/gi;
+                let m;
+                while ((m = urlRegex.exec(matchBlock)) !== null) {
+                    // 順便相容原本的逗號分隔寫法 [img:url1,url2]
+                    let splitUrls = m[1].split(/[,，\s\n|]+/).filter(u => u.trim() !== '');
+                    inlineUrls.push(...splitUrls);
+                }
+
                 if (inlineUrls.length === 0) return '';
-                
+
                 // 2. 如果只有一張圖，維持原本的單圖置中顯示
                 if (inlineUrls.length === 1) {
                     const cleanUrl = window.getCdnUrl(inlineUrls[0]); 
@@ -6637,7 +6645,7 @@ window.renderMinigameStart = function() {
                                 <img src="${cleanUrl}" loading="lazy" style="width: 100%; max-width: 550px; height: auto; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
                             </div>`;
                 } 
-                // 3. 如果有多張圖，自動轉換為內文版 IG 輪播相簿
+                // 3. ✨ 如果有多張圖，自動轉換為內文版高級 IG 輪播相簿
                 else {
                     const sliderId = 'inline-slider-' + Math.random().toString(36).substr(2, 9); // 給每個輪播獨立 ID 避免衝突
                     const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
