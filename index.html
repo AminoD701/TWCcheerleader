@@ -7428,7 +7428,7 @@ window.renderMinigameStart = function() {
             }
 
             // ==========================================
-            // 📊 資料聚合 2：專屬時間軸 (Schedules + Events)
+            // 📊 資料聚合 2：專屬時間軸 (月份群組化高質感行事曆)
             // ==========================================
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             
@@ -7442,45 +7442,120 @@ window.renderMinigameStart = function() {
                 return girlsStr.includes((c.realname||"").trim().toLowerCase()) || girlsStr.includes((c.nickname||"").trim().toLowerCase());
             }).map(e => ({ ...e, dataType: 'event' }));
 
-            let combinedItinerary = [...herSchedules, ...herEvents].filter(i => i.safeDate.num >= todayNum);
+            // 合併並過濾掉太久以前的歷史紀錄 (只保留今天以後，或最近一個月的)
+            let combinedItinerary = [...herSchedules, ...herEvents].filter(i => i.safeDate.num >= todayNum - 30);
             combinedItinerary.sort((a, b) => a.safeDate.num - b.safeDate.num);
+
+            const teamTranslation = {
+                "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", 
+                "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
+                "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
+                "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
+                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars"
+            };
+
+            const iconCal = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+            const iconPin = `<svg viewBox="0 0 24 24" style="width:13px; height:13px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+            const iconPlus = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:2px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+            const iconCheck = `<svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
 
             let timelineHtml = '';
             if (combinedItinerary.length === 0) {
-                timelineHtml = `<div style="padding:30px 15px; text-align:center; color:var(--text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius:8px;">目前尚無 ${dName} 後續的班表或活動。</div>`;
+                timelineHtml = `<div style="padding:40px 15px; text-align:center; color:var(--text-sub); border: 1px dashed rgba(255,255,255,0.1); border-radius:8px; height: 100%; display: flex; align-items: center; justify-content: center;">目前尚無 ${dName} 的後續行程資料。</div>`;
             } else {
-                timelineHtml = combinedItinerary.map(item => {
-                    const isToday = item.safeDate.num === todayNum;
-                    const statusBadge = isToday ? `<span style="background:#ff0044; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:900; margin-left:8px;">TODAY</span>` : '';
-                    let titleHtml = '', detailHtml = '', actionBtn = '';
+                // ✨ 核心升級：將行程依照「年 / 月」自動群組化打包
+                let groupedItinerary = {};
+                combinedItinerary.forEach(item => {
+                    let monthKey = `${item.safeDate.year} 年 ${item.safeDate.month} 月`;
+                    if (!groupedItinerary[monthKey]) groupedItinerary[monthKey] = [];
+                    groupedItinerary[monthKey].push(item);
+                });
+
+                timelineHtml = Object.keys(groupedItinerary).map(monthKey => {
+                    let monthEvents = groupedItinerary[monthKey];
                     
-                    if (item.dataType === 'schedule') {
-                        titleHtml = `<span style="color:#fff; font-weight:900; font-size:15px;">${item.team} 應援</span>`;
-                        detailHtml = `<div style="color:${cardAccent}; font-weight:900; font-size:12px; margin-top:4px;">${item.note ? `📍 ${item.note}` : '📍 賽事應援'}</div>`;
-                        let key = item.safeDate.num + '|' + item.team + '|' + item.sport + '|' + item.name;
-                        let isSaved = schedSet.has(key);
-                        let dateStrForSave = `${item.safeDate.monStr}/${String(item.safeDate.day).padStart(2,'0')}`;
-                        actionBtn = `<button onclick="window.toggleMySchedule('${key}', ${item.safeDate.num}, '${dateStrForSave}', '${item.team} 應援', event, this)" style="background:${isSaved?'var(--fav-accent)':'transparent'}; color:${isSaved?'#fff':cardAccent}; border:1px solid ${isSaved?'transparent':cardAccent}; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; cursor:pointer;">${isSaved?'已加入':'➕ 行程'}</button>`;
-                    } else {
-                        titleHtml = `<span style="color:#fff; font-weight:900; font-size:15px;">${item.eventname || "活動"}</span>`;
-                        detailHtml = `<div style="color:var(--text-sub); font-size:12px; margin-top:4px; line-height:1.4;">${item.address ? `📍 ${item.address}` : ''}<br>🏢 ${item.host || "主辦單位"}</div>`;
-                        let key = 'event|' + item.safeDate.num + '|' + (item.eventname||"") + '|' + (item.girls||"");
-                        let isSaved = schedSet.has(key);
-                        let dateStrForSave = `${item.safeDate.monStr}/${String(item.safeDate.day).padStart(2,'0')}`;
-                        actionBtn = `<button onclick="window.toggleMySchedule('${key}', ${item.safeDate.num}, '${dateStrForSave}', '${item.eventname||"活動"}', event, this)" style="background:${isSaved?'var(--fav-accent)':'transparent'}; color:${isSaved?'#fff':'#00b0ff'}; border:1px solid ${isSaved?'transparent':'#00b0ff'}; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:900; cursor:pointer;">${isSaved?'已加入':'➕ 行程'}</button>`;
-                    }
-                    
+                    let monthItemsHtml = monthEvents.map(item => {
+                        const isPast = item.safeDate.num < todayNum;
+                        const opacityStyle = isPast ? 'opacity: 0.5; filter: grayscale(1);' : '';
+                        const isToday = item.safeDate.num === todayNum;
+                        const statusBadge = isToday ? `<span style="background:#ff0044; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:900; margin-left:8px; letter-spacing:1px;">TODAY</span>` : '';
+                        
+                        let titleHtml = '';
+                        let detailHtml = '';
+                        let actionBtn = '';
+                        
+                        // 判斷是球場班表還是商業活動
+                        if (item.dataType === 'schedule') {
+                            let matchInfo = typeof dbMatches !== 'undefined' ? dbMatches.find(m => {
+                                let hTeam = teamTranslation[m.hometeam] || m.hometeam;
+                                let aTeam = teamTranslation[m.awayteam] || m.awayteam;
+                                return m.safeDate.num === item.safeDate.num && (hTeam === item.team || aTeam === item.team);
+                            }) : null;
+                            
+                            let opponentStr = matchInfo ? (teamTranslation[matchInfo.hometeam] === item.team ? `VS ${matchInfo.awayteam}` : `AT ${matchInfo.hometeam}`) : '';
+                            let timeStr = matchInfo && matchInfo.time ? matchInfo.time : 'TBA';
+                            let locStr = item.note ? item.note : (matchInfo && matchInfo.venue ? matchInfo.venue : "賽事應援");
+                            
+                            titleHtml = `<span style="color:#fff; font-weight:900; font-size:15px; letter-spacing:0.5px;">${item.team} 應援</span>`;
+                            detailHtml = `<div style="color:var(--text-sub); font-weight:700; font-size:12px; margin-top:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="color:${cardAccent};">${iconPin}${locStr}</span>
+                                ${opponentStr ? `<span style="border-left:1px solid rgba(255,255,255,0.2); padding-left:8px;">${opponentStr}</span>` : ''} 
+                            </div>`;
+                            
+                            let key = item.safeDate.num + '|' + item.team + '|' + item.sport + '|' + item.name;
+                            let isSaved = schedSet.has(key);
+                            let dateStrForSave = `${item.safeDate.monStr}/${String(item.safeDate.day).padStart(2,'0')}`;
+                            actionBtn = `<button onclick="window.toggleMySchedule('${key}', ${item.safeDate.num}, '${dateStrForSave}', '${item.team} 應援', event, this)" style="background:${isSaved?'var(--fav-accent)':'transparent'}; color:${isSaved?'#fff':cardAccent}; border:1px solid ${isSaved?'transparent':cardAccent}; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:900; cursor:pointer; white-space:nowrap; transition:0.2s;" onmouseover="this.style.background='${isSaved?'#ff0044':cardAccent}'; this.style.color='#000';">
+                                ${isSaved ? iconCheck+'已排定' : iconPlus+'加行程'}
+                            </button>`;
+                        } else {
+                            titleHtml = `<span style="color:#fff; font-weight:900; font-size:15px; letter-spacing:0.5px;">${item.eventname || "專屬活動"}</span>`;
+                            detailHtml = `<div style="color:var(--text-sub); font-size:12px; margin-top:4px; font-weight:700; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="color:#cbd5e1;">${iconPin}${item.address || "詳見公告"}</span>
+                            </div>`;
+                            
+                            let key = 'event|' + item.safeDate.num + '|' + (item.eventname||"") + '|' + (item.girls||"");
+                            let isSaved = schedSet.has(key);
+                            let dateStrForSave = `${item.safeDate.monStr}/${String(item.safeDate.day).padStart(2,'0')}`;
+                            actionBtn = `<button onclick="window.toggleMySchedule('${key}', ${item.safeDate.num}, '${dateStrForSave}', '${item.eventname||"專屬活動"}', event, this)" style="background:${isSaved?'var(--fav-accent)':'transparent'}; color:${isSaved?'#fff':'#38bdf8'}; border:1px solid ${isSaved?'transparent':'#38bdf8'}; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:900; cursor:pointer; white-space:nowrap; transition:0.2s;" onmouseover="this.style.background='${isSaved?'#ff0044':'#38bdf8'}'; this.style.color='#000';">
+                                ${isSaved ? iconCheck+'已排定' : iconPlus+'加行程'}
+                            </button>`;
+                        }
+                        
+                        return `
+                        <div style="position: relative; padding: 15px 15px 15px 20px; background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; gap: 15px; transition: 0.2s; ${opacityStyle} margin-bottom: 12px;" onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='${cardAccent}';" onmouseout="this.style.background='rgba(255,255,255,0.015)'; this.style.borderColor='rgba(255,255,255,0.05)';">
+                            <div style="position: absolute; left: -21.5px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: ${isToday ? '#ff0044' : cardAccent}; box-shadow: 0 0 10px ${isToday ? '#ff0044' : cardAccent}; z-index: 5;"></div>
+                            
+                            <div style="text-align: center; min-width: 40px;">
+                                <div style="font-family: var(--sport-font); font-size: 24px; font-weight: 900; color: ${isToday ? '#ff0044' : '#fff'}; line-height: 1;">${String(item.safeDate.day).padStart(2,'0')}</div>
+                                <div style="font-size: 11px; color: var(--text-sub); font-weight: 900; margin-top: 4px; font-family: var(--sport-font); letter-spacing: 1px;">${item.safeDate.week}</div>
+                            </div>
+                            
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 2px;">
+                                    ${titleHtml} ${statusBadge}
+                                </div>
+                                ${detailHtml}
+                            </div>
+                            
+                            <div>
+                                ${actionBtn}
+                            </div>
+                        </div>`;
+                    }).join('');
+
                     return `
-                    <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <div style="text-align:center; min-width:45px;">
-                            <div style="font-family:var(--sport-font); font-size:20px; font-weight:900; color:#fff;">${String(item.safeDate.day).padStart(2,'0')}</div>
-                            <div style="font-size:11px; color:var(--text-sub); font-weight:700;">${item.safeDate.monStr}</div>
+                    <div style="margin-bottom: 30px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; position: sticky; top: 0; background: var(--bg-card); z-index: 10; padding: 10px 0;">
+                            <div style="background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; font-weight: 900; padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
+                                ${iconCal} ${monthKey}
+                            </div>
+                            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
                         </div>
-                        <div style="flex:1; min-width:0;">
-                            <div style="margin-bottom:2px;">${titleHtml} ${statusBadge}</div>
-                            ${detailHtml}
+                        
+                        <div style="display: flex; flex-direction: column; border-left: 2px solid rgba(255,255,255,0.1); margin-left: 15px; padding-left: 15px; position: relative;">
+                            ${monthItemsHtml}
                         </div>
-                        <div>${actionBtn}</div>
                     </div>`;
                 }).join('');
             }
