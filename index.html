@@ -3270,160 +3270,235 @@
             }
         };
 
-        // ✨ 🏆 應援大賞啟動引擎 (極速秒開 + 背景同步)
+        // =========================================================================
+        // 🏆 應援大賞啟動引擎 (名人堂 ＆ 台港馬新戰場完美版)
+        // =========================================================================
+        
         window.initVoteHall = function() {
             if (!dbGirls || dbGirls.length === 0) return; 
             
-            // ✨ 0. 背景默默預先抓取球迷 IP
             window.fetchClientIP();
 
-            // 1. 瞬間畫出畫面 (先用舊數字或0)
-            updateVoteTeamDropdown();
+            // ✨ 這裡我們不再需要舊的下拉選單分類，因為第二屆只有一個「台/港/馬」賽道
+            // updateVoteTeamDropdown(); 
+            
             window.renderVoteGrid();
 
-            // 2. 背景默默去抓最新戰況，抓完再自動重新渲染排行榜 (不卡住使用者)
             window.fetchGlobalVotes().then(() => {
                 window.renderVoteGrid();
             });
         };
 
+        // 為了相容 HTML 結構，保留這些函式但不做多餘動作
         window.switchVoteCategory = async function(category) {
             voteState.currentCategory = category;
-            voteState.selectedTeam = '全部'; 
-            const tabs = document.querySelectorAll('#vote-category-tabs .vote-team-tag');
-            tabs.forEach(tab => {
-                if (tab.id === 'vote-tab-' + category) tab.classList.add('active');
-                else tab.classList.remove('active');
-            });
-            
-            updateVoteTeamDropdown(); 
             window.renderVoteGrid();
-            
-            // ✨ 背景默默刷新最新票數，確保切換賽道時票數是最新的
-            window.fetchGlobalVotes().then(() => window.renderVoteGrid());
         };
-
         window.selectVoteTeam = function(team) {
             voteState.selectedTeam = team;
             window.renderVoteGrid();
         };
 
+        // 🌟 最核心的渲染函式：包含名人堂與第二屆大賞
         window.renderVoteGrid = function() {
             const grid = document.getElementById('vote-grid');
             const leaderboard = document.getElementById('vote-leaderboard');
             const searchKeyword = document.getElementById('vote-search-input')?.value.toLowerCase().trim() || '';
-            if (!grid) return;
+            const container = document.getElementById('vote-container'); // 抓取外部大容器
 
-            const currentCat = voteState.currentCategory;
+            if (!container || !grid) return;
+
+            // -----------------------------------------------------------------
+            // 🏆 1. 第一屆日韓人氣大賞 - 殿堂級數據定義 (封存常數)
+            // -----------------------------------------------------------------
+            const season1Top10 = [
+                { name: "李珠珢", votes: 2711, rank: 1 },
+                { name: "李雅英", votes: 1777, rank: 2 },
+                { name: "權喜原", votes: 1725, rank: 3 },
+                { name: "朴旻曙", votes: 1707, rank: 4 },
+                { name: "李晧禎", votes: 1288, rank: 5 },
+                { name: "南珉貞", votes: 1251, rank: 6 },
+                { name: "李多慧", votes: 1097, rank: 7 },
+                { name: "邊荷律", votes: 1034, rank: 8 },
+                { name: "金娜妍", votes: 993, rank: 9 },
+                { name: "廉世彬", votes: 883, rank: 10 }
+            ];
+
+            // 🌟 智慧動態頭像查詢
+            const hofCardsHtml = season1Top10.map(item => {
+                const g = dbGirls.find(x => x.realname === item.name || x.nickname === item.name);
+                const imgUrl = g ? window.getCdnUrl(g.img) : 'https://via.placeholder.com/120x160/111/fff?text=' + item.name;
+                const teamName = g ? (g.team || "啦啦隊") : "日韓援";
+                const uid = g ? g.uid : '';
+
+                let rankBorder = 'border: 1px solid rgba(255,255,255,0.05);';
+                let rankBadge = `background: rgba(255,255,255,0.1); color: #fff;`;
+                let crown = '';
+
+                if (item.rank === 1) {
+                    rankBorder = 'border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.3);';
+                    rankBadge = 'background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; font-weight:900;';
+                    crown = '👑 ';
+                } else if (item.rank === 2) {
+                    rankBorder = 'border: 2px solid #c0c0c0; box-shadow: 0 0 10px rgba(192,192,192,0.2);';
+                    rankBadge = 'background: linear-gradient(135deg, #c0c0c0, #808080); color: #000; font-weight:900;';
+                } else if (item.rank === 3) {
+                    rankBorder = 'border: 2px solid #cd7f32; box-shadow: 0 0 10px rgba(205,127,50,0.2);';
+                    rankBadge = 'background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; font-weight:900;';
+                }
+
+                const clickAction = uid ? `onclick="window.openProfile('${uid}')"` : '';
+
+                return `
+                <div class="hof-card" ${clickAction} style="${rankBorder}; flex-shrink: 0; width: 110px; background: rgba(0,0,0,0.4); border-radius: 10px; padding: 12px; text-align: center; position: relative; cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.background='rgba(255,255,255,0.03)';" onmouseout="this.style.transform='none'; this.style.background='rgba(0,0,0,0.4)';">
+                    <div class="hof-rank-badge" style="${rankBadge}; position: absolute; top: -8px; left: -8px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: var(--sport-font); font-weight: 900; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 5;">${crown}${item.rank}</div>
+                    <div class="hof-avatar-box" style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px; border: 2px solid rgba(255,255,255,0.1); background: #222;">
+                        <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/120'">
+                    </div>
+                    <div class="hof-info">
+                        <div class="hof-name" style="font-size: 14px; font-weight: 900; color: #fff; margin-bottom: 2px; white-space: nowrap;">${item.name}</div>
+                        <div class="hof-team" style="font-size: 10px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px;">${teamName.split(' ')[0]}</div>
+                        <div class="hof-votes" style="font-family: var(--sport-font); font-size: 12px; color: #ffd700; font-weight: 900; letter-spacing: 0.5px;">${item.votes.toLocaleString()} 票</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // -----------------------------------------------------------------
+            // 🛑 動態注入名人堂介面 (如果還沒建立的話)
+            // -----------------------------------------------------------------
+            if (!document.getElementById('hof-wrapper')) {
+                // 將名人堂插入到原本標題的下方
+                const titleSection = container.querySelector('div[style*="text-align: center"]');
+                
+                // 為了讓新一屆更純粹，我們隱藏原本的分類標籤 (日韓外援陣線那個按鈕)
+                const tabsDiv = document.getElementById('vote-category-tabs');
+                if (tabsDiv) tabsDiv.style.display = 'none';
+
+                const hofWrapper = document.createElement('div');
+                hofWrapper.id = 'hof-wrapper';
+                hofWrapper.innerHTML = `
+                    <div class="hof-section" style="background: linear-gradient(180deg, #161a22 0%, #0d0f12 100%); border: 1px solid rgba(255, 215, 0, 0.15); border-top: 4px solid #ffd700; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+                        <div class="hof-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
+                            <div class="hof-title" style="font-family: var(--sport-font); font-size: 18px; font-weight: 900; color: #ffd700; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                                🏆 第一屆 👑 日韓人氣名人堂 (HALL OF FAME)
+                            </div>
+                        </div>
+                        <style>
+                            .hof-scroll-box::-webkit-scrollbar { height: 6px; }
+                            .hof-scroll-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+                            .hof-scroll-box::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.2); border-radius: 10px; }
+                            .hof-scroll-box::-webkit-scrollbar-thumb:hover { background: #ffd700; }
+                        </style>
+                        <div class="hof-scroll-box" style="display: flex; gap: 12px; overflow-x: auto; padding: 5px 5px 15px 5px; scrollbar-width: thin;">
+                            ${hofCardsHtml}
+                        </div>
+                    </div>
+                    <div style="font-family: var(--sport-font); font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        ✨ 第二屆 👑 <span style="color: #00e676;">台/港/馬人氣大賞</span> (CURRENT BATTLE)
+                    </div>
+                `;
+                titleSection.after(hofWrapper);
+            }
+
+            // -----------------------------------------------------------------
+            // ✨ 2. 日期狀態與副標題更新 (改為 8/1 ~ 8/30)
+            // -----------------------------------------------------------------
             const now = new Date();
-            const officialStart = new Date('2026-06-01T00:00:00+08:00');
-            const officialEnd = new Date('2026-06-30T23:59:59+08:00');
+            // ✨ 設定第二屆活動時間
+            const officialStart = new Date('2026-08-01T00:00:00+08:00'); 
+            const officialEnd = new Date('2026-08-30T23:59:59+08:00');
             
             let phase = 'testing';
             if (now > officialEnd) phase = 'closed';
             else if (now >= officialStart) phase = 'official';
 
-            // ✨ 修正：強制使用亞洲/台北時區計算日期，確保凌晨 12:00 準時重製
             const todayStr = new Date().toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-'); 
             let todayVotes = [];
             let isCategoryLocked = false;
             
-            // 正式賽期讀取今日投票紀錄
+            const currentCatKey = 'local_pro_season2';
+
             if (phase === 'official') {
-                const savedData = localStorage.getItem('cheer_vote_data_' + currentCat);
+                const savedData = localStorage.getItem('cheer_vote_data_' + currentCatKey);
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
-                    if (parsed.date === todayStr) {
-                        todayVotes = parsed.uids || [];
-                    }
+                    if (parsed.date === todayStr) todayVotes = parsed.uids || [];
                 }
                 if (todayVotes.length >= 3) isCategoryLocked = true;
             } else if (phase === 'closed') {
                 isCategoryLocked = true; 
             }
 
-            // ✨ 指向新的副標題容器，並套用極簡專業風文字與按鈕
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 全網測試：開放無限投票！正式賽期 6/1~6/30 限定每日 3 票。';
-                else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！感謝全台粉絲的熱烈參與。';
-                else text = `<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：6/1 ~ 6/30 · 每日限定 3 票，不可重複投同位女孩。(今日已投：${todayVotes.length}/3)`;
+                if (phase === 'testing') text = '<span style="color:#00e676; font-weight:900; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為全網測試模式！正式賽期 8/1~8/30 限定每日 3 票。';
+                else if (phase === 'closed') text = '<span style="color:#ff4757; font-weight:900; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！';
+                else text = `<span style="color:#ffd700; font-weight:900; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/1 ~ 8/30 · 每日限定 3 票。(今日已投：${todayVotes.length}/3)`;
                 
-                // 更換為低調質感的分享按鈕
                 subtitleEl.innerHTML = text + `
                 <div style="margin-top: 12px;">
                     <button onclick="window.shareVotePage()" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 18px; font-size: 12px; font-weight: 700; border-radius: 20px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
                         <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; vertical-align:middle; margin-right:6px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                        分享賽區戰況
+                        分享第二屆戰況
                     </button>
                 </div>`;
             }
 
-            const pool = getVotePool();
+            // -----------------------------------------------------------------
+            // 🌟 3. 第二屆專屬：台/港/馬 智慧名單過濾器
+            // -----------------------------------------------------------------
+            let uniqueLocalGirls = [];
+            let seenUids = new Set();
 
-            // ✨ 核心修復：絕對以「雲端真實票數」為主，完全捨棄本地舊紀錄的干擾！
-            let girlsWithVotes = pool.map(g => {
-                const voteKey = currentCat + '_' + g.uid; 
-                const realVotes = parseInt(window.globalVoteData[voteKey] || 0);
-                return { ...g, votes: realVotes }; 
-            });
-
-            const tpblTeams = ["Formosa Sexy", "Passion Sisters", "Muse Girls", "Taishin Wonders", "Leopard Girls", "New Taipei Queens", "Aqua Mermaids"];
-            const plgTeams = ["Pilots Crew", "Youngkey Girls", "Wing Stars", "Fubon Angels"];
-
-            let regionGirls = girlsWithVotes.filter(g => {
-                // ✨ 終極排除令：只要備註有寫身分，且不是「練習生」或「培訓生」，通通禁止參賽！
+            dbGirls.forEach(g => {
+                if (!g.img) return; // 沒照片的不參賽
                 const note = (g.note || g['備註'] || g.備註 || "").trim();
-                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return false;
+                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return; // 排除吉祥物/團長
 
-                const natStr = g.nat || "";
-                const isLocalNat = natStr.includes("台") || natStr.includes("臺") || natStr.includes("港") || natStr.includes("馬");
-                const isKoreanOrJapanese = (natStr.includes("韓") || natStr.includes("日")) && !isLocalNat;
+                // 🌟 精準鎖定：國籍含 台/港/馬，或是 Luxygirls（混血），且排除重複
+                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls");
                 
-                const isLuxy = (g.combinedTeam || "").includes("LuxyGirls");
-                const isBaseball = (g.combinedSport || "").includes("棒");
-                const isVolleyball = (g.combinedSport || "").includes("排");
-                const isTPBL = tpblTeams.some(t => (g.combinedTeam || "").includes(t));
-                const isPLG = plgTeams.some(t => (g.combinedTeam || "").includes(t));
-                const isInProLeague = isBaseball || isVolleyball || isTPBL || isPLG;
-
-                switch(currentCat) {
-                    case 'baseball':    return isBaseball;
-                    case 'korea_pro':   return isKoreanOrJapanese && isInProLeague; 
-                    case 'local_pro':   return !isKoreanOrJapanese && !isLuxy; 
-                    default:            return false;
+                if (isLocal && !seenUids.has(g.uid)) {
+                    seenUids.add(g.uid);
+                    
+                    // 抓取真實票數 (這裡要特別處理，因為原本的票數紀錄是 local_pro 開頭的)
+                    const voteKey1 = 'local_pro_' + g.uid; 
+                    const voteKey2 = currentCatKey + '_' + g.uid;
+                    // 將第一屆累積下來的本土票數 與 第二屆的票數加總 (或者如果您想歸零，可以直接只抓 voteKey2)
+                    const realVotes = (parseInt(window.globalVoteData[voteKey1] || 0)) + (parseInt(window.globalVoteData[voteKey2] || 0));
+                    
+                    uniqueLocalGirls.push({ ...g, votes: realVotes });
                 }
             });
 
-            regionGirls.sort((a, b) => b.votes - a.votes);
+            uniqueLocalGirls.sort((a, b) => b.votes - a.votes);
 
-            // ✨ 新增：計算真實排名 (處理同票平手狀況)
+            // 計算排名
             let currentRank = 1;
-            regionGirls.forEach((g, idx) => {
-                if (idx > 0 && g.votes < regionGirls[idx - 1].votes) {
+            uniqueLocalGirls.forEach((g, idx) => {
+                if (idx > 0 && g.votes < uniqueLocalGirls[idx - 1].votes) {
                     currentRank = idx + 1;
                 }
                 g.rank = currentRank;
             });
 
+            // -----------------------------------------------------------------
+            // 🎨 4. 渲染海報排行榜 (Top 10)
+            // -----------------------------------------------------------------
             if (leaderboard) {
-                // 清除舊的 Flex 設定，改用 Block 來裝載我們的新海報網格
                 leaderboard.style.display = 'block'; 
                 
-                const top10 = regionGirls.slice(0, 10);
+                const top10 = uniqueLocalGirls.slice(0, 10);
                 if (top10.length === 0) {
                     leaderboard.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub); font-weight:700;">尚無戰況資料</div>`;
                 } else {
-                   // 卡片製造機
                     const buildPosterCard = (g, rank) => {
                         if (!g) return '';
-                        const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                        const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                        const dName = g.nickname || g.realname; // 台港馬優先顯示綽號
                         let rankClass = `poster-rank-${rank}`;
                         if (rank > 3) rankClass = 'poster-rank-rest';
 
-                        // ✨ 極簡風：移除皇冠，純粹依靠金色邊框與版面大小展現第一名氣勢
                         return `
                         <div class="poster-card ${rankClass}" onclick="window.openProfile('${g.uid}')">
                             <div class="poster-rank-badge">${rank}</div>
@@ -3435,14 +3510,12 @@
                         </div>`;
                     };
 
-                    // 🏆 第一排：TOP 3 王者榮耀台 (排列順序：亞軍、冠軍、季軍)
                     let podiumHtml = `<div class="poster-podium">`;
-                    podiumHtml += buildPosterCard(top10[1], 2); // 亞軍 (左)
-                    podiumHtml += buildPosterCard(top10[0], 1); // 冠軍 (中)
-                    podiumHtml += buildPosterCard(top10[2], 3); // 季軍 (右)
+                    podiumHtml += buildPosterCard(top10[1], 2); // 亞軍
+                    podiumHtml += buildPosterCard(top10[0], 1); // 冠軍
+                    podiumHtml += buildPosterCard(top10[2], 3); // 季軍
                     podiumHtml += `</div>`;
 
-                    // 🥈 第二排：第 4 ~ 10 名密集方格陣
                     let restHtml = `<div class="poster-rest-grid">`;
                     for (let i = 3; i < top10.length; i++) {
                         restHtml += buildPosterCard(top10[i], i + 1);
@@ -3452,72 +3525,14 @@
                     leaderboard.innerHTML = `<div class="poster-leaderboard">${podiumHtml}${restHtml}</div>`;
                 }
             }
-            // =============== ✨ 閉幕模式特化：榮譽殿堂與冠軍特寫 ===============
-            const lbContainer = document.getElementById('vote-leaderboard-container');
-            if (lbContainer) {
-                const titleEl = lbContainer.querySelector('div');
-                if (titleEl) {
-                    // 針對 Q3: 美化前十名，讓標題變金黃色，並讓整個排行榜發出黃金光暈
-                    titleEl.innerHTML = phase === 'closed' ? '🏆 最終榮耀 TOP 10 殿堂' : '🔥 即時戰況 TOP 10';
-                    titleEl.style.color = phase === 'closed' ? '#ffd700' : '#fff';
-                    lbContainer.style.borderColor = phase === 'closed' ? '#ffd700' : 'var(--border-color)';
-                    lbContainer.style.boxShadow = phase === 'closed' ? '0 0 30px rgba(255,215,0,0.2)' : '0 10px 20px rgba(0,0,0,0.5)';
-                }
-            }
 
-            if (phase === 'closed') {
-                // 針對 Q2: 隱藏投票搜尋與下拉選單，因為活動已經結束了
-                const searchInput = document.getElementById('vote-search-input');
-                const teamSelect = document.getElementById('vote-team-select');
-                if (searchInput) searchInput.style.display = 'none';
-                if (teamSelect) teamSelect.style.display = 'none';
-
-                // 針對 Q4: 抓取第一名，給予特別海報大特寫
-                const champion = regionGirls[0];
-                if (champion) {
-                    const isLocal = (champion.nat || "").includes("台") || (champion.nat || "").includes("臺") || (champion.nat || "").includes("港") || (champion.nat || "").includes("馬");
-                    const champName = isLocal ? (champion.nickname || champion.realname) : champion.realname;
-                    
-                    grid.style.display = 'block'; // 解除原本的 Grid 排版，讓海報霸氣置中
-                    grid.innerHTML = `
-                        <div style="grid-column: 1 / -1; width: 100%; max-width: 600px; margin: 20px auto 60px; text-align: center; animation: destiny-pop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
-                            
-                            <div style="font-family: var(--sport-font); font-size: clamp(28px, 8vw, 42px); color: #ffd700; letter-spacing: 2px; text-shadow: 2px 2px 0px #b8860b; margin-bottom: 10px; line-height: 1.2; white-space: nowrap;">🏆 GRAND CHAMPION 🏆</div>
-                            <div style="font-size: clamp(14px, 4vw, 18px); color: #cbd5e1; font-weight: 900; margin-bottom: 30px; letter-spacing: 1px;">感謝全台粉絲熱情參與，最終榮耀得主誕生！</div>
-                            
-                            <div class="card winner-card" style="border-bottom: 6px solid #ffd700; --team-accent: #ffd700; pointer-events: none; width: 95%; max-width: 420px; aspect-ratio: 3/5; height: auto; min-height: 480px; max-height: 75vh; display: flex; flex-direction: column; margin: 0 auto; box-shadow: 0 0 60px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.2);">
-                                <div style="position:absolute; top:-20px; left:-15px; font-size:clamp(60px, 15vw, 80px); filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.8)); z-index:20; transform: rotate(-15deg);">👑</div>
-                                
-                                <div class="photo-area" style="flex: 1; height: auto; min-height: 0; border-bottom: 4px solid #ffd700;">
-                                    <img src="${window.getCdnUrl(champion.img)}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.onerror=null; this.src='${champion.img}';">
-                                </div>
-                                
-                                <div class="info-section" style="flex: none; height: auto; padding: 20px 15px; background: linear-gradient(135deg, #111, #1a1a24); display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <div style="font-size:clamp(12px, 3vw, 15px); color:#ffd700; font-weight:900; margin-bottom:6px; letter-spacing: 2px;">第一屆·全民應援大賞 總冠軍</div>
-                                    <div style="font-size:clamp(32px, 8vw, 46px); font-weight:900; color:#fff; text-align:center; line-height: 1; text-shadow: 0 0 15px rgba(255,255,255,0.4); margin-bottom: 12px;">${champName}</div>
-                                    <div style="font-size:clamp(18px, 5vw, 24px); font-weight:900; color:#fff; font-family:var(--sport-font); background: #e50012; padding: 6px 25px; border-radius: 30px; border: 2px solid #000; box-shadow: 3px 3px 0 rgba(0,0,0,0.8);">${champion.votes.toLocaleString()} 票</div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    `;
-                    // 噴發慶祝彩帶
-                    if(typeof createConfetti === 'function' && !window.hasFiredChampConfetti) {
-                        createConfetti();
-                        window.hasFiredChampConfetti = true;
-                    }
-                }
-                return; // 🛑 結束執行，不再渲染下方原本的百人投票網格！
-            } else {
-                // 如果還在活動期間，確保網格排版恢復正常
-                grid.style.display = ''; 
-            }
-            // ====================================================================
-
-            let filtered = regionGirls.filter(g => {
-                if (voteState.selectedTeam !== '全部' && !(g.combinedTeam || "").includes(voteState.selectedTeam)) return false;
+            // -----------------------------------------------------------------
+            // 🗳️ 5. 渲染下方大網格 (搜尋過濾)
+            // -----------------------------------------------------------------
+            let filtered = uniqueLocalGirls.filter(g => {
+                if (voteState.selectedTeam !== '全部' && !(g.team || "").includes(voteState.selectedTeam)) return false;
                 if (searchKeyword) {
-                    const matchStr = `${g.realname} ${g.nickname||''} ${g.combinedTeam}`.toLowerCase();
+                    const matchStr = `${g.realname} ${g.nickname||''} ${g.team||''}`.toLowerCase();
                     if (!matchStr.includes(searchKeyword)) return false;
                 }
                 return true;
@@ -3529,25 +3544,23 @@
             }
 
             grid.innerHTML = filtered.map(g => {
-                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
-                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                const dName = g.nickname || g.realname;
                 
                 let btnHtml = '';
-            if (phase === 'closed') {
-                btnHtml = `<button class="vote-btn-disabled" onclick="alert('🔒 投票活動已圓滿結束囉！')">活動已結束 🔒</button>`;
-            } else if (phase === 'official') {
-                if (todayVotes.includes(g.uid)) {
-                    // ✨ 點擊已投票的女孩，彈出禁止警告
-                    btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 您今天已經把票投給她囉！請把剩下的票分給其他女孩吧！')">今日已應援 🔒</button>`;
-                } else if (isCategoryLocked) {
-                    // ✨ 點擊沒票時，彈出用盡警告
-                    btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！')">今日票數已用盡 🔒</button>`;
+                if (phase === 'closed') {
+                    btnHtml = `<button class="vote-btn-disabled" onclick="alert('🔒 投票活動已圓滿結束囉！')">活動已結束 🔒</button>`;
+                } else if (phase === 'official') {
+                    if (todayVotes.includes(g.uid)) {
+                        btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 您今天已經把票投給她囉！請把剩下的票分給其他女孩吧！')">今日已應援 🔒</button>`;
+                    } else if (isCategoryLocked) {
+                        btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！')">今日票數已用盡 🔒</button>`;
+                    } else {
+                        // ✨ 傳入新的賽道鑰匙
+                        btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff);">投她一票 🗳️</button>`;
+                    }
                 } else {
-                    btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">投她一票 🗳️</button>`;
+                    btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff);">連線測試(無限) 🗳️</button>`;
                 }
-            } else {
-                btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}')">連線測試(無限) 🗳️</button>`;
-            }
 
                 const rankColor = g.rank === 1 ? '#ffd700' : g.rank === 2 ? '#c0c0c0' : g.rank === 3 ? '#cd7f32' : '#4a5568';
                 const rankBadge = `<div style="position: absolute; top: -10px; left: -10px; background: ${rankColor}; color: ${g.rank<=3?'#000':'#fff'}; font-family: var(--sport-font); font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 5; border: 2px solid var(--bg-card);">${g.rank}</div>`;
@@ -3559,38 +3572,22 @@
                         <img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
                     </div>
                     <div style="font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${g.combinedTeam}</div>
-                    <div style="font-size: 14px; font-weight: 900; color: #a0aec0; margin-bottom: 12px; font-family: var(--sport-font);">${g.votes.toLocaleString()} 票</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${g.team || "自由嬌點"}</div>
+                    <div style="font-size: 14px; font-weight: 900; color: #00e676; margin-bottom: 12px; font-family: var(--sport-font);">${g.votes.toLocaleString()} 票</div>
                     ${btnHtml}
                 </div>`;
             }).join('');
-        };
-
-        window.filterVoteList = function() { window.renderVoteGrid(); };
-        // ✨ 一鍵分享投票戰況引擎
-        window.shareVotePage = function() {
-            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
-            const currentCatName = catNames[voteState.currentCategory];
             
-            // 帶有 mode 參數的專屬分享網址
-            const shareUrl = `${window.location.origin}${window.location.pathname}?mode=vote`;
-            const shareText = `【第一屆·全民應援大賞】🏆\n快來看看「${currentCatName}」的即時戰況！\n為你的本命女孩投下神聖的一票吧！🔥\n\n👇 點擊前往投票大廳：`;
-
-            if (navigator.share) {
-                navigator.share({ title: '全民應援大賞', text: shareText, url: shareUrl }).catch(e => console.log('分享取消', e));
-            } else {
-                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-                    alert('📋 賽區投票連結已複製！快去各大社群幫女孩催票吧！');
-                }).catch(() => {
-                    alert('📋 連結複製失敗，請手動複製網址。');
-                });
-            }
+            // 恢復 grid 的顯示 (因為可能之前被大特寫蓋掉)
+            grid.style.display = ''; 
         };
-        // ✨ 把票真實送出給 Google 伺服器 (加入防誤按機制)
-        window.submitVote = function(uid, name) {
+
+        // ✨ 修改原本的 submitVote 函式，支援接收自訂的 categoryKey 與新檔期
+        window.submitVote = function(uid, name, categoryKey) {
             const now = new Date();
-            const officialStart = new Date('2026-06-01T00:00:00+08:00');
-            const officialEnd = new Date('2026-06-30T23:59:59+08:00');
+            // ✨ 同步更改為 8/1 ~ 8/30
+            const officialStart = new Date('2026-08-01T00:00:00+08:00');
+            const officialEnd = new Date('2026-08-30T23:59:59+08:00');
             let phase = 'testing';
             if (now > officialEnd) phase = 'closed';
             else if (now >= officialStart) phase = 'official';
@@ -3599,29 +3596,22 @@
                 alert("🔒 投票活動已結束！"); return;
             }
 
-            const catNames = { 'korea_pro': '日韓外援', 'local_pro': '本土應援', 'baseball': '棒球大賞', 'volleyball': '排球大賞', 'tpbl': 'TPBL籃球', 'plg': 'PLG籃球' };
-            const currentCat = voteState.currentCategory;
-
-            // ✨ 修正：強制使用亞洲/台北時區計算日期，確保凌晨 12:00 準時重製
             const todayStr = new Date().toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-');
             let todayVotes = [];
             
-            // ✨ 確保 IP 已經抓到，否則阻擋並要求稍後
             if (!window.clientIP && phase === 'official') {
                 alert("⚠️ 系統正在驗證連線安全，請稍候 2 秒後再試著點擊投票！");
                 window.fetchClientIP();
                 return;
             }
 
-            // 正式賽期檢查防灌票鎖與重複投票
             if (phase === 'official') {
-                const savedData = localStorage.getItem('cheer_vote_data_' + currentCat);
+                const savedData = localStorage.getItem('cheer_vote_data_' + categoryKey);
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
                     if (parsed.date === todayStr) todayVotes = parsed.uids || [];
                 }
                 
-                // ✨ 本地端防無痕小手段：檢查這個 IP 今天是不是已經在本地投滿了
                 const localIPVotes = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
                 
                 if (todayVotes.length >= 3 || localIPVotes >= 3) {
@@ -3634,25 +3624,20 @@
                 }
             }
 
-            // ✨ 新增防誤按確認視窗 (粉絲按取消就會終止)
             const confirmMsg = phase === 'testing' 
-                ? `🛠️ 【測試模式】\n您確定要把票投給 ${catNames[currentCat]} 的【${name}】嗎？`
+                ? `🛠️ 【測試模式】\n您確定要把票投給【${name}】嗎？`
                 : `⚠️ 【投票確認】\n您確定要把 1 票投給【${name}】嗎？\n(今日剩餘票數：${2 - todayVotes.length} 票)`;
             
-            if (!confirm(confirmMsg)) {
-                return; // 粉絲點擊了「取消」，直接中斷執行
-            }
+            if (!confirm(confirmMsg)) return;
 
-            const voteKey = currentCat + '_' + uid; 
+            const voteKey = categoryKey + '_' + uid; 
             
-            // 正式賽期寫入防灌票紀錄
             if (phase === 'official') {
                 todayVotes.push(uid);
-                localStorage.setItem('cheer_vote_data_' + currentCat, JSON.stringify({
+                localStorage.setItem('cheer_vote_data_' + categoryKey, JSON.stringify({
                     date: todayStr,
                     uids: todayVotes
                 }));
-                // ✨ 紀錄該 IP 的本地投票次數
                 const currentIpCount = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
                 localStorage.setItem('cheer_ip_count_' + window.clientIP + '_' + todayStr, currentIpCount + 1);
             }
@@ -3665,11 +3650,8 @@
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    // ✨ 殺手鐧：將球迷的 IP 偷渡到後端！
                     body: JSON.stringify({ uid: voteKey, voteKey: voteKey, ip: window.clientIP })
                 }).catch(e => console.log("寫入失敗", e));
-            } else {
-                console.log("⚠️ 尚未設定 VOTE_API_URL");
             }
 
             if (phase === 'testing') {
