@@ -4288,7 +4288,7 @@
             }
 
             // ==========================================
-            // 2. 本命陣容 (My Oshi)
+            // 2. 本命陣容 (My Oshi) - 撲克牌扇形互動卡組
             // ==========================================
             let favMap = new Map();
             dbGirls.filter(g => favSet.has(g.uid)).forEach(c => {
@@ -4301,28 +4301,60 @@
             if (favGirls.length === 0) {
                 favHtml = '<div style="color:var(--text-sub); font-size:14px; font-weight:700; text-align:center; padding:30px; border:1px dashed rgba(255,255,255,0.1); border-radius:8px;">還沒有加入最愛的女孩，快去圖鑑點擊卡片上的愛心收編！</div>';
             } else {
-                favHtml = `<div class="grid-container" style="padding:0; margin:0; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;">` + favGirls.map(c => {
+                // ✨ CSS 黑魔法：重疊與懸浮推開特效
+                const deckStyle = `
+                    <style>
+                        .oshi-deck-scroll { display: flex; padding: 20px 20px 40px 20px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+                        .oshi-deck-scroll::-webkit-scrollbar { display: none; }
+                        
+                        .oshi-card { 
+                            flex-shrink: 0; width: 140px; height: 210px; border-radius: 12px; 
+                            margin-left: -60px; /* ✨ 撲克牌重疊的關鍵 */
+                            position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                            box-shadow: -5px 0 20px rgba(0,0,0,0.8); cursor: pointer; background: #111;
+                            border: 2px solid; overflow: hidden;
+                        }
+                        .oshi-card:first-child { margin-left: 0; } /* 第一張不往左縮 */
+                        
+                        /* ✨ 滑鼠懸浮時，自己往上浮，後面的卡片全部往右退開！ */
+                        .oshi-card:hover { transform: translateY(-20px) scale(1.05); z-index: 20; box-shadow: 0 15px 30px rgba(0,0,0,0.9); }
+                        .oshi-card:hover ~ .oshi-card { transform: translateX(60px); }
+                        
+                        .oshi-card img { width: 100%; height: 75%; object-fit: cover; object-position: top center; border-bottom: 2px solid rgba(255,255,255,0.1); }
+                        .oshi-card-info { height: 25%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(to top, #0a0c0f, #1a1e24); padding: 5px; }
+                        
+                        @media (max-width: 768px) {
+                            .oshi-card { width: 110px; height: 165px; margin-left: -40px; }
+                            .oshi-card:hover ~ .oshi-card { transform: translateX(40px); }
+                        }
+                    </style>
+                `;
+
+                const cardsHtml = favGirls.map((c, index) => {
                     const teams = c.mT.filter(t => t);
                     const lookupTeam = teams[0] || "全部啦啦隊";
                     const accent = (teamThemes[lookupTeam] || {accent:"#fff"}).accent;
-                    const showNick = (c.nickname && c.nickname !== c.realname) ? c.nickname : '';
+                    const isLocal = (c.nat || "").includes("台") || (c.nat || "").includes("臺") || (c.nat || "").includes("港") || (c.nat || "").includes("馬");
+                    const dName = isLocal ? (c.nickname || c.realname) : c.realname;
 
+                    // 給予每個卡片階層遞增，確保右邊永遠壓在左邊上面
                     return `
-                    <div class="card" style="border-bottom: 4px solid ${accent}; min-height:auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onclick="window.openProfile('${c.uid}')">
-                        <div class="photo-area" style="height: 160px; border-bottom: 2px solid var(--border-color);">
-                            <div class="fav-btn active" style="width:24px; height:24px; top:8px; right:8px;" onclick="window.toggleFavorite('${c.uid}', event, this)"><svg class="fav-icon" style="width:12px; height:12px;"><use xlink:href="#icon-heart"></use></svg></div>
-                            <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
+                    <div class="oshi-card" style="z-index: ${index + 1}; border-color: ${accent};" onclick="window.openProfile('${c.uid}')">
+                        <div class="fav-btn active" style="position:absolute; width:22px; height:22px; top:8px; right:8px; z-index:10; box-shadow: 0 2px 5px rgba(0,0,0,0.8);" onclick="window.toggleFavorite('${c.uid}', event, this)"><svg class="fav-icon" style="width:10px; height:10px;"><use xlink:href="#icon-heart"></use></svg></div>
+                        <img src="${window.getCdnUrl(c.img)}" loading="lazy" onerror="this.onerror=null; this.src='${c.img}';">
+                        <div class="oshi-card-info">
+                            <div style="font-size: clamp(12px, 3vw, 15px); font-weight: 900; color: ${accent}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center;">${dName}</div>
+                            <div style="font-size: 9px; color: var(--text-sub); font-weight: 700; margin-top: 2px;">${teams[0] ? teams[0].split(' ')[0] : '專屬本命'}</div>
                         </div>
-                        <div class="info-section" style="padding: 10px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; background: #111418;">
-                            <div class="nickname" style="font-size:15px; font-weight:900; color:${accent}; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.realname}</div>
-                            ${showNick ? `<div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${showNick}</div>` : ''}
-                        </div>
-                     </div>`;
-                }).join('') + `</div>`;
+                    </div>`;
+                }).join('');
+
+                favHtml = deckStyle + `<div class="oshi-deck-scroll">${cardsHtml}</div>
+                <div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-top: -15px; margin-bottom: 10px; letter-spacing: 1px; padding-right: 15px; animation: slide-hint 2s infinite;">點擊抽出您的本命女孩 ➔</div>`;
             }
 
             // ==========================================
-            // 3. VIP 粉絲專屬通行證 (Fan ID)
+            // 3. VIP 粉絲專屬通行證 (3D Flip Fan ID)
             // ==========================================
             let tasteHtml = '';
             if (favGirls.length < 3) {
@@ -4330,10 +4362,13 @@
                     <div style="background: rgba(255,255,255,0.02); padding: 30px; border-radius: 12px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
                         <div style="font-size:36px; margin-bottom:10px; filter:grayscale(1); opacity:0.5;">🪪</div>
                         <div style="font-size:15px; color:#fff; font-weight:900; margin-bottom:5px;">VIP 粉絲通行證尚未解鎖</div>
-                        <div style="font-size:13px; color:var(--text-sub); font-weight:700;">🔒 收藏至少 3 位本命女孩，系統將為您生成專屬粉絲 ID 卡！</div>
+                        <div style="font-size:13px; color:var(--text-sub); font-weight:700;">🔒 收藏至少 3 位本命女孩，即可解鎖 3D 專屬粉絲證與數據大解析！</div>
                     </div>`;
             } else {
                 let zodiacCounts = {}; let teamCounts = {}; let natCounts = {};
+                let validHeights = favGirls.map(g => parseFloat(g.height)).filter(h => !isNaN(h));
+                let avgHeight = validHeights.length > 0 ? (validHeights.reduce((a,b)=>a+b,0)/validHeights.length).toFixed(1) : "未知";
+
                 favGirls.forEach(g => {
                     let z = (g.zodiac||"").replace("白羊","牡羊").replace("魔羯","摩羯");
                     if(z) zodiacCounts[z] = (zodiacCounts[z] || 0) + 1;
@@ -4348,45 +4383,115 @@
                 let teamPct = Math.round((teamCounts[topTeam] / favGirls.length) * 100) || 0;
 
                 let title = "博愛型應援大師";
-                if (teamPct >= 60) title = `死忠 ${topTeam} 狂粉`;
+                if (teamPct >= 60) title = `死忠 ${topTeam.split(' ')[0]} 狂粉`;
                 else if (topNat === "韓國") title = "韓援魅力無法擋";
                 else if (topZodiac !== "未知") title = `天生絕配 ${topZodiac}`;
 
-                const myHomeTheme = teamThemes[myHomeTeam] || { accent: '#00e676' };
+                const myHomeTheme = teamThemes[myHomeTeam] || { accent: '#ffd700' };
                 const vipColor = myHomeTeam === 'none' ? '#ff0044' : myHomeTheme.accent;
 
-                // ✨ 高質感 VIP 數位卡片排版
+                // ✨ 3D 翻轉卡片專屬 CSS 與 HTML 結構
                 tasteHtml = `
-                    <div style="background: linear-gradient(135deg, #1a1e24 0%, #0d0f12 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+                    <style>
+                        .vip-flip-container {
+                            perspective: 1000px; width: 100%; max-width: 500px; height: 280px; margin: 0 auto; cursor: pointer;
+                        }
+                        .vip-flip-inner {
+                            position: relative; width: 100%; height: 100%;
+                            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                            transform-style: preserve-3d;
+                        }
+                        .vip-flip-container.flipped .vip-flip-inner { transform: rotateY(180deg); }
                         
-                        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: ${vipColor}; filter: blur(60px); opacity: 0.2; pointer-events: none;"></div>
-                        <div style="position: absolute; top: 20px; right: 25px; width: 40px; height: 30px; background: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,215,0,0.3) 4px, rgba(255,215,0,0.3) 6px), linear-gradient(135deg, #d4af37, #aa7700); border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); opacity:0.8;"></div>
+                        .vip-face {
+                            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+                            border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); overflow: hidden;
+                        }
+                        
+                        /* 正面：黑金晶片卡 */
+                        .vip-front {
+                            background: linear-gradient(135deg, #1a1e24 0%, #0d0f12 100%);
+                            border: 1px solid rgba(255,255,255,0.1);
+                        }
+                        /* 背面：數據戰情室 */
+                        .vip-back {
+                            background: linear-gradient(135deg, #0d0f12 0%, #1a1e24 100%);
+                            border: 2px solid ${vipColor};
+                            transform: rotateY(180deg); display: flex; flex-direction: column;
+                        }
 
-                        <div style="padding: 25px 30px;">
-                            <div style="font-family: var(--sport-font); font-size: 11px; color: ${vipColor}; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">OFFICIAL FAN ID</div>
-                            <div style="font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 25px; display: flex; align-items: baseline; gap: 10px;">
-                                ${title}
-                                <span style="font-family: var(--sport-font); font-size: 14px; color: var(--text-sub); font-weight: 700; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">LV.${favGirls.length}</span>
+                        /* 模擬數位晶片 */
+                        .nfc-chip {
+                            position: absolute; top: 25px; right: 30px; width: 45px; height: 35px;
+                            background: repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(255,215,0,0.3) 5px, rgba(255,215,0,0.3) 7px), linear-gradient(135deg, #d4af37, #aa7700);
+                            border-radius: 6px; box-shadow: inset 0 0 8px rgba(0,0,0,0.6); opacity: 0.9;
+                            border: 1px solid rgba(255,215,0,0.5);
+                        }
+
+                        /* 底部條碼裝飾 */
+                        .barcode-deco {
+                            width: 100%; height: 20px;
+                            background: repeating-linear-gradient(90deg, #fff 0, #fff 2px, transparent 2px, transparent 4px, #fff 4px, #fff 5px, transparent 5px, transparent 8px);
+                            opacity: 0.2; margin-top: auto;
+                        }
+                    </style>
+
+                    <div class="vip-flip-container" onclick="this.classList.toggle('flipped')">
+                        <div class="vip-flip-inner">
+                            
+                            <div class="vip-face vip-front">
+                                <div style="position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; background: ${vipColor}; filter: blur(70px); opacity: 0.2; pointer-events: none;"></div>
+                                <div class="nfc-chip"></div>
+                                
+                                <div style="padding: 30px; height: 100%; display: flex; flex-direction: column;">
+                                    <div style="font-family: var(--sport-font); font-size: 13px; color: ${vipColor}; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px;">OFFICIAL FAN ID</div>
+                                    <div style="font-size: clamp(24px, 5vw, 32px); font-weight: 900; color: #fff; margin-bottom: auto; line-height: 1.2;">
+                                        ${title}
+                                    </div>
+
+                                    <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+                                        <div>
+                                            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">MEMBER LEVEL</div>
+                                            <div style="font-family: var(--sport-font); font-size: 28px; font-weight: 900; color: #fff; line-height: 1;">LV.${favGirls.length}</div>
+                                        </div>
+                                        
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 10px; color: #888; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; animation: slide-hint 2s infinite;">TAP TO FLIP 🔄</div>
+                                            <div style="font-family: var(--sport-font); font-size: 16px; color: var(--text-sub); font-weight: 700; letter-spacing: 2px;">SEASON 2026</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
-                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">本命陣營</div>
-                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topTeam} <span style="font-size:11px; color:${vipColor};">(${teamPct}%)</span></div>
+                            <div class="vip-face vip-back">
+                                <div style="padding: 20px 25px; flex: 1;">
+                                    <div style="font-family: var(--sport-font); font-size: 14px; color: ${vipColor}; font-weight: 900; letter-spacing: 2px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between;">
+                                        <span>YOUR CHEERLEADER WRAPPED</span>
+                                        <span style="color: #fff;">${mySchedules.length} <span style="font-size:10px; color:#888;">MISSIONS</span></span>
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                        <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid ${vipColor};">
+                                            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 2px;">本命陣營</div>
+                                            <div style="font-size: 15px; font-weight: 900; color: #fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${topTeam} <span style="font-size:11px; color:${vipColor};">(${teamPct}%)</span></div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid ${vipColor};">
+                                            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 2px;">致命吸引星座</div>
+                                            <div style="font-size: 15px; font-weight: 900; color: #fff;">${topZodiac}</div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid ${vipColor};">
+                                            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 2px;">偏好平均身高</div>
+                                            <div style="font-size: 15px; font-weight: 900; color: #fff; font-family: var(--sport-font);">${avgHeight} <span style="font-size:11px; color:var(--text-sub);">cm</span></div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid ${vipColor};">
+                                            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 2px;">偏好國籍</div>
+                                            <div style="font-size: 15px; font-weight: 900; color: #fff;">${topNat}</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
-                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">吸引星座</div>
-                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topZodiac}</div>
-                                </div>
-                                <div style="flex: 1; min-width: 100px; background: rgba(0,0,0,0.3); border-left: 3px solid ${vipColor}; padding: 12px 15px; border-radius: 6px;">
-                                    <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">國籍傾向</div>
-                                    <div style="font-size: 15px; font-weight: 900; color: #fff;">${topNat}</div>
-                                </div>
+                                <div class="barcode-deco"></div>
                             </div>
-                        </div>
-                        <div style="background: rgba(0,0,0,0.5); padding: 10px 30px; font-family: var(--sport-font); font-size: 12px; color: var(--text-sub); letter-spacing: 2px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between;">
-                            <span>MEMBER SINCE 2026</span>
-                            <span style="color: ${vipColor};">VERIFIED</span>
+
                         </div>
                     </div>`;
             }
