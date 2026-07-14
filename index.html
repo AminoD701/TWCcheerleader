@@ -6606,7 +6606,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專屬彈窗 (極速秒開 + 雲端背景同步 + 潮流標籤雲 + 六大心情 + 內文插圖)
+        // 📰 每日情報專屬彈窗 (動態高度防空白 + 內文插圖聚合引擎)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
@@ -6617,16 +6617,13 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
-            // ✨ 升級解析多圖：確保陣列完美乾淨
             const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
             const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
             const titleText = getField(n, ['title', '標題'], '無標題');
-            let contentText = getField(n, ['content', '內文', '內容'], '暫無內文'); // 注意這裡要用 let
+            let contentText = getField(n, ['content', '內文', '內容'], '暫無內文'); 
             const dateText = getField(n, ['date', '日期'], '-');
 
-            // ✨ 戰術一：內文智慧關聯女孩 (Smart Mentions) - 🚀 英文邊界與防誤判升級版
             let allNames = [];
-            // 🚫 黑名單：太常見的名詞不自動標記 (例如李晧禎的"大哥")，避免文章內文被錯誤串聯
             const bannedAutoLinks = ["大哥", "老闆", "女神", "隊長", "總監", "仙女", "公主", "女王", "小豬"]; 
             
             dbGirls.forEach(g => {
@@ -6635,43 +6632,34 @@ window.renderMinigameStart = function() {
                     allNames.push(g.nickname);
                 }
             });
-            allNames.sort((a, b) => b.length - a.length); // 避免短名吃掉長名
+            allNames.sort((a, b) => b.length - a.length); 
             
             let namesPattern = allNames.map(name => {
                 let escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                // ✨ 黑魔法：如果是純英數字，加上 \b (Word Boundary) 邊界，避免 Joyce 裡面抓出 Joy
-                if (/^[a-zA-Z0-9_]+$/.test(name)) {
-                    return `\\b${escaped}\\b`;
-                }
+                if (/^[a-zA-Z0-9_]+$/.test(name)) { return `\\b${escaped}\\b`; }
                 return escaped;
             }).join('|');
             
-            // ✨ 加上 'i' 標籤 (case-insensitive)，讓 mingo 或 Mingo 都能被偵測到
             let smartMentionRegex = namesPattern ? new RegExp(`(${namesPattern})`, 'gi') : /(?!)/g;
-
             let mentionedGirls = new Set(); 
             
             contentText = contentText.replace(smartMentionRegex, (match) => {
                 const matchLower = match.toLowerCase();
-                // 尋找對應的女孩時，也全部轉為小寫比對
                 const targetGirl = dbGirls.find(g => 
                     (g.realname || "").toLowerCase() === matchLower || 
                     (g.nickname || "").toLowerCase() === matchLower
                 );
                 
                 if (targetGirl) {
-                    if (mentionedGirls.has(targetGirl.uid)) return match; // 每位女孩一篇新聞只高亮一次
+                    if (mentionedGirls.has(targetGirl.uid)) return match; 
                     mentionedGirls.add(targetGirl.uid);
-                    
-                    // ✨ 導向全新改版的專屬個人首頁 (Profile)
                     return `<span onclick="window.openProfile('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
                 }
                 return match;
             });
 
-            // ✨ 內文專屬插圖引擎 (Image Parser) - 支援連續 [img:url] 自動聚合成輪播
+            // ✨ 內文專屬插圖引擎 (Image Parser) - 修復高度自適應，不再產生黑色大縫隙
             contentText = contentText.replace(/(?:\[img:[^\]]+\][\s\n]*)+/gi, (matchBlock) => {
-                // 1. 把這整塊連續的 [img:xxx] 裡面的網址全部抽出來
                 let inlineUrls = [];
                 let urlRegex = /\[img:([^\]]+)\]/gi;
                 let m;
@@ -6682,23 +6670,20 @@ window.renderMinigameStart = function() {
 
                 if (inlineUrls.length === 0) return '';
 
-                // 2. 單圖模式：無黑框，完美放大
                 if (inlineUrls.length === 1) {
                     const cleanUrl = window.getCdnUrl(inlineUrls[0]); 
                     return `<div style="margin: 25px auto; width: 100%; max-width: 800px; display: flex; justify-content: center;">
-                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+                                <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 8px;">
                             </div>`;
                 } 
-                // 3. ✨ 多圖輪播模式：完全無框化，純文字浮水印
                 else {
                     const sliderId = 'inline-slider-' + Math.random().toString(36).substr(2, 9);
                     const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
                     
                     let slidesHtml = inlineUrls.map((u, idx) => `
-                        <div style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
-                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; border-radius: 8px; object-fit: contain;">
-                            
-                            <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
+                        <div style="flex: 0 0 100%; min-width: 100%; height: auto; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; border-radius: 8px; object-fit: contain;">
+                            <div style="position: absolute; bottom: 15px; right: 20px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
                                 ${idx + 1} / ${inlineUrls.length}
                             </div>
                         </div>
@@ -6706,23 +6691,58 @@ window.renderMinigameStart = function() {
 
                     return `
                     <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
-                    <div style="margin: 25px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px;">
-                        
+                    <div style="margin: 25px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px; overflow: hidden;">
                         <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.color='rgba(255,255,255,0.8)';">❮</button>
 
-                        <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto;">
+                        <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto; align-items: center;">
                             ${slidesHtml}
                         </div>
 
                         <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.color='rgba(255,255,255,0.8)';">❯</button>
-                        
                     </div>
                     `;
                 }
             });
 
-            // ✨ YouTube 影片自動嵌入引擎 (YouTube Parser - 黃金比例絕對不裁切版)
-            // 只要偵測到 youtube.com 或 youtu.be 的網址，就自動轉換成完美比例的播放器！
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
+
+            // ✨ 製造情報頂部多圖輪播區塊 (終極防破圖 + 高度自適應)
+            let modalImgSection = '';
+            if (imgUrls.length === 1) {
+                modalImgSection = `
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; max-height: 75vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <img src="${window.getCdnUrl(imgUrls[0])}" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain;">
+                </div>`;
+            } else if (imgUrls.length > 1) {
+                let slidesHtml = imgUrls.map((u, idx) => `
+                    <div style="flex: 0 0 100%; min-width: 100%; height: auto; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 75vh; object-fit: contain;">
+                        <div style="position: absolute; bottom: 15px; right: 20px; color: rgba(255,255,255,0.9); font-size: 13px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.6); pointer-events: none;">
+                            ${idx + 1} / ${imgUrls.length}
+                        </div>
+                    </div>
+                `).join('');
+
+                modalImgSection = `
+                <style>
+                    #modal-img-slider::-webkit-scrollbar { display: none; }
+                    @media (max-width: 768px) { .modal-slider-btn { display: none !important; } }
+                </style>
+                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; max-height: 75vh; overflow: hidden; display: flex; align-items: center;">
+                    
+                    <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: -document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❮</button>
+
+                    <div id="modal-img-slider" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto; align-items: center;">
+                        ${slidesHtml}
+                    </div>
+
+                    <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❯</button>
+                    
+                </div>
+                `;
+            }
+
+            // YouTube 影片自動嵌入引擎
             contentText = contentText.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s<]*)?/gi, (match, videoId) => {
                 return `<div style="margin: 30px auto; width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1);">
                             <div style="position: relative; padding-bottom: 56.25%; height: 0; width: 100%;">
@@ -6730,31 +6750,25 @@ window.renderMinigameStart = function() {
                             </div>
                         </div>`;
             });
+
             const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
             const linkText = getField(n, ['link', '連結', '相關連結']);
             
             const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
             let tagsArray = hashRaw ? hashRaw.split(/[,\s、，]+/).filter(t=>t) : [tagText];
 
-            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
             document.documentElement.style.setProperty('--modal-accent', themeColor);
 
             const reactTypes = [
-                { id: 'love', icon: '❤️' },
-                { id: 'laugh', icon: '😂' },
-                { id: 'sad', icon: '😢' },
-                { id: 'think', icon: '🤔' },
-                { id: 'angry', icon: '😡' },
-                { id: 'wow', icon: '😮' }
+                { id: 'love', icon: '❤️' }, { id: 'laugh', icon: '😂' }, { id: 'sad', icon: '😢' },
+                { id: 'think', icon: '🤔' }, { id: 'angry', icon: '😡' }, { id: 'wow', icon: '😮' }
             ];
 
-            // ✨ 第一步：瞬間畫出介面 (先用暫存的 0 或手機記憶數字，絕對不卡頓)
             let reactionsHtml = reactTypes.map(r => {
                 const voteKey = `news_react_${absoluteIndex}_${r.id}`;
                 const userChoice = localStorage.getItem(`news_react_single_${absoluteIndex}`);
                 const hasReacted = userChoice === r.id;
                 
-                // 先拿本地暫存的數字頂著
                 const tempCount = parseInt(window.globalNewsReactData ? window.globalNewsReactData[voteKey] : 0) || (hasReacted ? 1 : 0);
                 
                 const activeStyle = hasReacted 
@@ -6767,42 +6781,6 @@ window.renderMinigameStart = function() {
                     <span id="react-count-${absoluteIndex}-${r.id}" style="font-size:11px; font-family:var(--sport-font); font-weight:700; color:var(--text-sub); margin-top:3px;">${tempCount}</span>
                 </div>`;
             }).join('');
-            // ✨ 製造多圖輪播區塊 (終極防破圖排版 + IG張數標籤)
-            let modalImgSection = '';
-            if (imgUrls.length === 1) {
-                modalImgSection = `
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; text-align: center; height: 62vh; display: flex; align-items: center; justify-content: center;">
-                    <img src="${window.getCdnUrl(imgUrls[0])}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                </div>`;
-            } else if (imgUrls.length > 1) {
-                // 產生每張照片的 Slide，並在右上角壓上 1/5 這種頁數標籤
-                let slidesHtml = imgUrls.map((u, idx) => `
-                    <div style="flex: 0 0 100%; min-width: 100%; height: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img src="${window.getCdnUrl(u)}" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                        <div style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
-                            ${idx + 1} / ${imgUrls.length}
-                        </div>
-                    </div>
-                `).join('');
-
-                modalImgSection = `
-                <style>
-                    #modal-img-slider::-webkit-scrollbar { display: none; }
-                    @media (max-width: 768px) { .modal-slider-btn { display: none !important; } }
-                </style>
-                <div style="width: 100%; background: #050505; border-bottom: 4px solid ${themeColor}; position: relative; height: 62vh;">
-                    
-                    <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: -document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❮</button>
-
-                    <div id="modal-img-slider" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: 100%;">
-                        ${slidesHtml}
-                    </div>
-
-                    <button class="modal-slider-btn" onclick="event.stopPropagation(); document.getElementById('modal-img-slider').scrollBy({left: document.getElementById('modal-img-slider').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 18px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.borderColor='rgba(255,255,255,0.3)';">❯</button>
-                    
-                </div>
-                `;
-            }
 
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div class="modal-body" style="padding: 0; position: relative;">
@@ -6836,15 +6814,12 @@ window.renderMinigameStart = function() {
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll'); 
 
-            // ✨ 第二步：背景默默去 Google 抓最新數據，抓到後自動替換數字 (完全不卡畫面！)
             if (typeof window.fetchGlobalNewsReactions === 'function') {
                 window.fetchGlobalNewsReactions().then(() => {
                     reactTypes.forEach(r => {
                         const voteKey = `news_react_${absoluteIndex}_${r.id}`;
                         const realCount = parseInt(window.globalNewsReactData[voteKey] || 0);
                         const countEl = document.getElementById(`react-count-${absoluteIndex}-${r.id}`);
-                        
-                        // 神不知鬼不覺把數字換成全網最新的真實數據
                         if (countEl) countEl.innerText = realCount; 
                     });
                 });
