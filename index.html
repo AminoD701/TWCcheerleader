@@ -4213,11 +4213,13 @@
                     let isPast = s.dateNum < todayNum;
                     let extraInfoHtml = '';
                     let displayTitle = s.title;
+                    let girlAvatarHtml = ''; // ✨ 負責裝載女孩頭像的變數
 
                     if (s.id && s.id.startsWith('event|')) {
                         const parts = s.id.split('|');
                         const eDateNum = parseInt(parts[1]);
                         const eName = parts[2];
+                        const eGirlsStr = parts[3] || ""; // 抓取活動名單
                         const matchedEvent = dbEvents.find(e => e.safeDate.num === eDateNum && (e.eventname || "").trim() === (eName || "").trim());
 
                         if (matchedEvent) {
@@ -4230,12 +4232,40 @@
                                     <div style="display:flex; gap:12px;"><span>⏰ ${timeStr}</span> <span>🏢 ${hostStr}</span></div>
                                 </div>`;
                         }
+
+                        // ✨ 反向解析活動女孩，並生成迷你頭像
+                        const attendGirls = eGirlsStr.split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
+                        if (attendGirls.length > 0) {
+                            girlAvatarHtml = `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">` + attendGirls.map(n => {
+                                const g = girlMap.get(n);
+                                if (g) {
+                                    const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                                    const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                                    return `<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:2px 10px 2px 2px; border-radius:20px; border: 1px solid rgba(255,255,255,0.1);"><img src="${window.getCdnUrl(g.img)}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:top center;"> <span style="font-size:11px; color:#fff; font-weight:900;">${dName}</span></div>`;
+                                }
+                                return `<span style="font-size:11px; color:#aaa; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:20px;">${n}</span>`;
+                            }).join('') + `</div>`;
+                        }
+
                     } else if (s.id) {
                         const parts = s.id.split('|');
                         if (parts.length >= 4) {
                             const team = parts[1];
                             const sport = parts[2];
+                            const gName = parts[3]; // ✨ 從 ID 中拆出女孩名字
                             displayTitle = `${team} · ${sport} 應援`;
+                            
+                            // ✨ 抓取女孩照片並生成頭像膠囊
+                            const g = girlMap.get(gName);
+                            if (g) {
+                                const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                                const dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                                girlAvatarHtml = `
+                                <div style="display:flex; align-items:center; gap:8px; margin-top:10px; background:rgba(255,255,255,0.1); padding:3px 12px 3px 3px; border-radius:30px; width:fit-content; border: 1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <img src="${window.getCdnUrl(g.img)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; object-position:top center;"> 
+                                    <span style="font-size:13px; color:#fff; font-weight:900; letter-spacing:1px;">${dName}</span>
+                                </div>`;
+                            }
                         }
                     }
 
@@ -4245,13 +4275,14 @@
                     const btnText = isPast ? '✖ 刪除紀錄' : '移除任務';
 
                     return `
-                    <div class="timeline-item" style="align-items: flex-start; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); ${cardStyle} margin-bottom: 10px; padding: 15px;">
+                    <div class="timeline-item" style="align-items: flex-start; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); ${cardStyle} margin-bottom: 12px; padding: 15px; border-radius: 8px;">
                         <div style="flex: 1;">
                             <div style="font-family:var(--sport-font); font-size:14px; font-weight:900; color:${dateAccent};">${s.dateStr} ${isPast ? '<span style="font-size:10px; border:1px solid #6a7a90; padding:1px 4px; border-radius:4px; margin-left:6px;">已結束</span>' : ''}</div>
                             <div style="font-size:16px; font-weight:900; margin-top:4px; color:#fff;">${displayTitle}</div>
                             ${extraInfoHtml}
+                            ${girlAvatarHtml}
                         </div>
-                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="padding:6px 12px; border-radius:4px; font-size:11px; font-weight:900; cursor:pointer; transition:0.2s; white-space:nowrap; ${btnStyle}">${btnText}</button>
+                        <button onclick="window.toggleMySchedule('${s.id}', 0, '', '', event, this)" style="padding:6px 12px; border-radius:4px; font-size:11px; font-weight:900; cursor:pointer; transition:0.2s; white-space:nowrap; margin-top:5px; ${btnStyle}">${btnText}</button>
                     </div>`;
                 }).join('');
             }
