@@ -6466,40 +6466,50 @@ window.renderMinigameStart = function() {
             let contentText = getField(n, ['content', '內文', '內容'], '暫無內文'); // 注意這裡要用 let
             const dateText = getField(n, ['date', '日期'], '-');
 
-            // ✨ 戰術一：內文智慧關聯女孩 (Smart Mentions) - 🚀 極速快取優化版
-            // 讓系統只在第一次組合巨大搜尋字典，之後直接拿出來用，解決點擊 LAG 問題！
-            if (!window.cachedSmartMentionRegex) {
-                let allNames = [];
-                dbGirls.forEach(g => {
-                    if (g.realname) allNames.push(g.realname);
-                    if (g.nickname && g.nickname !== g.realname) allNames.push(g.nickname);
-                });
-                allNames.sort((a, b) => b.length - a.length); // 避免短名吃掉長名
-                
-                if (allNames.length > 0) {
-                    const namesPattern = allNames.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-                    window.cachedSmartMentionRegex = new RegExp(`(${namesPattern})`, 'g');
-                } else {
-                    window.cachedSmartMentionRegex = /(?!)/g; // 空字典防呆
-                }
-            }
+            // ✨ 戰術一：內文智慧關聯女孩 (Smart Mentions) - 🚀 英文邊界與防誤判升級版
+            let allNames = [];
+            // 🚫 黑名單：太常見的名詞不自動標記 (例如李晧禎的"大哥")，避免文章內文被錯誤串聯
+            const bannedAutoLinks = ["大哥", "老闆", "女神", "隊長", "總監", "仙女", "公主", "女王", "小豬"]; 
             
-            // 拿快取好的字典直接去掃描文章替換
-            if (window.cachedSmartMentionRegex) {
-                let mentionedGirls = new Set(); 
+            dbGirls.forEach(g => {
+                if (g.realname) allNames.push(g.realname);
+                if (g.nickname && g.nickname !== g.realname && !bannedAutoLinks.includes(g.nickname)) {
+                    allNames.push(g.nickname);
+                }
+            });
+            allNames.sort((a, b) => b.length - a.length); // 避免短名吃掉長名
+            
+            let namesPattern = allNames.map(name => {
+                let escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // ✨ 黑魔法：如果是純英數字，加上 \b (Word Boundary) 邊界，避免 Joyce 裡面抓出 Joy
+                if (/^[a-zA-Z0-9_]+$/.test(name)) {
+                    return `\\b${escaped}\\b`;
+                }
+                return escaped;
+            }).join('|');
+            
+            // ✨ 加上 'i' 標籤 (case-insensitive)，讓 mingo 或 Mingo 都能被偵測到
+            let smartMentionRegex = namesPattern ? new RegExp(`(${namesPattern})`, 'gi') : /(?!)/g;
+
+            let mentionedGirls = new Set(); 
+            
+            contentText = contentText.replace(smartMentionRegex, (match) => {
+                const matchLower = match.toLowerCase();
+                // 尋找對應的女孩時，也全部轉為小寫比對
+                const targetGirl = dbGirls.find(g => 
+                    (g.realname || "").toLowerCase() === matchLower || 
+                    (g.nickname || "").toLowerCase() === matchLower
+                );
                 
-                contentText = contentText.replace(window.cachedSmartMentionRegex, (match) => {
-                    const targetGirl = girlMap.get(match) || dbGirls.find(g => g.realname === match || g.nickname === match);
+                if (targetGirl) {
+                    if (mentionedGirls.has(targetGirl.uid)) return match; // 每位女孩一篇新聞只高亮一次
+                    mentionedGirls.add(targetGirl.uid);
                     
-                    if (targetGirl) {
-                        if (mentionedGirls.has(targetGirl.uid)) return match;
-                        
-                        mentionedGirls.add(targetGirl.uid);
-                        return `<span onclick="window.openProfile('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
-                    }
-                    return match;
-                });
-            }
+                    // ✨ 導向全新改版的專屬個人首頁 (Profile)
+                    return `<span onclick="window.openProfile('${targetGirl.uid}')" style="color: var(--event-accent); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--event-accent); padding: 0 2px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderRadius='4px';" onmouseout="this.style.background='transparent';">${match}</span>`;
+                }
+                return match;
+            });
 
             // ✨ 內文專屬插圖引擎 (Image Parser) - 多圖輪播升級版
             contentText = contentText.replace(/\[img:(.+?)\]/gi, (match, urlsStr) => {
