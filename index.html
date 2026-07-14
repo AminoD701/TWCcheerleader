@@ -6644,7 +6644,7 @@ window.renderMinigameStart = function() {
                                 <img src="${cleanUrl}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px;">
                             </div>`;
                 } 
-                // 3. ✨ 多圖輪播模式：移除黑底，指示器移至底部居中
+                // 3. ✨ 多圖輪播模式：移除黑底，指示器極致輕量化
                 else {
                     const sliderId = 'inline-slider-' + Math.random().toString(36).substr(2, 9);
                     const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
@@ -6653,7 +6653,7 @@ window.renderMinigameStart = function() {
                         <div style="flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; position: relative;">
                             <img src="${window.getCdnUrl(u)}" loading="lazy" style="width: 100%; height: auto; max-height: 80vh; border-radius: 8px; object-fit: contain;">
                             
-                            <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: var(--sport-font); font-weight: 900; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(4px);">
+                            <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 700; letter-spacing: 1px; backdrop-filter: blur(2px); pointer-events: none;">
                                 ${idx + 1} / ${inlineUrls.length}
                             </div>
                         </div>
@@ -6663,13 +6663,13 @@ window.renderMinigameStart = function() {
                     <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
                     <div style="margin: 25px auto; width: 100%; max-width: 800px; position: relative; border-radius: 8px;">
                         
-                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='rgba(255,255,255,0.2)';">❮</button>
+                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: -document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.color='rgba(255,255,255,0.8)';">❮</button>
 
                         <div id="${sliderId}" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; height: auto;">
                             ${slidesHtml}
                         </div>
 
-                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='rgba(255,255,255,0.2)';">❯</button>
+                        <button onclick="event.stopPropagation(); document.getElementById('${sliderId}').scrollBy({left: document.getElementById('${sliderId}').offsetWidth, behavior: 'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-size: 14px; font-weight: 900; backdrop-filter: blur(4px); transition: 0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.color='rgba(255,255,255,0.8)';">❯</button>
                         
                     </div>
                     `;
