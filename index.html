@@ -3290,7 +3290,7 @@
             window.renderVoteGrid();
         };
 
-        // 🌟 最核心的渲染函式：包含名人堂與第二屆大賞
+        // 🌟 最核心的渲染函式：包含名人堂、推薦引擎與第二屆大賞
         window.renderVoteGrid = function() {
             const grid = document.getElementById('vote-grid');
             const leaderboard = document.getElementById('vote-leaderboard');
@@ -3358,10 +3358,8 @@
             // 🛑 動態注入名人堂介面 (如果還沒建立的話)
             // -----------------------------------------------------------------
             if (!document.getElementById('hof-wrapper')) {
-                // 將名人堂插入到原本標題的下方
                 const titleSection = container.querySelector('div[style*="text-align: center"]');
                 
-                // 為了讓新一屆更純粹，我們隱藏原本的分類標籤 (日韓外援陣線那個按鈕)
                 const tabsDiv = document.getElementById('vote-category-tabs');
                 if (tabsDiv) tabsDiv.style.display = 'none';
 
@@ -3395,7 +3393,6 @@
             // ✨ 2. 日期狀態與副標題更新 (改為 8/1 ~ 8/30)
             // -----------------------------------------------------------------
             const now = new Date();
-            // ✨ 設定第二屆活動時間
             const officialStart = new Date('2026-08-01T00:00:00+08:00'); 
             const officialEnd = new Date('2026-08-30T23:59:59+08:00');
             
@@ -3443,20 +3440,17 @@
             let seenUids = new Set();
 
             dbGirls.forEach(g => {
-                if (!g.img) return; // 沒照片的不參賽
+                if (!g.img) return;
                 const note = (g.note || g['備註'] || g.備註 || "").trim();
-                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return; // 排除吉祥物/團長
+                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return;
 
-                // 🌟 精準鎖定：國籍含 台/港/馬，或是 Luxygirls（混血），且排除重複
                 const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬") || (g.team || "").toLowerCase().includes("luxygirls");
                 
                 if (isLocal && !seenUids.has(g.uid)) {
                     seenUids.add(g.uid);
                     
-                    // 抓取真實票數 (這裡要特別處理，因為原本的票數紀錄是 local_pro 開頭的)
                     const voteKey1 = 'local_pro_' + g.uid; 
                     const voteKey2 = currentCatKey + '_' + g.uid;
-                    // 將第一屆累積下來的本土票數 與 第二屆的票數加總 (或者如果您想歸零，可以直接只抓 voteKey2)
                     const realVotes = (parseInt(window.globalVoteData[voteKey1] || 0)) + (parseInt(window.globalVoteData[voteKey2] || 0));
                     
                     uniqueLocalGirls.push({ ...g, votes: realVotes });
@@ -3465,7 +3459,6 @@
 
             uniqueLocalGirls.sort((a, b) => b.votes - a.votes);
 
-            // 計算排名
             let currentRank = 1;
             uniqueLocalGirls.forEach((g, idx) => {
                 if (idx > 0 && g.votes < uniqueLocalGirls[idx - 1].votes) {
@@ -3486,7 +3479,7 @@
                 } else {
                     const buildPosterCard = (g, rank) => {
                         if (!g) return '';
-                        const dName = g.nickname || g.realname; // 台港馬優先顯示綽號
+                        const dName = g.nickname || g.realname; 
                         let rankClass = `poster-rank-${rank}`;
                         if (rank > 3) rankClass = 'poster-rank-rest';
 
@@ -3502,9 +3495,9 @@
                     };
 
                     let podiumHtml = `<div class="poster-podium">`;
-                    podiumHtml += buildPosterCard(top10[1], 2); // 亞軍
-                    podiumHtml += buildPosterCard(top10[0], 1); // 冠軍
-                    podiumHtml += buildPosterCard(top10[2], 3); // 季軍
+                    podiumHtml += buildPosterCard(top10[1], 2); 
+                    podiumHtml += buildPosterCard(top10[0], 1); 
+                    podiumHtml += buildPosterCard(top10[2], 3); 
                     podiumHtml += `</div>`;
 
                     let restHtml = `<div class="poster-rest-grid">`;
@@ -3518,7 +3511,62 @@
             }
 
             // -----------------------------------------------------------------
-            // 🗳️ 5. 渲染下方大網格 (搜尋過濾)
+            // ✨ 4.5 隨機探索 ‧ 今日推薦引擎 (Random Daily Picks)
+            // -----------------------------------------------------------------
+            let recommendContainer = document.getElementById('vote-recommend-container');
+            if (!recommendContainer) {
+                recommendContainer = document.createElement('div');
+                recommendContainer.id = 'vote-recommend-container';
+                // 安插在搜尋框的正上方
+                const searchBox = document.getElementById('vote-search-input').parentElement;
+                searchBox.parentNode.insertBefore(recommendContainer, searchBox);
+            }
+
+            // 只有在沒有搜尋/過濾條件，且名單有資料時，才顯示推薦區
+            if (searchKeyword === '' && voteState.selectedTeam === '全部' && phase !== 'closed' && uniqueLocalGirls.length > 0) {
+                // 如果目前還沒有存好的推薦名單，就隨機洗牌抽 3 個
+                if (!window.currentRecommendedGirls || window.currentRecommendedGirls.length === 0) {
+                    // 將所有的女孩洗牌後，取前三名
+                    let poolForRec = [...uniqueLocalGirls].sort(() => 0.5 - Math.random());
+                    window.currentRecommendedGirls = poolForRec.slice(0, 3);
+                }
+
+                let recHtml = `
+                <div style="margin-bottom: 20px; background: linear-gradient(135deg, rgba(0,230,118,0.1) 0%, rgba(0,176,255,0.05) 100%); border: 1px solid rgba(0,230,118,0.3); border-radius: 12px; padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-family: var(--sport-font); font-size: 16px; font-weight: 900; color: #00e676; display: flex; align-items: center; gap: 8px;">
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:currentColor;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            隨機探索 ‧ 今日推薦
+                        </div>
+                        <button onclick="window.currentRecommendedGirls=[]; window.renderVoteGrid();" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; font-weight: 700;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                            🔄 換一批
+                        </button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        ${window.currentRecommendedGirls.map(g => {
+                            const dName = g.nickname || g.realname;
+                            return `
+                            <div class="vote-card" style="padding: 10px; border-color: rgba(0,230,118,0.4); background: rgba(0,0,0,0.4); min-width: 0;" onclick="window.openProfile('${g.uid}')">
+                                <div class="vote-img-box" style="margin-bottom: 6px; border-width: 2px; border-color: #00e676;">
+                                    <img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
+                                </div>
+                                <div style="font-size: 13px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
+                                <div style="font-size: 10px; font-weight: 700; color: #00e676; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${g.team || "自由嬌點"}</div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+                
+                recommendContainer.innerHTML = recHtml;
+                recommendContainer.style.display = 'block';
+            } else {
+                // 如果粉絲正在使用搜尋或是篩選特定球隊，就先把推薦區隱藏起來，保持畫面乾淨
+                recommendContainer.style.display = 'none';
+            }
+
+            // -----------------------------------------------------------------
+            // 🗳️ 6. 渲染下方大網格 (搜尋過濾)
             // -----------------------------------------------------------------
             let filtered = uniqueLocalGirls.filter(g => {
                 if (voteState.selectedTeam !== '全部' && !(g.team || "").includes(voteState.selectedTeam)) return false;
@@ -3546,7 +3594,6 @@
                     } else if (isCategoryLocked) {
                         btnHtml = `<button class="vote-btn-disabled" onclick="alert('⚠️ 今日的 3 票已經全部用完囉！請明天再來為女孩應援！')">今日票數已用盡 🔒</button>`;
                     } else {
-                        // ✨ 傳入新的賽道鑰匙
                         btnHtml = `<button class="vote-btn-active" onclick="window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background: linear-gradient(135deg, #00e676, #00b0ff);">投她一票 🗳️</button>`;
                     }
                 } else {
@@ -3569,7 +3616,6 @@
                 </div>`;
             }).join('');
             
-            // 恢復 grid 的顯示 (因為可能之前被大特寫蓋掉)
             grid.style.display = ''; 
         };
 
