@@ -7397,11 +7397,11 @@ window.renderMinigameStart = function() {
             if (window.allStarViewMode === 'list') {
                 modeList.style.cssText += `border:2px solid var(--event-accent); background:var(--event-accent); color:#000; box-shadow:0 4px 10px rgba(0,0,0,0.5);`;
                 modeMatrix.style.cssText += `border:2px solid #2d3748; background:#15191e; color:#a0aec0; box-shadow:none;`;
-                filtersBox.style.display = 'flex'; // 列表模式才需要局數/區域過濾器
+                filtersBox.style.display = 'flex'; 
             } else {
                 modeMatrix.style.cssText += `border:2px solid var(--event-accent); background:var(--event-accent); color:#000; box-shadow:0 4px 10px rgba(0,0,0,0.5);`;
                 modeList.style.cssText += `border:2px solid #2d3748; background:#15191e; color:#a0aec0; box-shadow:none;`;
-                filtersBox.style.display = 'none'; // 矩陣模式自帶分類，隱藏過濾器保持一頁式乾淨
+                filtersBox.style.display = 'none'; 
             }
 
             if (window.allStarShowFavOnly) {
@@ -7452,11 +7452,10 @@ window.renderMinigameStart = function() {
                 return false;
             };
 
-            // ✨ 核心修復 3：支援多關鍵字聯集搜尋 (可同時搜 李多慧 邊荷律)
             const searchTerms = searchKeyword.split(/\s+/).filter(t => t);
             const checkMatch = (str) => {
                 if (searchTerms.length === 0) return true;
-                return searchTerms.some(term => str.includes(term)); // 只要中一個就顯示
+                return searchTerms.some(term => str.includes(term)); 
             };
 
             // ==========================================
@@ -7548,7 +7547,7 @@ window.renderMinigameStart = function() {
                 let matrix = {};
                 zoneList.forEach(z => { matrix[z] = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]}; });
                 
-                let activeZones = new Set(); // 記錄哪些區域真的有人
+                let activeZones = new Set(); 
 
                 allStarSchedules.forEach(s => {
                     let g = girlMap.get(s.name) || dbGirls.find(x => x.realname === s.name || x.nickname === s.name) || { realname: s.name, img: '' };
@@ -7585,7 +7584,7 @@ window.renderMinigameStart = function() {
                         activeInnings.forEach(i => {
                             if (i >= 1 && i <= 9) {
                                 matrix[matchedZone][i].push({ name: s.name, girl: g, team: s.team });
-                                activeZones.add(matchedZone); // 標記此區域有人
+                                activeZones.add(matchedZone); 
                             }
                         });
                     });
@@ -7596,7 +7595,7 @@ window.renderMinigameStart = function() {
                     return;
                 }
 
-                // ✨ 核心修復 4：極限一頁式排版，隱藏無人區域，直向區域文字
+                // ✨ 視覺降噪：拔除花俏底線，改用「極簡微光圓點 + 柔和灰底」
                 let matrixContentHtml = `
                 <style>
                     .compact-matrix { width: 100%; table-layout: fixed; border-collapse: collapse; background: var(--bg-card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
@@ -7607,9 +7606,11 @@ window.renderMinigameStart = function() {
                     /* 第一欄區域欄：極致壓縮寬度與直向排版 */
                     .compact-matrix .zone-th { width: 8%; min-width: 25px; background: #111418; color: #fff; font-size: clamp(11px, 3vw, 14px); font-weight: 900; writing-mode: vertical-rl; text-orientation: upright; padding: 10px 2px; letter-spacing: 2px; border-right: 2px solid rgba(255,255,255,0.1); vertical-align: middle; }
                     
-                    /* 名字膠囊：絕對不換行，極簡小字 */
-                    .compact-name-tag { display: block; width: 100%; background: rgba(0,0,0,0.5); font-size: clamp(9px, 2.5vw, 12px); font-weight: 900; color: #fff; padding: 3px 0; margin-bottom: 3px; border-radius: 3px; border-bottom: 2px solid var(--tag-color); white-space: nowrap; overflow: hidden; text-overflow: clip; letter-spacing: -0.5px; cursor: pointer; transition: 0.2s; }
-                    .compact-name-tag:hover { filter: brightness(1.2); transform: scale(1.05); z-index: 10; position: relative; }
+                    /* ✨ 降噪膠囊：半透明灰底 + 微光圓點，不使用重色底線 */
+                    .compact-name-tag { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; background: rgba(255,255,255,0.03); font-size: clamp(10px, 2.5vw, 12px); font-weight: 700; color: #cbd5e1; padding: 4px 2px; margin-bottom: 4px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
+                    .compact-name-tag:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: var(--tag-color); transform: scale(1.05); z-index: 10; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+                    .compact-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--tag-color); flex-shrink: 0; box-shadow: 0 0 4px var(--tag-color); }
+                    .compact-name-text { white-space: nowrap; overflow: hidden; text-overflow: clip; letter-spacing: -0.5px; }
                 </style>
                 <div style="width: 100%; overflow: hidden;">
                     <table class="compact-matrix">
@@ -7622,7 +7623,6 @@ window.renderMinigameStart = function() {
                         <tbody>
                 `;
 
-                // 只畫出有人的區域
                 zoneList.filter(z => activeZones.has(z)).forEach(z => {
                     matrixContentHtml += `<tr><td class="zone-th">${z}</td>`;
                     for(let i=1; i<=9; i++) {
@@ -7638,8 +7638,12 @@ window.renderMinigameStart = function() {
                             const dName = item.girl ? (isLocal ? (item.girl.nickname || item.girl.realname) : item.girl.realname) : item.name;
                             const targetId = item.girl ? item.girl.uid : item.name;
                             
-                            // 拔除頭像，純文字極致壓縮
-                            return `<div class="compact-name-tag" style="--tag-color: ${tCfg.accent};" onclick="window.openProfile('${targetId}')" title="${dName} (${item.team})">${dName}</div>`;
+                            // ✨ 套用全新的圓點排版
+                            return `
+                            <div class="compact-name-tag" style="--tag-color: ${tCfg.accent};" onclick="window.openProfile('${targetId}')" title="${dName} (${item.team})">
+                                <div class="compact-dot"></div>
+                                <div class="compact-name-text">${dName}</div>
+                            </div>`;
                         }).join('');
                         
                         matrixContentHtml += `<td>${cellContent}</td>`;
