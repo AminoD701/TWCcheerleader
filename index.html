@@ -3513,7 +3513,7 @@
                 }
             }
 
-            // --- ✨ 5. 隨機探索 ‧ 今日推薦引擎 (電競風) ---
+            // --- ✨ 5. 隨機探索 ‧ 今日推薦引擎 (絕對等高防破版) ---
             let recommendContainer = document.getElementById('vote-recommend-container');
             if (!recommendContainer) {
                 recommendContainer = document.createElement('div');
@@ -3529,44 +3529,48 @@
                 }
 
                 let recHtml = `
-                <div style="margin-bottom: 25px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 18px;">
+                <div style="margin-bottom: 25px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="font-family: var(--sport-font); font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: 2px;">
-                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:none; stroke:#00e676; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                            DAILY PICKS <span style="font-family: var(--tc-font); font-size: 12px; color: var(--text-sub); font-weight: 700; letter-spacing: 0;">隨機推薦</span>
+                        <div style="font-family: var(--sport-font); font-size: clamp(14px, 4vw, 16px); font-weight: 900; color: #fff; display: flex; align-items: center; gap: 6px; letter-spacing: 1px;">
+                            <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:#00e676; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            DAILY PICKS <span style="font-family: var(--tc-font); font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 0;">隨機推薦</span>
                         </div>
-                        <button onclick="window.currentRecommendedGirls=[]; window.renderVoteGrid();" style="background: transparent; border: 1px solid #444; color: #a0aec0; padding: 4px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.2s; font-family: var(--sport-font); display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#fff'; this.style.color='#000'; this.style.borderColor='#fff';">
+                        <button onclick="window.currentRecommendedGirls=[]; window.renderVoteGrid();" style="background: transparent; border: 1px solid #444; color: #a0aec0; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.2s; font-family: var(--sport-font); display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#fff'; this.style.color='#000'; this.style.borderColor='#fff';">
                             <svg viewBox="0 0 24 24" style="width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> REFRESH
                         </button>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: stretch;">
                         ${window.currentRecommendedGirls.map(g => {
                             const dName = g.nickname || g.realname;
                             
                             let btnHtml = '';
+                            // 縮減按鈕文字，避免在手機小螢幕上折行撐開高度
                             if (phase === 'closed') {
-                                btnHtml = `<button class="vote-btn-disabled" style="background:rgba(255,255,255,0.05); color:#666; border:1px solid #444; width:100%; padding:8px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">CLOSED</button>`;
+                                btnHtml = `<button class="vote-btn-disabled" style="background:rgba(255,255,255,0.05); color:#666; border:1px solid #444; width:100%; padding:8px 2px; border-radius:4px; font-size:10px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">CLOSED</button>`;
                             } else if (phase === 'official') {
                                 if (todayVotes.includes(g.uid)) {
-                                    btnHtml = `<button class="vote-btn-disabled" style="background:rgba(0,230,118,0.1); color:#00e676; border:1px solid rgba(0,230,118,0.3); width:100%; padding:8px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">VOTED</button>`;
+                                    btnHtml = `<button class="vote-btn-disabled" style="background:rgba(0,230,118,0.1); color:#00e676; border:1px solid rgba(0,230,118,0.3); width:100%; padding:8px 2px; border-radius:4px; font-size:10px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">VOTED</button>`;
                                 } else if (isCategoryLocked) {
-                                    btnHtml = `<button class="vote-btn-disabled" style="background:rgba(255,255,255,0.05); color:#666; border:1px solid #444; width:100%; padding:8px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">LIMIT REACHED</button>`;
+                                    btnHtml = `<button class="vote-btn-disabled" style="background:rgba(255,255,255,0.05); color:#666; border:1px solid #444; width:100%; padding:8px 2px; border-radius:4px; font-size:10px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">LIMIT</button>`;
                                 } else {
-                                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background:transparent; color:#00e676; border:1px solid #00e676; width:100%; padding:8px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#00e676'; this.style.color='#000';">CAST VOTE</button>`;
+                                    btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background:transparent; color:#00e676; border:1px solid #00e676; width:100%; padding:8px 2px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#00e676'; this.style.color='#000';">VOTE</button>`;
                                 }
                             } else {
-                                btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background:transparent; color:#00e676; border:1px dashed #00e676; width:100%; padding:8px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#00e676'; this.style.color='#000';">TEST VOTE</button>`;
+                                btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background:transparent; color:#00e676; border:1px dashed #00e676; width:100%; padding:8px 2px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#00e676'; this.style.color='#000';">TEST</button>`;
                             }
 
+                            // ✨ 卡片本體採用 Flex 排版，絕對撐滿 100% 空間，內部佈局自動對齊底端
                             return `
-                            <div class="vote-card" style="padding: 10px; border: 1px solid rgba(255,255,255,0.05); background: #111418; border-radius: 6px; box-shadow: none;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='#00e676';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)';">
-                                <div class="vote-img-box" style="margin-bottom: 8px; border: 1px solid #333; border-radius: 4px; box-shadow: none;">
-                                    <img src="${window.getCdnUrl(g.img)}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
+                            <div class="vote-card" style="padding: 10px; border: 1px solid rgba(255,255,255,0.05); background: #111418; border-radius: 6px; box-shadow: none; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='#00e676';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)';">
+                                <div class="vote-img-box" style="margin: 0 auto 8px; border: 1px solid #333; border-radius: 4px; box-shadow: none; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; flex-shrink: 0; background: #222;">
+                                    <img src="${window.getCdnUrl(g.img)}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/150'">
                                 </div>
-                                <div style="font-size: 14px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
-                                <div style="font-size: 10px; font-weight: 700; color: var(--text-sub); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${g.combinedTeam || "自由嬌點"}</div>
-                                ${btnHtml}
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; width: 100%;">
+                                    <div style="font-size: clamp(12px, 3.5vw, 14px); font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
+                                    <div style="font-size: clamp(9px, 2.5vw, 10px); font-weight: 700; color: var(--text-sub); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-bottom: auto;">${g.combinedTeam || "自由嬌點"}</div>
+                                    ${btnHtml}
+                                </div>
                             </div>`;
                         }).join('')}
                     </div>
