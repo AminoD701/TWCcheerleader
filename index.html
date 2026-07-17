@@ -6559,20 +6559,30 @@ window.renderMinigameStart = function() {
             let currentShortDate = null;
             let shortPostBuffer = [];
 
-            // 輔助函式：將緩衝區內的「同一天微動態」打包成一個大區塊
+            // 輔助函式：將緩衝區內的「同一天微動態」打包成一個大區塊 (✨ 加入高度限制與內部捲軸)
             const flushShortPosts = () => {
                 if (shortPostBuffer.length === 0) return '';
                 
                 let html = `
-                <div style="background: #111418; border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px;">
+                <div style="background: #111418; border: 1px solid var(--border-color); border-radius: 12px; padding: 25px 20px 25px 25px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px; padding-right: 5px;">
                         <div style="background: ${themeColor}; color: #000; font-family: var(--sport-font); font-weight: 900; padding: 4px 12px; border-radius: 6px; font-size: 16px; letter-spacing: 1px;">
                             ${currentShortDate}
                         </div>
                         <div style="font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 1px;">今日社群 ‧ 快訊重點</div>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 20px; position: relative;">
-                        <div style="position: absolute; left: 14px; top: 10px; bottom: 10px; width: 2px; background: rgba(255,255,255,0.05); z-index: 1;"></div>
+                    
+                    <style>
+                        /* ✨ 專屬高質感電競捲軸 */
+                        .timeline-scroll-box::-webkit-scrollbar { width: 6px; }
+                        .timeline-scroll-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+                        .timeline-scroll-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+                        .timeline-scroll-box::-webkit-scrollbar-thumb:hover { background: ${themeColor}; }
+                    </style>
+                    
+                    <div class="timeline-scroll-box" style="max-height: 480px; overflow-y: auto; padding-right: 15px; margin-right: -5px;">
+                        <div style="display: flex; flex-direction: column; gap: 20px; position: relative;">
+                            <div style="position: absolute; left: 14px; top: 10px; bottom: 10px; width: 2px; background: rgba(255,255,255,0.05); z-index: 1;"></div>
                 `;
 
                 html += shortPostBuffer.map((n, idx) => {
@@ -6611,7 +6621,10 @@ window.renderMinigameStart = function() {
                     </div>`;
                 }).join('');
 
-                html += `</div></div>`;
+                html += `
+                        </div>
+                    </div>
+                </div>`;
                 shortPostBuffer = []; // 清空緩衝區
                 return html;
             };
