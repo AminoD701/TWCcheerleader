@@ -6403,7 +6403,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日動態情報牆核心渲染引擎 (CMS) - 支援長篇新聞與「一頁式社群動態時間軸」
+        // 📰 每日動態情報牆核心渲染引擎 2.0 (長篇新聞 + 專屬日期分頁微動態模組)
         // =========================================================================
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
@@ -6447,7 +6447,7 @@ window.renderMinigameStart = function() {
                 return matchCat && matchHash && matchSearch;
             });
 
-            // 3. 終極排序邏輯：日期越新越上，同日期則越下方越上
+            // 3. 終極排序邏輯：日期越新越上
             let sortedNews = filteredNews.sort((a, b) => {
                 let dA = getField(a, ['date', '日期']);
                 let dB = getField(b, ['date', '日期']);
@@ -6457,27 +6457,39 @@ window.renderMinigameStart = function() {
                 return b._idx - a._idx; 
             });
             
-            let displayList = sortedNews.slice(0, window.currentDisplayLimit);
+            // ✨ 4. 智慧分流：將「短動態」與「一般新聞」徹底拆開處理
+            let shortPosts = [];
+            let longPosts = [];
+            
+            sortedNews.forEach(n => {
+                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
+                const isShort = tagText.includes('快訊') || tagText.includes('動態') || tagText.toLowerCase().includes('threads') || tagText.includes('脆') || tagText.toLowerCase().includes('ig');
+                if (isShort) shortPosts.push(n);
+                else longPosts.push(n);
+            });
+
+            // ✨ 將短動態依照日期打包
+            window.groupedShortPosts = {};
+            window.shortPostDates = [];
+            shortPosts.forEach(n => {
+                const d = getField(n, ['date', '日期'], '-');
+                if (!window.groupedShortPosts[d]) {
+                    window.groupedShortPosts[d] = [];
+                    window.shortPostDates.push(d); // 保持排序好的日期順序
+                }
+                window.groupedShortPosts[d].push(n);
+            });
+
+            // 5. 處理一般新聞 (載入更多限制)
+            let displayList = longPosts.slice(0, window.currentDisplayLimit);
             let isDefaultView = (searchKeyword === "" && window.currentMainCategory === "全部" && window.currentSubCategory === "全部" && !window.currentNewsHashtag);
             
             let heroList = [];
             let standardList = [];
             
             if (isDefaultView) {
-                // 預設大廳模式下，提取前 5 篇長篇新聞作為可滑動的頭條看板 (排除短動態)
-                let tempHero = [];
-                let tempStd = [];
-                for (let n of displayList) {
-                    const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                    const isShortPost = tagText.includes('快訊') || tagText.includes('動態') || tagText.toLowerCase().includes('threads') || tagText.includes('脆') || tagText.toLowerCase().includes('ig');
-                    if (!isShortPost && tempHero.length < 5) {
-                        tempHero.push(n);
-                    } else {
-                        tempStd.push(n);
-                    }
-                }
-                heroList = tempHero;
-                standardList = tempStd;
+                heroList = displayList.slice(0, 5);
+                standardList = displayList.slice(5);
             } else {
                 standardList = displayList;
             }
@@ -6495,7 +6507,6 @@ window.renderMinigameStart = function() {
                     const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                     const titleText = getField(n, ['title', '標題'], '無標題');
                     const dateText = getField(n, ['date', '日期'], '-');
-
                     const bgStyle = imgUrl ? `background-image: url('${imgUrl}');` : `background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%);`;
 
                     return `
@@ -6528,15 +6539,8 @@ window.renderMinigameStart = function() {
                     .hero-nav-btn:hover { background: var(--event-accent); border-color: transparent; transform: translateY(-50%) scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
                     .hero-nav-prev { left: 10px; }
                     .hero-nav-next { right: 10px; }
-
                     @media (min-width: 769px) { .news-hero-card { aspect-ratio: 16 / 9; max-height: 480px; align-items: flex-end; } }
-                    @media (max-width: 768px) { 
-                        .news-hero-card { flex: 0 0 92%; flex-direction: column; } 
-                        .hero-carousel { padding-right: 8%; scroll-padding-left: 0; }
-                        .hero-img-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; height: auto; } 
-                        .hero-text-content { background: #0a0c0f; padding: 15px 15px 20px; align-self: stretch; } 
-                        .hero-nav-btn { display: none; } 
-                    }
+                    @media (max-width: 768px) { .news-hero-card { flex: 0 0 92%; flex-direction: column; } .hero-carousel { padding-right: 8%; scroll-padding-left: 0; } .hero-img-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; height: auto; } .hero-text-content { background: #0a0c0f; padding: 15px 15px 20px; align-self: stretch; } .hero-nav-btn { display: none; } }
                 </style>
                 <div class="hero-carousel-container">
                     ${heroList.length > 1 ? `<div style="text-align: right; font-size: 11px; color: var(--event-accent); font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; padding-right: 5px;">滑動或點擊箭頭查看更多頭條 ➔</div>` : ''}
@@ -6552,150 +6556,170 @@ window.renderMinigameStart = function() {
             }
 
             // ==========================================
-            // 📜 渲染下方清單 (時間軸聚合引擎)
+            // 📱 渲染社群動態分頁模組 (Short Post Widget)
             // ==========================================
-            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
-            let standardHtml = '';
-            let currentShortDate = null;
-            let shortPostBuffer = [];
+            let shortPostWidgetHtml = '';
+            if (window.shortPostDates.length > 0) {
+                // 產生日期分頁按鈕 (Tabs)
+                let tabsHtml = window.shortPostDates.map((d, i) => {
+                    return `<button id="sp-tab-${i}" onclick="window.switchShortPostDate('${d}', ${i})" style="white-space:nowrap; padding:6px 14px; border-radius:20px; font-size:12px; font-family:var(--sport-font); font-weight:900; cursor:pointer; transition:0.2s; border:none; background:rgba(255,255,255,0.05); color:var(--text-sub);" onmouseover="if(this.style.color!=='rgb(0, 0, 0)') this.style.background='rgba(255,255,255,0.1)'" onmouseout="if(this.style.color!=='rgb(0, 0, 0)') this.style.background='rgba(255,255,255,0.05)'">${d}</button>`;
+                }).join('');
 
-            // 輔助函式：將緩衝區內的「同一天微動態」打包成一個大區塊 (✨ 加入高度限制與內部捲軸)
-            const flushShortPosts = () => {
-                if (shortPostBuffer.length === 0) return '';
-                
-                let html = `
-                <div style="background: #111418; border: 1px solid var(--border-color); border-radius: 12px; padding: 25px 20px 25px 25px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 2px dashed rgba(255,255,255,0.1); padding-bottom: 12px; padding-right: 5px;">
-                        <div style="background: ${themeColor}; color: #000; font-family: var(--sport-font); font-weight: 900; padding: 4px 12px; border-radius: 6px; font-size: 16px; letter-spacing: 1px;">
-                            ${currentShortDate}
+                shortPostWidgetHtml = `
+                <div style="background: #111418; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; display:flex; align-items:center; gap:8px;">
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:none; stroke:var(--event-accent); stroke-width:2;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            社群時報 ‧ 歷史動態
                         </div>
-                        <div style="font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 1px;">今日社群 ‧ 快訊重點</div>
+                    </div>
+                    
+                    <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px; scrollbar-width:none; border-bottom: 2px dashed rgba(255,255,255,0.1);" id="sp-tabs-container">
+                        ${tabsHtml}
                     </div>
                     
                     <style>
-                        /* ✨ 專屬高質感電競捲軸 */
                         .timeline-scroll-box::-webkit-scrollbar { width: 6px; }
                         .timeline-scroll-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
                         .timeline-scroll-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-                        .timeline-scroll-box::-webkit-scrollbar-thumb:hover { background: ${themeColor}; }
+                        .timeline-scroll-box::-webkit-scrollbar-thumb:hover { background: var(--event-accent); }
                     </style>
                     
-                    <div class="timeline-scroll-box" style="max-height: 480px; overflow-y: auto; padding-right: 15px; margin-right: -5px;">
-                        <div style="display: flex; flex-direction: column; gap: 20px; position: relative;">
-                            <div style="position: absolute; left: 14px; top: 10px; bottom: 10px; width: 2px; background: rgba(255,255,255,0.05); z-index: 1;"></div>
+                    <div class="timeline-scroll-box" id="sp-content-container" style="max-height: 480px; overflow-y: auto; padding-right: 10px;"></div>
+                </div>
                 `;
+            }
 
-                html += shortPostBuffer.map((n, idx) => {
-                    const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-                    const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                    const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
-                    const rawContent = getField(n, ['content', '內文', '內容']);
-                    const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                    const titleText = getField(n, ['title', '標題'], '無標題');
-                    const linkText = getField(n, ['link', '連結', '相關連結']);
+            // ==========================================
+            // 📜 渲染一般長篇新聞清單
+            // ==========================================
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
+            let standardHtml = standardList.map((n, index) => {
+                const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
+                const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
+                const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                const rawContent = getField(n, ['content', '內文', '內容']);
+                const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
+                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
+                const titleText = getField(n, ['title', '標題'], '無標題');
+                const dateText = getField(n, ['date', '日期'], '-');
 
-                    const showTitle = titleText && titleText !== '無標題' && !rawContent.startsWith(titleText);
+                const imgHtml = imgUrl 
+                    ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
+                    : `<div class="news-img-wrap" style="background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; text-align:center;">
+                           <div style="font-family:var(--sport-font); font-size:48px; font-weight:900; color:#252c36; line-height:1; letter-spacing:2px; transform:skewX(-10deg);">NEWS</div>
+                           <div style="font-size:13px; color:var(--text-sub); font-weight:900; margin-top:12px; letter-spacing:2px; border-bottom:2px dashed #252c36; padding-bottom:4px;">${tagText}</div>
+                       </div>`;
 
-                    return `
-                    <div style="position: relative; padding-left: 40px; z-index: 2;">
-                        <div style="position: absolute; left: 10px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: ${themeColor}; box-shadow: 0 0 8px ${themeColor};"></div>
-                        
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.1)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.05)';">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="font-size: 11px; color: ${themeColor}; font-weight: 900; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">⚡ ${tagText}</span>
-                                ${linkText ? `<a href="${linkText}" target="_blank" style="color: var(--text-sub); font-size: 11px; text-decoration: none; font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-sub)'">前往出處 🔗</a>` : ''}
+                return `
+                <div class="news-card" style="margin-bottom: 20px;" onclick="window.openNewsModal(${n._idx})">
+                    ${imgHtml}
+                    <div class="news-info-wrap">
+                        <div>
+                            <div class="news-header-meta">
+                                <span class="news-date">📅 ${dateText}</span>
+                                <span class="news-tag" style="color:${themeColor}; border-color:${themeColor};">${tagText}</span>
                             </div>
-                            
-                            ${showTitle ? `<div style="font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 8px; line-height: 1.3;">${titleText}</div>` : ''}
-                            
-                            <div style="font-size: 14px; color: #e2e8f0; line-height: 1.6; font-weight: 700; white-space: pre-wrap; word-break: break-word;">${rawContent}</div>
-                            
-                            ${imgUrl ? `<div style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;"><img src="${imgUrl}" loading="lazy" style="width: 100%; max-height: 300px; object-fit: contain; display: block; cursor: zoom-in;" onclick="window.openNewsModal(${n._idx})"></div>` : ''}
-                            
-                            <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
-                                <div style="font-size: 12px; color: var(--text-sub); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${themeColor}'" onmouseout="this.style.color='var(--text-sub)'" onclick="window.openNewsModal(${n._idx})">
-                                    <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> 點擊參與討論 / 留言
-                                </div>
-                            </div>
+                            <div class="news-title-text">${titleText}</div>
+                            <div class="news-summary-text">${summary}</div>
                         </div>
-                    </div>`;
-                }).join('');
-
-                html += `
+                        <div class="news-click-prompt" style="margin-top: 10px; color:${themeColor};">
+                            READ ARTICLE ➔
                         </div>
                     </div>
                 </div>`;
-                shortPostBuffer = []; // 清空緩衝區
-                return html;
-            };
+            }).join('');
 
-            // 依序處理每一篇情報
-            standardList.forEach((n, index) => {
-                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                const isShortPost = tagText.includes('快訊') || tagText.includes('動態') || tagText.toLowerCase().includes('threads') || tagText.includes('脆') || tagText.toLowerCase().includes('ig');
-                const dateText = getField(n, ['date', '日期'], '-');
+            // 組合全部 HTML
+            let html = heroHtml + shortPostWidgetHtml + `<div style="display:flex; flex-direction:column; gap:5px;">${standardHtml || (heroHtml || shortPostWidgetHtml ? '' : '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>')}</div>`;
 
-                if (isShortPost) {
-                    // 如果這篇是短文，檢查日期是否跟上一篇短文一樣
-                    if (currentShortDate !== dateText) {
-                        standardHtml += flushShortPosts(); // 日期換了，把前面的打包輸出
-                        currentShortDate = dateText;
-                    }
-                    shortPostBuffer.push(n); // 塞進緩衝區
-                } else {
-                    // 如果遇到一般長文，先把緩衝區裡的短文打包輸出
-                    standardHtml += flushShortPosts();
-                    currentShortDate = null;
-                    
-                    // --- 渲染一般長篇情報卡片 ---
-                    const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
-                    const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                    const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
-                    const rawContent = getField(n, ['content', '內文', '內容']);
-                    const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
-                    const titleText = getField(n, ['title', '標題'], '無標題');
-
-                    const imgHtml = imgUrl 
-                        ? `<div class="news-img-wrap"><img src="${imgUrl}" loading="lazy" onerror="this.parentNode.style.display='none';"></div>` 
-                        : `<div class="news-img-wrap" style="background: linear-gradient(135deg, #15191e 0%, #0a0c0f 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; text-align:center;">
-                               <div style="font-family:var(--sport-font); font-size:48px; font-weight:900; color:#252c36; line-height:1; letter-spacing:2px; transform:skewX(-10deg);">NEWS</div>
-                               <div style="font-size:13px; color:var(--text-sub); font-weight:900; margin-top:12px; letter-spacing:2px; border-bottom:2px dashed #252c36; padding-bottom:4px;">${tagText}</div>
-                           </div>`;
-
-                    standardHtml += `
-                    <div class="news-card" style="margin-bottom: 20px;" onclick="window.openNewsModal(${n._idx})">
-                        ${imgHtml}
-                        <div class="news-info-wrap">
-                            <div>
-                                <div class="news-header-meta">
-                                    <span class="news-date">📅 ${dateText}</span>
-                                    <span class="news-tag" style="color:${themeColor}; border-color:${themeColor};">${tagText}</span>
-                                </div>
-                                <div class="news-title-text">${titleText}</div>
-                                <div class="news-summary-text">${summary}</div>
-                            </div>
-                            <div class="news-click-prompt" style="margin-top: 10px; color:${themeColor};">
-                                READ ARTICLE ➔
-                            </div>
-                        </div>
-                    </div>`;
-                }
-            });
-            // 迴圈結束後，別忘了把最後緩衝區裡的東西輸出
-            standardHtml += flushShortPosts(); 
-
-            let html = heroHtml + `<div>${standardHtml || (heroHtml ? '' : '<div style="text-align:center; padding:50px; color:var(--text-sub); font-weight:700;">該分類目前沒有情報。</div>')}</div>`;
-
-            if (sortedNews.length > window.currentDisplayLimit) {
+            if (longPosts.length > window.currentDisplayLimit) {
                 html += `
                 <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="window.currentDisplayLimit += 10; renderNewsHub();" class="enter-btn" style="display: inline-flex; font-size: 15px; padding: 12px 30px;">
-                        查看更多歷史情報 LOAD MORE 🔽
+                    <button onclick="window.currentDisplayLimit += 10; window.renderNewsHub();" class="enter-btn" style="display: inline-flex; font-size: 15px; padding: 12px 30px;">
+                        查看更多歷史新聞 LOAD MORE 🔽
                     </button>
                 </div>`;
             }
 
             container.innerHTML = html;
+
+            // 畫面渲染完畢後，預設觸發點擊第一天（最新）的短動態分頁
+            if (window.shortPostDates.length > 0) {
+                setTimeout(() => { window.switchShortPostDate(window.shortPostDates[0], 0); }, 0);
+            }
+        };
+
+        // =========================================================================
+        // 🔄 社群時報：點擊日期分頁切換內容引擎
+        // =========================================================================
+        window.switchShortPostDate = function(dateStr, index) {
+            const posts = window.groupedShortPosts[dateStr] || [];
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#ff5722';
+            
+            // 處理標籤列的按鈕亮起狀態
+            window.shortPostDates.forEach((d, i) => {
+                let btn = document.getElementById(`sp-tab-${i}`);
+                if (btn) {
+                    if (i === index) {
+                        btn.style.background = themeColor;
+                        btn.style.color = '#000';
+                    } else {
+                        btn.style.background = 'rgba(255,255,255,0.05)';
+                        btn.style.color = 'var(--text-sub)';
+                    }
+                }
+            });
+
+            // 產生該日期的內容
+            let html = `
+            <div style="display: flex; flex-direction: column; gap: 20px; position: relative;">
+                <div style="position: absolute; left: 14px; top: 10px; bottom: 10px; width: 2px; background: rgba(255,255,255,0.05); z-index: 1;"></div>
+            `;
+
+            html += posts.map(n => {
+                const getF = (keys) => { for(let k of keys) { if(n[k]) return n[k].trim(); } return ''; };
+                const imgRaw = getF(['img', '圖片', '圖片網址']);
+                const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
+                const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                const rawContent = getF(['content', '內文', '內容']);
+                const tagText = getF(['tag', '標籤', '分類標籤', '分類']) || '情報';
+                const titleText = getF(['title', '標題']) || '無標題';
+                const linkText = getF(['link', '連結', '相關連結']);
+                const showTitle = titleText !== '無標題' && !rawContent.startsWith(titleText);
+
+                return `
+                <div style="position: relative; padding-left: 40px; z-index: 2;">
+                    <div style="position: absolute; left: 10px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: ${themeColor}; box-shadow: 0 0 8px ${themeColor};"></div>
+                    
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.1)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.05)';">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 11px; color: ${themeColor}; font-weight: 900; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">⚡ ${tagText}</span>
+                            ${linkText ? `<a href="${linkText}" target="_blank" style="color: var(--text-sub); font-size: 11px; text-decoration: none; font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-sub)'">前往出處 🔗</a>` : ''}
+                        </div>
+                        
+                        ${showTitle ? `<div style="font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 8px; line-height: 1.3;">${titleText}</div>` : ''}
+                        
+                        <div style="font-size: 14px; color: #e2e8f0; line-height: 1.6; font-weight: 700; white-space: pre-wrap; word-break: break-word;">${rawContent}</div>
+                        
+                        ${imgUrl ? `<div style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;"><img src="${imgUrl}" loading="lazy" style="width: 100%; max-height: 300px; object-fit: contain; display: block; cursor: zoom-in;" onclick="window.openNewsModal(${n._idx})"></div>` : ''}
+                        
+                        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                            <div style="font-size: 12px; color: var(--text-sub); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${themeColor}'" onmouseout="this.style.color='var(--text-sub)'" onclick="window.openNewsModal(${n._idx})">
+                                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> 參與討論
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            html += `</div>`;
+            
+            const contentBox = document.getElementById('sp-content-container');
+            if (contentBox) {
+                contentBox.innerHTML = html;
+                contentBox.scrollTop = 0; // 切換日期時自動捲回最上方
+            }
         };
 
         // =========================================================================
