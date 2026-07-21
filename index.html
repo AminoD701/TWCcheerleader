@@ -3412,9 +3412,9 @@
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為無限測試模式。正式賽期 8/1~8/30 每日限 3 票。';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為無限測試模式。正式賽期 8/1~8/30 每日限 5 票。';
                 else if (phase === 'closed') text = '<span style="color:#ff4757; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！';
-                else text = `<span style="color:#ffd700; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/1 ~ 8/30 (每日限 3 票) <span style="margin-left:8px; border-left:1px solid #444; padding-left:8px;">TODAY: ${todayVotes.length}/3</span>`;
+                else text = `<span style="color:#ffd700; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/1 ~ 8/30 (每日限 5 票) <span style="margin-left:8px; border-left:1px solid #444; padding-left:8px;">TODAY: ${todayVotes.length}/3</span>`;
                 
                 subtitleEl.innerHTML = text + `
                 <div style="margin-top: 15px;">
