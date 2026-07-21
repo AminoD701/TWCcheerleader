@@ -7485,13 +7485,24 @@ window.renderMinigameStart = function() {
             else if (currentMode === 'dreamteam') backText = '返回夢幻陣容';
 
             // ==========================================
-            // 📰 專屬情報新聞 (News) 聚合
+            // 📰 專屬情報新聞 (News) 聚合 (完美修復純英文綽號 ET / Planet 誤殺問題)
             // ==========================================
             let herNews = typeof dbNews !== 'undefined' ? dbNews.filter(n => {
-                let textToSearch = ((n.title||"") + " " + (n.content||"") + " " + (n.hashtags||"")).toLowerCase();
-                let matchReal = c.realname && textToSearch.includes(c.realname.toLowerCase());
-                let matchNick = c.nickname && c.nickname !== c.realname && textToSearch.includes(c.nickname.toLowerCase());
-                return matchReal || matchNick;
+                let textToSearch = ((n.title||"") + " " + (n.content||"") + " " + (n.hashtags||""));
+                
+                const checkMatch = (text, name) => {
+                    if (!name) return false;
+                    // 🛡️ 如果名字是純英文或數字 (例如 ET, Yuri, 17)
+                    if (/^[a-zA-Z0-9_]+$/.test(name)) {
+                        // 使用 \b 單字邊界，確保它是獨立單字 (忽略大小寫)
+                        const regex = new RegExp(`\\b${name}\\b`, 'i');
+                        return regex.test(text);
+                    }
+                    // 🛡️ 中文名字維持原本的精準包含比對
+                    return text.toLowerCase().includes(name.toLowerCase());
+                };
+
+                return checkMatch(textToSearch, c.realname) || checkMatch(textToSearch, c.nickname);
             }) : [];
 
             herNews.sort((a,b) => {
