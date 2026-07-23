@@ -5632,99 +5632,148 @@
             document.getElementById('event-container').innerHTML = html;
         };
         // =========================================================================
-        // 賽事專屬彈窗 (手機極致壓縮 vs 電腦大氣展示 雙棲版)
+        // 📅 外籍行程與賽事專屬彈窗 (左圖右文專業售票網排版)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
-            if(!e) return;
-            
-            const getField = (obj, keys) => {
+            if (!e) return;
+
+            const getField = (obj, keys, defaultVal = "") => {
                 for (let k of keys) { if (obj[k]) return obj[k].trim(); }
-                return "";
+                return defaultVal;
             };
-            const posterRaw = getField(e, ['海報', 'poster', '圖片', '活動圖片', 'img']);
-            const posterUrl = posterRaw ? window.getCdnUrl(posterRaw) : '';
+
+            const titleText = e.eventname || "專屬活動";
+            const hostText = e.host || "";
+            const dateText = e.safeDate ? `${e.safeDate.year}/${e.safeDate.month}/${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})` : "-";
+            const timeText = e.time || "TBA";
+            const addressText = e.address || "詳見官方公告";
+            const noteText = e.note || e.content || e['備註'] || "暫無詳細內容。";
             const linkRaw = getField(e, ['連結', 'link', '活動連結', 'ig', 'threads']);
             const linkUrl = linkRaw ? (linkRaw.startsWith('http') ? linkRaw : `https://${linkRaw}`) : '';
+            const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#00e676';
 
-            const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
-            const attendHtml = attendGirls.map(n => {
-                const g = girlMap.get(n);
-                const targetId = g ? g.uid : n;
-                // ✨ 使用 clamp()：手機版頭像小小的 (50px)，電腦版自動變大 (75px)
-                return `
-                <div class="girl-hero-card" onclick="window.openProfile('${targetId}')" style="width:clamp(65px, 12vw, 95px); padding: clamp(4px, 0.5vw, 8px); border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="girl-hero-img-wrap" style="width:clamp(50px, 9vw, 75px); height:clamp(50px, 9vw, 75px); box-shadow:none;">
-                        ${g?`<img src="${g.img}" class="girl-hero-img" loading="lazy">`:`<div class="girl-hero-img default-avatar"><svg viewBox="0 0 24 24"><use xlink:href="#icon-user"></use></svg></div>`}
+            // --- 🖼️ 處理左側圖片 (支援單圖或多圖輪播) ---
+            const imgRaw = getField(e, ['海報', 'poster', '圖片', '活動圖片', 'img']);
+            const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
+            
+            let mediaHtml = '';
+            if (imgUrls.length === 1) {
+                mediaHtml = `<img src="${window.getCdnUrl(imgUrls[0])}" style="width: 100%; border-radius: 12px; object-fit: contain; background: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); max-height: 70vh;">`;
+            } else if (imgUrls.length > 1) {
+                const sliderId = 'event-modal-slider-' + Math.random().toString(36).substr(2, 9);
+                const slides = imgUrls.map((u, i) => `
+                    <div style="flex: 0 0 100%; min-width: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000;">
+                        <img src="${window.getCdnUrl(u)}" style="width: 100%; max-height: 70vh; object-fit: contain;">
+                        <div style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.8); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:900; color:#fff;">${i+1} / ${imgUrls.length}</div>
                     </div>
-                    <div class="girl-hero-name-container">
-                        <span class="girl-hero-name" style="font-size:clamp(11px, 1.5vw, 14px);">${g?g.realname:n}</span>
-                    </div>
+                `).join('');
+                
+                mediaHtml = `
+                <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                    <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
+                    <div id="${sliderId}" style="display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; scroll-behavior:smooth;">${slides}</div>
+                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:-200, behavior:'smooth'})" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:5; font-weight:900; transition:0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❮</button>
+                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:200, behavior:'smooth'})" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:5; font-weight:900; transition:0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❯</button>
                 </div>`;
-            }).join('');
+            } else {
+                // 如果沒照片，給一個高質感的預設區塊
+                mediaHtml = `<div style="width:100%; aspect-ratio:3/4; background:linear-gradient(135deg, #15191e, #0a0c0f); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--text-sub); border: 1px dashed rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:48px;height:48px;opacity:0.3;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`;
+            }
 
-            const addressRaw = (e.address || "").trim();
-            const addressDisplay = addressRaw 
-                ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressRaw)}" target="_blank" style="color:var(--event-accent); text-decoration:none; border-bottom:1px dashed var(--event-accent); transition:0.2s;">${addressRaw}</a>`
-                : "請見官方公告";
+            // --- 👧 處理右側出席女孩頭像 ---
+            const attendGirls = (e.girls || "").split(/[,\s、，\n]+/).map(n => n.trim()).filter(n => n);
+            let girlsHtml = attendGirls.map(n => {
+                const g = girlMap.get(n);
+                let dName = n;
+                let imgH = `<div style="width:50px; height:50px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; border:2px solid var(--border-color); flex-shrink:0;"><svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
+                if(g) {
+                    const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
+                    dName = isLocal ? (g.nickname || g.realname) : g.realname;
+                    imgH = `<img src="${window.getCdnUrl(g.img)}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--border-color); flex-shrink:0; transition:0.2s;">`;
+                }
+                return `<div style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; width:65px; background: rgba(255,255,255,0.02); padding: 8px 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" onclick="window.openProfile('${g?g.uid:n}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.querySelector('img').style.borderColor='${themeColor}'; this.querySelector('img').style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; if(this.querySelector('img')) { this.querySelector('img').style.borderColor='var(--border-color)'; this.querySelector('img').style.transform='none'; }">
+                            ${imgH}
+                            <span style="font-size:12px; font-weight:900; color:#fff; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${dName}</span>
+                        </div>`;
+            }).join('');
 
             let key = 'event|' + e.safeDate.num + '|' + (e.eventname||"") + '|' + (e.girls||"");
             let isSaved = schedSet.has(key);
-            let dateStr = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
+            let dateStrForSave = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
-            // ✨ 修復：統一按鈕盒模型與排版屬性，移除干擾的 class，強制等高對齊
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStr}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'#15191e'}; color: #fff; border: 2px solid ${isSaved?'transparent':'#2d3748'}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
-            
-            let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='var(--event-accent)'; this.style.color='var(--event-accent)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : '';
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStrForSave}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'transparent'}; color: ${isSaved?'#fff':themeColor}; border: 2px solid ${isSaved?'transparent':themeColor}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.background='${isSaved?'#ff0044':themeColor}'; this.style.color='#000';">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
 
-            // ✨ 海報高度在手機版微調，讓出更多空間給下方資訊，並加上 flex-shrink: 0 嚴禁擠壓！
-            let posterSection = '';
-            if (posterUrl) {
-                posterSection = `
-                <div style="position: relative; width: 100%; height: clamp(200px, 35vh, 600px); background: #050505; overflow: hidden; border-bottom: 2px solid var(--event-accent); flex-shrink: 0;">
-                    <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${posterUrl}'); background-size: cover; background-position: center; filter: blur(15px) brightness(0.4); z-index: 1;"></div>
-                    <img src="${posterUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
-                </div>`;
-            }
-
-            document.documentElement.style.setProperty('--modal-accent', 'var(--event-accent)'); 
-
-            // ✨ 所有內部區塊都加上 flex-shrink: 0，並解除文字大小的過度壓縮！
+            // --- 🔧 組合最終 Modal HTML (導入 Flex 雙欄排版) ---
+            document.documentElement.style.setProperty('--modal-accent', themeColor); 
             document.getElementById('modal-dynamic-content').innerHTML = `
-                ${posterSection}
-                <div class="modal-body" style="padding: clamp(15px, 3vw, 25px); display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
+                <div class="modal-body" style="padding: 30px; background: #0a0c0f;">
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; flex-shrink: 0;">
-                        <div style="display: inline-block; background: var(--event-accent); color: #000; font-family: var(--sport-font); font-size: 13px; font-weight: 900; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; width: fit-content;">
-                            📅 ${e.safeDate.monStr} / ${String(e.safeDate.day).padStart(2,'0')} (${e.safeDate.week})
-                        </div>
-                        <div style="font-size: clamp(20px, 4vw, 26px); font-weight: 900; color: #fff; line-height: 1.3; word-break: break-word;">
-                            ${e.eventname || "賽事活動未定"}
-                        </div>
-                    </div>
-                    
-                    <div class="stats-grid" style="margin: 0; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); flex-shrink: 0;">
-                        <div class="stat-box" style="padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">時間 TIME</span><span class="stat-value" style="font-size:15px;">${e.time||"TBA"}</span></div>
-                        <div class="stat-box" style="padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">主辦 HOST</span><span class="stat-value" style="font-size:15px; font-family:var(--tc-font);">${e.host||"-"}</span></div>
-                        <div class="stat-box" style="grid-column: 1 / -1; border-top: 1px solid var(--border-color); border-bottom: none; border-right: none; padding: 12px 8px;"><span class="stat-label" style="margin-bottom:4px; font-size:11px;">地點 LOCATION</span><span class="stat-value" style="font-size:15px; font-family:var(--tc-font); line-height:1.4;">${addressDisplay}</span></div>
-                    </div>
+                    <style>
+                        /* ✨ 電腦版左圖右文，手機版自動變成上下排列 */
+                        .event-modal-layout { display: flex; flex-direction: row; gap: 35px; align-items: flex-start; }
+                        .event-modal-left { flex: 0 0 45%; max-width: 500px; position: sticky; top: 0; }
+                        .event-modal-right { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+                        
+                        @media (max-width: 768px) {
+                            .event-modal-layout { flex-direction: column; gap: 20px; }
+                            .event-modal-left { flex: none; width: 100%; max-width: 100%; position: static; }
+                        }
+                    </style>
 
-                    <div style="flex-shrink: 0; margin-top: 5px;">
-                        <div style="font-family:var(--sport-font); font-size:13px; font-weight:900; color:var(--text-sub); margin-bottom:8px; letter-spacing:1px;">✨ 出席名單 GIRLS</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                            ${attendHtml || '<div style="color:var(--text-sub); font-size:13px; font-weight:700;">名單確認中</div>'}
+                    <div class="event-modal-layout">
+                        
+                        <div class="event-modal-left">
+                            ${mediaHtml}
                         </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px; margin-top: auto; padding-top: 10px; flex-shrink: 0;">
-                        ${saveBtnHtml}
-                        ${linkBtnHtml}
+
+                        <div class="event-modal-right">
+                            
+                            <div style="margin-bottom: 25px;">
+                                ${hostText ? `<div style="font-size:14px; color:${themeColor}; font-weight:900; font-family:var(--tc-font); margin-bottom:8px; letter-spacing:1px;">${hostText}</div>` : ''}
+                                <div style="font-size:clamp(24px, 5vw, 32px); font-weight:900; color:#fff; line-height:1.3; margin-bottom:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${titleText}</div>
+                                
+                                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
+                                        📅 ${dateText}
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
+                                        ⏰ ${timeText}
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-size:13px; font-weight:700; color:#cbd5e1; border:1px solid rgba(255,255,255,0.05);">
+                                        📍 ${addressText}
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${girlsHtml ? `
+                            <div style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:20px; margin-bottom:25px;">
+                                <div style="font-size:13px; color:var(--text-sub); font-weight:900; margin-bottom:15px; letter-spacing:2px; display:flex; align-items:center; gap:6px;">
+                                    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
+                                    出席陣容
+                                </div>
+                                <div style="display:flex; flex-wrap:wrap; gap:12px;">${girlsHtml}</div>
+                            </div>` : ''}
+
+                            <div style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:20px; flex: 1;">
+                                <div style="font-size:13px; color:var(--text-sub); font-weight:900; margin-bottom:15px; letter-spacing:2px; display:flex; align-items:center; gap:6px;">
+                                    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    活動詳情
+                                </div>
+                                <div style="font-size:15px; color:#e2e8f0; line-height:1.7; font-weight:700; white-space:pre-wrap;">${noteText}</div>
+                            </div>
+
+                            <div style="display: flex; gap: 15px; margin-top: 30px; padding-top: 20px;">
+                                ${saveBtnHtml}
+                                ${linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='${themeColor}'; this.style.color='${themeColor}';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : ''}
+                            </div>
+                            
+                        </div>
                     </div>
                 </div>
             `;
-
             document.getElementById('girl-modal').classList.add('active');
-            document.body.classList.add('no-scroll'); 
+            document.body.classList.add('no-scroll');
         };
 
         // =========================================================================
