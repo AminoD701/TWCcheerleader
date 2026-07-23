@@ -5632,7 +5632,7 @@
             document.getElementById('event-container').innerHTML = html;
         };
         // =========================================================================
-        // 📅 外籍行程與賽事專屬彈窗 (左圖右文專業售票網排版)
+        // 📅 外籍行程與賽事專屬彈窗 (左圖右文專業售票網排版 - 畫框鎖定＋精緻按鈕版)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
@@ -5653,32 +5653,39 @@
             const linkUrl = linkRaw ? (linkRaw.startsWith('http') ? linkRaw : `https://${linkRaw}`) : '';
             const themeColor = document.documentElement.style.getPropertyValue('--event-accent') || '#00e676';
 
-            // --- 🖼️ 處理左側圖片 (支援單圖或多圖輪播) ---
+            // --- 🖼️ 處理左側圖片 (畫框強制鎖定 3:4 比例，搭配毛玻璃背景填充) ---
             const imgRaw = getField(e, ['海報', 'poster', '圖片', '活動圖片', 'img']);
             const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
             
             let mediaHtml = '';
             if (imgUrls.length === 1) {
-                mediaHtml = `<img src="${window.getCdnUrl(imgUrls[0])}" style="width: 100%; border-radius: 12px; object-fit: contain; background: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); max-height: 70vh;">`;
+                const imgClean = window.getCdnUrl(imgUrls[0]);
+                mediaHtml = `
+                <div style="position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: #050505; display: flex; align-items: center; justify-content: center;">
+                    <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgClean}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
+                    <img src="${imgClean}" style="position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
+                </div>`;
             } else if (imgUrls.length > 1) {
                 const sliderId = 'event-modal-slider-' + Math.random().toString(36).substr(2, 9);
-                const slides = imgUrls.map((u, i) => `
-                    <div style="flex: 0 0 100%; min-width: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000;">
-                        <img src="${window.getCdnUrl(u)}" style="width: 100%; max-height: 70vh; object-fit: contain;">
-                        <div style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.8); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:900; color:#fff;">${i+1} / ${imgUrls.length}</div>
-                    </div>
-                `).join('');
+                const slides = imgUrls.map((u, i) => {
+                    const imgClean = window.getCdnUrl(u);
+                    return `
+                    <div style="flex: 0 0 100%; min-width: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #050505; overflow: hidden;">
+                        <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgClean}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
+                        <img src="${imgClean}" style="position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2;">
+                        <div style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.8); padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 900; color: #fff; z-index: 5; font-family: var(--sport-font); border: 1px solid rgba(255,255,255,0.2);">${i+1} / ${imgUrls.length}</div>
+                    </div>`;
+                }).join('');
                 
                 mediaHtml = `
-                <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                <div style="position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
                     <style>#${sliderId}::-webkit-scrollbar { display: none; }</style>
-                    <div id="${sliderId}" style="display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; scroll-behavior:smooth;">${slides}</div>
-                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:-200, behavior:'smooth'})" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:5; font-weight:900; transition:0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❮</button>
-                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:200, behavior:'smooth'})" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:50%; width:36px; height:36px; cursor:pointer; z-index:5; font-weight:900; transition:0.2s;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❯</button>
+                    <div id="${sliderId}" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; width: 100%; height: 100%;">${slides}</div>
+                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:-200, behavior:'smooth'})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: 900; transition: 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❮</button>
+                    <button onclick="document.getElementById('${sliderId}').scrollBy({left:200, behavior:'smooth'})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: 900; transition: 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='${themeColor}'; this.style.color='#000';">❯</button>
                 </div>`;
             } else {
-                // 如果沒照片，給一個高質感的預設區塊
-                mediaHtml = `<div style="width:100%; aspect-ratio:3/4; background:linear-gradient(135deg, #15191e, #0a0c0f); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--text-sub); border: 1px dashed rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:48px;height:48px;opacity:0.3;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`;
+                mediaHtml = `<div style="width: 100%; aspect-ratio: 3 / 4; background: linear-gradient(135deg, #15191e, #0a0c0f); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-sub); border: 1px dashed rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" style="width:48px;height:48px;opacity:0.3;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`;
             }
 
             // --- 👧 處理右側出席女孩頭像 ---
@@ -5686,15 +5693,15 @@
             let girlsHtml = attendGirls.map(n => {
                 const g = girlMap.get(n);
                 let dName = n;
-                let imgH = `<div style="width:50px; height:50px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; border:2px solid var(--border-color); flex-shrink:0;"><svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
+                let imgH = `<div style="width:45px; height:45px; border-radius:50%; background:#252c36; display:flex; align-items:center; justify-content:center; border:2px solid var(--border-color); flex-shrink:0;"><svg viewBox="0 0 24 24" style="width:20px; height:20px; stroke:#6a7a90; stroke-width:2; fill:none;"><use xlink:href="#icon-user"></use></svg></div>`;
                 if(g) {
                     const isLocal = (g.nat || "").includes("台") || (g.nat || "").includes("臺") || (g.nat || "").includes("港") || (g.nat || "").includes("馬");
                     dName = isLocal ? (g.nickname || g.realname) : g.realname;
-                    imgH = `<img src="${window.getCdnUrl(g.img)}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--border-color); flex-shrink:0; transition:0.2s;">`;
+                    imgH = `<img src="${window.getCdnUrl(g.img)}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; object-position:top center; border:2px solid var(--border-color); flex-shrink:0; transition:0.2s;">`;
                 }
-                return `<div style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; width:65px; background: rgba(255,255,255,0.02); padding: 8px 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" onclick="window.openProfile('${g?g.uid:n}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.querySelector('img').style.borderColor='${themeColor}'; this.querySelector('img').style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; if(this.querySelector('img')) { this.querySelector('img').style.borderColor='var(--border-color)'; this.querySelector('img').style.transform='none'; }">
+                return `<div style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; width:60px; background: rgba(255,255,255,0.02); padding: 8px 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);" onclick="window.openProfile('${g?g.uid:n}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.querySelector('img').style.borderColor='${themeColor}'; this.querySelector('img').style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; if(this.querySelector('img')) { this.querySelector('img').style.borderColor='var(--border-color)'; this.querySelector('img').style.transform='none'; }">
                             ${imgH}
-                            <span style="font-size:12px; font-weight:900; color:#fff; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${dName}</span>
+                            <span style="font-size:11px; font-weight:900; color:#fff; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${dName}</span>
                         </div>`;
             }).join('');
 
@@ -5702,17 +5709,18 @@
             let isSaved = schedSet.has(key);
             let dateStrForSave = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStrForSave}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: ${isSaved?'var(--fav-accent)':'transparent'}; color: ${isSaved?'#fff':themeColor}; border: 2px solid ${isSaved?'transparent':themeColor}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.background='${isSaved?'#ff0044':themeColor}'; this.style.color='#000';">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
+            // ✨ 將按鈕尺寸縮小 (height: 36px, font-size: 13px)
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStrForSave}', '${e.eventname||"外籍行程"}', event, this);" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 36px; font-weight: 900; font-size: 13px; background: ${isSaved?'var(--fav-accent)':'transparent'}; color: ${isSaved?'#fff':themeColor}; border: 1px solid ${isSaved?'transparent':themeColor}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.background='${isSaved?'#ff0044':themeColor}'; this.style.color='#000';">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
 
-            // --- 🔧 組合最終 Modal HTML (導入 Flex 雙欄排版) ---
+            // --- 🔧 組合最終 Modal HTML ---
             document.documentElement.style.setProperty('--modal-accent', themeColor); 
             document.getElementById('modal-dynamic-content').innerHTML = `
                 <div class="modal-body" style="padding: 30px; background: #0a0c0f;">
                     
                     <style>
-                        /* ✨ 電腦版左圖右文，手機版自動變成上下排列 */
-                        .event-modal-layout { display: flex; flex-direction: row; gap: 35px; align-items: flex-start; }
-                        .event-modal-left { flex: 0 0 45%; max-width: 500px; position: sticky; top: 0; }
+                        /* ✨ 強制鎖定左側圖片區寬度最大值為 50%，保證圖片夠大 */
+                        .event-modal-layout { display: flex; flex-direction: row; gap: 30px; align-items: flex-start; }
+                        .event-modal-left { flex: 0 0 50%; max-width: 480px; position: sticky; top: 0; }
                         .event-modal-right { flex: 1; min-width: 0; display: flex; flex-direction: column; }
                         
                         @media (max-width: 768px) {
@@ -5731,16 +5739,16 @@
                             
                             <div style="margin-bottom: 25px;">
                                 ${hostText ? `<div style="font-size:14px; color:${themeColor}; font-weight:900; font-family:var(--tc-font); margin-bottom:8px; letter-spacing:1px;">${hostText}</div>` : ''}
-                                <div style="font-size:clamp(24px, 5vw, 32px); font-weight:900; color:#fff; line-height:1.3; margin-bottom:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${titleText}</div>
+                                <div style="font-size:clamp(22px, 4vw, 28px); font-weight:900; color:#fff; line-height:1.3; margin-bottom:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${titleText}</div>
                                 
-                                <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
                                         📅 ${dateText}
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:6px; font-family:var(--sport-font); font-size:13px; font-weight:900; color:#fff; border:1px solid rgba(255,255,255,0.05);">
                                         ⏰ ${timeText}
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:8px 14px; border-radius:6px; font-size:13px; font-weight:700; color:#cbd5e1; border:1px solid rgba(255,255,255,0.05);">
+                                    <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:6px; font-size:13px; font-weight:700; color:#cbd5e1; border:1px solid rgba(255,255,255,0.05);">
                                         📍 ${addressText}
                                     </div>
                                 </div>
@@ -5752,7 +5760,7 @@
                                     <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> 
                                     出席陣容
                                 </div>
-                                <div style="display:flex; flex-wrap:wrap; gap:12px;">${girlsHtml}</div>
+                                <div style="display:flex; flex-wrap:wrap; gap:10px;">${girlsHtml}</div>
                             </div>` : ''}
 
                             <div style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:20px; flex: 1;">
@@ -5763,9 +5771,9 @@
                                 <div style="font-size:15px; color:#e2e8f0; line-height:1.7; font-weight:700; white-space:pre-wrap;">${noteText}</div>
                             </div>
 
-                            <div style="display: flex; gap: 15px; margin-top: 30px; padding-top: 20px;">
+                            <div style="display: flex; gap: 10px; margin-top: 30px; padding-top: 20px;">
                                 ${saveBtnHtml}
-                                ${linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 45px; font-weight: 900; font-size: clamp(13px, 1.5vw, 15px); background: #1a1e24; color: #fff; border: 2px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='${themeColor}'; this.style.color='${themeColor}';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : ''}
+                                ${linkUrl ? `<a href="${linkUrl}" target="_blank" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 36px; font-weight: 900; font-size: 13px; background: #1a1e24; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='${themeColor}'; this.style.color='${themeColor}';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : ''}
                             </div>
                             
                         </div>
@@ -5775,7 +5783,6 @@
             document.getElementById('girl-modal').classList.add('active');
             document.body.classList.add('no-scroll');
         };
-
         // =========================================================================
         // 🎮 殘酷二選一 (Minigame) 遊戲引擎
         // =========================================================================
