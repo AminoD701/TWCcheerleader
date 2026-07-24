@@ -42,7 +42,7 @@
       gtag('config', 'G-19L6EYRWKE');
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@400;700;900&display=swap');
@@ -78,9 +78,10 @@
         .sports-bg-slider::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--theme-glow, #333) 40%, transparent) 0%, transparent 70%); z-index: 3; pointer-events: none; transition: background 0.5s ease; }
         
         .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; filter: grayscale(30%) contrast(110%); animation: slideFade 24s infinite; z-index: 1; }
-        .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } 
-        .slide-2 { background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2000&auto=format&fit=crop'); animation-delay: 8s; } 
-        .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } 
+        /* 🌟 將 w=2000 降至 w=1080，大幅減少圖片檔案大小 */
+        .slide-1 { background-image: url('https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=1080&auto=format&fit=crop'); animation-delay: 0s; } 
+        .slide-2 { background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1080&auto=format&fit=crop'); animation-delay: 8s; } 
+        .slide-3 { background-image: url('https://images.unsplash.com/photo-1593787406536-369656f37fb2?q=80&w=1080&auto=format&fit=crop'); animation-delay: 16s; } 
         @keyframes slideFade { 0% { opacity: 0; transform: scale(1.05); } 10% { opacity: 0.4; transform: scale(1); } 33% { opacity: 0.4; transform: scale(1); } 43% { opacity: 0; transform: scale(1.05); } 100% { opacity: 0; } }
 
         .landing-page { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505 radial-gradient(circle at center, #1a1a24 0%, #050505 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; transition: opacity 0.5s ease; }
