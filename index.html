@@ -1831,7 +1831,7 @@
     <main id="main-content">
         <div class="marquee-wrapper" onclick="window.setMode('vote')" title="點擊前往第二屆應援大賞！">
             <div class="marquee-content">
-                🏆【第二屆·台港馬人氣大賞】將於 8/1 ~ 8/30 正式引爆！🔥 <span class="marquee-highlight">目前為全網測試階段</span>，快點擊此處前往【應援大賞 VOTE】搶先為你的本命女孩投票護盤！👑
+                🏆【第二屆·台港馬人氣大賞】將於 8/5 ~ 9/5 正式引爆！🔥 <span class="marquee-highlight">目前為全網測試階段</span>，快點擊此處前往【應援大賞 VOTE】搶先為你的本命女孩投票護盤！👑
             </div>
         </div>
         <div class="grid-container" id="grid-container"></div>
@@ -3387,8 +3387,8 @@
 
             // --- ✨ 2. 日期狀態與副標題更新 (去除 Emoji) ---
             const now = new Date();
-            const officialStart = new Date('2026-08-01T00:00:00+08:00'); 
-            const officialEnd = new Date('2026-08-30T23:59:59+08:00');
+            const officialStart = new Date('2026-08-05T00:00:00+08:00'); // 🌟 更新開始日
+            const officialEnd = new Date('2026-09-05T23:59:59+08:00');   // 🌟 更新結束日
             
             let phase = 'testing';
             if (now > officialEnd) phase = 'closed';
@@ -3405,7 +3405,7 @@
                     const parsed = JSON.parse(savedData);
                     if (parsed.date === todayStr) todayVotes = parsed.uids || [];
                 }
-                if (todayVotes.length >= 3) isCategoryLocked = true;
+                if (todayVotes.length >= 5) isCategoryLocked = true; // 🌟 從 3 改為 5
             } else if (phase === 'closed') {
                 isCategoryLocked = true; 
             }
@@ -3413,9 +3413,9 @@
             const subtitleEl = document.getElementById('vote-subtitle-box');
             if (subtitleEl) {
                 let text = '';
-                if (phase === 'testing') text = '<span style="color:#00e676; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為無限測試模式。正式賽期 8/1~8/30 每日限 5 票。';
+                if (phase === 'testing') text = '<span style="color:#00e676; font-family:var(--sport-font);">[ TESTING ]</span> 第二屆籌備中，目前為無限測試模式。正式賽期 8/5~9/5 每日限 5 票。';
                 else if (phase === 'closed') text = '<span style="color:#ff4757; font-family:var(--sport-font);">[ CLOSED ]</span> 本活動已圓滿結束！';
-                else text = `<span style="color:#ffd700; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/1 ~ 8/30 (每日限 5 票) <span style="margin-left:8px; border-left:1px solid #444; padding-left:8px;">TODAY: ${todayVotes.length}/3</span>`;
+                else text = `<span style="color:#ffd700; font-family:var(--sport-font);">[ OFFICIAL ]</span> 正式賽期：8/5 ~ 9/5 (每日限 5 票) <span style="margin-left:8px; border-left:1px solid #444; padding-left:8px;">TODAY: ${todayVotes.length}/5</span>`; // 🌟 字樣更新
                 
                 subtitleEl.innerHTML = text + `
                 <div style="margin-top: 15px;">
@@ -3652,11 +3652,11 @@
             }
         };
 
-        // ✨ 終極修復版：測試模式下完全解除「重複投票」與「每日3票」限制，防 IP 阻擋！
+        // ✨ 終極修復版：測試模式下完全解除限制，正式版套用每日 5 票與 IP 鎖！
         window.submitVote = function(uid, name, categoryKey) {
             const now = new Date();
-            const officialStart = new Date('2026-08-01T00:00:00+08:00');
-            const officialEnd = new Date('2026-08-30T23:59:59+08:00');
+            const officialStart = new Date('2026-08-05T00:00:00+08:00'); // 🌟 更新
+            const officialEnd = new Date('2026-09-05T23:59:59+08:00');   // 🌟 更新
             let phase = 'testing';
             if (now > officialEnd) phase = 'closed';
             else if (now >= officialStart) phase = 'official';
@@ -3684,8 +3684,8 @@
                 
                 const localIPVotes = parseInt(localStorage.getItem('cheer_ip_count_' + window.clientIP + '_' + todayStr)) || 0;
                 
-                if (todayVotes.length >= 3 || localIPVotes >= 3) {
-                    alert("⚠️ 系統偵測到您的網路 IP 今日的 3 票已經全部用完囉！請明天再來為女孩應援！");
+                if (todayVotes.length >= 5 || localIPVotes >= 5) { // 🌟 限制提升為 5 票，且防範同 IP 灌票
+                    alert("⚠️ 系統偵測到您的網路 IP 今日的 5 票已經全部用完囉！請明天再來為女孩應援！");
                     return;
                 }
                 if (todayVotes.includes(uid)) {
@@ -3697,7 +3697,7 @@
             // 彈出確認視窗
             const confirmMsg = phase === 'testing' 
                 ? `🛠️ 【測試模式】\n您確定要把票投給【${name}】嗎？\n(測試模式可無限重複投票測試！)`
-                : `⚠️ 【投票確認】\n您確定要把 1 票投給【${name}】嗎？\n(今日剩餘票數：${2 - todayVotes.length} 票)`;
+                : `⚠️ 【投票確認】\n您確定要把 1 票投給【${name}】嗎？\n(今日剩餘票數：${4 - todayVotes.length} 票)`; // 🌟 顯示正確剩餘票數
             
             if (!confirm(confirmMsg)) return;
 
@@ -3731,7 +3731,7 @@
             if (phase === 'testing') {
                 alert(`✅ [全網連線測試] 應援成功！\n測試選票已成功灌入雲端伺服器！`);
             } else {
-                alert(`🎉 應援連線成功！\n您已成功把票投給【${name}】！\n今日剩餘 ${3 - todayVotes.length} 票！`);
+                alert(`🎉 應援連線成功！\n您已成功把票投給【${name}】！\n今日剩餘 ${5 - todayVotes.length} 票！`); // 🌟 此處的 todayVotes.length 已經包含了剛剛投出的一票
             }
             
             window.renderVoteGrid();
