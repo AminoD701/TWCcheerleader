@@ -3510,7 +3510,7 @@
                 }
             }
 
-            // --- ✨ 5. 隨機探索 ‧ 今日推薦引擎 (絕對等高防破版) ---
+            // --- ✨ 5. 隨機探索 ‧ 今日推薦引擎 (終極手機正方形鎖定防破版) ---
             let recommendContainer = document.getElementById('vote-recommend-container');
             if (!recommendContainer) {
                 recommendContainer = document.createElement('div');
@@ -3542,7 +3542,6 @@
                             const dName = g.nickname || g.realname;
                             
                             let btnHtml = '';
-                            // 縮減按鈕文字，避免在手機小螢幕上折行撐開高度
                             if (phase === 'closed') {
                                 btnHtml = `<button class="vote-btn-disabled" style="background:rgba(255,255,255,0.05); color:#666; border:1px solid #444; width:100%; padding:8px 2px; border-radius:4px; font-size:10px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:not-allowed;" onclick="event.stopPropagation();">CLOSED</button>`;
                             } else if (phase === 'official') {
@@ -3557,17 +3556,19 @@
                                 btnHtml = `<button class="vote-btn-active" onclick="event.stopPropagation(); window.submitVote('${g.uid}', '${dName}', '${currentCatKey}')" style="background:transparent; color:#00e676; border:1px dashed #00e676; width:100%; padding:8px 2px; border-radius:4px; font-size:11px; font-family:var(--sport-font); font-weight:900; margin-top:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#00e676'; this.style.color='#000';">TEST</button>`;
                             }
 
-                            // ✨ 卡片本體採用 Flex 排版，絕對撐滿 100% 空間，內部佈局自動對齊底端
                             return `
-                            <div class="vote-card" style="padding: 10px; border: 1px solid rgba(255,255,255,0.05); background: #111418; border-radius: 6px; box-shadow: none; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='#00e676';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)';">
-                                <div class="vote-img-box" style="margin: 0 auto 8px; border: 1px solid #333; border-radius: 4px; box-shadow: none; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; flex-shrink: 0; background: #222;">
-                                    <img src="${window.getCdnUrl(g.img)}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/150'">
+                            <div class="vote-card" style="padding: 10px; border: 1px solid rgba(255,255,255,0.05); background: #111418; border-radius: 6px; box-shadow: none; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; min-width: 0;" onclick="window.openProfile('${g.uid}')" onmouseover="this.style.borderColor='#00e676';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)';">
+                                
+                                <div class="vote-img-box" style="position: relative; margin: 0 auto 8px; border: 1px solid #333; border-radius: 4px; width: 100%; padding-bottom: 100%; overflow: hidden; flex-shrink: 0; background: #222; box-shadow: none;">
+                                    <img src="${window.getCdnUrl(g.img)}" loading="lazy" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center;" onerror="this.src='https://via.placeholder.com/150'">
                                 </div>
-                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; width: 100%;">
+                                
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; width: 100%; min-width: 0;">
                                     <div style="font-size: clamp(12px, 3.5vw, 14px); font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${dName}</div>
                                     <div style="font-size: clamp(9px, 2.5vw, 10px); font-weight: 700; color: var(--text-sub); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-bottom: auto;">${g.combinedTeam || "自由嬌點"}</div>
                                     ${btnHtml}
                                 </div>
+                                
                             </div>`;
                         }).join('')}
                     </div>
