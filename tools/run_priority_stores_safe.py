@@ -10,14 +10,35 @@ from pathlib import Path
 
 import fetch_priority_store_events as core
 
-TIMEOUT_SECONDS = 45
+TIMEOUT_SECONDS = 35
+HTTP_TIMEOUT_SECONDS = 25
 MAX_WORKERS = 8
+
+
+def fast_apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
+    """Hard-limit every Apify sync request used by the priority-store crawler."""
+    actor_id = actor.replace("/", "~")
+    quoted = core.base.urllib.parse.quote(token)
+    url = (
+        f"https://api.apify.com/v2/acts/{actor_id}/run-sync-get-dataset-items"
+        f"?token={quoted}&clean=true&timeout={HTTP_TIMEOUT_SECONDS}"
+    )
+    result = core.base.http_json(url, payload=payload, timeout=HTTP_TIMEOUT_SECONDS)
+    return result if isinstance(result, list) else []
+
+
+# Patch every route used by the dedicated store crawler, including fallback fetchers.
+core.base.apify_sync = fast_apify_sync
+core.legacy.base.apify_sync = fast_apify_sync
+if hasattr(core.legacy, "platform"):
+    core.legacy.platform.apify_sync = fast_apify_sync
 
 
 def worker(platform_name: str, account: str, output_path: str) -> int:
     token = os.environ.get("APIFY_TOKEN", "").strip()
     if not token:
         Path(output_path).write_text("[]\n", encoding="utf-8")
+        print(f"WORKER {platform_name} @{account}: APIFY_TOKEN missing")
         return 0
 
     girls = core.base.load_girls()
@@ -104,7 +125,10 @@ def main() -> None:
         for platform_name in ("instagram", "threads")
     ]
 
-    print(f"START parallel priority crawl: jobs={len(jobs)} timeout={TIMEOUT_SECONDS}s")
+    print(
+        f"START parallel priority crawl: jobs={len(jobs)} "
+        f"worker_timeout={TIMEOUT_SECONDS}s http_timeout={HTTP_TIMEOUT_SECONDS}s"
+    )
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_map = {
             executor.submit(run_one, platform_name, account): (platform_name, account)
