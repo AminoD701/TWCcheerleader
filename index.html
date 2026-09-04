@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v26";
+        const CACHE_KEY = "tw_cheerleader_cache_v27";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2043,8 +2043,22 @@
                         dbThemes = parsed.dbThemes || []; 
                         
                         if (dbGirls.length > 0) {
+                            // 即使其他資料使用 1 小時快取，新聞仍重新抓最新 auto-news，避免畫面停在舊月份。
+                            try {
+                                const autoNewsData = await fetch(`data/auto-news.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []);
+                                if (Array.isArray(autoNewsData) && autoNewsData.length > 0) {
+                                    const manualCached = (dbNews || []).filter(n => !n.auto);
+                                    const newsSeen = new Set();
+                                    dbNews = [...manualCached, ...autoNewsData].filter(n => {
+                                        const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
+                                        if (!key || newsSeen.has(key)) return false;
+                                        newsSeen.add(key);
+                                        return true;
+                                    });
+                                }
+                            } catch(e) {}
                             buildGirlMap(); init(); enableEnterButton(); 
-                            return; // ✨ 移除了會導致黑屏的錯誤自動淡出代碼
+                            return;
                         }
                     }
                 }
