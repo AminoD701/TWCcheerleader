@@ -2114,15 +2114,8 @@
                 });
                 dbSchedules = flat;
 
-                const manualNews = newsData.filter(n => n.title);
-                const automaticNews = Array.isArray(autoNewsData) ? autoNewsData.filter(n => n.title) : [];
-                const newsSeen = new Set();
-                dbNews = [...manualNews, ...automaticNews].filter(n => {
-                    const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
-                    if (!key || newsSeen.has(key)) return false;
-                    newsSeen.add(key);
-                    return true;
-                });
+                // dbNews already merged above; do not redeclare const variables here.
+
                 if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
 
                 buildGirlMap(); 
