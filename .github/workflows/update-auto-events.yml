@@ -1,0 +1,35 @@
+name: Update automatic public events
+
+on:
+  schedule:
+    - cron: '15 22 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/fetch_auto_events.py'
+      - '.github/workflows/update-auto-events.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install event URL decoder
+        run: pip install googlenewsdecoder
+      - name: Fetch latest public events
+        run: python tools/fetch_auto_events.py
+      - name: Commit updated events
+        run: |
+          git add data/auto-events.json
+          if git diff --cached --quiet; then
+            echo "No event changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Auto update public cheerleader events"
+          git push
