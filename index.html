@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v28";
+        const CACHE_KEY = "tw_cheerleader_cache_v29";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2028,6 +2028,41 @@
             });
         }
 
+        window.refreshLatestNews = async function(forceRender = false) {
+            if (window.__newsRefreshInFlight) return;
+            window.__newsRefreshInFlight = true;
+            try {
+                const nt = Date.now();
+                const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
+                const [freshManualNews, freshAutoNews] = await Promise.all([
+                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
+                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+                        .then(r => r.ok ? r.json() : []).catch(() => [])
+                ]);
+                const seen = new Set();
+                const merged = [
+                    ...(Array.isArray(freshManualNews) ? freshManualNews.filter(n => n.title) : []),
+                    ...(Array.isArray(freshAutoNews) ? freshAutoNews.filter(n => n.title) : [])
+                ].filter(n => {
+                    const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
+                    if (!key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+                if (merged.length) {
+                    dbNews = merged;
+                    window.__newsLastRefresh = Date.now();
+                    if (forceRender && currentMode === 'news' && typeof window.renderNewsHub === 'function') {
+                        window.renderNewsHub(true);
+                    }
+                }
+            } catch (e) {
+                console.warn('Live news refresh failed', e);
+            } finally {
+                window.__newsRefreshInFlight = false;
+            }
+        };
+
         async function loadData() {
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
@@ -2038,7 +2073,8 @@
                         dbGirls = parsed.dbGirls || []; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
-                        dbNews = parsed.dbNews || []; 
+                        dbNews = []; // news is never trusted from localStorage
+
                         dbMatches = parsed.dbMatches || []; 
                         dbThemes = parsed.dbThemes || []; 
                         
@@ -2050,7 +2086,7 @@
                                 const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
                                 const [freshManualNews, freshAutoNews] = await Promise.all([
                                     fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
-                                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
+                                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
                                 ]);
 
                                 const newsSeen = new Set();
@@ -2087,7 +2123,7 @@
                     fetchCSV(`${baseUrl}&gid=417186374&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=92509162&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=547736461&t=${t}`),
-                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
+                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
 
                 dbGirls = girlsData.filter(i => i.realname);
@@ -6500,8 +6536,11 @@ window.renderMinigameStart = function() {
         // =========================================================================
         // 📰 最新情報牆核心渲染引擎 2.0 (長篇新聞 + 專屬日期分頁微動態模組)
         // =========================================================================
-        window.renderNewsHub = function() {
+        window.renderNewsHub = function(skipRefresh = false) {
             const container = document.getElementById('news-container');
+            if (!skipRefresh && (!window.__newsLastRefresh || Date.now() - window.__newsLastRefresh > 15000)) {
+                window.refreshLatestNews(true);
+            }
             
             if (!dbNews || dbNews.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-size:18px; font-weight:700;">目前教練室尚未發布任何情報 📝</div>`;
@@ -6590,7 +6629,7 @@ window.renderMinigameStart = function() {
                 let heroCards = heroList.map((n, index) => {
                     const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
                     const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                    const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                    const imgUrl = imgUrls.length > 0 ? (/^https?:\/\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0])) : '';
                     const rawContent = getField(n, ['content', '內文', '內容']);
                     const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                     const titleText = getField(n, ['title', '標題'], '無標題');
@@ -6685,7 +6724,7 @@ window.renderMinigameStart = function() {
             let standardHtml = standardList.map((n, index) => {
                 const imgRaw = getField(n, ['img', '圖片', '圖片網址']);
                 const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                const imgUrl = imgUrls.length > 0 ? (/^https?:\/\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0])) : '';
                 const rawContent = getField(n, ['content', '內文', '內容']);
                 const summary = rawContent ? (rawContent.slice(0, 65) + '...') : '';
                 const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
@@ -6769,7 +6808,7 @@ window.renderMinigameStart = function() {
                 const getF = (keys) => { for(let k of keys) { if(n[k]) return n[k].trim(); } return ''; };
                 const imgRaw = getF(['img', '圖片', '圖片網址']);
                 const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                const imgUrl = imgUrls.length > 0 ? (/^https?:\/\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0])) : '';
                 const rawContent = getF(['content', '內文', '內容']);
                 const tagText = getF(['tag', '標籤', '分類標籤', '分類']) || '情報';
                 const titleText = getF(['title', '標題']) || '無標題';
@@ -7612,7 +7651,7 @@ window.renderMinigameStart = function() {
                 newsHtml = herNews.map(n => {
                     const imgRaw = n.img || n['圖片'] || n['圖片網址'];
                     const imgUrls = imgRaw ? imgRaw.split(/[,，\s\n|]+/).filter(u => u.trim() !== '') : [];
-                    const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';
+                    const imgUrl = imgUrls.length > 0 ? (/^https?:\/\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0])) : '';
                     const summary = n.content ? (n.content.slice(0, 45) + '...') : '';
                     const bgStyle = imgUrl ? `background-image: url('${imgUrl}');` : `background: #15191e;`;
                     
