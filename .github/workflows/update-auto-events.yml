@@ -17,7 +17,7 @@ on:
       - '.github/workflows/update-auto-events.yml'
 
 concurrency:
-  group: update-automatic-public-events
+  group: auto-events
   cancel-in-progress: true
 
 permissions:
@@ -31,15 +31,12 @@ jobs:
       APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - name: Refresh four priority public-event stores safely
-        continue-on-error: true
-        timeout-minutes: 7
+      - name: Crawl four priority stores (Instagram and Threads)
+        timeout-minutes: 8
         run: python tools/run_priority_stores_safe.py
-      - name: Deduplicate preserved public events
-        if: always()
+      - name: Deduplicate automatic public events
         run: python tools/dedupe_auto_events.py
       - name: Commit updated events
-        if: always()
         run: |
           git add data/auto-events.json
           if git diff --cached --quiet; then
