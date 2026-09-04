@@ -92,13 +92,13 @@ def fetch_threads(token: str, accounts: list[str], explicit: list[dict]) -> list
         return platform.fetch_threads(token, accounts, explicit)
 
 
-# ---- Store-specific parser: silbi_house / 全州喜比食堂 -----------------------
-# Their standard copy is highly structured, so use deterministic rules instead of
-# the generic heuristic parser.
+# ---- Store-specific parsers -------------------------------------------------
 _original_primary_girls = platform.primary_girls_for_row
 _original_strict_event_date = platform.strict_event_date
 _original_build_event = platform.build_event
 
+
+# silbi_house / 全州喜比食堂
 
 def _is_silbi_row(row: dict) -> bool:
     account = platform.normalize_account(platform.username_from_item(row))
@@ -109,9 +109,7 @@ def _is_silbi_row(row: dict) -> bool:
 def _silbi_featured_girl(row: dict, girls: list[dict]) -> list[str]:
     text = platform.clean_post_body(row)
     patterns = [
-        # 特別邀請超人氣女神 — 韓志恩 @xanjieun
         r"特別邀請\s*(?:超人氣)?女神\s*[—–\-:：]?\s*([^\s@，,。！!\n]{2,16})\s*@([A-Za-z0-9._-]+)",
-        # 超人氣女神 韓志恩 @xanjieun
         r"(?:超人氣)?女神\s*[—–\-:：]?\s*([^\s@，,。！!\n]{2,16})\s*@([A-Za-z0-9._-]+)",
     ]
     for pat in patterns:
@@ -125,11 +123,38 @@ def _silbi_featured_girl(row: dict, girls: list[dict]) -> list[str]:
         by_handle = platform.safe_alias_matches("@" + handle, girls)
         if by_handle:
             return by_handle[:1]
-        # Keep the clearly-declared featured name even when the roster sheet has not
-        # learned the alias yet; this is safer than attaching unrelated roster members.
         if not platform.looks_like_date_or_label(raw_name):
             return [raw_name]
     return []
+
+
+# goddess._.meet / 女神來見面
+
+def _is_goddess_meet_row(row: dict) -> bool:
+    account = platform.normalize_account(platform.username_from_item(row))
+    body = platform.clean_post_body(row)
+    return account == "goddess._.meet" or "主辦單位：女神來見面" in body or "主辦單位:女神來見面" in body
+
+
+def _goddess_meet_girls(row: dict, girls: list[dict]) -> list[str]:
+    text = platform.clean_post_body(row)
+    # Prefer the explicit attendee sentence, e.g. 跟千昭允還有南和侖一起吃美食簽名拍照
+    m = re.search(r"跟\s*([^\s，,。！!\n]{2,12})\s*(?:還有|和|與|\+|➕|＆|&)\s*([^\s，,。！!\n]{2,12})\s*一起", text)
+    if not m:
+        # Common first-line format: 千昭允➕南和侖
+        m = re.search(r"([\u3400-\u9fff]{2,6})\s*(?:\+|➕|＆|&|和|與)\s*([\u3400-\u9fff]{2,6})", text)
+    if not m:
+        return []
+    names = []
+    for raw in (m.group(1).strip(), m.group(2).strip()):
+        exact = platform.exact_realname_matches(raw, girls)
+        if exact:
+            for name in exact:
+                if name not in names:
+                    names.append(name)
+        elif raw not in names:
+            names.append(raw)
+    return names[:2]
 
 
 def primary_girls_for_row(row, platform_name, girls, source_mapping, explicit_mapping):
@@ -137,12 +162,24 @@ def primary_girls_for_row(row, platform_name, girls, source_mapping, explicit_ma
         featured = _silbi_featured_girl(row, girls)
         if featured:
             return featured, "silbi_featured_girl"
+    if _is_goddess_meet_row(row):
+        featured = _goddess_meet_girls(row, girls)
+        if featured:
+            return featured, "goddess_meet_featured_girls"
     return _original_primary_girls(row, platform_name, girls, source_mapping, explicit_mapping)
 
 
 def strict_event_date(text: str):
+    # 女神來見面: only the line labelled 活動時間 is the activity date.
+    if "女神來見面" in text:
+        m = re.search(r"活動時間\s*[:：]\s*(20\d{2})\s*[/／.\-]\s*(\d{1,2})\s*[/／.\-]\s*(\d{1,2})", text)
+        if m:
+            try:
+                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), tzinfo=platform.TZ)
+            except ValueError:
+                pass
+
     # silbi_house standard: the leading "9月12日女神降臨" is the activity date.
-    # Later lines such as "09/04 12:00開始購票" are ticket-sale times and must never win.
     if "全州喜比食堂" in text or "女神降臨" in text:
         m = re.search(r"(?:^|\n)\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*女神降臨", text)
         if m:
@@ -159,11 +196,38 @@ def strict_event_date(text: str):
     return _original_strict_event_date(text)
 
 
+def _goddess_meet_time(text: str) -> str:
+    m = re.search(
+        r"活動時間\s*[:：][^\n]*\n?\s*(\d{1,2}:\d{2}\s*[-–~～]\s*\d{1,2}:\d{2})\s*[/／]\s*(\d{1,2}:\d{2}\s*[-–~～]\s*\d{1,2}:\d{2})",
+        text,
+    )
+    if m:
+        return f"{m.group(1).replace(' ', '')} / {m.group(2).replace(' ', '')}"
+    return ""
+
+
 def build_event(item: dict, platform_name: str, girls: list[dict], stats: dict):
     event = _original_build_event(item, platform_name, girls, stats)
-    if event and _is_silbi_row(item):
+    if not event:
+        return event
+
+    if _is_silbi_row(item):
         event["host"] = "全州喜比食堂"
         event["organizer"] = "全州喜比食堂"
+
+    if _is_goddess_meet_row(item):
+        text = platform.clean_post_body(item)
+        event["host"] = "女神來見面"
+        event["organizer"] = "女神來見面"
+        event["venue"] = "TGI FRIDAYS 華泰餐廳"
+        event["address"] = "TGI FRIDAYS 華泰餐廳｜桃園市中壢區青埔里春德路189號"
+        event["activity_type"] = "粉絲見面活動"
+        event["eventname"] = "女神來見面｜粉絲互動簽名拍照"
+        slots = _goddess_meet_time(text)
+        if slots:
+            event["time"] = slots
+        # Keep the source post as the official link; signup date/time remains descriptive only.
+        event["note"] = "主辦：女神來見面；地點：TGI FRIDAYS 華泰餐廳。活動日期與場次以貼文『活動時間』欄位為準。"
     return event
 
 
