@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timedelta
 
 import fetch_apify_social_events as base
 
@@ -91,8 +92,86 @@ def fetch_threads(token: str, accounts: list[str], explicit: list[dict]) -> list
         return platform.fetch_threads(token, accounts, explicit)
 
 
+# ---- Store-specific parser: silbi_house / 全州喜比食堂 -----------------------
+# Their standard copy is highly structured, so use deterministic rules instead of
+# the generic heuristic parser.
+_original_primary_girls = platform.primary_girls_for_row
+_original_strict_event_date = platform.strict_event_date
+_original_build_event = platform.build_event
+
+
+def _is_silbi_row(row: dict) -> bool:
+    account = platform.normalize_account(platform.username_from_item(row))
+    body = platform.clean_post_body(row)
+    return account == "silbi_house" or "全州喜比食堂" in body
+
+
+def _silbi_featured_girl(row: dict, girls: list[dict]) -> list[str]:
+    text = platform.clean_post_body(row)
+    patterns = [
+        # 特別邀請超人氣女神 — 韓志恩 @xanjieun
+        r"特別邀請\s*(?:超人氣)?女神\s*[—–\-:：]?\s*([^\s@，,。！!\n]{2,16})\s*@([A-Za-z0-9._-]+)",
+        # 超人氣女神 韓志恩 @xanjieun
+        r"(?:超人氣)?女神\s*[—–\-:：]?\s*([^\s@，,。！!\n]{2,16})\s*@([A-Za-z0-9._-]+)",
+    ]
+    for pat in patterns:
+        m = re.search(pat, text, re.I)
+        if not m:
+            continue
+        raw_name, handle = m.group(1).strip(), m.group(2).strip()
+        exact = platform.exact_realname_matches(raw_name, girls)
+        if exact:
+            return exact[:1]
+        by_handle = platform.safe_alias_matches("@" + handle, girls)
+        if by_handle:
+            return by_handle[:1]
+        # Keep the clearly-declared featured name even when the roster sheet has not
+        # learned the alias yet; this is safer than attaching unrelated roster members.
+        if not platform.looks_like_date_or_label(raw_name):
+            return [raw_name]
+    return []
+
+
+def primary_girls_for_row(row, platform_name, girls, source_mapping, explicit_mapping):
+    if _is_silbi_row(row):
+        featured = _silbi_featured_girl(row, girls)
+        if featured:
+            return featured, "silbi_featured_girl"
+    return _original_primary_girls(row, platform_name, girls, source_mapping, explicit_mapping)
+
+
+def strict_event_date(text: str):
+    # silbi_house standard: the leading "9月12日女神降臨" is the activity date.
+    # Later lines such as "09/04 12:00開始購票" are ticket-sale times and must never win.
+    if "全州喜比食堂" in text or "女神降臨" in text:
+        m = re.search(r"(?:^|\n)\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*女神降臨", text)
+        if m:
+            now = datetime.now(platform.TZ)
+            month, day = int(m.group(1)), int(m.group(2))
+            try:
+                dt = datetime(now.year, month, day, tzinfo=platform.TZ)
+                if dt < now - timedelta(days=1) and now.month >= 11 and month <= 2:
+                    dt = dt.replace(year=now.year + 1)
+                if now - timedelta(days=1) <= dt <= now + timedelta(days=240):
+                    return dt
+            except ValueError:
+                pass
+    return _original_strict_event_date(text)
+
+
+def build_event(item: dict, platform_name: str, girls: list[dict], stats: dict):
+    event = _original_build_event(item, platform_name, girls, stats)
+    if event and _is_silbi_row(item):
+        event["host"] = "全州喜比食堂"
+        event["organizer"] = "全州喜比食堂"
+    return event
+
+
 platform.fetch_instagram = fetch_instagram
 platform.fetch_threads = fetch_threads
+platform.primary_girls_for_row = primary_girls_for_row
+platform.strict_event_date = strict_event_date
+platform.build_event = build_event
 
 
 if __name__ == "__main__":
