@@ -9,16 +9,17 @@ on:
       - '.github/workflows/patch-auto-events.yml'
   workflow_dispatch:
 
+concurrency:
+  group: auto-events
+  cancel-in-progress: true
+
 permissions:
   contents: write
-
-concurrency:
-  group: integrate-auto-events
-  cancel-in-progress: true
 
 jobs:
   patch:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Patch Events integration
