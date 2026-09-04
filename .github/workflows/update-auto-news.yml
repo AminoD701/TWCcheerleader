@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install news URL decoder
+        run: python -m pip install --disable-pip-version-check googlenewsdecoder
       - name: Fetch latest cheerleader news
         run: python tools/fetch_auto_news.py
       - name: Commit updated news
