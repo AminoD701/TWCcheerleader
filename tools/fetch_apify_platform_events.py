@@ -14,13 +14,16 @@ from fetch_apify_social_events import (
     build_event,
     extract_context_names,
     load_girls,
-    post_text,
     post_url,
     username_from_item,
 )
 
 TZ = timezone(timedelta(hours=8))
-EVENT_TERMS_LOCAL = ["一日店長", "一日店員", "一日經理", "見面會", "粉絲見面會", "簽名會", "拍照會", "商演", "站台", "路跑", "派對", "活動"]
+EVENT_TERMS_LOCAL = [
+    "一日店長", "一日店員", "一日經理", "見面會", "粉絲見面會", "女神來見面",
+    "女神見面", "來見面", "見面活動", "來店見面", "粉絲見面", "與你見面", "見面日",
+    "簽名會", "拍照會", "商演", "站台", "路跑", "派對", "活動",
+]
 
 
 def load_json(path: Path, default):
@@ -85,6 +88,42 @@ def post_mappings(explicit: list[dict]) -> dict[str, list[str]]:
     return out
 
 
+def _string_values(value) -> list[str]:
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    if isinstance(value, list):
+        out = []
+        for v in value[:20]:
+            if isinstance(v, str) and v.strip():
+                out.append(v.strip())
+        return out
+    return []
+
+
+def clean_post_body(row: dict) -> str:
+    """Return only actual post/caption text, excluding author/profile/related metadata."""
+    preferred = ("caption", "text", "postText", "post_text", "body", "content", "description", "message")
+    parts = []
+    for key in preferred:
+        parts.extend(_string_values(row.get(key)))
+
+    # Some actors wrap the real post in one explicit post/media/node object. Read only known body fields.
+    if not parts:
+        for container_key in ("post", "media", "node"):
+            obj = row.get(container_key)
+            if isinstance(obj, dict):
+                for key in preferred:
+                    parts.extend(_string_values(obj.get(key)))
+
+    seen, clean = set(), []
+    for part in parts:
+        part = re.sub(r"\r\n?", "\n", str(part)).strip()
+        if part and part not in seen:
+            seen.add(part)
+            clean.append(part)
+    return "\n".join(clean)
+
+
 def looks_like_date_or_label(value: str) -> bool:
     s = str(value or "").strip()
     if not s:
@@ -110,68 +149,95 @@ def safe_alias_matches(text: str, girls: list[dict]) -> list[str]:
     result = []
     for girl in girls:
         real = str(girl.get("realname") or "").strip()
-        if real in result:
-            continue
         for alias in girl.get("aliases", []):
             alias = str(alias or "").strip()
             if not alias or alias == real:
                 continue
             norm = normalize_text(alias)
-            if len(norm) >= 3:
-                matched = alias in text or (alias.isascii() and re.search(rf"(?<![A-Za-z0-9._])@?{re.escape(alias)}(?![A-Za-z0-9._])", text, re.I) is not None)
-            else:
-                matched = re.search(
-                    rf"(?:^|[\s、，,：:；;｜|【】\[\]（）()「」『』#]|(?:與|和|及))"
-                    rf"{re.escape(alias)}"
-                    rf"(?=$|[\s、，,。.!！?？：:；;｜|【】\[\]（）()「」『』#]|(?:與|和|及))",
-                    text,
-                ) is not None
-            if matched:
+            # Long aliases / handles only. Two-character aliases are too collision-prone globally.
+            if len(norm) < 3:
+                continue
+            matched = alias in text
+            if alias.isascii():
+                matched = re.search(rf"(?<![A-Za-z0-9._])@?{re.escape(alias)}(?![A-Za-z0-9._])", text, re.I) is not None
+            if matched and real not in result:
                 result.append(real)
                 break
     return result[:6]
 
 
-def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
-    result = []
-    for raw in [x for x in extract_context_names(text) if not str(x).startswith("@")]:
-        cleaned = str(raw).strip()
-        if looks_like_date_or_label(cleaned):
+def local_alias_matches(text: str, girls: list[dict]) -> list[str]:
+    """Allow short nicknames only inside a local event-name phrase with clear separators."""
+    result = safe_alias_matches(text, girls)
+    for girl in girls:
+        real = str(girl.get("realname") or "").strip()
+        if real in result:
             continue
-        for name in exact_realname_matches(cleaned, girls) or safe_alias_matches(cleaned, girls):
-            if name not in result:
-                result.append(name)
-        if len(result) >= 4:
-            break
-    return result
+        for alias in girl.get("aliases", []):
+            alias = str(alias or "").strip()
+            if alias == real or len(normalize_text(alias)) != 2:
+                continue
+            pat = (
+                rf"(?:^|[\s、，,：:；;｜|【】\[\]（）()「」『』]|(?:與|和|及))"
+                rf"{re.escape(alias)}"
+                rf"(?=$|[\s、，,。.!！?？：:；;｜|【】\[\]（）()「」『』]|(?:與|和|及))"
+            )
+            if re.search(pat, text):
+                result.append(real)
+                break
+    return result[:6]
 
 
-def caption_roster_names(text: str, girls: list[dict]) -> list[str]:
-    exact = exact_realname_matches(text, girls)
-    if exact:
-        return exact
-    return safe_alias_matches(text, girls)
-
-
-def near_event_names(text: str, girls: list[dict]) -> list[str]:
-    result = []
+def event_windows(text: str, radius: int = 140) -> list[str]:
+    windows = []
     for term in EVENT_TERMS_LOCAL:
         start = 0
         while True:
             pos = text.find(term, start)
             if pos < 0:
                 break
-            window = text[max(0, pos - 120): pos + len(term) + 120]
-            for name in exact_realname_matches(window, girls) or safe_alias_matches(window, girls):
-                if name not in result:
-                    result.append(name)
+            windows.append(text[max(0, pos - radius): pos + len(term) + radius])
             start = pos + len(term)
-    return result[:4]
+    return windows[:8]
 
 
-def strict_event_date(text: str) -> datetime | None:
-    """Parse public-event dates without turning stale month/day posts into next-year events."""
-    now = datetime.now(TZ)
+def primary_girls_for_row(row, platform, girls, source_mapping, explicit_mapping):
+    key = post_key(post_url(row, platform))
+    if key and explicit_mapping.get(key):
+        return explicit_mapping[key], "post_override"
+
+    account = normalize_account(username_from_item(row))
+    mapped = source_mapping.get(platform, {}).get(account, [])
+    if mapped:
+        return mapped, "source_mapping"
+
+    text = clean_post_body(row)
+    if not text:
+        return ["待確認"], "unresolved"
+
+    # 1) Full roster names in the actual post body are authoritative.
+    exact = exact_realname_matches(text, girls)
+    if exact:
+        return exact, "exact_body_name"
+
+    # 2) Then inspect only the event-local phrase for aliases/nicknames.
+    local = []
+    for window in event_windows(text):
+        for name in local_alias_matches(window, girls):
+            if name not in local:
+                local.append(name)
+    if local:
+        return local[:4], "event_local_alias"
+
+    # 3) Long distinctive aliases/handles can be matched globally; short ones cannot.
+    aliases = safe_alias_matches(text, girls)
+    if aliases:
+        return aliases[:4], "safe_body_alias"
+
+    return ["待確認"], "unresolved"
+
+
+def _date_candidates_from_line(line: str, line_offset: int, now: datetime):
     sep = r"[/／.．·・-]"
     patterns = [
         (re.compile(r"(?<!\d)(?P<y>20\d{2})(?P<m>\d{2})(?P<d>\d{2})(?!\d)"), True),
@@ -179,51 +245,52 @@ def strict_event_date(text: str) -> datetime | None:
         (re.compile(r"(?<!\d)(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*日"), False),
         (re.compile(rf"(?<!\d)(?P<m>\d{{1,2}})\s*{sep}\s*(?P<d>\d{{1,2}})(?!\d)"), False),
     ]
-    candidates = []
-    term_positions = [text.find(t) for t in EVENT_TERMS_LOCAL if text.find(t) >= 0]
+    out = []
     for pat, has_year in patterns:
-        for m in pat.finditer(text):
+        for m in pat.finditer(line):
             try:
                 month, day = int(m.group("m")), int(m.group("d"))
                 year = int(m.groupdict().get("y") or now.year)
                 dt = datetime(year, month, day, tzinfo=TZ)
                 if not has_year and dt.date() < (now - timedelta(days=1)).date():
-                    # Only allow genuine year-boundary inference near the end of the year.
                     if now.month >= 11 and month <= 2:
                         dt = dt.replace(year=year + 1)
                     else:
                         continue
-                if dt < now - timedelta(days=1) or dt > now + timedelta(days=240):
-                    continue
-                distance = min((abs(m.start() - p) for p in term_positions), default=0)
-                candidates.append((distance, m.start(), dt))
+                if now - timedelta(days=1) <= dt <= now + timedelta(days=240):
+                    out.append((dt, line_offset + m.start(), has_year))
             except Exception:
-                continue
+                pass
+    return out
+
+
+def strict_event_date(text: str) -> datetime | None:
+    """Choose an activity date, preferring explicit activity-date lines over signup/deadline dates."""
+    now = datetime.now(TZ)
+    candidates = []
+    offset = 0
+    for line in text.splitlines() or [text]:
+        raw = line.strip()
+        if not raw:
+            offset += len(line) + 1
+            continue
+        positive = 0
+        negative = 0
+        if any(k in raw for k in ("活動日期", "活動日", "日期", "活動時間", "場次", "一日店長", "一日店員", "見面", "來店")):
+            positive += 120
+        if any(k in raw for k in ("報名", "截止", "開賣", "預購", "登記", "付款", "售票", "抽選")):
+            negative += 160
+        for dt, pos, has_year in _date_candidates_from_line(raw, offset, now):
+            explicit = 25 if has_year else 0
+            candidates.append((positive - negative + explicit, pos, dt))
+        offset += len(line) + 1
+
     if not candidates:
         return None
-    candidates.sort(key=lambda x: (x[0], x[1], x[2]))
+
+    # Higher semantic score first; if tied, earlier occurrence wins.
+    candidates.sort(key=lambda x: (-x[0], x[1], x[2]))
     return candidates[0][2]
-
-
-def primary_girls_for_row(row, platform, girls, source_mapping, explicit_mapping):
-    key = post_key(post_url(row, platform))
-    if key and explicit_mapping.get(key):
-        return explicit_mapping[key], "post_override"
-    account = normalize_account(username_from_item(row))
-    mapped = source_mapping.get(platform, {}).get(account, [])
-    if mapped:
-        return mapped, "source_mapping"
-    text = post_text(row)
-    context = canonicalize_context_names(text, girls)
-    if context:
-        return context, "event_context"
-    roster = caption_roster_names(text, girls)
-    if roster:
-        return roster, "caption_roster"
-    nearby = near_event_names(text, girls)
-    if nearby:
-        return nearby, "near_event"
-    return ["待確認"], "unresolved"
 
 
 def force_primary_girls(row, platform, girls, source_mapping, explicit_mapping):
@@ -243,21 +310,22 @@ def parse_platform(platform, rows, girls, current, source_mapping, explicit_mapp
     stats = {
         "actor_error": 0, "non_post": 0, "no_text": 0, "no_girl": 0, "no_date": 0,
         "no_event_signal": 0, "accepted": 0, "post_override": 0, "source_mapping": 0,
-        "event_context": 0, "caption_roster": 0, "near_event": 0, "unresolved": 0,
+        "exact_body_name": 0, "event_local_alias": 0, "safe_body_alias": 0, "unresolved": 0,
         "strict_date_fixed": 0, "stale_puppy_skipped": 0,
     }
     found = []
     for original in rows:
         if original.get("error"):
             print(f"{platform.upper()} ACTOR ERROR: {original.get('error')} | {original.get('errorDescription', '')}")
+
         row, reason = force_primary_girls(original, platform, girls, source_mapping, explicit_mapping)
         stats[reason] += 1
         event = build_event(row, platform, girls, stats)
         if not event:
             continue
 
-        text = post_text(original)
-        strict_dt = strict_event_date(text)
+        clean_text = clean_post_body(original)
+        strict_dt = strict_event_date(clean_text)
         account = normalize_account(username_from_item(original))
         if strict_dt:
             correct_date = strict_dt.strftime("%Y/%m/%d")
@@ -268,8 +336,6 @@ def parse_platform(platform, rows, girls, current, source_mapping, explicit_mapp
                     event["activity_signature"] = correct_date + "|" + sig.split("|", 1)[1]
                 stats["strict_date_fixed"] += 1
         elif account == "hhpuppy_studio":
-            # Heartbroken Puppy has older posts in the scrape window. If no valid current/future
-            # date is present in the clean caption, do not fabricate a next-year event.
             stats["stale_puppy_skipped"] += 1
             continue
 
@@ -322,25 +388,30 @@ def main() -> None:
     token = os.environ.get("APIFY_TOKEN", "").strip()
     if not token:
         raise SystemExit("APIFY_TOKEN is not configured")
+
     girls = load_girls()
     sources = load_json(SOURCES_FILE, [])
     explicit = load_json(POSTS_FILE, [])
     current = load_json(EVENTS_FILE, [])
     source_mapping = source_mappings(sources)
     explicit_mapping = post_mappings(explicit)
+
     ig_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "instagram" and s.get("account")})
     thread_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "threads" and s.get("account")})
+
     successful_platforms = 0
     try:
         current, _ = parse_platform("instagram", fetch_instagram(token, ig_accounts), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"INSTAGRAM FETCH FAILED: {type(exc).__name__}: {exc}")
+
     try:
         current, _ = parse_platform("threads", fetch_threads(token, thread_accounts, explicit), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"THREADS FETCH FAILED: {type(exc).__name__}: {exc}")
+
     EVENTS_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Social fetch completed; successful_platforms={successful_platforms}/2; total_before_dedupe={len(current)}")
     if successful_platforms == 0:
