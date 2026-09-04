@@ -1587,7 +1587,7 @@
     </style> 
 
 <style>
-.manual-event-launch{display:none;background:var(--event-accent);color:#111;border:2px solid #fff;border-radius:4px;padding:10px 16px;font-weight:900;cursor:pointer}
+.manual-event-launch{display:inline-block;background:var(--event-accent);color:#111;border:2px solid #fff;border-radius:4px;padding:10px 16px;font-weight:900;cursor:pointer}
 body.manual-events-mode .manual-event-launch{display:inline-block}
 .manual-event-overlay{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
 .manual-event-overlay.active{display:flex}
@@ -2147,7 +2147,7 @@ body.manual-events-mode .manual-event-launch{display:inline-block}
                     fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
 
-                dbGirls = girlsData.filter(i => i.realname);
+                dbGirls = girlsData.filter(i => i.realname); window.dbGirls = dbGirls;
                 const manualEvents = Array.isArray(eventsData) ? eventsData.filter(e => e.eventname || e.girls) : [];
                 const automaticEvents = Array.isArray(autoEventsData) ? autoEventsData.filter(e => e.eventname && e.date && e.girls) : [];
                 const eventSeen = new Set();
