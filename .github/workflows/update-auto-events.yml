@@ -9,6 +9,8 @@ on:
     paths:
       - 'tools/fetch_auto_events.py'
       - 'tools/fetch_social_events.py'
+      - 'tools/fetch_threads_event_posts.py'
+      - 'tools/dedupe_auto_events.py'
       - 'data/event-social-sources.json'
       - 'data/event-social-posts.json'
       - '.github/workflows/update-auto-events.yml'
@@ -27,6 +29,10 @@ jobs:
         run: python tools/fetch_auto_events.py
       - name: Fetch monitored Instagram and Threads events
         run: python tools/fetch_social_events.py
+      - name: Fetch explicit Threads share events
+        run: python tools/fetch_threads_event_posts.py
+      - name: Deduplicate merged public events
+        run: python tools/dedupe_auto_events.py
       - name: Commit updated events
         run: |
           git add data/auto-events.json
