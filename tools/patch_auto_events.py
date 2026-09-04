@@ -1,70 +1,98 @@
 from pathlib import Path
+import re
 
-# Trigger integration after seeding current automatic Events data.
 path = Path('index.html')
 text = path.read_text(encoding='utf-8')
 original = text
 
-# Rename the section to cover both local and foreign cheerleaders.
+# Keep the public Events naming.
 text = text.replace('外籍行程 EVENTS', '公開行程 EVENTS')
 text = text.replace('外籍行程大廳', '公開行程大廳')
 text = text.replace('外籍行程與賽事專屬彈窗', '公開行程與賽事專屬彈窗')
 text = text.replace("'${e.eventname||\"外籍行程\"}'", "'${e.eventname||\"公開行程\"}'")
 
-# Force a fresh cache namespace for the new Events data model.
-for old in ('v28', 'v29', 'v30', 'v31'):
-    text = text.replace(f'const CACHE_KEY = "tw_cheerleader_cache_{old}";', 'const CACHE_KEY = "tw_cheerleader_cache_v32";', 1)
+# Force a brand-new cache namespace so stale crawler events in localStorage are never reused.
+text = re.sub(
+    r'const CACHE_KEY = "tw_cheerleader_cache_v\d+";',
+    'const CACHE_KEY = "tw_cheerleader_cache_v33";',
+    text,
+    count=1,
+)
 
-# Add auto-events to the main data load Promise.
-old_sig = 'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData] = await Promise.all(['
-new_sig = 'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, autoEventsData] = await Promise.all(['
-if old_sig in text:
-    text = text.replace(old_sig, new_sig, 1)
+# Remove the browser-side "+新增活動" tool completely.
+text = re.sub(
+    r'\n<style>\s*\.manual-event-launch\{.*?</style>',
+    '',
+    text,
+    count=1,
+    flags=re.S,
+)
+text = text.replace(
+    '<button class="manual-event-launch" type="button" onclick="window.openManualEventModal()">＋新增活動</button>',
+    '',
+)
+text = re.sub(
+    r'\n<div id="manual-event-overlay" class="manual-event-overlay".*?</script>\s*(?=</body>)',
+    '\n',
+    text,
+    count=1,
+    flags=re.S,
+)
 
-old_tail = '''                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
-                ]);'''
-new_tail = '''                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => []),
-                    fetch(`data/auto-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
-                ]);'''
-if old_tail in text:
-    text = text.replace(old_tail, new_tail, 1)
-else:
-    old_tail2 = '''                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
-                ]);'''
-    new_tail2 = '''                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => []),
-                    fetch(`data/auto-events.json?t=${t}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
-                ]);'''
-    if old_tail2 in text:
-        text = text.replace(old_tail2, new_tail2, 1)
+# Stop loading crawler-generated auto-events. Keep only Sheet Events + manual-events.json.
+text = text.replace(
+    'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, autoEventsData, manualEventsData] = await Promise.all([',
+    'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, manualEventsData] = await Promise.all([',
+    1,
+)
+text = text.replace(
+    'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, autoEventsData] = await Promise.all([',
+    'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, manualEventsData] = await Promise.all([',
+    1,
+)
 
-old_events = '''                dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);'''
-new_events = '''                const manualEvents = Array.isArray(eventsData) ? eventsData.filter(e => e.eventname || e.girls) : [];
-                const automaticEvents = Array.isArray(autoEventsData) ? autoEventsData.filter(e => e.eventname && e.date && e.girls) : [];
+# Delete any auto-events fetch line while preserving the following manual-events fetch.
+text = re.sub(
+    r'\n\s*fetch\(`data/auto-events\.json\?t=\$\{t\}`[^\n]*\),?',
+    '',
+    text,
+)
+
+# If manual-events.json is not in the Promise yet, append it after auto-news.
+if 'fetch(`data/manual-events.json?t=${t}`' not in text:
+    text = text.replace(
+        "                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])\n                ]);",
+        "                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => []),\n                    fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])\n                ]);",
+        1,
+    )
+
+# Replace the old event merge (which included crawler data) with Sheet + manual only.
+event_block = re.compile(
+    r'\s*const manualEvents = Array\.isArray\(eventsData\).*?\.filter\(e => e\.safeDate\);',
+    re.S,
+)
+replacement = '''
+                const sheetEvents = Array.isArray(eventsData) ? eventsData.filter(e => e.eventname || e.girls) : [];
+                const manualEvents = Array.isArray(manualEventsData) ? manualEventsData.filter(e => e.eventname || e.girls) : [];
                 const eventSeen = new Set();
-                dbEvents = [...manualEvents, ...automaticEvents]
+                dbEvents = [...manualEvents, ...sheetEvents]
                     .filter(e => {
-                        const key = [e.date || '', e.eventname || '', e.girls || ''].join('|').trim().toLowerCase();
+                        const key = [e.date || '', e.time || '', e.host || '', e.eventname || '', e.girls || ''].join('|').trim().toLowerCase();
                         if (!key || eventSeen.has(key)) return false;
                         eventSeen.add(key);
                         return true;
                     })
                     .map(e => ({ ...e, safeDate: parseDateFlexible(e.date) }))
                     .filter(e => e.safeDate);'''
-if old_events in text:
-    text = text.replace(old_events, new_events, 1)
+text, replaced = event_block.subn(replacement, text, count=1)
 
-# External event posters should use their publisher URL directly.
-text = text.replace(
-    'const imgClean = window.getCdnUrl(imgUrls[0]);',
-    "const imgClean = /^https?:\\/\\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0]);"
-)
-text = text.replace(
-    'const imgClean = window.getCdnUrl(u);',
-    "const imgClean = /^https?:\\/\\//i.test(u) ? u : window.getCdnUrl(u);"
-)
+# Handle older code that still maps eventsData directly.
+old_direct = '                dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);'
+if old_direct in text:
+    text = text.replace(old_direct, replacement, 1)
 
 if text == original:
-    print('No Events integration changes were needed.')
+    print('No public Events cleanup changes were needed.')
 else:
     path.write_text(text, encoding='utf-8')
-    print('Automatic public events integrated successfully.')
+    print(f'Public Events cleanup applied. event_merge_replaced={replaced}')
