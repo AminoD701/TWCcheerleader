@@ -8,6 +8,8 @@ on:
     branches: [main]
     paths:
       - 'tools/fetch_auto_events.py'
+      - 'tools/fetch_social_events.py'
+      - 'data/event-social-sources.json'
       - '.github/workflows/update-auto-events.yml'
 
 permissions:
@@ -22,6 +24,8 @@ jobs:
         run: pip install googlenewsdecoder
       - name: Fetch latest public events
         run: python tools/fetch_auto_events.py
+      - name: Fetch monitored Instagram and Threads events
+        run: python tools/fetch_social_events.py
       - name: Commit updated events
         run: |
           git add data/auto-events.json
