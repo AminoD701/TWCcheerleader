@@ -10,6 +10,7 @@ on:
       - 'tools/fetch_auto_events.py'
       - 'tools/fetch_social_events.py'
       - 'data/event-social-sources.json'
+      - 'data/event-social-posts.json'
       - '.github/workflows/update-auto-events.yml'
 
 permissions:
