@@ -16,6 +16,10 @@ on:
       - 'data/event-social-posts.json'
       - '.github/workflows/update-auto-events.yml'
 
+concurrency:
+  group: update-automatic-public-events
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
