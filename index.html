@@ -1725,13 +1725,13 @@
                 
                 <div class="dropdown-container">
                     <button class="dropdown-btn" onclick="window.toggleDropdown('mode-menu', event)">
-                        <span id="mode-btn-text">📰 每日情報 INTEL</span>
+                        <span id="mode-btn-text">📰 最新情報 INTEL</span>
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div class="dropdown-menu" id="mode-menu">
                         <button class="dropdown-item active" onclick="window.setMode('news')">
                             <svg viewBox="0 0 24 24" class="menu-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            每日情報 INTEL
+                            最新情報 INTEL
                         </button>
                         <button class="dropdown-item" onclick="window.setMode('girls')">
                             <svg viewBox="0 0 24 24" class="menu-icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -2906,7 +2906,7 @@
                 'minigame': '🎮', 'dreamteam': '🌟', 'feedback': '💡', 'agency': '🏢', 'allstar': '🌟' // ✨ 這裡補上 allstar 圖示
             };
             const modeNames = {
-                'news': '每日情報 INTEL',
+                'news': '最新情報 INTEL',
                 'girls': '女孩圖鑑 ROSTER',
                 'schedule': '應援班表 SCHEDULE',
                 'events': '外籍行程 EVENTS',
@@ -2996,7 +2996,7 @@
             const container = document.getElementById('team-menu');
             const gachaWrapper = document.getElementById('gacha-btn-wrapper');
             
-            // ✨ 1. 每日一抽：只有在「每日情報 (news)」才顯示，並與選單並列
+            // ✨ 1. 每日一抽：只有在「最新情報 (news)」才顯示，並與選單並列
             if (gachaWrapper) {
                 gachaWrapper.style.display = (currentMode === 'news') ? 'flex' : 'none';
             }
@@ -6235,7 +6235,7 @@ window.renderMinigameStart = function() {
             document.getElementById('gacha-overlay').classList.remove('show');
         };
         // =========================================================================
-        // 📰 每日動態情報牆核心渲染引擎 (CMS)
+        // 📰 最新情報牆核心渲染引擎 (CMS)
         // =========================================================================
         window.currentNewsHashtag = ""; 
         window.currentMainCategory = "全部";
@@ -6462,7 +6462,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日動態情報牆核心渲染引擎 2.0 (長篇新聞 + 專屬日期分頁微動態模組)
+        // 📰 最新情報牆核心渲染引擎 2.0 (長篇新聞 + 專屬日期分頁微動態模組)
         // =========================================================================
         window.renderNewsHub = function() {
             const container = document.getElementById('news-container');
@@ -6516,16 +6516,9 @@ window.renderMinigameStart = function() {
                 return b._idx - a._idx; 
             });
             
-            // ✨ 4. 智慧分流：將「短動態」與「一般新聞」徹底拆開處理
+            // 4. 所有情報統一進入一般情報流，不再建立獨立「社群時報」區塊
             let shortPosts = [];
-            let longPosts = [];
-            
-            sortedNews.forEach(n => {
-                const tagText = getField(n, ['tag', '標籤', '分類標籤', '分類'], '情報');
-                const isShort = tagText.includes('快訊') || tagText.includes('動態') || tagText.toLowerCase().includes('threads') || tagText.includes('脆') || tagText.toLowerCase().includes('ig');
-                if (isShort) shortPosts.push(n);
-                else longPosts.push(n);
-            });
+            let longPosts = [...sortedNews];
 
             // ✨ 將短動態依照日期打包
             window.groupedShortPosts = {};
@@ -6782,7 +6775,7 @@ window.renderMinigameStart = function() {
         };
 
         // =========================================================================
-        // 📰 每日情報專屬彈窗 (終極零縫隙 ＆ 左下角隱形指示器完美版)
+        // 📰 最新情報專屬彈窗 (終極零縫隙 ＆ 左下角隱形指示器完美版)
         // =========================================================================
         window.openNewsModal = function(absoluteIndex) {
             const n = dbNews[absoluteIndex]; 
