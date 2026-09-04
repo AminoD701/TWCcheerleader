@@ -14,14 +14,14 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from googlenewsdecoder import new_decoderv1
+
 SHEET_CSV = (
     "https://docs.google.com/spreadsheets/d/e/"
     "2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/"
     "pub?output=csv&gid=0"
 )
 
-# Keep the site focused on the sports ecosystem around the cheerleading database,
-# but no longer limit automatic news to cheerleaders only.
 QUERIES = [
     "台灣 啦啦隊",
     "中職 啦啦隊",
@@ -59,8 +59,6 @@ CHEER_TERMS = [
     "Uni Girls", "Fubon Angels", "樂天女孩", "啦啦隊", "應援團"
 ]
 
-# Guaranteed visual fallback. Real article images are preferred; these are only used
-# when the source does not expose an image that can be reused directly.
 FALLBACK_IMAGES = {
     "CPBL": "baseball-bg.png",
     "MLB": "baseball-bg.png",
@@ -73,7 +71,7 @@ FALLBACK_IMAGES = {
 
 MAX_AGE_DAYS = 14
 MAX_ITEMS = 120
-USER_AGENT = "Mozilla/5.0 (compatible; TWCcheerleaderNewsBot/1.1)"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152.0 Safari/537.36"
 
 
 def fetch_bytes(url: str, timeout: int = 25) -> tuple[bytes, str, str]:
@@ -82,6 +80,7 @@ def fetch_bytes(url: str, timeout: int = 25) -> tuple[bytes, str, str]:
         headers={
             "User-Agent": USER_AGENT,
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.7",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         },
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -144,57 +143,85 @@ def source_from_item(item: ET.Element) -> str:
 def classify_news(title: str, desc: str, matched_girls: list[str]) -> str | None:
     hay = f"{title} {desc}"
     hay_lower = hay.lower()
-
-    # Cheerleader stories remain their own category even when a team name appears.
     if matched_girls or any(term.lower() in hay_lower for term in CHEER_TERMS):
         return "啦啦隊"
-
     for category, terms in SPORT_RULES:
         if any(term.lower() in hay_lower for term in terms):
             return category
     return None
 
 
-def extract_meta_image(page_html: str, base_url: str) -> str:
+def extract_meta(page_html: str, key: str) -> str:
+    key_re = re.escape(key)
     patterns = [
-        r'<meta[^>]+(?:property|name)=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)',
-        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\']og:image(?::secure_url)?["\']',
-        r'<meta[^>]+(?:property|name)=["\']twitter:image(?::src)?["\'][^>]+content=["\']([^"\']+)',
-        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\']twitter:image(?::src)?["\']',
+        rf'<meta[^>]+(?:property|name)=["\']{key_re}["\'][^>]+content=["\']([^"\']+)',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\']{key_re}["\']',
     ]
     for pattern in patterns:
         match = re.search(pattern, page_html, flags=re.I)
         if match:
-            image = html.unescape(match.group(1).strip())
+            return html.unescape(match.group(1).strip())
+    return ""
+
+
+def extract_meta_image(page_html: str, base_url: str) -> str:
+    for key in ("og:image:secure_url", "og:image", "twitter:image:src", "twitter:image"):
+        image = extract_meta(page_html, key)
+        if image:
             if image.startswith("//"):
                 image = "https:" + image
             return urllib.parse.urljoin(base_url, image)
     return ""
 
 
-def discover_article_image(url: str) -> str:
-    """Best-effort OG/Twitter image lookup. Failure is expected for some publishers."""
-    try:
-        data, final_url, content_type = fetch_bytes(url, timeout=12)
-        if "html" not in content_type.lower() and b"<html" not in data[:1000].lower():
-            return ""
-        page = data[:1_500_000].decode("utf-8", errors="replace")
-        image = extract_meta_image(page, final_url)
-        if image and image.startswith(("http://", "https://")):
-            return image
-    except Exception:
-        pass
+def extract_summary(page_html: str) -> str:
+    for key in ("og:description", "twitter:description", "description"):
+        value = strip_html(extract_meta(page_html, key))
+        if len(value) >= 20:
+            return value[:320].strip()
     return ""
 
 
+def is_google_placeholder_image(url: str) -> bool:
+    host = urllib.parse.urlparse(url).netloc.lower()
+    return host.endswith("googleusercontent.com") or host.endswith("gstatic.com") or "news.google" in host
+
+
+def resolve_google_news_url(url: str) -> str:
+    if "news.google.com" not in url:
+        return url
+    try:
+        decoded = new_decoderv1(url, interval=0.2)
+        if isinstance(decoded, dict) and decoded.get("status") and decoded.get("decoded_url"):
+            return str(decoded["decoded_url"])
+    except Exception as exc:
+        print(f"decode failed: {exc}")
+    return url
+
+
+def discover_article_metadata(url: str) -> tuple[str, str, str]:
+    """Return final article URL, publisher image and a short publisher-provided description."""
+    try:
+        data, final_url, content_type = fetch_bytes(url, timeout=15)
+        if "html" not in content_type.lower() and b"<html" not in data[:1200].lower():
+            return final_url, "", ""
+        page = data[:2_000_000].decode("utf-8", errors="replace")
+        image = extract_meta_image(page, final_url)
+        if image and is_google_placeholder_image(image):
+            image = ""
+        summary = extract_summary(page)
+        return final_url, image, summary
+    except Exception as exc:
+        print(f"metadata failed: {url}: {exc}")
+        return url, "", ""
+
+
 def rss_image(item: ET.Element) -> str:
-    # Some RSS providers expose media:content / media:thumbnail even though Google News
-    # often does not. Namespace-agnostic matching keeps this future-proof.
     for child in item.iter():
         tag = child.tag.lower()
         if tag.endswith("content") or tag.endswith("thumbnail") or tag.endswith("enclosure"):
             candidate = (child.attrib.get("url") or "").strip()
-            if candidate.startswith(("http://", "https://")):
+            if candidate.startswith(("http://", "https://")) and not is_google_placeholder_image(candidate):
                 return candidate
     return ""
 
@@ -229,7 +256,7 @@ def main() -> None:
                 pool.append(item)
         except Exception as exc:
             print(f"query failed: {query}: {exc}")
-        time.sleep(0.7)
+        time.sleep(0.5)
 
     seen_title: set[str] = set()
     seen_url: set[str] = set()
@@ -247,28 +274,36 @@ def main() -> None:
             continue
 
         norm_title = normalize_title(item["title"])
-        if not norm_title or norm_title in seen_title or item["url"] in seen_url:
+        if not norm_title or norm_title in seen_title:
             continue
 
         source = item["source"]
         is_trusted = any(h.lower() in source.lower() for h in TRUSTED_HINTS)
-        # Cheerleader stories with a known girl can pass even from a smaller outlet;
-        # broad sports news requires a recognized source to avoid low-quality scraping.
         if not is_trusted and not matched:
+            continue
+
+        original_url = resolve_google_news_url(item["url"])
+        final_url, publisher_image, publisher_summary = discover_article_metadata(original_url)
+        article_url = final_url if "news.google.com" not in final_url else original_url
+
+        if article_url in seen_url:
             continue
 
         hashtags = matched[:]
         if category not in hashtags:
             hashtags.append(category)
 
-        image_url = item.get("rssImage") or ""
-        if not image_url:
-            image_url = discover_article_image(item["url"])
-        if not image_url:
+        image_url = publisher_image or item.get("rssImage") or ""
+        if not image_url or is_google_placeholder_image(image_url):
             image_url = FALLBACK_IMAGES.get(category, FALLBACK_IMAGES["綜合"])
 
-        uid = hashlib.sha1((item["url"] or item["title"]).encode("utf-8")).hexdigest()[:16]
-        content = f"來源：{source}\n系統自動彙整相關新聞，請點擊「查看原文」閱讀完整報導。"
+        summary = publisher_summary or item.get("description") or ""
+        summary = strip_html(summary)
+        if len(summary) < 20:
+            summary = "本則為系統自動彙整之最新相關新聞，請點擊下方「查看原文」閱讀完整報導。"
+
+        uid = hashlib.sha1((article_url or item["title"]).encode("utf-8")).hexdigest()[:16]
+        content = f"來源：{source}\n\n新聞摘要：{summary}"
 
         output.append({
             "id": f"auto-{uid}",
@@ -278,13 +313,13 @@ def main() -> None:
             "subtag": matched[0] if matched else category,
             "content": content,
             "hashtags": " ".join(hashtags),
-            "url": item["url"],
+            "url": article_url,
             "source": source,
             "auto": True,
             "img": image_url,
         })
         seen_title.add(norm_title)
-        seen_url.add(item["url"])
+        seen_url.add(article_url)
 
         if len(output) >= MAX_ITEMS:
             break
