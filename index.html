@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v33";
+        const CACHE_KEY = "tw_cheerleader_cache_v34";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2103,6 +2103,29 @@
                                 if (mergedFreshNews.length > 0) dbNews = mergedFreshNews;
                             } catch(e) {
                                 console.warn('Fresh news refresh failed; using cached news as fallback.', e);
+                            }
+
+                            // PUBLIC_EVENTS_ALWAYS_REFRESH_V1
+                            try {
+                                const et = Date.now();
+                                const eventBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${et}`;
+                                const [freshSheetEvents, freshManualEvents] = await Promise.all([
+                                    fetchCSV(`${eventBaseUrl}&gid=925411186&t=${et}`).catch(() => []),
+                                    fetch(`data/manual-events.json?t=${et}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+                                        .then(r => r.ok ? r.json() : []).catch(() => [])
+                                ]);
+                                const eventSeen = new Set();
+                                dbEvents = [
+                                    ...(Array.isArray(freshManualEvents) ? freshManualEvents.filter(e => e.eventname || e.girls) : []),
+                                    ...(Array.isArray(freshSheetEvents) ? freshSheetEvents.filter(e => e.eventname || e.girls) : [])
+                                ].filter(e => {
+                                    const key = [e.date || '', e.time || '', e.host || '', e.eventname || '', e.girls || ''].join('|').trim().toLowerCase();
+                                    if (!key || eventSeen.has(key)) return false;
+                                    eventSeen.add(key);
+                                    return true;
+                                }).map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                            } catch(e) {
+                                console.warn('Fresh public Events refresh failed; using cached Events as fallback.', e);
                             }
 
                             buildGirlMap(); init(); enableEnterButton();
