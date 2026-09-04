@@ -12,7 +12,6 @@ from fetch_apify_social_events import (
     apify_sync,
     build_event,
     extract_context_names,
-    girl_matches,
     load_girls,
     post_text,
     post_url,
@@ -33,6 +32,10 @@ def normalize_account(value: str) -> str:
     return re.sub(r"[^a-z0-9._-]+", "", str(value or "").lower().lstrip("@"))
 
 
+def normalize_text(value: str) -> str:
+    return re.sub(r"[\s@._\-·•]+", "", str(value or "")).lower()
+
+
 def split_names(value) -> list[str]:
     if isinstance(value, list):
         return [str(x).strip() for x in value if str(x).strip()]
@@ -48,8 +51,7 @@ def source_mappings(sources: list[dict]) -> dict[str, dict[str, list[str]]]:
         account = normalize_account(source.get("account", ""))
         if platform not in out or not account:
             continue
-        mapped = split_names(source.get("girls") or source.get("girl") or [])
-        out[platform][account] = mapped
+        out[platform][account] = split_names(source.get("girls") or source.get("girl") or [])
     return out
 
 
@@ -79,62 +81,97 @@ def post_mappings(explicit: list[dict]) -> dict[str, list[str]]:
     return out
 
 
+def looks_like_date_or_label(value: str) -> bool:
+    s = str(value or "").strip()
+    if not s:
+        return True
+    if re.search(r"\d{1,2}\s*月\s*\d{1,2}\s*日", s):
+        return True
+    if re.fullmatch(r"\d{1,2}\s*月\s*\d{1,2}\s*日?.*", s):
+        return True
+    bad = ("女神降臨", "活動", "料理派對", "一日店長", "一日店員", "店長", "日期", "時間", "地點")
+    return any(x in s for x in bad)
+
+
+def exact_realname_matches(text: str, girls: list[dict]) -> list[str]:
+    result = []
+    for girl in girls:
+        name = str(girl.get("realname") or "").strip()
+        if len(name) >= 2 and name in text and name not in result:
+            result.append(name)
+    return result[:6]
+
+
+def safe_alias_matches(text: str, girls: list[dict]) -> list[str]:
+    """Use aliases conservatively so short nicknames do not create false attendees."""
+    result = []
+    for girl in girls:
+        real = str(girl.get("realname") or "").strip()
+        if real in result:
+            continue
+        for alias in girl.get("aliases", []):
+            alias = str(alias or "").strip()
+            if not alias or alias == real:
+                continue
+            norm = normalize_text(alias)
+            matched = False
+            # Handles / long aliases are distinctive enough for exact literal matching.
+            if len(norm) >= 3:
+                matched = alias in text or (alias.isascii() and re.search(rf"(?<![A-Za-z0-9._])@?{re.escape(alias)}(?![A-Za-z0-9._])", text, re.I)) is not None
+            else:
+                # Two-character nicknames must appear as a separated/listed name, not inside prose.
+                matched = re.search(
+                    rf"(?:^|[\s、，,：:；;｜|【】\[\]（）()「」『』#]|(?:與|和|及))"
+                    rf"{re.escape(alias)}"
+                    rf"(?=$|[\s、，,。.!！?？：:；;｜|【】\[\]（）()「」『』#]|(?:與|和|及))",
+                    text,
+                ) is not None
+            if matched:
+                result.append(real)
+                break
+    return result[:6]
+
+
 def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
-    """Pick only names directly attached to event wording."""
     extracted = [x for x in extract_context_names(text) if not str(x).startswith("@")]
     result = []
     for raw in extracted:
-        matches = girl_matches(raw, girls)
-        if matches:
-            for girl in matches:
-                name = girl["realname"]
-                if name not in result:
-                    result.append(name)
-        else:
-            cleaned = str(raw).strip()
-            if 1 < len(cleaned) <= 16 and cleaned not in result:
-                result.append(cleaned)
+        cleaned = str(raw).strip()
+        if looks_like_date_or_label(cleaned):
+            continue
+        # Context extraction may return a nickname. Canonicalize using exact realname first,
+        # then conservative alias matching. Never keep arbitrary non-roster phrases as people.
+        matched = exact_realname_matches(cleaned, girls) or safe_alias_matches(cleaned, girls)
+        for name in matched:
+            if name not in result:
+                result.append(name)
         if len(result) >= 4:
             break
     return result
 
 
 def caption_roster_names(text: str, girls: list[dict]) -> list[str]:
-    """Match roster aliases anywhere in the cleaned caption/body text.
-
-    post_text() now excludes scraped metadata, URLs and timestamps, so a whole-caption
-    roster pass is safe and catches names that are present in the post but not adjacent
-    to the event phrase (for example, attendee names listed on a separate line).
-    """
-    result = []
-    for girl in girl_matches(text, girls):
-        name = girl["realname"]
-        if name not in result:
-            result.append(name)
-        if len(result) >= 4:
-            break
-    return result
+    # Highest confidence: full roster names written literally in the clean post body.
+    exact = exact_realname_matches(text, girls)
+    if exact:
+        return exact
+    return safe_alias_matches(text, girls)
 
 
 def near_event_names(text: str, girls: list[dict]) -> list[str]:
-    """Fallback: scan a small window around the event phrase."""
     terms = ["一日店長", "一日店員", "一日經理", "見面會", "簽名會", "拍照會", "商演", "站台", "路跑", "派對"]
-    windows = []
+    result = []
     for term in terms:
         start = 0
         while True:
             pos = text.find(term, start)
             if pos < 0:
                 break
-            windows.append(text[max(0, pos - 90): pos + len(term) + 90])
+            window = text[max(0, pos - 120): pos + len(term) + 120]
+            for name in exact_realname_matches(window, girls) or safe_alias_matches(window, girls):
+                if name not in result:
+                    result.append(name)
             start = pos + len(term)
-    result = []
-    for window in windows[:6]:
-        for girl in girl_matches(window, girls):
-            if girl["realname"] not in result:
-                result.append(girl["realname"])
-        if len(result) >= 4:
-            break
     return result[:4]
 
 
@@ -145,12 +182,10 @@ def primary_girls_for_row(
     source_mapping: dict[str, dict[str, list[str]]],
     explicit_mapping: dict[str, list[str]],
 ) -> tuple[list[str], str]:
-    # Highest priority: a human-confirmed override for this exact post URL.
     key = post_key(post_url(row, platform))
     if key and explicit_mapping.get(key):
         return explicit_mapping[key], "post_override"
 
-    # Second: only use account mapping when that source was explicitly configured as a fixed girl account.
     account = normalize_account(username_from_item(row))
     mapped = source_mapping.get(platform, {}).get(account, [])
     if mapped:
@@ -158,13 +193,10 @@ def primary_girls_for_row(
 
     text = post_text(row)
 
-    # Prefer names explicitly tied to event wording.
     context = canonicalize_context_names(text, girls)
     if context:
         return context, "event_context"
 
-    # Then scan the entire CLEAN caption/body against roster aliases. This catches names
-    # like "以恩、凱莉" when they are present elsewhere in the Threads body.
     roster = caption_roster_names(text, girls)
     if roster:
         return roster, "caption_roster"
@@ -173,17 +205,10 @@ def primary_girls_for_row(
     if nearby:
         return nearby, "near_event"
 
-    # Safer to ask for review than attach unrelated girls.
     return ["待確認"], "unresolved"
 
 
-def force_primary_girls(
-    row: dict,
-    platform: str,
-    girls: list[dict],
-    source_mapping: dict[str, dict[str, list[str]]],
-    explicit_mapping: dict[str, list[str]],
-) -> tuple[dict, str]:
+def force_primary_girls(row, platform, girls, source_mapping, explicit_mapping):
     names, reason = primary_girls_for_row(row, platform, girls, source_mapping, explicit_mapping)
     patched = dict(row)
     patched["_mapped_girls"] = "、".join(names)
@@ -193,38 +218,16 @@ def force_primary_girls(
 def is_social_event_for_platform(event: dict, platform: str) -> bool:
     source = str(event.get("source", "")).lower()
     event_id = str(event.get("id", ""))
-    return (
-        source.startswith(platform.lower() + " ")
-        or event_id.startswith("auto-event-unmatched-")
-        or (event_id.startswith("auto-event-apify-") and platform.lower() in source)
-    )
+    return source.startswith(platform.lower() + " ") or event_id.startswith("auto-event-unmatched-") or (event_id.startswith("auto-event-apify-") and platform.lower() in source)
 
 
-def parse_platform(
-    platform: str,
-    rows: list[dict],
-    girls: list[dict],
-    current: list[dict],
-    source_mapping: dict[str, dict[str, list[str]]],
-    explicit_mapping: dict[str, list[str]],
-) -> tuple[list[dict], dict]:
+def parse_platform(platform, rows, girls, current, source_mapping, explicit_mapping):
     stats = {
-        "actor_error": 0,
-        "non_post": 0,
-        "no_text": 0,
-        "no_girl": 0,
-        "no_date": 0,
-        "no_event_signal": 0,
-        "accepted": 0,
-        "post_override": 0,
-        "source_mapping": 0,
-        "event_context": 0,
-        "caption_roster": 0,
-        "near_event": 0,
-        "unresolved": 0,
+        "actor_error": 0, "non_post": 0, "no_text": 0, "no_girl": 0, "no_date": 0,
+        "no_event_signal": 0, "accepted": 0, "post_override": 0, "source_mapping": 0,
+        "event_context": 0, "caption_roster": 0, "near_event": 0, "unresolved": 0,
     }
     found = []
-
     for original in rows:
         if original.get("error"):
             print(f"{platform.upper()} ACTOR ERROR: {original.get('error')} | {original.get('errorDescription', '')}")
@@ -232,32 +235,21 @@ def parse_platform(
         stats[reason] += 1
         event = build_event(row, platform, girls, stats)
         if event:
+            event["needs_girl_review"] = reason == "unresolved"
             if reason == "unresolved":
-                event["needs_girl_review"] = True
                 event["note"] = f"自動發現來源：{platform}。活動日期已由貼文正文解析；人物尚待確認，請以原始貼文為準。"
             else:
-                event["needs_girl_review"] = False
                 event["girl_match_method"] = reason
             found.append(event)
-
     preserved = [e for e in current if not is_social_event_for_platform(e, platform)]
-    merged = preserved + found
-    print(
-        f"{platform.upper()}: actor rows={len(rows)}, accepted={len(found)}, "
-        f"stats={json.dumps(stats, ensure_ascii=False)}"
-    )
-    return merged, stats
+    print(f"{platform.upper()}: actor rows={len(rows)}, accepted={len(found)}, stats={json.dumps(stats, ensure_ascii=False)}")
+    return preserved + found, stats
 
 
 def fetch_instagram(token: str, accounts: list[str]) -> list[dict]:
     if not accounts:
         return []
-    payload = {
-        "usernames": accounts,
-        "resultsType": "posts",
-        "postsLimit": 12,
-        "maxRecords": max(12, len(accounts) * 12),
-    }
+    payload = {"usernames": accounts, "resultsType": "posts", "postsLimit": 12, "maxRecords": max(12, len(accounts) * 12)}
     return apify_sync("scrapers_lat/instagram-scraper", payload, token)
 
 
@@ -299,36 +291,24 @@ def main() -> None:
     source_mapping = source_mappings(sources)
     explicit_mapping = post_mappings(explicit)
 
-    ig_accounts = sorted({
-        str(s.get("account", "")).lstrip("@")
-        for s in sources
-        if s.get("platform") == "instagram" and s.get("account")
-    })
-    thread_accounts = sorted({
-        str(s.get("account", "")).lstrip("@")
-        for s in sources
-        if s.get("platform") == "threads" and s.get("account")
-    })
+    ig_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "instagram" and s.get("account")})
+    thread_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "threads" and s.get("account")})
 
     successful_platforms = 0
-
     try:
-        ig_rows = fetch_instagram(token, ig_accounts)
-        current, _ = parse_platform("instagram", ig_rows, girls, current, source_mapping, explicit_mapping)
+        current, _ = parse_platform("instagram", fetch_instagram(token, ig_accounts), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"INSTAGRAM FETCH FAILED: {type(exc).__name__}: {exc}")
 
     try:
-        thread_rows = fetch_threads(token, thread_accounts, explicit)
-        current, _ = parse_platform("threads", thread_rows, girls, current, source_mapping, explicit_mapping)
+        current, _ = parse_platform("threads", fetch_threads(token, thread_accounts, explicit), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"THREADS FETCH FAILED: {type(exc).__name__}: {exc}")
 
     EVENTS_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Social fetch completed; successful_platforms={successful_platforms}/2; total_before_dedupe={len(current)}")
-
     if successful_platforms == 0:
         raise SystemExit("Both Instagram and Threads fetchers failed")
 
