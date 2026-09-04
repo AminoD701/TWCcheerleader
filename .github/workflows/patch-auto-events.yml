@@ -29,3 +29,4 @@ jobs:
           git add index.html
           git commit -m "Integrate automatic public events"
           git push
+# re-run after restoring confirmed event data
