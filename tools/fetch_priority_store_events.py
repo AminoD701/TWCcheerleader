@@ -124,7 +124,8 @@ def parse_goddess(row: dict, platform: str, girls: list[dict]):
         return None
     ranges = re.findall(r"(?<!\d)(\d{1,2}:\d{2})\s*[-–~～]\s*(\d{1,2}:\d{2})(?!\d)", text)
     loc = re.search(r"活動地點\s*[:：]\s*([^\n]+)", text)
-    addr = re.search(r"[（(]([^）)\n]+)[）)]", text)
+    location_text = text[loc.end():] if loc else ""
+    addr = re.search(r"[（(]([^）)\\n]+)[）)]", location_text)
     venue = loc.group(1).strip() if loc else ""
     address = normalize_address(addr.group(1) if addr else "")
     names = [canonical_name(girl_match.group(1), girls), canonical_name(girl_match.group(2), girls)]
