@@ -1743,7 +1743,7 @@
                         </button>
                         <button class="dropdown-item" onclick="window.setMode('events')">
                             <svg viewBox="0 0 24 24" class="menu-icon"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                            外籍行程 EVENTS
+                            公開行程 EVENTS
                         </button>
                         <button class="dropdown-item" onclick="window.setMode('matches')">
                             <svg viewBox="0 0 24 24" class="menu-icon"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16V7H4v15zM7.5 4c0-1.1.9-2 2-2h5a2 2 0 0 1 2 2v3h-9V4z"></path></svg>
@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v29";
+        const CACHE_KEY = "tw_cheerleader_cache_v31";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2116,18 +2116,30 @@
             const baseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${t}`;
 
             try {
-                const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData] = await Promise.all([
+                const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, autoEventsData] = await Promise.all([
                     fetchCSV(`${baseUrl}&gid=0&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=925411186&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=417186374&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=92509162&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=547736461&t=${t}`),
-                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
+                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => []),
+                    fetch(`data/auto-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
 
                 dbGirls = girlsData.filter(i => i.realname);
-                dbEvents = eventsData.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                const manualEvents = Array.isArray(eventsData) ? eventsData.filter(e => e.eventname || e.girls) : [];
+                const automaticEvents = Array.isArray(autoEventsData) ? autoEventsData.filter(e => e.eventname && e.date && e.girls) : [];
+                const eventSeen = new Set();
+                dbEvents = [...manualEvents, ...automaticEvents]
+                    .filter(e => {
+                        const key = [e.date || '', e.eventname || '', e.girls || ''].join('|').trim().toLowerCase();
+                        if (!key || eventSeen.has(key)) return false;
+                        eventSeen.add(key);
+                        return true;
+                    })
+                    .map(e => ({ ...e, safeDate: parseDateFlexible(e.date) }))
+                    .filter(e => e.safeDate);
                 const manualNews = newsData.filter(n => n.title);
                 const automaticNews = Array.isArray(autoNewsData) ? autoNewsData.filter(n => n.title) : [];
                 const newsSeen = new Set();
@@ -2985,7 +2997,7 @@
                 'news': '最新情報 INTEL',
                 'girls': '女孩圖鑑 ROSTER',
                 'schedule': '應援班表 SCHEDULE',
-                'events': '外籍行程 EVENTS',
+                'events': '公開行程 EVENTS',
                 'matches': '賽事中心 MATCHES',
                 'agency': '經紀公司 AGENCIES',
                 'passport': '追星護照 MY PASSPORT',
@@ -5473,7 +5485,7 @@
         };
 
         // =========================================================================
-        // ✨ 外籍行程大廳 - 尊爵黃金三欄引擎 (主辦單位高光凸顯 + 精緻SVG圖示版)
+        // ✨ 公開行程大廳 - 尊爵黃金三欄引擎 (主辦單位高光凸顯 + 精緻SVG圖示版)
         // =========================================================================
         window.renderEvents = function() {
             const search = (document.getElementById('searchInput').value || "").toLowerCase().trim();
@@ -5710,7 +5722,7 @@
             document.getElementById('event-container').innerHTML = html;
         };
         // =========================================================================
-        // 📅 外籍行程與賽事專屬彈窗 (終極精緻排版：大頭像 + SVG圖示 + 俐落按鈕)
+        // 📅 公開行程與賽事專屬彈窗 (終極精緻排版：大頭像 + SVG圖示 + 俐落按鈕)
         // =========================================================================
         window.openEventModal = function(index) {
             const e = dbEvents[index];
@@ -5742,7 +5754,7 @@
             
             let mediaHtml = '';
             if (imgUrls.length === 1) {
-                const imgClean = window.getCdnUrl(imgUrls[0]);
+                const imgClean = /^https?:\/\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0]);
                 mediaHtml = `
                 <div style="position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: #050505; display: flex; align-items: center; justify-content: center;">
                     <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgClean}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
@@ -5751,7 +5763,7 @@
             } else if (imgUrls.length > 1) {
                 const sliderId = 'event-modal-slider-' + Math.random().toString(36).substr(2, 9);
                 const slides = imgUrls.map((u, i) => {
-                    const imgClean = window.getCdnUrl(u);
+                    const imgClean = /^https?:\/\//i.test(u) ? u : window.getCdnUrl(u);
                     return `
                     <div style="flex: 0 0 100%; min-width: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #050505; overflow: hidden;">
                         <div style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-image: url('${imgClean}'); background-size: cover; background-position: center; filter: blur(20px) brightness(0.3); z-index: 1;"></div>
@@ -5793,7 +5805,7 @@
             let dateStrForSave = `${e.safeDate.monStr}/${String(e.safeDate.day).padStart(2,'0')}`;
             
             // ✨ 按鈕拔除 flex: 1，改為固定 padding，靠左排列不拉伸
-            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStrForSave}', '${e.eventname||"外籍行程"}', event, this);" style="display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 20px; font-weight: 900; font-size: 13px; background: ${isSaved?'var(--fav-accent)':'transparent'}; color: ${isSaved?'#fff':themeColor}; border: 1px solid ${isSaved?'transparent':themeColor}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.background='${isSaved?'#ff0044':themeColor}'; this.style.color='#000';">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
+            let saveBtnHtml = `<button onclick="window.toggleMySchedule('${key}', ${e.safeDate.num}, '${dateStrForSave}', '${e.eventname||"公開行程"}', event, this);" style="display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 20px; font-weight: 900; font-size: 13px; background: ${isSaved?'var(--fav-accent)':'transparent'}; color: ${isSaved?'#fff':themeColor}; border: 1px solid ${isSaved?'transparent':themeColor}; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.background='${isSaved?'#ff0044':themeColor}'; this.style.color='#000';">${isSaved?'➖ 移除行事曆':'➕ 加入行事曆'}</button>`;
             let linkBtnHtml = linkUrl ? `<a href="${linkUrl}" target="_blank" style="display: flex; align-items: center; justify-content: center; height: 36px; padding: 0 20px; font-weight: 900; font-size: 13px; background: #1a1e24; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; text-decoration: none; white-space: nowrap; transition: 0.2s; font-family: var(--tc-font); box-sizing: border-box;" onmouseover="this.style.borderColor='${themeColor}'; this.style.color='${themeColor}';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='#fff';">🔗 官方連結</a>` : '';
 
             // --- 🔧 組合最終 Modal HTML ---
