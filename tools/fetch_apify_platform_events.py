@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fetch_apify_social_events import (
@@ -17,6 +18,9 @@ from fetch_apify_social_events import (
     post_url,
     username_from_item,
 )
+
+TZ = timezone(timedelta(hours=8))
+EVENT_TERMS_LOCAL = ["一日店長", "一日店員", "一日經理", "見面會", "粉絲見面會", "簽名會", "拍照會", "商演", "站台", "路跑", "派對", "活動"]
 
 
 def load_json(path: Path, default):
@@ -103,7 +107,6 @@ def exact_realname_matches(text: str, girls: list[dict]) -> list[str]:
 
 
 def safe_alias_matches(text: str, girls: list[dict]) -> list[str]:
-    """Use aliases conservatively so short nicknames do not create false attendees."""
     result = []
     for girl in girls:
         real = str(girl.get("realname") or "").strip()
@@ -114,12 +117,9 @@ def safe_alias_matches(text: str, girls: list[dict]) -> list[str]:
             if not alias or alias == real:
                 continue
             norm = normalize_text(alias)
-            matched = False
-            # Handles / long aliases are distinctive enough for exact literal matching.
             if len(norm) >= 3:
-                matched = alias in text or (alias.isascii() and re.search(rf"(?<![A-Za-z0-9._])@?{re.escape(alias)}(?![A-Za-z0-9._])", text, re.I)) is not None
+                matched = alias in text or (alias.isascii() and re.search(rf"(?<![A-Za-z0-9._])@?{re.escape(alias)}(?![A-Za-z0-9._])", text, re.I) is not None)
             else:
-                # Two-character nicknames must appear as a separated/listed name, not inside prose.
                 matched = re.search(
                     rf"(?:^|[\s、，,：:；;｜|【】\[\]（）()「」『』#]|(?:與|和|及))"
                     rf"{re.escape(alias)}"
@@ -133,16 +133,12 @@ def safe_alias_matches(text: str, girls: list[dict]) -> list[str]:
 
 
 def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
-    extracted = [x for x in extract_context_names(text) if not str(x).startswith("@")]
     result = []
-    for raw in extracted:
+    for raw in [x for x in extract_context_names(text) if not str(x).startswith("@")]:
         cleaned = str(raw).strip()
         if looks_like_date_or_label(cleaned):
             continue
-        # Context extraction may return a nickname. Canonicalize using exact realname first,
-        # then conservative alias matching. Never keep arbitrary non-roster phrases as people.
-        matched = exact_realname_matches(cleaned, girls) or safe_alias_matches(cleaned, girls)
-        for name in matched:
+        for name in exact_realname_matches(cleaned, girls) or safe_alias_matches(cleaned, girls):
             if name not in result:
                 result.append(name)
         if len(result) >= 4:
@@ -151,7 +147,6 @@ def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
 
 
 def caption_roster_names(text: str, girls: list[dict]) -> list[str]:
-    # Highest confidence: full roster names written literally in the clean post body.
     exact = exact_realname_matches(text, girls)
     if exact:
         return exact
@@ -159,9 +154,8 @@ def caption_roster_names(text: str, girls: list[dict]) -> list[str]:
 
 
 def near_event_names(text: str, girls: list[dict]) -> list[str]:
-    terms = ["一日店長", "一日店員", "一日經理", "見面會", "簽名會", "拍照會", "商演", "站台", "路跑", "派對"]
     result = []
-    for term in terms:
+    for term in EVENT_TERMS_LOCAL:
         start = 0
         while True:
             pos = text.find(term, start)
@@ -175,36 +169,60 @@ def near_event_names(text: str, girls: list[dict]) -> list[str]:
     return result[:4]
 
 
-def primary_girls_for_row(
-    row: dict,
-    platform: str,
-    girls: list[dict],
-    source_mapping: dict[str, dict[str, list[str]]],
-    explicit_mapping: dict[str, list[str]],
-) -> tuple[list[str], str]:
+def strict_event_date(text: str) -> datetime | None:
+    """Parse public-event dates without turning stale month/day posts into next-year events."""
+    now = datetime.now(TZ)
+    sep = r"[/／.．·・-]"
+    patterns = [
+        (re.compile(r"(?<!\d)(?P<y>20\d{2})(?P<m>\d{2})(?P<d>\d{2})(?!\d)"), True),
+        (re.compile(rf"(?P<y>20\d{{2}})\s*(?:年|{sep})\s*(?P<m>\d{{1,2}})\s*(?:月|{sep})\s*(?P<d>\d{{1,2}})\s*日?"), True),
+        (re.compile(r"(?<!\d)(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*日"), False),
+        (re.compile(rf"(?<!\d)(?P<m>\d{{1,2}})\s*{sep}\s*(?P<d>\d{{1,2}})(?!\d)"), False),
+    ]
+    candidates = []
+    term_positions = [text.find(t) for t in EVENT_TERMS_LOCAL if text.find(t) >= 0]
+    for pat, has_year in patterns:
+        for m in pat.finditer(text):
+            try:
+                month, day = int(m.group("m")), int(m.group("d"))
+                year = int(m.groupdict().get("y") or now.year)
+                dt = datetime(year, month, day, tzinfo=TZ)
+                if not has_year and dt.date() < (now - timedelta(days=1)).date():
+                    # Only allow genuine year-boundary inference near the end of the year.
+                    if now.month >= 11 and month <= 2:
+                        dt = dt.replace(year=year + 1)
+                    else:
+                        continue
+                if dt < now - timedelta(days=1) or dt > now + timedelta(days=240):
+                    continue
+                distance = min((abs(m.start() - p) for p in term_positions), default=0)
+                candidates.append((distance, m.start(), dt))
+            except Exception:
+                continue
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x: (x[0], x[1], x[2]))
+    return candidates[0][2]
+
+
+def primary_girls_for_row(row, platform, girls, source_mapping, explicit_mapping):
     key = post_key(post_url(row, platform))
     if key and explicit_mapping.get(key):
         return explicit_mapping[key], "post_override"
-
     account = normalize_account(username_from_item(row))
     mapped = source_mapping.get(platform, {}).get(account, [])
     if mapped:
         return mapped, "source_mapping"
-
     text = post_text(row)
-
     context = canonicalize_context_names(text, girls)
     if context:
         return context, "event_context"
-
     roster = caption_roster_names(text, girls)
     if roster:
         return roster, "caption_roster"
-
     nearby = near_event_names(text, girls)
     if nearby:
         return nearby, "near_event"
-
     return ["待確認"], "unresolved"
 
 
@@ -226,6 +244,7 @@ def parse_platform(platform, rows, girls, current, source_mapping, explicit_mapp
         "actor_error": 0, "non_post": 0, "no_text": 0, "no_girl": 0, "no_date": 0,
         "no_event_signal": 0, "accepted": 0, "post_override": 0, "source_mapping": 0,
         "event_context": 0, "caption_roster": 0, "near_event": 0, "unresolved": 0,
+        "strict_date_fixed": 0, "stale_puppy_skipped": 0,
     }
     found = []
     for original in rows:
@@ -234,13 +253,33 @@ def parse_platform(platform, rows, girls, current, source_mapping, explicit_mapp
         row, reason = force_primary_girls(original, platform, girls, source_mapping, explicit_mapping)
         stats[reason] += 1
         event = build_event(row, platform, girls, stats)
-        if event:
-            event["needs_girl_review"] = reason == "unresolved"
-            if reason == "unresolved":
-                event["note"] = f"自動發現來源：{platform}。活動日期已由貼文正文解析；人物尚待確認，請以原始貼文為準。"
-            else:
-                event["girl_match_method"] = reason
-            found.append(event)
+        if not event:
+            continue
+
+        text = post_text(original)
+        strict_dt = strict_event_date(text)
+        account = normalize_account(username_from_item(original))
+        if strict_dt:
+            correct_date = strict_dt.strftime("%Y/%m/%d")
+            if event.get("date") != correct_date:
+                event["date"] = correct_date
+                sig = str(event.get("activity_signature") or "")
+                if "|" in sig:
+                    event["activity_signature"] = correct_date + "|" + sig.split("|", 1)[1]
+                stats["strict_date_fixed"] += 1
+        elif account == "hhpuppy_studio":
+            # Heartbroken Puppy has older posts in the scrape window. If no valid current/future
+            # date is present in the clean caption, do not fabricate a next-year event.
+            stats["stale_puppy_skipped"] += 1
+            continue
+
+        event["needs_girl_review"] = reason == "unresolved"
+        if reason == "unresolved":
+            event["note"] = f"自動發現來源：{platform}。活動日期已由貼文正文解析；人物尚待確認，請以原始貼文為準。"
+        else:
+            event["girl_match_method"] = reason
+        found.append(event)
+
     preserved = [e for e in current if not is_social_event_for_platform(e, platform)]
     print(f"{platform.upper()}: actor rows={len(rows)}, accepted={len(found)}, stats={json.dumps(stats, ensure_ascii=False)}")
     return preserved + found, stats
@@ -283,30 +322,25 @@ def main() -> None:
     token = os.environ.get("APIFY_TOKEN", "").strip()
     if not token:
         raise SystemExit("APIFY_TOKEN is not configured")
-
     girls = load_girls()
     sources = load_json(SOURCES_FILE, [])
     explicit = load_json(POSTS_FILE, [])
     current = load_json(EVENTS_FILE, [])
     source_mapping = source_mappings(sources)
     explicit_mapping = post_mappings(explicit)
-
     ig_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "instagram" and s.get("account")})
     thread_accounts = sorted({str(s.get("account", "")).lstrip("@") for s in sources if s.get("platform") == "threads" and s.get("account")})
-
     successful_platforms = 0
     try:
         current, _ = parse_platform("instagram", fetch_instagram(token, ig_accounts), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"INSTAGRAM FETCH FAILED: {type(exc).__name__}: {exc}")
-
     try:
         current, _ = parse_platform("threads", fetch_threads(token, thread_accounts, explicit), girls, current, source_mapping, explicit_mapping)
         successful_platforms += 1
     except Exception as exc:
         print(f"THREADS FETCH FAILED: {type(exc).__name__}: {exc}")
-
     EVENTS_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Social fetch completed; successful_platforms={successful_platforms}/2; total_before_dedupe={len(current)}")
     if successful_platforms == 0:
