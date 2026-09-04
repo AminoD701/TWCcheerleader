@@ -20,7 +20,8 @@ ACCOUNTS = {
     "hhpuppy_studio": ("心碎小狗", "心碎小狗", "粉絲互動簽名合照活動"),
     "jcl700912": ("板橋第一家卡店", "板橋第一家卡店", "一日店長"),
 }
-# Anonymous-only crawler: no tokens, cookies, browser sessions, or paid services.\nUA = "Mozilla/5.0 (compatible; TWCcheerleader/1.0; +https://aminod701.github.io/TWCcheerleader/)"
+# Anonymous-only crawler: no tokens, cookies, browser sessions, or paid services.
+UA = "Mozilla/5.0 (compatible; TWCcheerleader/1.0; +https://aminod701.github.io/TWCcheerleader/)"
 
 
 class MetaParser(HTMLParser):
