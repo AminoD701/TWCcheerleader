@@ -16,7 +16,7 @@ on:
       - 'tests/test_priority_store_parsers.py'
   workflow_dispatch:
 
-# Final parser verification after whitespace regex correction.
+# Final parser verification after corrected regex escaping.
 # Fixture tests cover each store-specific grammar and false-positive guard.
 concurrency:
   group: priority-parser-tests
