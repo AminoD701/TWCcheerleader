@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'tools/fetch_priority_store_events.py'
+      - 'tools/run_priority_stores_safe.py'
       - 'tools/fetch_apify_social_events.py'
       - 'tools/fetch_apify_platform_events.py'
       - 'tools/run_event_fetch.py'
@@ -21,15 +22,15 @@ permissions:
 jobs:
   update-events:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 10
     env:
       APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - name: Refresh four priority public-event stores
+      - name: Refresh four priority public-event stores safely
         continue-on-error: true
-        timeout-minutes: 8
-        run: python tools/fetch_priority_store_events.py
+        timeout-minutes: 7
+        run: python tools/run_priority_stores_safe.py
       - name: Deduplicate preserved public events
         if: always()
         run: python tools/dedupe_auto_events.py
