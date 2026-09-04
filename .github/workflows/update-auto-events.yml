@@ -39,7 +39,7 @@ jobs:
         run: python tools/patch_auto_events.py
       - name: Commit updated events and index
         run: |
-          git add data/auto-events.json index.html
+          git add data/auto-events.json data/event-crawler-state.json index.html
           if git diff --cached --quiet; then
             echo "No event changes"
             exit 0
