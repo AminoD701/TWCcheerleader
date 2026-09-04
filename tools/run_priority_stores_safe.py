@@ -5,11 +5,13 @@ import os
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import fetch_priority_store_events as core
 
 TIMEOUT_SECONDS = 45
+MAX_WORKERS = 8
 
 
 def worker(platform_name: str, account: str, output_path: str) -> int:
@@ -35,8 +37,6 @@ def worker(platform_name: str, account: str, output_path: str) -> int:
         found = []
         for row in rows:
             row_acc = core.row_account(row)
-            # Some actors omit/alter the account field for a single-profile request.
-            # Only accept rows that either resolve to the requested account or have no account.
             if row_acc and row_acc != account:
                 continue
             event = parser(row, platform_name, girls)
@@ -94,16 +94,30 @@ def run_one(platform_name: str, account: str) -> list[dict]:
 
 
 def main() -> None:
-    # Remove stale auto-generated rows from the four priority stores first.
-    # Confirmed seed rows guarantee that known-good website data is refreshed even
-    # when Instagram/Threads scraping is temporarily unavailable.
     preserved = [e for e in core.load_events() if not core.belongs_priority_event(e)]
     seeds = core.confirmed_seed_events()
     found: list[dict] = []
 
-    for account in core.PRIORITY_ACCOUNTS:
-        for platform_name in ("instagram", "threads"):
-            found.extend(run_one(platform_name, account))
+    jobs = [
+        (platform_name, account)
+        for account in core.PRIORITY_ACCOUNTS
+        for platform_name in ("instagram", "threads")
+    ]
+
+    print(f"START parallel priority crawl: jobs={len(jobs)} timeout={TIMEOUT_SECONDS}s")
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_map = {
+            executor.submit(run_one, platform_name, account): (platform_name, account)
+            for platform_name, account in jobs
+        }
+        for future in as_completed(future_map):
+            platform_name, account = future_map[future]
+            try:
+                events = future.result()
+                found.extend(events)
+                print(f"DONE {platform_name} @{account}: events={len(events)}")
+            except Exception as exc:
+                print(f"FAILED {platform_name} @{account}: {type(exc).__name__}: {exc}")
 
     merged_priority = {}
     for event in seeds + found:
