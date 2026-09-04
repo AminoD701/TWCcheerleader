@@ -13,8 +13,8 @@ import fetch_priority_store_events as core
 WORKER_TIMEOUT_SECONDS = 45
 HTTP_TIMEOUT_SECONDS = 30
 MAX_WORKERS = 8
-INSTAGRAM_ACTOR = "scrapers_lat/instagram-scraper"
-THREADS_ACTOR = "thirdwatch/threads-scraper"
+INSTAGRAM_ACTOR = "apify/instagram-api-scraper"
+THREADS_ACTOR = "themineworks/threads-scraper"
 
 
 def fast_apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
@@ -33,10 +33,9 @@ def fast_apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
 def fetch_rows(platform: str, account: str, token: str) -> list[dict]:
     if platform == "instagram":
         return fast_apify_sync(INSTAGRAM_ACTOR, {
-            "usernames": [account],
+            "directUrls": [f"https://www.instagram.com/{account}/"],
             "resultsType": "posts",
-            "postsLimit": 12,
-            "maxRecords": 12,
+            "resultsLimit": 12,
         }, token)
     return fast_apify_sync(THREADS_ACTOR, {
         "usernames": [account],
