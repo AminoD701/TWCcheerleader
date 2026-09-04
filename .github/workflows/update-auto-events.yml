@@ -7,7 +7,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/fetch_auto_events.py'
       - 'tools/fetch_apify_social_events.py'
       - 'tools/dedupe_auto_events.py'
       - 'data/event-social-sources.json'
@@ -20,6 +19,7 @@ permissions:
 jobs:
   update-events:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     env:
       APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
     steps:
@@ -30,15 +30,15 @@ jobs:
             echo "APIFY_TOKEN is not configured. Aborting without changing event data."
             exit 1
           fi
-      - name: Install event URL decoder
-        run: pip install googlenewsdecoder
-      - name: Fetch supplemental public events
-        run: python tools/fetch_auto_events.py
       - name: Fetch Instagram and Threads events via Apify
+        continue-on-error: true
+        timeout-minutes: 7
         run: python tools/fetch_apify_social_events.py
-      - name: Deduplicate merged public events
+      - name: Deduplicate preserved public events
+        if: always()
         run: python tools/dedupe_auto_events.py
       - name: Commit updated events
+        if: always()
         run: |
           git add data/auto-events.json
           if git diff --cached --quiet; then
@@ -49,4 +49,3 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Auto update public cheerleader events"
           git push
-# retrigger after APIFY_TOKEN setup
