@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Trigger integration after seeding current automatic Events data.
 path = Path('index.html')
 text = path.read_text(encoding='utf-8')
 original = text
@@ -11,8 +12,8 @@ text = text.replace('外籍行程與賽事專屬彈窗', '公開行程與賽事�
 text = text.replace("'${e.eventname||\"外籍行程\"}'", "'${e.eventname||\"公開行程\"}'")
 
 # Force a fresh cache namespace for the new Events data model.
-for old in ('v28', 'v29', 'v30'):
-    text = text.replace(f'const CACHE_KEY = "tw_cheerleader_cache_{old}";', 'const CACHE_KEY = "tw_cheerleader_cache_v31";', 1)
+for old in ('v28', 'v29', 'v30', 'v31'):
+    text = text.replace(f'const CACHE_KEY = "tw_cheerleader_cache_{old}";', 'const CACHE_KEY = "tw_cheerleader_cache_v32";', 1)
 
 # Add auto-events to the main data load Promise.
 old_sig = 'const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData] = await Promise.all(['
