@@ -9,6 +9,7 @@ on:
     paths:
       - 'tools/fetch_apify_social_events.py'
       - 'tools/fetch_apify_platform_events.py'
+      - 'tools/run_event_fetch.py'
       - 'tools/dedupe_auto_events.py'
       - 'data/event-social-sources.json'
       - 'data/event-social-posts.json'
@@ -34,7 +35,7 @@ jobs:
       - name: Fetch Instagram and Threads independently via Apify
         continue-on-error: true
         timeout-minutes: 8
-        run: python tools/fetch_apify_platform_events.py
+        run: python tools/run_event_fetch.py
       - name: Deduplicate preserved public events
         if: always()
         run: python tools/dedupe_auto_events.py
