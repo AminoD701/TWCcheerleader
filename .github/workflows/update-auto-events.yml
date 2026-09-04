@@ -49,3 +49,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Auto update public cheerleader events"
           git push
+# retrigger after APIFY_TOKEN setup
