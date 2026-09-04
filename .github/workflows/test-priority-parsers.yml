@@ -1,0 +1,32 @@
+name: Test priority event parsers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/fetch_priority_store_events.py'
+      - 'tools/fetch_apify_social_events.py'
+      - 'tools/fetch_apify_platform_events.py'
+      - 'tools/run_event_fetch.py'
+      - 'tests/test_priority_store_parsers.py'
+      - '.github/workflows/test-priority-parsers.yml'
+  pull_request:
+    paths:
+      - 'tools/**'
+      - 'tests/test_priority_store_parsers.py'
+  workflow_dispatch:
+
+concurrency:
+  group: priority-parser-tests
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python -m pytest -q tests/test_priority_store_parsers.py
