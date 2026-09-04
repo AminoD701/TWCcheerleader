@@ -22,21 +22,27 @@ POSTS_FILE = Path("data/event-social-posts.json")
 EVENTS_FILE = Path("data/auto-events.json")
 TZ = timezone(timedelta(hours=8))
 MAX_FUTURE_DAYS = 240
+
 EVENT_TERMS = [
     "一日店長", "一日店員", "一日經理", "店長", "店員", "見面會", "粉絲見面會",
     "簽名會", "拍照會", "握手會", "合照會", "品牌活動", "品牌大使", "開幕活動",
     "開幕", "站台", "商演", "快閃店", "快閃活動", "新品發表", "記者會", "嘉賓",
     "出席", "公開活動", "路跑", "派對", "應援活動", "粉絲活動", "活動現場",
 ]
-CONTEXT_HINTS = ["活動", "現場", "報名", "登場", "出席", "來店", "店長", "店員", "見面", "合照", "簽名", "快閃", "開幕", "場次"]
+CONTEXT_HINTS = [
+    "活動", "現場", "報名", "登場", "出席", "來店", "店長", "店員", "見面", "合照",
+    "簽名", "快閃", "開幕", "場次", "時間", "地點", "日期"
+]
 
 
-def http_json(url: str, payload: dict | None = None, token: str | None = None, timeout: int = 300):
+def http_json(url: str, payload: dict | None = None, timeout: int = 300):
     data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    headers = {"Content-Type": "application/json", "User-Agent": "TWCcheerleaderEventBot/3.0"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST" if data is not None else "GET")
+    req = urllib.request.Request(
+        url,
+        data=data,
+        headers={"Content-Type": "application/json", "User-Agent": "TWCcheerleaderEventBot/4.0"},
+        method="POST" if data is not None else "GET",
+    )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode("utf-8", errors="replace"))
 
@@ -47,9 +53,22 @@ def fetch_text(url: str) -> str:
         return resp.read().decode("utf-8", errors="replace")
 
 
+def clean_alias(value: str) -> str:
+    value = html.unescape(str(value or "")).strip()
+    if not value:
+        return ""
+    if "instagram.com/" in value or "threads.com/" in value or "threads.net/" in value:
+        m = re.search(r"/@?([A-Za-z0-9._-]+)", value)
+        if m:
+            value = m.group(1)
+    value = value.strip().lstrip("@").strip("/ ")
+    return value
+
+
 def load_girls() -> list[dict]:
     rows = csv.DictReader(io.StringIO(fetch_text(SHEET_CSV)))
     out, seen = [], set()
+    social_key_hints = ("ig", "instagram", "threads", "帳號", "社群", "英文", "english", "韓文", "korean")
     for row in rows:
         real = (row.get("realname") or row.get("姓名") or "").strip()
         nick = (row.get("nickname") or row.get("綽號") or row.get("藝名") or "").strip()
@@ -57,20 +76,67 @@ def load_girls() -> list[dict]:
         if not real or real.lower() in seen:
             continue
         seen.add(real.lower())
-        aliases = [x for x in {real, nick} if x and len(x) >= 2]
+        aliases = {clean_alias(real), clean_alias(nick)}
+        for key, value in row.items():
+            kl = str(key or "").lower()
+            if any(h in kl for h in social_key_hints):
+                for part in re.split(r"[,，;/\s]+", str(value or "")):
+                    a = clean_alias(part)
+                    if a:
+                        aliases.add(a)
+        aliases = [a for a in aliases if len(a) >= 2]
         out.append({"realname": real, "aliases": aliases, "img": image})
     return out
 
 
+def normalize_for_match(value: str) -> str:
+    return re.sub(r"[\s@._-]+", "", str(value or "")).lower()
+
+
 def girl_matches(text: str, girls: list[dict]) -> list[dict]:
+    raw = str(text or "")
+    compact = normalize_for_match(raw)
     found = []
-    compact = re.sub(r"\s+", "", text or "")
     for girl in girls:
-        if any(alias in text or re.sub(r"\s+", "", alias) in compact for alias in girl["aliases"]):
-            found.append(girl)
+        for alias in girl["aliases"]:
+            if alias in raw or normalize_for_match(alias) in compact:
+                found.append(girl)
+                break
         if len(found) >= 12:
             break
     return found
+
+
+def flatten_strings(value, depth: int = 0) -> list[str]:
+    if depth > 5:
+        return []
+    if isinstance(value, str):
+        return [value] if value.strip() else []
+    if isinstance(value, dict):
+        out = []
+        for v in value.values():
+            out.extend(flatten_strings(v, depth + 1))
+        return out
+    if isinstance(value, list):
+        out = []
+        for v in value[:50]:
+            out.extend(flatten_strings(v, depth + 1))
+        return out
+    return []
+
+
+def post_text(item: dict) -> str:
+    strings = flatten_strings(item)
+    seen, parts = set(), []
+    for s in strings:
+        s = html.unescape(str(s)).strip()
+        if not s or s in seen:
+            continue
+        if s.startswith("http") and len(s) > 180:
+            continue
+        seen.add(s)
+        parts.append(s)
+    return "\n".join(parts)
 
 
 def find_event_term(text: str) -> str:
@@ -79,25 +145,24 @@ def find_event_term(text: str) -> str:
 
 def candidate_dates(text: str) -> list[datetime]:
     now = datetime.now(TZ)
-    candidates = []
     patterns = [
         re.compile(r"(?P<y>20\d{2})\s*[年/.-]\s*(?P<m>\d{1,2})\s*[月/.-]\s*(?P<d>\d{1,2})\s*日?"),
         re.compile(r"(?<!\d)(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*日"),
         re.compile(r"(?<!\d)(?P<m>\d{1,2})\s*[/.-]\s*(?P<d>\d{1,2})(?!\d)"),
     ]
+    out = []
     for pat in patterns:
         for m in pat.finditer(text):
             try:
-                has_year = bool(m.groupdict().get("y"))
                 year = int(m.groupdict().get("y") or now.year)
                 dt = datetime(year, int(m.group("m")), int(m.group("d")), tzinfo=TZ)
-                if dt < now - timedelta(days=1) and not has_year:
+                if dt < now - timedelta(days=1) and not m.groupdict().get("y"):
                     dt = dt.replace(year=year + 1)
                 if now - timedelta(days=1) <= dt <= now + timedelta(days=MAX_FUTURE_DAYS):
-                    candidates.append(dt)
+                    out.append(dt)
             except Exception:
                 pass
-    return sorted(set(candidates))
+    return sorted(set(out))
 
 
 def choose_event_date(text: str) -> datetime | None:
@@ -120,65 +185,37 @@ def extract_time(text: str) -> str:
     return "TBA"
 
 
-def flatten_text(value, depth: int = 0) -> list[str]:
-    if depth > 3:
-        return []
-    if isinstance(value, str):
-        return [value] if value.strip() else []
-    if isinstance(value, dict):
-        out = []
-        for k, v in value.items():
-            if k.lower() in {"caption", "captiontext", "text", "description", "title", "body", "content", "alt", "alttext", "accessibilitycaption"}:
-                out.extend(flatten_text(v, depth + 1))
-        return out
-    if isinstance(value, list):
-        out = []
-        for v in value[:12]:
-            out.extend(flatten_text(v, depth + 1))
-        return out
-    return []
-
-
-def post_text(item: dict) -> str:
-    parts = []
-    for key in ("caption", "captionText", "text", "description", "title", "body", "content", "accessibilityCaption", "altText", "alt"):
-        value = item.get(key)
-        if isinstance(value, str) and value.strip():
-            parts.append(value.strip())
-        elif isinstance(value, (dict, list)):
-            parts.extend(flatten_text(value))
-    if not parts:
-        parts.extend(flatten_text(item))
-    seen, clean = set(), []
-    for p in parts:
-        p = html.unescape(str(p)).strip()
-        if p and p not in seen:
-            seen.add(p)
-            clean.append(p)
-    return "\n".join(clean)
-
-
 def first_image(item: dict) -> str:
-    candidates = [item.get(k) for k in (
-        "displayUrl", "display_url", "imageUrl", "image_url", "thumbnailUrl", "thumbnail_url",
-        "profilePicUrl", "profile_pic", "user_pic"
-    )]
-    for key in ("images", "imageUrls", "image_urls", "mediaUrls", "media_urls", "childPosts", "carousel_media", "sidecarChildren"):
-        value = item.get(key)
-        if isinstance(value, list):
-            for x in value:
-                if isinstance(x, str):
-                    candidates.append(x)
-                elif isinstance(x, dict):
-                    candidates.extend([x.get("url"), x.get("displayUrl"), x.get("imageUrl")])
-    return next((x for x in candidates if isinstance(x, str) and x.startswith("http")), "")
+    urls = []
+    for s in flatten_strings(item):
+        if isinstance(s, str) and s.startswith("http") and re.search(r"\.(?:jpg|jpeg|png|webp)(?:\?|$)", s, re.I):
+            urls.append(s)
+    for key in ("displayUrl", "imageUrl", "thumbnailUrl", "profilePicUrl"):
+        v = item.get(key)
+        if isinstance(v, str) and v.startswith("http"):
+            urls.insert(0, v)
+    return urls[0] if urls else ""
+
+
+def username_from_item(item: dict) -> str:
+    for key in ("ownerUsername", "username", "owner_username", "authorUsername"):
+        v = item.get(key)
+        if isinstance(v, str) and v.strip():
+            return v.strip().lstrip("@")
+    for key in ("owner", "author", "user"):
+        v = item.get(key)
+        if isinstance(v, dict):
+            for sub in ("username", "handle"):
+                if isinstance(v.get(sub), str):
+                    return v[sub].strip().lstrip("@")
+    return ""
 
 
 def post_url(item: dict, platform: str) -> str:
-    for key in ("url", "postUrl", "post_url", "shortCodeUrl", "shortcodeUrl", "inputUrl", "profileUrl"):
-        value = item.get(key)
-        if isinstance(value, str) and value.startswith("http"):
-            return value
+    for key in ("url", "postUrl", "post_url", "shortCodeUrl", "shortcodeUrl", "inputUrl"):
+        v = item.get(key)
+        if isinstance(v, str) and v.startswith("http"):
+            return v
     code = item.get("shortCode") or item.get("shortcode") or item.get("code")
     account = username_from_item(item)
     if code and platform == "instagram":
@@ -188,29 +225,21 @@ def post_url(item: dict, platform: str) -> str:
     return ""
 
 
-def username_from_item(item: dict) -> str:
-    for key in ("ownerUsername", "username", "owner_username", "authorUsername", "author", "user"):
-        value = item.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip().lstrip("@")
-        if isinstance(value, dict):
-            for sub in ("username", "handle"):
-                if isinstance(value.get(sub), str):
-                    return value[sub].lstrip("@")
-    return ""
-
-
-def clean_event_title(text: str, term: str, account: str, matched: list[dict], event_dt: datetime) -> str:
-    lines = [re.sub(r"\s+", " ", x).strip(" -|｜") for x in text.splitlines() if x.strip()]
+def clean_event_title(text: str, term: str, matched: list[dict], event_dt: datetime) -> str:
     names = [g["realname"] for g in matched]
-    for line in lines:
+    for line in [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]:
         if len(line) <= 110 and (term in line or any(n in line for n in names)):
             return line
-    host = f"@{account}" if account else "公開活動"
-    return f"{'、'.join(names[:4])} {term or '公開活動'}｜{event_dt.month}/{event_dt.day}｜{host}"
+    return f"{'、'.join(names[:4])} {term or '公開活動'}｜{event_dt.month}/{event_dt.day}"
 
 
 def build_event(item: dict, platform: str, girls: list[dict], stats: dict) -> dict | None:
+    if item.get("error"):
+        stats["actor_error"] += 1
+        return None
+    if platform == "threads" and (item.get("itemType") == "profile" or item.get("isReply") is True):
+        stats["non_post"] += 1
+        return None
     text = post_text(item)
     if not text:
         stats["no_text"] += 1
@@ -225,13 +254,12 @@ def build_event(item: dict, platform: str, girls: list[dict], stats: dict) -> di
         return None
     term = find_event_term(text)
     event_time = extract_time(text)
-    if not term:
-        if event_time == "TBA" and not any(h in text for h in CONTEXT_HINTS):
-            stats["no_event_signal"] += 1
-            return None
-        term = "公開活動"
+    if not term and event_time == "TBA" and not any(h in text for h in CONTEXT_HINTS):
+        stats["no_event_signal"] += 1
+        return None
+    term = term or "公開活動"
     account = username_from_item(item)
-    title = clean_event_title(text, term, account, matched, event_dt)
+    title = clean_event_title(text, term, matched, event_dt)
     image = first_image(item) or next((g["img"] for g in matched if g.get("img")), "")
     url = post_url(item, platform)
     names = "、".join(g["realname"] for g in matched)
@@ -263,6 +291,14 @@ def apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
     return result if isinstance(result, list) else []
 
 
+def normalize_threads_url(url: str) -> str:
+    url = url.replace("threads.com", "threads.net")
+    m = re.search(r"threads\.net/share/([A-Za-z0-9_-]+)", url)
+    if m:
+        return f"https://www.threads.net/t/{m.group(1)}"
+    return url
+
+
 def main() -> None:
     token = os.environ.get("APIFY_TOKEN", "").strip()
     if not token:
@@ -278,9 +314,10 @@ def main() -> None:
     for item in explicit:
         url = item if isinstance(item, str) else item.get("url", "")
         if "threads.com" in url or "threads.net" in url:
-            thread_urls.append(url)
+            thread_urls.append(normalize_threads_url(url))
 
     raw_posts: list[tuple[str, dict]] = []
+
     if ig_accounts:
         payload = {
             "usernames": ig_accounts,
@@ -296,29 +333,33 @@ def main() -> None:
 
     if thread_accounts or thread_urls:
         start_urls = [{"url": f"https://www.threads.net/@{u}"} for u in thread_accounts]
-        start_urls.extend({"url": u.replace("threads.com", "threads.net")} for u in thread_urls)
-        payload = {"startUrls": start_urls, "usernames": thread_accounts, "maxItems": 12, "proxyConfiguration": {"useApifyProxy": True}}
+        start_urls.extend({"url": u} for u in thread_urls)
+        payload = {
+            "startUrls": start_urls,
+            "usernames": thread_accounts,
+            "maxItems": 12,
+            "proxyConfiguration": {"useApifyProxy": True},
+        }
         for item in apify_sync("anyxsolutions/threads-scraper", payload, token):
-            if item.get("itemType") == "profile":
-                continue
             raw_posts.append(("threads", item))
 
     current = json.loads(EVENTS_FILE.read_text(encoding="utf-8")) if EVENTS_FILE.exists() else []
+    stats = {"actor_error": 0, "non_post": 0, "no_text": 0, "no_girl": 0, "no_date": 0, "no_event_signal": 0, "accepted": 0}
     found = []
-    stats = {"no_text": 0, "no_girl": 0, "no_date": 0, "no_event_signal": 0, "accepted": 0}
-    sample_printed = 0
+    rejected_samples = 0
+
     for platform, item in raw_posts:
         event = build_event(item, platform, girls, stats)
         if event:
             found.append(event)
-        elif sample_printed < 5:
-            txt = post_text(item).replace("\n", " ")[:220]
-            print(f"REJECT SAMPLE [{platform}] keys={sorted(item.keys())[:20]} text={txt}")
-            sample_printed += 1
+        elif rejected_samples < 8 and not item.get("error"):
+            sample = post_text(item).replace("\n", " ")[:260]
+            print(f"REJECT SAMPLE [{platform}] keys={list(item.keys())[:20]} text={sample}")
+            rejected_samples += 1
 
     merged = current + found
     EVENTS_FILE.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Apify returned {len(raw_posts)} posts; parsed {len(found)} activity posts; total before dedupe {len(merged)}")
+    print(f"Apify returned {len(raw_posts)} rows; parsed {len(found)} activity posts; total before dedupe {len(merged)}")
     print("Parser stats:", json.dumps(stats, ensure_ascii=False))
 
 
