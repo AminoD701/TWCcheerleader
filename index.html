@@ -2089,7 +2089,7 @@ body.manual-events-mode .manual-event-launch{display:inline-block}
                     const parsed = JSON.parse(cached);
                     
                     if (Date.now() - parsed.timestamp < CACHE_TIME && parsed.dbThemes) {
-                        dbGirls = parsed.dbGirls || []; 
+                        dbGirls = parsed.dbGirls || []; window.dbGirls = dbGirls; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = []; // news is never trusted from localStorage
