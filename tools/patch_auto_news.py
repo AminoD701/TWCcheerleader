@@ -52,64 +52,93 @@ while text.count(new_dbnews) > 1:
     duplicate = text.find(new_dbnews, first + len(new_dbnews))
     text = text[:duplicate] + '                // dbNews already merged above; do not redeclare const variables here.\n' + text[duplicate + len(new_dbnews):]
 
-# New cache namespace: cached core data may stay fast, but cached news is never trusted.
-text = text.replace('const CACHE_KEY = "tw_cheerleader_cache_v26";', 'const CACHE_KEY = "tw_cheerleader_cache_v28";', 1)
-text = text.replace('const CACHE_KEY = "tw_cheerleader_cache_v27";', 'const CACHE_KEY = "tw_cheerleader_cache_v28";', 1)
+# Fresh cache namespace for this rollout.
+for old in ('v26','v27','v28'):
+    text = text.replace(f'const CACHE_KEY = "tw_cheerleader_cache_{old}";', 'const CACHE_KEY = "tw_cheerleader_cache_v29";', 1)
 
-old_cached_block = '''                        if (dbGirls.length > 0) {
-                            // 即使其他資料使用 1 小時快取，新聞仍重新抓最新 auto-news，避免畫面停在舊月份。
-                            try {
-                                const autoNewsData = await fetch(`data/auto-news.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []);
-                                if (Array.isArray(autoNewsData) && autoNewsData.length > 0) {
-                                    const manualCached = (dbNews || []).filter(n => !n.auto);
-                                    const newsSeen = new Set();
-                                    dbNews = [...manualCached, ...autoNewsData].filter(n => {
-                                        const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
-                                        if (!key || newsSeen.has(key)) return false;
-                                        newsSeen.add(key);
-                                        return true;
-                                    });
-                                }
-                            } catch(e) {}
-                            buildGirlMap(); init(); enableEnterButton(); 
-                            return;
-                        }'''
+# On cached core-data path, always re-fetch fresh news.
+old_cached_start = '''                        dbNews = parsed.dbNews || []; '''
+text = text.replace(old_cached_start, '''                        dbNews = []; // news is never trusted from localStorage\n''', 1)
 
-new_cached_block = '''                        if (dbGirls.length > 0) {
-                            // 核心資料可用快取，但新聞每次進站都重新抓「人工 Sheet + 自動新聞 JSON」。
-                            // 不再相信 localStorage 裡的 dbNews，避免新聞頁永久停在舊資料。
-                            try {
-                                const nt = Date.now();
-                                const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
-                                const [freshManualNews, freshAutoNews] = await Promise.all([
-                                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
-                                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
-                                ]);
+# Make all auto-news requests bypass HTTP cache.
+text = text.replace(
+    "fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store' })",
+    "fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })"
+)
+text = text.replace(
+    "fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store' })",
+    "fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })"
+)
 
-                                const newsSeen = new Set();
-                                const mergedFreshNews = [
-                                    ...(Array.isArray(freshManualNews) ? freshManualNews.filter(n => n.title) : []),
-                                    ...(Array.isArray(freshAutoNews) ? freshAutoNews.filter(n => n.title) : [])
-                                ].filter(n => {
-                                    const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
-                                    if (!key || newsSeen.has(key)) return false;
-                                    newsSeen.add(key);
-                                    return true;
-                                });
+# Add a dedicated live refresh function and call it whenever the news page renders.
+refresh_fn = '''
+        window.refreshLatestNews = async function(forceRender = false) {
+            if (window.__newsRefreshInFlight) return;
+            window.__newsRefreshInFlight = true;
+            try {
+                const nt = Date.now();
+                const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
+                const [freshManualNews, freshAutoNews] = await Promise.all([
+                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
+                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+                        .then(r => r.ok ? r.json() : []).catch(() => [])
+                ]);
+                const seen = new Set();
+                const merged = [
+                    ...(Array.isArray(freshManualNews) ? freshManualNews.filter(n => n.title) : []),
+                    ...(Array.isArray(freshAutoNews) ? freshAutoNews.filter(n => n.title) : [])
+                ].filter(n => {
+                    const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
+                    if (!key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+                if (merged.length) {
+                    dbNews = merged;
+                    window.__newsLastRefresh = Date.now();
+                    if (forceRender && currentMode === 'news' && typeof window.renderNewsHub === 'function') {
+                        window.renderNewsHub(true);
+                    }
+                }
+            } catch (e) {
+                console.warn('Live news refresh failed', e);
+            } finally {
+                window.__newsRefreshInFlight = false;
+            }
+        };
+'''
 
-                                if (mergedFreshNews.length > 0) dbNews = mergedFreshNews;
-                            } catch(e) {
-                                console.warn('Fresh news refresh failed; using cached news as fallback.', e);
-                            }
+insert_after = '''        function fetchCSV(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: h => h.trim().toLowerCase().replace(/[\\s_]/g, ""),
+                    complete: res => resolve(res.data),
+                    error: err => reject(err)
+                });
+            });
+        }
+'''
+if 'window.refreshLatestNews = async function' not in text and insert_after in text:
+    text = text.replace(insert_after, insert_after + refresh_fn, 1)
 
-                            buildGirlMap(); init(); enableEnterButton();
-                            return;
-                        }'''
+old_render_sig = '''        window.renderNewsHub = function() {
+            const container = document.getElementById('news-container');'''
+new_render_sig = '''        window.renderNewsHub = function(skipRefresh = false) {
+            const container = document.getElementById('news-container');
+            if (!skipRefresh && (!window.__newsLastRefresh || Date.now() - window.__newsLastRefresh > 15000)) {
+                window.refreshLatestNews(true);
+            }'''
+if old_render_sig in text:
+    text = text.replace(old_render_sig, new_render_sig, 1)
 
-if old_cached_block in text:
-    text = text.replace(old_cached_block, new_cached_block, 1)
-elif 'const mergedFreshNews = [' not in text:
-    print('Warning: cached news block not found; fresh-news replacement was not applied.')
+# News images from publishers should use the raw external URL. Local site images can still use getCdnUrl.
+text = text.replace(
+    "const imgUrl = imgUrls.length > 0 ? window.getCdnUrl(imgUrls[0]) : '';",
+    "const imgUrl = imgUrls.length > 0 ? (/^https?:\\/\\//i.test(imgUrls[0]) ? imgUrls[0] : window.getCdnUrl(imgUrls[0])) : '';"
+)
 
 needle = '''                        <div class="modal-news-text" style="margin-bottom: 20px; margin-top: 0px; padding-top: 0px;">${contentText}</div>
                         
@@ -125,4 +154,4 @@ if text == original:
     print('No changes needed.')
 else:
     path.write_text(text, encoding='utf-8')
-    print('Fresh news loading patched successfully.')
+    print('Live news refresh and publisher image handling patched successfully.')
