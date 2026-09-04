@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 
 import run_event_fetch as legacy
+import store_rule_jcl
 
 platform = legacy.platform
 
@@ -96,6 +97,10 @@ def build_event(item: dict, platform_name: str, girls: list[dict], stats: dict):
 
 platform.strict_event_date = strict_event_date
 platform.build_event = build_event
+
+# Install the dedicated 板橋第一家卡店 / jcl700912 parser after the legacy
+# wrappers so its deterministic rules have final priority for that store.
+store_rule_jcl.install(platform)
 
 
 if __name__ == "__main__":
