@@ -34,12 +34,25 @@ def merge_girls(a: str, b: str) -> str:
 
 
 def event_key(item: dict) -> tuple[str, str, str]:
-    # User-facing duplicate rule: same date + same time + same activity name = one event.
-    return (
-        str(item.get("date", "")).strip(),
-        norm_time(item.get("time", "TBA")),
-        norm(item.get("eventname", "")),
-    )
+    date = str(item.get("date", "")).strip()
+    time = norm_time(item.get("time", "TBA"))
+
+    # Apify records carry a stable activity signature based on activity type + host.
+    # This lets an Instagram caption and a Threads caption for the same activity merge
+    # even when their wording is not identical.
+    signature = str(item.get("activity_signature", "")).strip()
+    if signature:
+        parts = signature.split("|")
+        activity = "|".join(parts[2:]) if len(parts) >= 4 else signature
+        return (date, time, norm(activity))
+
+    activity_type = norm(item.get("activity_type", ""))
+    host = norm(item.get("host", ""))
+    if activity_type and host:
+        return (date, time, f"{activity_type}|{host}")
+
+    # Legacy/manual-like auto records fall back to the visible activity title.
+    return (date, time, norm(item.get("eventname", "")))
 
 
 def completeness(item: dict) -> int:
@@ -72,7 +85,7 @@ def main() -> None:
         better, other = (item, old) if completeness(item) > completeness(old) else (old, item)
         combined = dict(better)
         combined["girls"] = merge_girls(old.get("girls", ""), item.get("girls", ""))
-        for field in ("img", "link", "address", "host", "note", "source"):
+        for field in ("img", "link", "address", "host", "note", "source", "activity_type", "activity_signature"):
             if not str(combined.get(field, "")).strip():
                 combined[field] = other.get(field, "")
         combined["auto"] = bool(old.get("auto") or item.get("auto"))
