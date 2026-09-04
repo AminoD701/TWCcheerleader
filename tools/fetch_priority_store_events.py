@@ -69,7 +69,7 @@ def dt_string(y, m, d):
 
 
 def normalize_address(value: str) -> str:
-    return re.sub(r"\\s+", "", str(value or ""))
+    return re.sub(r"\s+", "", str(value or ""))
 
 
 def clock(hour: str, minute: str, meridiem: str = "") -> str:
