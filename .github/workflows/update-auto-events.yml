@@ -8,8 +8,7 @@ on:
     branches: [main]
     paths:
       - 'tools/fetch_auto_events.py'
-      - 'tools/fetch_social_events.py'
-      - 'tools/fetch_threads_event_posts.py'
+      - 'tools/fetch_apify_social_events.py'
       - 'tools/dedupe_auto_events.py'
       - 'data/event-social-sources.json'
       - 'data/event-social-posts.json'
@@ -21,16 +20,22 @@ permissions:
 jobs:
   update-events:
     runs-on: ubuntu-latest
+    env:
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - name: Verify Apify token
+        run: |
+          if [ -z "$APIFY_TOKEN" ]; then
+            echo "APIFY_TOKEN is not configured. Aborting without changing event data."
+            exit 1
+          fi
       - name: Install event URL decoder
         run: pip install googlenewsdecoder
-      - name: Fetch latest public events
+      - name: Fetch supplemental public events
         run: python tools/fetch_auto_events.py
-      - name: Fetch monitored Instagram and Threads events
-        run: python tools/fetch_social_events.py
-      - name: Fetch explicit Threads share events
-        run: python tools/fetch_threads_event_posts.py
+      - name: Fetch Instagram and Threads events via Apify
+        run: python tools/fetch_apify_social_events.py
       - name: Deduplicate merged public events
         run: python tools/dedupe_auto_events.py
       - name: Commit updated events
