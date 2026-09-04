@@ -7,35 +7,28 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/fetch_priority_store_events.py'
-      - 'tools/run_priority_stores_safe.py'
-      - 'tools/fetch_apify_social_events.py'
-      - 'tools/fetch_apify_platform_events.py'
-      - 'tools/run_event_fetch.py'
+      - 'tools/fetch_priority_stores_direct.py'
       - 'tools/dedupe_auto_events.py'
       - 'data/event-social-posts.json'
+      - 'data/event-social-sources.json'
       - '.github/workflows/update-auto-events.yml'
 
 concurrency:
   group: auto-events
   cancel-in-progress: true
 
-# Re-run after parser correction.
-# Deliberately fail when all sources return zero rows; a green job must mean a real crawl occurred.
 permissions:
   contents: write
 
 jobs:
   update-events:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Crawl four priority stores (Instagram and Threads)
-        timeout-minutes: 8
-        run: python tools/run_priority_stores_safe.py
+      - name: Crawl four stores from anonymous public HTML
+        timeout-minutes: 4
+        run: python tools/fetch_priority_stores_direct.py
       - name: Deduplicate automatic public events
         run: python tools/dedupe_auto_events.py
       - name: Commit updated events
@@ -47,5 +40,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Refresh priority store public events"
+          git commit -m "Refresh direct public store events"
           git push
