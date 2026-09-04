@@ -8114,6 +8114,7 @@ window.renderMinigameStart = function() {
  window.copyManualEventJson=function(){if(manualJson)navigator.clipboard.writeText(JSON.stringify(manualJson,null,2)).then(()=>alert('JSON 已複製'))};
  window.downloadManualEventJson=function(){if(!manualJson)return;const blob=new Blob([JSON.stringify(manualJson,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='manual-event-'+(manualJson.date||'event').replace(/\//g,'-')+'.json';a.click();URL.revokeObjectURL(a.href)};
 })();
-\n</script>
+
+</script>
 </body>
 </html>
