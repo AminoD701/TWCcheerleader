@@ -80,7 +80,7 @@ def post_mappings(explicit: list[dict]) -> dict[str, list[str]]:
 
 
 def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
-    """Pick only names attached to event wording, never all aliases from the whole post."""
+    """Pick only names directly attached to event wording."""
     extracted = [x for x in extract_context_names(text) if not str(x).startswith("@")]
     result = []
     for raw in extracted:
@@ -99,12 +99,25 @@ def canonicalize_context_names(text: str, girls: list[dict]) -> list[str]:
     return result
 
 
-def near_event_names(text: str, girls: list[dict]) -> list[str]:
-    """Fallback: only scan a small window around the event phrase.
+def caption_roster_names(text: str, girls: list[dict]) -> list[str]:
+    """Match roster aliases anywhere in the cleaned caption/body text.
 
-    This prevents unrelated roster aliases elsewhere in a scraped object from being treated
-    as attendees.
+    post_text() now excludes scraped metadata, URLs and timestamps, so a whole-caption
+    roster pass is safe and catches names that are present in the post but not adjacent
+    to the event phrase (for example, attendee names listed on a separate line).
     """
+    result = []
+    for girl in girl_matches(text, girls):
+        name = girl["realname"]
+        if name not in result:
+            result.append(name)
+        if len(result) >= 4:
+            break
+    return result
+
+
+def near_event_names(text: str, girls: list[dict]) -> list[str]:
+    """Fallback: scan a small window around the event phrase."""
     terms = ["一日店長", "一日店員", "一日經理", "見面會", "簽名會", "拍照會", "商演", "站台", "路跑", "派對"]
     windows = []
     for term in terms:
@@ -144,9 +157,17 @@ def primary_girls_for_row(
         return mapped, "source_mapping"
 
     text = post_text(row)
+
+    # Prefer names explicitly tied to event wording.
     context = canonicalize_context_names(text, girls)
     if context:
         return context, "event_context"
+
+    # Then scan the entire CLEAN caption/body against roster aliases. This catches names
+    # like "以恩、凱莉" when they are present elsewhere in the Threads body.
+    roster = caption_roster_names(text, girls)
+    if roster:
+        return roster, "caption_roster"
 
     nearby = near_event_names(text, girls)
     if nearby:
@@ -198,6 +219,7 @@ def parse_platform(
         "post_override": 0,
         "source_mapping": 0,
         "event_context": 0,
+        "caption_roster": 0,
         "near_event": 0,
         "unresolved": 0,
     }
