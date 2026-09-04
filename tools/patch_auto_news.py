@@ -37,9 +37,6 @@ new_dbnews = '''                const manualNews = newsData.filter(n => n.title)
                     return true;
                 });'''
 
-# Only one declaration block is allowed in the same try scope.
-# The previous patch accidentally replaced BOTH original dbNews assignments,
-# creating duplicate const declarations and a JavaScript SyntaxError that blocked site initialization.
 if old_dbnews in text and new_dbnews not in text:
     text = text.replace(old_dbnews, new_dbnews, 1)
 
@@ -47,6 +44,34 @@ while text.count(new_dbnews) > 1:
     first = text.find(new_dbnews)
     duplicate = text.find(new_dbnews, first + len(new_dbnews))
     text = text[:duplicate] + '                // dbNews already merged above; do not redeclare const variables here.\n' + text[duplicate + len(new_dbnews):]
+
+# Force a one-time cache reset for everyone after introducing automatic news.
+text = text.replace('const CACHE_KEY = "tw_cheerleader_cache_v26";', 'const CACHE_KEY = "tw_cheerleader_cache_v27";', 1)
+
+old_cached_return = '''                        if (dbGirls.length > 0) {
+                            buildGirlMap(); init(); enableEnterButton(); 
+                            return; // ✨ 移除了會導致黑屏的錯誤自動淡出代碼
+                        }'''
+new_cached_return = '''                        if (dbGirls.length > 0) {
+                            // 即使其他資料使用 1 小時快取，新聞仍重新抓最新 auto-news，避免畫面停在舊月份。
+                            try {
+                                const autoNewsData = await fetch(`data/auto-news.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []);
+                                if (Array.isArray(autoNewsData) && autoNewsData.length > 0) {
+                                    const manualCached = (dbNews || []).filter(n => !n.auto);
+                                    const newsSeen = new Set();
+                                    dbNews = [...manualCached, ...autoNewsData].filter(n => {
+                                        const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
+                                        if (!key || newsSeen.has(key)) return false;
+                                        newsSeen.add(key);
+                                        return true;
+                                    });
+                                }
+                            } catch(e) {}
+                            buildGirlMap(); init(); enableEnterButton(); 
+                            return;
+                        }'''
+if old_cached_return in text:
+    text = text.replace(old_cached_return, new_cached_return, 1)
 
 needle = '''                        <div class="modal-news-text" style="margin-bottom: 20px; margin-top: 0px; padding-top: 0px;">${contentText}</div>
                         
@@ -62,4 +87,4 @@ if text == original:
     print('No changes needed.')
 else:
     path.write_text(text, encoding='utf-8')
-    print('Automatic news integration repaired successfully.')
+    print('Automatic news cache refresh patched successfully.')
