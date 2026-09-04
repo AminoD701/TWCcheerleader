@@ -2050,7 +2050,7 @@
                     return true;
                 });
                 if (merged.length) {
-                    dbNews = merged;
+                    dbNews = merged.map(n => ({ ...n, tag: window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類') }));
                     window.__newsLastRefresh = Date.now();
                     if (forceRender && currentMode === 'news' && typeof window.renderNewsHub === 'function') {
                         window.renderNewsHub(true);
@@ -2137,6 +2137,10 @@
                     newsSeen.add(key);
                     return true;
                 });
+                dbNews = dbNews.map(n => ({
+                    ...n,
+                    tag: window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類')
+                }));
                 if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
                 if(themesData) dbThemes = themesData.map(t => ({ ...t, safeDate: parseDateFlexible(t.date) })).filter(t => t.safeDate);
                 
@@ -6323,6 +6327,23 @@ window.renderMinigameStart = function() {
             window.scrollTo({top: 0, behavior: 'smooth'}); 
         };
 
+
+        // Canonical news category mapping: legacy Sheet labels + automatic feed labels
+        window.normalizeNewsCategory = function(value) {
+            const raw = String(value || '').trim();
+            const key = raw.toLowerCase().replace(/[\s_\-+\.]/g, '');
+            if (!key) return '未分類';
+
+            if (key.includes('啦啦隊') || key.includes('cheer')) return '啦啦隊';
+            if (key.includes('mlb') || key.includes('大聯盟')) return 'MLB';
+            if (key.includes('cpbl') || key.includes('中華職棒') || key === '中職' || key.includes('中職新聞')) return 'CPBL';
+            if (key.includes('tpbl') || key.includes('台灣職業籃球大聯盟')) return 'TPBL';
+            if (key.includes('plg') || key.includes('pleague')) return 'PLG';
+            if (key.includes('tvbl') || key.includes('tpvl') || key.includes('職業排球') || key === '職排') return 'TVBL';
+
+            return raw;
+        };
+
         window.renderDualTierNewsFilters = function(allNewsData) {
             const mainContainer = document.getElementById('news-filter-container');
             const mainNav = document.getElementById('news-main-filters');
@@ -6335,7 +6356,7 @@ window.renderMinigameStart = function() {
             let categoryTree = { "全部": [] };
             
             allNewsData.forEach(n => {
-                let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
+                let mainTag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || "未分類");
                 // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
                 let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
                 let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
@@ -6371,7 +6392,7 @@ window.renderMinigameStart = function() {
 
         window.selectMainCategory = function(mainTag) {
             window.currentNewsHashtag = ""; 
-            window.currentMainCategory = mainTag;
+            window.currentMainCategory = (mainTag === "全部" ? "全部" : window.normalizeNewsCategory(mainTag));
             window.currentSubCategory = "全部";
             window.currentDisplayLimit = 10;
             window.renderNewsHub(); // 讓這行自動去呼叫正確的資料過濾即可
@@ -6486,7 +6507,7 @@ window.renderMinigameStart = function() {
             let categoryTree = { "全部": [] };
             
             allNewsData.forEach(n => {
-                let mainTag = (n.tag || n['標籤'] || n['分類'] || "未分類").trim();
+                let mainTag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || "未分類");
                 // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
                 let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
                 let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
@@ -6520,7 +6541,7 @@ window.renderMinigameStart = function() {
 
         window.selectMainCategory = function(mainTag) {
             window.currentNewsHashtag = ""; 
-            window.currentMainCategory = mainTag;
+            window.currentMainCategory = (mainTag === "全部" ? "全部" : window.normalizeNewsCategory(mainTag));
             window.currentSubCategory = "全部";
             window.currentDisplayLimit = 10;
             window.renderNewsHub(); // 讓這行自動去呼叫正確的資料過濾即可
@@ -6559,7 +6580,7 @@ window.renderMinigameStart = function() {
 
             // 2. 依照主分類、子分類、Hashtag 與「全文檢索」篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
-                let mainTag = getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類');
+                let mainTag = window.normalizeNewsCategory(getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類'));
                 let rawSubTag = getField(n, ['subtag', 'sub_tag', '子分類', 'subTag'], '');
                 let subTag = rawSubTag !== "" ? rawSubTag : "全部";
 
