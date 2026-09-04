@@ -31,9 +31,11 @@ jobs:
         run: python tools/fetch_priority_stores_direct.py
       - name: Deduplicate automatic public events
         run: python tools/dedupe_auto_events.py
-      - name: Commit updated events
+      - name: Update index integration
+        run: python tools/patch_auto_events.py
+      - name: Commit updated events and index
         run: |
-          git add data/auto-events.json
+          git add data/auto-events.json index.html
           if git diff --cached --quiet; then
             echo "No event changes"
             exit 0
