@@ -51,7 +51,7 @@ class MetaParser(HTMLParser):
             self._script = False
 
 
-def fetch_html(url: str, timeout: int = 25) -> str:
+def fetch_html(url: str, timeout: int = 8) -> str:
     request = Request(url, headers={"User-Agent": UA, "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"})
     with urlopen(request, timeout=timeout) as response:
         return response.read().decode("utf-8", errors="replace")
@@ -207,7 +207,7 @@ def extract_post_urls(platform, text):
 def search_post_urls(platform, account):
     query = f"site:{'instagram.com' if platform == 'instagram' else 'threads.com'} {account}"
     try:
-        document = fetch_html("https://html.duckduckgo.com/html/?q=" + quote(query), timeout=12)
+        document = fetch_html("https://html.duckduckgo.com/html/?q=" + quote(query), timeout=6)
         urls = extract_post_urls(platform, document)
         return urls[:20]
     except Exception:
@@ -273,7 +273,7 @@ def oembed_post(platform, url):
                   "https://www.threads.com/oembed?url=" + quote(url, safe="")])
     for endpoint in endpoints:
         try:
-            raw = fetch_html(endpoint, timeout=15)
+            raw = fetch_html(endpoint, timeout=6)
             data = json.loads(raw)
             if isinstance(data, dict) and (data.get("title") or data.get("author_name")):
                 return {"caption": str(data.get("title") or ""), "image": str(data.get("thumbnail_url") or "")}
