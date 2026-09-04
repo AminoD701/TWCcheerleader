@@ -4,12 +4,17 @@ on:
   push:
     branches: [main]
     paths:
+      - 'data/auto-events.json'
       - 'tools/patch_auto_events.py'
       - '.github/workflows/patch-auto-events.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: integrate-auto-events
+  cancel-in-progress: true
 
 jobs:
   patch:
@@ -29,4 +34,3 @@ jobs:
           git add index.html
           git commit -m "Integrate automatic public events"
           git push
-# re-run after restoring confirmed event data
