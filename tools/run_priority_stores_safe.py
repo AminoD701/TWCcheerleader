@@ -10,13 +10,16 @@ from pathlib import Path
 
 import fetch_priority_store_events as core
 
-TIMEOUT_SECONDS = 35
-HTTP_TIMEOUT_SECONDS = 25
+TIMEOUT_SECONDS = 75
+HTTP_TIMEOUT_SECONDS = 60
 MAX_WORKERS = 8
+
+INSTAGRAM_ACTOR = "scrapers_lat/instagram-scraper"
+THREADS_ACTOR = "thirdwatch/threads-scraper"
 
 
 def fast_apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
-    """Hard-limit every Apify sync request used by the priority-store crawler."""
+    """Run an Apify actor with a hard network/run timeout."""
     actor_id = actor.replace("/", "~")
     quoted = core.base.urllib.parse.quote(token)
     url = (
@@ -27,11 +30,22 @@ def fast_apify_sync(actor: str, payload: dict, token: str) -> list[dict]:
     return result if isinstance(result, list) else []
 
 
-# Patch every route used by the dedicated store crawler, including fallback fetchers.
-core.base.apify_sync = fast_apify_sync
-core.legacy.base.apify_sync = fast_apify_sync
-if hasattr(core.legacy, "platform"):
-    core.legacy.platform.apify_sync = fast_apify_sync
+def fetch_instagram_rows(token: str, account: str) -> list[dict]:
+    payload = {
+        "usernames": [account],
+        "resultsType": "posts",
+        "postsLimit": 12,
+        "maxRecords": 12,
+    }
+    return fast_apify_sync(INSTAGRAM_ACTOR, payload, token)
+
+
+def fetch_threads_rows(token: str, account: str) -> list[dict]:
+    payload = {
+        "usernames": [account],
+        "maxResults": 20,
+    }
+    return fast_apify_sync(THREADS_ACTOR, payload, token)
 
 
 def worker(platform_name: str, account: str, output_path: str) -> int:
@@ -49,9 +63,9 @@ def worker(platform_name: str, account: str, output_path: str) -> int:
 
     try:
         if platform_name == "instagram":
-            rows = core.legacy.fetch_instagram(token, [account])
+            rows = fetch_instagram_rows(token, account)
         elif platform_name == "threads":
-            rows = core.legacy.fetch_threads(token, [account], [])
+            rows = fetch_threads_rows(token, account)
         else:
             rows = []
 
@@ -68,7 +82,11 @@ def worker(platform_name: str, account: str, output_path: str) -> int:
             json.dumps(found, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-        print(f"WORKER {platform_name} @{account}: rows={len(rows)} accepted={len(found)}")
+        print(
+            f"WORKER {platform_name} @{account}: actor="
+            f"{INSTAGRAM_ACTOR if platform_name == 'instagram' else THREADS_ACTOR} "
+            f"rows={len(rows)} accepted={len(found)}"
+        )
         return 0
     except Exception as exc:
         Path(output_path).write_text("[]\n", encoding="utf-8")
@@ -126,8 +144,9 @@ def main() -> None:
     ]
 
     print(
-        f"START parallel priority crawl: jobs={len(jobs)} "
-        f"worker_timeout={TIMEOUT_SECONDS}s http_timeout={HTTP_TIMEOUT_SECONDS}s"
+        f"START priority crawl: jobs={len(jobs)} worker_timeout={TIMEOUT_SECONDS}s "
+        f"http_timeout={HTTP_TIMEOUT_SECONDS}s ig_actor={INSTAGRAM_ACTOR} "
+        f"threads_actor={THREADS_ACTOR}"
     )
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_map = {
@@ -154,7 +173,7 @@ def main() -> None:
         encoding="utf-8",
     )
     print(
-        f"SAFE PRIORITY REFRESH COMPLETE: preserved={len(preserved)} "
+        f"PRIORITY REFRESH COMPLETE: preserved={len(preserved)} "
         f"seeds={len(seeds)} crawled={len(found)} total={len(merged)}"
     )
 
