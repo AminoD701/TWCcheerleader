@@ -5,9 +5,6 @@ from datetime import datetime, timedelta
 
 import fetch_apify_social_events as base
 
-# Extend event wording without duplicating the core parser. These are common commercial
-# event phrases used by Taiwanese stores / organizers that do not necessarily contain
-# the exact term "見面會".
 EXTRA_EVENT_TERMS = [
     "女神來見面",
     "女神見面",
@@ -17,6 +14,8 @@ EXTRA_EVENT_TERMS = [
     "粉絲見面",
     "與你見面",
     "見面日",
+    "心碎療癒室",
+    "療癒室",
 ]
 
 for term in reversed(EXTRA_EVENT_TERMS):
@@ -31,7 +30,6 @@ for term in EXTRA_EVENT_TERMS:
 
 
 def fetch_instagram(token: str, accounts: list[str]) -> list[dict]:
-    """Use the maintained public-profile actor first; fall back only if needed."""
     if not accounts:
         return []
     payload = {
@@ -61,9 +59,7 @@ def _threads_short_url(url: str) -> str:
 
 
 def fetch_threads(token: str, accounts: list[str], explicit: list[dict]) -> list[dict]:
-    """Fetch both watched store profiles and every explicitly supplied public post URL."""
     start_urls = [{"url": f"https://www.threads.net/@{a.lstrip('@')}"} for a in accounts]
-
     seen = {x["url"] for x in start_urls}
     for item in explicit:
         url = item if isinstance(item, str) else item.get("url", "")
@@ -73,10 +69,8 @@ def fetch_threads(token: str, accounts: list[str], explicit: list[dict]) -> list
         if normalized and normalized not in seen:
             seen.add(normalized)
             start_urls.append({"url": normalized})
-
     if not start_urls:
         return []
-
     payload = {
         "startUrls": start_urls,
         "usernames": accounts,
@@ -138,10 +132,8 @@ def _is_goddess_meet_row(row: dict) -> bool:
 
 def _goddess_meet_girls(row: dict, girls: list[dict]) -> list[str]:
     text = platform.clean_post_body(row)
-    # Prefer the explicit attendee sentence, e.g. 跟千昭允還有南和侖一起吃美食簽名拍照
     m = re.search(r"跟\s*([^\s，,。！!\n]{2,12})\s*(?:還有|和|與|\+|➕|＆|&)\s*([^\s，,。！!\n]{2,12})\s*一起", text)
     if not m:
-        # Common first-line format: 千昭允➕南和侖
         m = re.search(r"([\u3400-\u9fff]{2,6})\s*(?:\+|➕|＆|&|和|與)\s*([\u3400-\u9fff]{2,6})", text)
     if not m:
         return []
@@ -157,6 +149,37 @@ def _goddess_meet_girls(row: dict, girls: list[dict]) -> list[str]:
     return names[:2]
 
 
+# hhpuppy_studio / 心碎小狗
+
+def _is_hhpuppy_row(row: dict) -> bool:
+    account = platform.normalize_account(platform.username_from_item(row))
+    body = platform.clean_post_body(row)
+    return account == "hhpuppy_studio" or "心碎小狗" in body or "心碎療癒室" in body
+
+
+def _hhpuppy_girl(row: dict, girls: list[dict]) -> list[str]:
+    text = platform.clean_post_body(row)
+    patterns = [
+        r"今天[の的]\s*心碎療癒師[^\n]{0,12}?女神\s*[「『\"“]?([^」』\"”\s💙❤💔，,。！!\n]{2,16})",
+        r"心碎療癒師[^\n]{0,12}?女神\s*[「『\"“]?([^」』\"”\s💙❤💔，,。！!\n]{2,16})",
+        r"女神\s*[「『\"“]([^」』\"”]{2,16})[」』\"”]",
+    ]
+    for pat in patterns:
+        m = re.search(pat, text)
+        if not m:
+            continue
+        raw = m.group(1).strip()
+        exact = platform.exact_realname_matches(raw, girls)
+        if exact:
+            return exact[:1]
+        aliases = platform.safe_alias_matches(raw, girls)
+        if aliases:
+            return aliases[:1]
+        if not platform.looks_like_date_or_label(raw):
+            return [raw]
+    return []
+
+
 def primary_girls_for_row(row, platform_name, girls, source_mapping, explicit_mapping):
     if _is_silbi_row(row):
         featured = _silbi_featured_girl(row, girls)
@@ -166,11 +189,24 @@ def primary_girls_for_row(row, platform_name, girls, source_mapping, explicit_ma
         featured = _goddess_meet_girls(row, girls)
         if featured:
             return featured, "goddess_meet_featured_girls"
+    if _is_hhpuppy_row(row):
+        featured = _hhpuppy_girl(row, girls)
+        if featured:
+            return featured, "hhpuppy_featured_girl"
     return _original_primary_girls(row, platform_name, girls, source_mapping, explicit_mapping)
 
 
 def strict_event_date(text: str):
-    # 女神來見面: only the line labelled 活動時間 is the activity date.
+    # 心碎小狗：日期固定放在【YYYY/M/D(週)】的活動抬頭，後面的場次/報名資訊都不是活動日。
+    if "心碎小狗" in text or "心碎療癒室" in text:
+        m = re.search(r"[【\[]\s*(20\d{2})\s*[/／.\-]\s*(\d{1,2})\s*[/／.\-]\s*(\d{1,2})(?:\([^)]*\)|（[^）]*）)?\s*[】\]]", text)
+        if m:
+            try:
+                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), tzinfo=platform.TZ)
+            except ValueError:
+                pass
+
+    # 女神來見面：只認「活動時間」標籤後的日期。
     if "女神來見面" in text:
         m = re.search(r"活動時間\s*[:：]\s*(20\d{2})\s*[/／.\-]\s*(\d{1,2})\s*[/／.\-]\s*(\d{1,2})", text)
         if m:
@@ -179,7 +215,7 @@ def strict_event_date(text: str):
             except ValueError:
                 pass
 
-    # silbi_house standard: the leading "9月12日女神降臨" is the activity date.
+    # 全州喜比食堂：開頭「9月12日女神降臨」是活動日；售票日不算。
     if "全州喜比食堂" in text or "女神降臨" in text:
         m = re.search(r"(?:^|\n)\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*女神降臨", text)
         if m:
@@ -206,6 +242,21 @@ def _goddess_meet_time(text: str) -> str:
     return ""
 
 
+def _hhpuppy_time(text: str) -> str:
+    m = re.search(
+        r"[【\[]\s*20\d{2}\s*[/／.\-]\s*\d{1,2}\s*[/／.\-]\s*\d{1,2}(?:\([^)]*\)|（[^）]*）)?\s*[】\]]\s*(\d{1,2}:\d{2})\s*[-–~～]\s*(\d{1,2}:\d{2})",
+        text,
+    )
+    if m:
+        return f"{m.group(1)}-{m.group(2)}"
+    return ""
+
+
+def _hhpuppy_address(text: str) -> str:
+    m = re.search(r"活動地址\s*[:：]\s*([^\n]+)", text)
+    return m.group(1).strip() if m else ""
+
+
 def build_event(item: dict, platform_name: str, girls: list[dict], stats: dict):
     event = _original_build_event(item, platform_name, girls, stats)
     if not event:
@@ -226,8 +277,21 @@ def build_event(item: dict, platform_name: str, girls: list[dict], stats: dict):
         slots = _goddess_meet_time(text)
         if slots:
             event["time"] = slots
-        # Keep the source post as the official link; signup date/time remains descriptive only.
         event["note"] = "主辦：女神來見面；地點：TGI FRIDAYS 華泰餐廳。活動日期與場次以貼文『活動時間』欄位為準。"
+
+    if _is_hhpuppy_row(item):
+        text = platform.clean_post_body(item)
+        event["host"] = "心碎小狗"
+        event["organizer"] = "心碎小狗"
+        event["activity_type"] = "粉絲互動簽名合照活動"
+        event["eventname"] = "心碎小狗｜心碎療癒室"
+        slots = _hhpuppy_time(text)
+        if slots:
+            event["time"] = slots
+        address = _hhpuppy_address(text)
+        if address:
+            event["address"] = address
+        event["note"] = "主辦：心碎小狗。活動日期、時間與出席女孩以貼文『心碎療癒室』抬頭資訊為準。"
     return event
 
 
