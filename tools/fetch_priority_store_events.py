@@ -69,9 +69,7 @@ def dt_string(y, m, d):
 
 
 def normalize_address(value: str) -> str:
-    value = re.sub(r"\s+", " ", str(value or "")).strip()
-    value = re.sub(r"\s+(?=(號|樓|F)\b)", "", value)
-    return value
+    return re.sub(r"\\s+", "", str(value or ""))
 
 
 def clock(hour: str, minute: str, meridiem: str = "") -> str:
