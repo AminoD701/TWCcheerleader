@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v27";
+        const CACHE_KEY = "tw_cheerleader_cache_v28";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2043,21 +2043,33 @@
                         dbThemes = parsed.dbThemes || []; 
                         
                         if (dbGirls.length > 0) {
-                            // 即使其他資料使用 1 小時快取，新聞仍重新抓最新 auto-news，避免畫面停在舊月份。
+                            // 核心資料可用快取，但新聞每次進站都重新抓「人工 Sheet + 自動新聞 JSON」。
+                            // 不再相信 localStorage 裡的 dbNews，避免新聞頁永久停在舊資料。
                             try {
-                                const autoNewsData = await fetch(`data/auto-news.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []);
-                                if (Array.isArray(autoNewsData) && autoNewsData.length > 0) {
-                                    const manualCached = (dbNews || []).filter(n => !n.auto);
-                                    const newsSeen = new Set();
-                                    dbNews = [...manualCached, ...autoNewsData].filter(n => {
-                                        const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
-                                        if (!key || newsSeen.has(key)) return false;
-                                        newsSeen.add(key);
-                                        return true;
-                                    });
-                                }
-                            } catch(e) {}
-                            buildGirlMap(); init(); enableEnterButton(); 
+                                const nt = Date.now();
+                                const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
+                                const [freshManualNews, freshAutoNews] = await Promise.all([
+                                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
+                                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
+                                ]);
+
+                                const newsSeen = new Set();
+                                const mergedFreshNews = [
+                                    ...(Array.isArray(freshManualNews) ? freshManualNews.filter(n => n.title) : []),
+                                    ...(Array.isArray(freshAutoNews) ? freshAutoNews.filter(n => n.title) : [])
+                                ].filter(n => {
+                                    const key = ((n.url || '') + '|' + (n.title || '')).trim().toLowerCase();
+                                    if (!key || newsSeen.has(key)) return false;
+                                    newsSeen.add(key);
+                                    return true;
+                                });
+
+                                if (mergedFreshNews.length > 0) dbNews = mergedFreshNews;
+                            } catch(e) {
+                                console.warn('Fresh news refresh failed; using cached news as fallback.', e);
+                            }
+
+                            buildGirlMap(); init(); enableEnterButton();
                             return;
                         }
                     }
@@ -2075,7 +2087,7 @@
                     fetchCSV(`${baseUrl}&gid=417186374&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=92509162&t=${t}`),
                     fetchCSV(`${baseUrl}&gid=547736461&t=${t}`),
-                    fetch(`data/auto-news.json?t=${t}`).then(r => r.ok ? r.json() : []).catch(() => [])
+                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
 
                 dbGirls = girlsData.filter(i => i.realname);
