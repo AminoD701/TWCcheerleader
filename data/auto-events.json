@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "confirmed-20260912-shiqi-pinede",
+    "date": "2026/09/12",
+    "time": "14:00",
+    "girls": "瑟七",
+    "eventname": "〖特企〗PINÈDE 彼內朵 X 中職真香 瑟七一日店長",
+    "host": "中職真香活動平台",
+    "address": "PINÈDE 彼內朵 市府店",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "activity_type": "一日店長",
+    "auto": true,
+    "verified": true
+  },
+  {
+    "id": "confirmed-20260912-linke-pinede",
+    "date": "2026/09/12",
+    "time": "17:00",
+    "girls": "林可",
+    "eventname": "〖特企〗PINÈDE 彼內朵 X 中職真香 林可一日店長",
+    "host": "中職真香活動平台",
+    "address": "PINÈDE 彼內朵 市府店",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "activity_type": "一日店長",
+    "auto": true,
+    "verified": true
+  },
+  {
+    "id": "confirmed-20260920-jiayi-party",
+    "date": "2026/09/20",
+    "time": "13:30",
+    "girls": "佳依",
+    "eventname": "〖特企〗佳依的局間秘密派對",
+    "host": "中職真香活動平台",
+    "address": "MUU ONE BEAUTY活動空間",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "activity_type": "派對",
+    "auto": true,
+    "verified": true
+  },
+  {
+    "id": "confirmed-20261018-nanminjeong-run",
+    "date": "2026/10/18",
+    "time": "05:30",
+    "girls": "南珉貞",
+    "eventname": "2026 第8屆寶礦力路跑 남민정 南珉貞",
+    "host": "中職真香活動平台",
+    "address": "大佳河濱公園蛋型廣場",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "activity_type": "路跑",
+    "auto": true,
+    "verified": true
+  }
+]
