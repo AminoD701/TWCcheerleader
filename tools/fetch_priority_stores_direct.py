@@ -230,7 +230,7 @@ def known_post_urls(platform, account):
     return list(dict.fromkeys(urls))
 
 
-def discover_instaloader(account, limit=18):
+def _discover_instaloader(account, limit=18):
     try:
         import instaloader
         loader = instaloader.Instaloader(download_pictures=False, download_videos=False,
@@ -253,6 +253,17 @@ def discover_instaloader(account, limit=18):
         print(f"IG_DISCOVERY instaloader @{account} posts=0 reason={type(exc).__name__}")
         return []
 
+
+
+def discover_instaloader(account, limit=18):
+    # Instaloader is best-effort and isolated in a daemon thread so a blocked
+    # public profile cannot consume the whole five-minute Actions job.
+    import threading
+    result = []
+    worker = threading.Thread(target=lambda: result.extend(_discover_instaloader(account, limit)), daemon=True)
+    worker.start()
+    worker.join(timeout=20)
+    return result if not worker.is_alive() else []
 
 def discover_from_profile(platform, account):
     hosts = ["www.instagram.com"] if platform == "instagram" else ["www.threads.com", "www.threads.net"]
