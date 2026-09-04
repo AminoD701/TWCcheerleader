@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "id": "auto-event-seed-20260912-se7",
+    "date": "2026/09/12",
+    "time": "14:00",
+    "girls": "瑟七",
+    "eventname": "PINÈDE 彼內朵一日店長",
+    "host": "PINÈDE 彼內朵",
+    "address": "詳見官方公告",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "auto": true
+  },
+  {
+    "id": "auto-event-seed-20260912-linke",
+    "date": "2026/09/12",
+    "time": "17:00",
+    "girls": "林可",
+    "eventname": "PINÈDE 彼內朵一日店長",
+    "host": "PINÈDE 彼內朵",
+    "address": "詳見官方公告",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "auto": true
+  },
+  {
+    "id": "auto-event-seed-20260920-jiayi",
+    "date": "2026/09/20",
+    "time": "13:30",
+    "girls": "佳依",
+    "eventname": "局間秘密派對",
+    "host": "",
+    "address": "詳見官方公告",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "auto": true
+  },
+  {
+    "id": "auto-event-seed-20261018-namminjeong",
+    "date": "2026/10/18",
+    "time": "05:30",
+    "girls": "南珉貞",
+    "eventname": "寶礦力路跑",
+    "host": "寶礦力水得",
+    "address": "詳見官方公告",
+    "note": "公開活動資料彙整；活動細節請以原始來源／主辦單位最新公告為準。",
+    "img": "",
+    "link": "https://www.cpblgirls.tw/linebot/frontend/event_list.php",
+    "source": "中職真香活動平台",
+    "auto": true
+  }
+]
