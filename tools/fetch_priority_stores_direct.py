@@ -236,6 +236,7 @@ def discover_instaloader(account, limit=18):
         loader = instaloader.Instaloader(download_pictures=False, download_videos=False,
                                          download_video_thumbnails=False, save_metadata=False,
                                          quiet=True)
+        loader.context.request_timeout = 8
         profile = instaloader.Profile.from_username(loader.context, account)
         results = []
         for post in profile.get_posts():
