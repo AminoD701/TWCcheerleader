@@ -17,26 +17,31 @@ SHEET_CSV = (
     "pub?output=csv&gid=0"
 )
 SOURCES_FILE = Path("data/event-social-sources.json")
+POSTS_FILE = Path("data/event-social-posts.json")
 EVENTS_FILE = Path("data/auto-events.json")
 TZ = timezone(timedelta(hours=8))
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152 Safari/537.36"
+IG_APP_ID = "936619743392459"
 EVENT_TERMS = [
     "一日店長", "一日店員", "見面會", "粉絲見面會", "簽名會", "拍照會", "握手會",
     "品牌活動", "品牌大使", "開幕活動", "開幕", "站台", "商演", "快閃店", "快閃活動",
     "新品發表", "記者會", "擔任嘉賓", "活動嘉賓", "出席活動", "公開活動", "路跑", "派對",
 ]
 MAX_FUTURE_DAYS = 180
-MAX_POSTS_PER_ACCOUNT = 12
+MAX_POSTS_PER_ACCOUNT = 16
 
 
-def fetch_text(url: str, timeout: int = 15) -> tuple[str, str]:
-    req = urllib.request.Request(url, headers={
+def fetch_text(url: str, timeout: int = 15, extra_headers: dict | None = None) -> tuple[str, str]:
+    headers = {
         "User-Agent": USER_AGENT,
         "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.7",
-        "Accept": "text/html,application/xhtml+xml",
-    })
+        "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        data = resp.read(2_000_000)
+        data = resp.read(2_500_000)
         return data.decode("utf-8", errors="replace"), resp.geturl()
 
 
@@ -63,8 +68,7 @@ def meta_value(page: str, keys: list[str]) -> str:
 def load_girls() -> list[dict]:
     page, _ = fetch_text(SHEET_CSV)
     rows = csv.DictReader(io.StringIO(page))
-    out = []
-    seen = set()
+    out, seen = [], set()
     for row in rows:
         real = (row.get("realname") or row.get("姓名") or "").strip()
         nick = (row.get("nickname") or row.get("綽號") or row.get("藝名") or "").strip()
@@ -130,7 +134,33 @@ def normalize_title(value: str) -> str:
     return re.sub(r"[\s\W_]+", "", value or "").lower()
 
 
-def profile_post_urls(platform: str, account: str, page: str, final_url: str) -> list[str]:
+def instagram_api_post_urls(account: str) -> list[str]:
+    url = "https://www.instagram.com/api/v1/users/web_profile_info/?username=" + urllib.parse.quote(account)
+    try:
+        raw, _ = fetch_text(url, extra_headers={
+            "X-IG-App-ID": IG_APP_ID,
+            "X-ASBD-ID": "129477",
+            "Referer": f"https://www.instagram.com/{account}/",
+        })
+        payload = json.loads(raw)
+        user = (payload.get("data") or {}).get("user") or {}
+        edges = ((user.get("edge_owner_to_timeline_media") or {}).get("edges") or [])
+        urls = []
+        for edge in edges[:MAX_POSTS_PER_ACCOUNT]:
+            node = edge.get("node") or {}
+            shortcode = node.get("shortcode")
+            typename = node.get("__typename", "")
+            if shortcode:
+                kind = "reel" if "Video" in typename else "p"
+                urls.append(f"https://www.instagram.com/{kind}/{shortcode}/")
+        print(f"instagram API exposed {len(urls)} posts: @{account}")
+        return urls
+    except Exception as exc:
+        print(f"instagram API failed: @{account}: {exc}")
+        return []
+
+
+def profile_post_urls(platform: str, account: str, page: str) -> list[str]:
     urls = set()
     if platform == "instagram":
         for m in re.finditer(r'(?:https?://(?:www\.)?instagram\.com)?/(p|reel)/([A-Za-z0-9_-]+)', page):
@@ -145,69 +175,127 @@ def profile_post_urls(platform: str, account: str, page: str, final_url: str) ->
     return list(urls)[:MAX_POSTS_PER_ACCOUNT]
 
 
+def instagram_fallback_urls(url: str) -> list[str]:
+    m = re.search(r"instagram\.com/(p|reel)/([A-Za-z0-9_-]+)", url)
+    if not m:
+        return [url]
+    kind, code = m.group(1), m.group(2)
+    return [
+        f"https://www.instagram.com/{kind}/{code}/",
+        f"https://www.instagram.com/{kind}/{code}/embed/captioned/",
+        f"https://www.ddinstagram.com/{kind}/{code}/",
+        f"https://www.vxinstagram.com/{kind}/{code}/",
+    ]
+
+
 def post_info(url: str) -> tuple[str, str, str]:
-    try:
-        page, final_url = fetch_text(url)
-    except Exception as exc:
-        print(f"post fetch failed: {url}: {exc}")
-        return "", "", ""
-    title = meta_value(page, ["og:title", "twitter:title"])
-    desc = meta_value(page, ["og:description", "description", "twitter:description"])
-    image = meta_value(page, ["og:image", "twitter:image", "twitter:image:src"])
-    if image.startswith("//"):
-        image = "https:" + image
-    if image:
-        image = urllib.parse.urljoin(final_url, image)
-    text = strip_html(" ".join([title, desc]))
-    return text, image, final_url
+    candidates = instagram_fallback_urls(url) if "instagram.com/" in url else [url]
+    last_error = None
+    for candidate in candidates:
+        try:
+            page, final_url = fetch_text(candidate)
+            title = meta_value(page, ["og:title", "twitter:title"])
+            desc = meta_value(page, ["og:description", "description", "twitter:description"])
+            image = meta_value(page, ["og:image", "twitter:image", "twitter:image:src"])
+            if image.startswith("//"):
+                image = "https:" + image
+            if image:
+                image = urllib.parse.urljoin(final_url, image)
+            text = strip_html(" ".join([title, desc]))
+            if text:
+                return text, image, url
+        except Exception as exc:
+            last_error = exc
+    print(f"post fetch failed: {url}: {last_error}")
+    return "", "", ""
+
+
+def event_from_post(post_url: str, account: str, platform: str, girls: list[dict]) -> dict | None:
+    text, image, canonical_url = post_info(post_url)
+    if not text or not contains_event_term(text):
+        return None
+    matched = girl_matches(text, girls)
+    if not matched:
+        return None
+    event_dt = choose_event_date(text)
+    if not event_dt:
+        return None
+    names = [g["realname"] for g in matched]
+    if not image:
+        image = next((g["img"] for g in matched if g.get("img")), "")
+    short_title = text[:110]
+    uid_base = f"{event_dt.date()}|{account}|{normalize_title(short_title)}|{'/'.join(names)}"
+    uid = hashlib.sha1(uid_base.encode("utf-8")).hexdigest()[:16]
+    return {
+        "id": f"auto-event-social-{uid}",
+        "date": event_dt.strftime("%Y/%m/%d"),
+        "time": extract_time(text),
+        "girls": "、".join(names),
+        "eventname": short_title,
+        "host": f"@{account}" if account else "",
+        "address": "詳見官方公告",
+        "note": f"自動發現來源：{platform} @{account}\n活動細節請以原始貼文最新公告為準。",
+        "img": image,
+        "link": canonical_url,
+        "source": f"{platform} @{account}",
+        "auto": True,
+    }
 
 
 def crawl_source(source: dict, girls: list[dict]) -> list[dict]:
     platform = source["platform"]
     account = source["account"]
     url = source["url"]
-    try:
-        page, final_url = fetch_text(url)
-    except Exception as exc:
-        print(f"profile fetch failed: {platform} @{account}: {exc}")
-        return []
+    post_urls = []
 
-    post_urls = profile_post_urls(platform, account, page, final_url)
+    if platform == "instagram":
+        post_urls.extend(instagram_api_post_urls(account))
+
+    if not post_urls:
+        try:
+            page, _ = fetch_text(url)
+            post_urls.extend(profile_post_urls(platform, account, page))
+        except Exception as exc:
+            print(f"profile fetch failed: {platform} @{account}: {exc}")
+
     if not post_urls:
         print(f"no public post URLs exposed: {platform} @{account}")
         return []
 
     out = []
+    seen_urls = set()
     for post_url in post_urls:
-        text, image, final_post_url = post_info(post_url)
-        if not text or not contains_event_term(text):
+        if post_url in seen_urls:
             continue
-        matched = girl_matches(text, girls)
-        if not matched:
+        seen_urls.add(post_url)
+        event = event_from_post(post_url, account, platform, girls)
+        if event:
+            out.append(event)
+    return out
+
+
+def crawl_explicit_posts(girls: list[dict]) -> list[dict]:
+    if not POSTS_FILE.exists():
+        return []
+    try:
+        posts = json.loads(POSTS_FILE.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"explicit post list failed: {exc}")
+        return []
+    out = []
+    for item in posts:
+        if isinstance(item, str):
+            url, account, platform = item, "", "instagram" if "instagram.com" in item else "threads"
+        else:
+            url = item.get("url", "")
+            account = item.get("account", "")
+            platform = item.get("platform", "instagram" if "instagram.com" in url else "threads")
+        if not url:
             continue
-        event_dt = choose_event_date(text)
-        if not event_dt:
-            continue
-        names = [g["realname"] for g in matched]
-        if not image:
-            image = next((g["img"] for g in matched if g.get("img")), "")
-        short_title = text[:110]
-        uid_base = f"{event_dt.date()}|{account}|{normalize_title(short_title)}|{'/'.join(names)}"
-        uid = hashlib.sha1(uid_base.encode("utf-8")).hexdigest()[:16]
-        out.append({
-            "id": f"auto-event-social-{uid}",
-            "date": event_dt.strftime("%Y/%m/%d"),
-            "time": extract_time(text),
-            "girls": "、".join(names),
-            "eventname": short_title,
-            "host": f"@{account}",
-            "address": "詳見官方公告",
-            "note": f"自動發現來源：{platform} @{account}\n活動細節請以原始貼文最新公告為準。",
-            "img": image,
-            "link": final_post_url,
-            "source": f"{platform} @{account}",
-            "auto": True,
-        })
+        event = event_from_post(url, account, platform, girls)
+        if event:
+            out.append(event)
+    print(f"explicit social posts produced {len(out)} events")
     return out
 
 
@@ -218,18 +306,13 @@ def main() -> None:
     girls = load_girls()
     sources = json.loads(SOURCES_FILE.read_text(encoding="utf-8"))
     current = json.loads(EVENTS_FILE.read_text(encoding="utf-8")) if EVENTS_FILE.exists() else []
-    found = []
+    found = crawl_explicit_posts(girls)
     for source in sources:
         found.extend(crawl_source(source, girls))
 
-    merged = []
-    seen = set()
+    merged, seen = [], set()
     for item in current + found:
-        key = (
-            item.get("date", ""),
-            normalize_title(item.get("eventname", "")),
-            item.get("girls", ""),
-        )
+        key = (item.get("date", ""), normalize_title(item.get("eventname", "")), item.get("girls", ""))
         if key in seen:
             continue
         seen.add(key)
