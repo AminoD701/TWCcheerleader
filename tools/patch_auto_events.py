@@ -153,7 +153,7 @@ fetch_csv_replacement = '''        async function fetchCSV(url, timeoutMs = 7000
                 clearTimeout(timer);
             }
         }'''
-text, fetch_csv_replaced = fetch_csv_pattern.subn(fetch_csv_replacement, text, count=1)
+text, fetch_csv_replaced = fetch_csv_pattern.subn(lambda _: fetch_csv_replacement, text, count=1)
 
 # A valid local cache should make the site usable immediately. Previously the
 # cache path still waited for fresh News and Events network requests before the
