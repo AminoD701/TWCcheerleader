@@ -1979,7 +1979,7 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
-        const CACHE_KEY = "tw_cheerleader_cache_v34";
+        const CACHE_KEY = "tw_cheerleader_cache_v35";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2015,17 +2015,29 @@
             }
         }
 
-        function fetchCSV(url) {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
-                    transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
-                    complete: res => resolve(res.data),
-                    error: err => reject(err)
+        async function fetchCSV(url, timeoutMs = 7000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {
+                    cache: 'no-store',
+                    signal: controller.signal,
+                    headers: { 'Cache-Control': 'no-cache' }
                 });
-            });
+                if (!response.ok) throw new Error(`CSV HTTP ${response.status}`);
+                const csvText = await response.text();
+                return await new Promise((resolve, reject) => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        transformHeader: h => h.trim().toLowerCase().replace(/[\s_]/g, ""),
+                        complete: res => resolve(res.data || []),
+                        error: err => reject(err)
+                    });
+                });
+            } finally {
+                clearTimeout(timer);
+            }
         }
 
         window.refreshLatestNews = async function(forceRender = false) {
@@ -2079,6 +2091,11 @@
                         dbThemes = parsed.dbThemes || []; 
                         
                         if (dbGirls.length > 0) {
+                            // CACHE_FAST_START_V1: cached core data is enough to enter immediately.
+                            buildGirlMap();
+                            init();
+                            enableEnterButton();
+
                             // 核心資料可用快取，但新聞每次進站都重新抓「人工 Sheet + 自動新聞 JSON」。
                             // 不再相信 localStorage 裡的 dbNews，避免新聞頁永久停在舊資料。
                             try {
@@ -2128,7 +2145,9 @@
                                 console.warn('Fresh public Events refresh failed; using cached Events as fallback.', e);
                             }
 
-                            buildGirlMap(); init(); enableEnterButton();
+                            if (typeof window.renderContent === 'function' && (currentMode === 'news' || currentMode === 'events')) {
+                                window.renderContent();
+                            }
                             return;
                         }
                     }
@@ -2140,12 +2159,12 @@
 
             try {
                 const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, manualEventsData] = await Promise.all([
-                    fetchCSV(`${baseUrl}&gid=0&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=925411186&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=417186374&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=92509162&t=${t}`),
-                    fetchCSV(`${baseUrl}&gid=547736461&t=${t}`),
+                    fetchCSV(`${baseUrl}&gid=0&t=${t}`).catch(() => []),
+                    fetchCSV(`${baseUrl}&gid=925411186&t=${t}`).catch(() => []),
+                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`).catch(() => []),
+                    fetchCSV(`${baseUrl}&gid=417186374&t=${t}`).catch(() => []),
+                    fetchCSV(`${baseUrl}&gid=92509162&t=${t}`).catch(() => []),
+                    fetchCSV(`${baseUrl}&gid=547736461&t=${t}`).catch(() => []),
                     fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => []),
                     fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
                 ]);
@@ -7596,6 +7615,30 @@ window.renderMinigameStart = function() {
                     <div style="display:flex; flex-direction:column; width:100%;">${themeCardsHtml}</div>
                 </div>`;
         };
+        // LANDING_WATCHDOG_V1
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const btn = document.getElementById('enter-btn');
+                if (!btn || !btn.disabled) return;
+                if (Array.isArray(dbGirls) && dbGirls.length > 0) {
+                    try {
+                        buildGirlMap();
+                        init();
+                    } catch (e) {
+                        console.warn('Startup watchdog recovered from init error.', e);
+                    }
+                    enableEnterButton();
+                } else {
+                    const spinner = document.getElementById('loading-spinner');
+                    const textEl = document.getElementById('enter-text');
+                    if (spinner) spinner.style.display = 'none';
+                    btn.disabled = false;
+                    btn.onclick = () => location.reload();
+                    btn.style.background = '#ff4757';
+                    if (textEl) textEl.textContent = '讀取逾時・點此重試 RETRY';
+                }
+            }, 9000);
+        });
         window.onload = loadData;
        // =========================================================================
         // 🌟 明星賽專屬站位地圖引擎 (休賽季謝幕模式)
