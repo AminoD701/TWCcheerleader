@@ -14,7 +14,7 @@ text = text.replace("'${e.eventname||\"外籍行程\"}'", "'${e.eventname||\"公
 # New cache namespace, and public Events are refreshed separately below on every visit.
 text = re.sub(
     r'const CACHE_KEY = "tw_cheerleader_cache_v\d+";',
-    'const CACHE_KEY = "tw_cheerleader_cache_v34";',
+    'const CACHE_KEY = "tw_cheerleader_cache_v35";',
     text,
     count=1,
 )
@@ -119,8 +119,111 @@ if marker not in text:
     if needle in text:
         text = text.replace(needle, injected, 1)
 
+# -----------------------------------------------------------------------------
+# Homepage loading reliability fixes
+# -----------------------------------------------------------------------------
+# PapaParse's remote download mode has no reliable request timeout. A stalled
+# Google Sheets CSV request can therefore leave the landing screen spinning
+# forever. Fetch the CSV ourselves with AbortController, then parse the text.
+fetch_csv_pattern = re.compile(
+    r'''        function fetchCSV\(url\) \{\n            return new Promise\(\(resolve, reject\) => \{\n                Papa\.parse\(url, \{\n                    download: true,\n                    header: true,\n                    skipEmptyLines: true,\n                    transformHeader: h => h\.trim\(\)\.toLowerCase\(\)\.replace\(/\[\\s_\]/g, ""\),\n                    complete: res => resolve\(res\.data\),\n                    error: err => reject\(err\)\n                \}\);\n            \}\);\n        \}''',
+    re.S,
+)
+fetch_csv_replacement = '''        async function fetchCSV(url, timeoutMs = 7000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {
+                    cache: 'no-store',
+                    signal: controller.signal,
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                if (!response.ok) throw new Error(`CSV HTTP ${response.status}`);
+                const csvText = await response.text();
+                return await new Promise((resolve, reject) => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        transformHeader: h => h.trim().toLowerCase().replace(/[\\s_]/g, ""),
+                        complete: res => resolve(res.data || []),
+                        error: err => reject(err)
+                    });
+                });
+            } finally {
+                clearTimeout(timer);
+            }
+        }'''
+text, fetch_csv_replaced = fetch_csv_pattern.subn(fetch_csv_replacement, text, count=1)
+
+# A valid local cache should make the site usable immediately. Previously the
+# cache path still waited for fresh News and Events network requests before the
+# ENTER button was enabled, which made repeat visits feel frozen.
+cache_fast_marker = '// CACHE_FAST_START_V1'
+if cache_fast_marker not in text:
+    cache_start = '''                        if (dbGirls.length > 0) {
+                            // 核心資料可用快取'''
+    cache_fast = '''                        if (dbGirls.length > 0) {
+                            // CACHE_FAST_START_V1: cached core data is enough to enter immediately.
+                            buildGirlMap();
+                            init();
+                            enableEnterButton();
+
+                            // 核心資料可用快取'''
+    text = text.replace(cache_start, cache_fast, 1)
+
+    # After background refreshes finish, only repaint the current view instead
+    # of running init() a second time and attaching duplicate listeners.
+    text = text.replace(
+        '''                            buildGirlMap(); init(); enableEnterButton();
+                            return;''',
+        '''                            if (typeof window.renderContent === 'function' && (currentMode === 'news' || currentMode === 'events')) {
+                                window.renderContent();
+                            }
+                            return;''',
+        1,
+    )
+
+# One optional/secondary CSV should never take down the whole first load. All
+# sources are fetched in parallel, and failed feeds simply start empty.
+for gid in ('0', '925411186', '1702657458', '417186374', '92509162', '547736461'):
+    raw = f'                    fetchCSV(`${{baseUrl}}&gid={gid}&t=${{t}}`),'
+    safe = f'                    fetchCSV(`${{baseUrl}}&gid={gid}&t=${{t}}`).catch(() => []),'
+    text = text.replace(raw, safe, 1)
+
+# Last-resort watchdog: if parsing/initialization throws after data is already
+# available, do not trap the visitor forever on the splash screen.
+watchdog_marker = '// LANDING_WATCHDOG_V1'
+if watchdog_marker not in text:
+    load_hook = '        window.onload = loadData;'
+    watchdog = '''        // LANDING_WATCHDOG_V1
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const btn = document.getElementById('enter-btn');
+                if (!btn || !btn.disabled) return;
+                if (Array.isArray(dbGirls) && dbGirls.length > 0) {
+                    try {
+                        buildGirlMap();
+                        init();
+                    } catch (e) {
+                        console.warn('Startup watchdog recovered from init error.', e);
+                    }
+                    enableEnterButton();
+                } else {
+                    const spinner = document.getElementById('loading-spinner');
+                    const textEl = document.getElementById('enter-text');
+                    if (spinner) spinner.style.display = 'none';
+                    btn.disabled = false;
+                    btn.onclick = () => location.reload();
+                    btn.style.background = '#ff4757';
+                    if (textEl) textEl.textContent = '讀取逾時・點此重試 RETRY';
+                }
+            }, 9000);
+        });
+        window.onload = loadData;'''
+    text = text.replace(load_hook, watchdog, 1)
+
 if text == original:
-    print('No public Events refresh changes were needed.')
+    print('No public Events/loading changes were needed.')
 else:
     path.write_text(text, encoding='utf-8')
-    print(f'Public Events refresh applied. event_merge_replaced={replaced}')
+    print(f'Public Events/loading fixes applied. event_merge_replaced={replaced}, fetch_csv_replaced={fetch_csv_replaced}')
