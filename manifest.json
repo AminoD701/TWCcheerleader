@@ -1,0 +1,34 @@
+{
+  "name": "台灣啦啦隊資料庫",
+  "short_name": "啦啦隊資料庫",
+  "description": "台灣啦啦隊女孩、活動、班表與賽事資訊",
+  "lang": "zh-TW",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#111418",
+  "categories": ["sports", "entertainment", "lifestyle"],
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "公開行程",
+      "short_name": "行程",
+      "url": "./?mode=events"
+    },
+    {
+      "name": "最新消息",
+      "short_name": "消息",
+      "url": "./?mode=news"
+    }
+  ]
+}
