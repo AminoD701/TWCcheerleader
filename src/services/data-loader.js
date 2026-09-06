@@ -23,7 +23,12 @@
         console.warn(`Could not refresh ${key}; using last successful data.`, error);
         return previous;
       }
-      throw error;
+
+      // A single remote source must never make the whole app fail to start.
+      // This is especially important for AbortController timeouts on mobile/PWA,
+      // where browsers may surface the error as "signal is aborted without reason".
+      console.warn(`Could not load ${key}; continuing with an empty dataset.`, error);
+      return [];
     }
   }
 
