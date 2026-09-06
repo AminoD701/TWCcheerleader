@@ -82,33 +82,8 @@
     const style = document.createElement('style');
     style.id = 'gacha-history-style';
     style.textContent = `
-      #gacha-history-modal{position:fixed;inset:0;z-index:100002;display:grid;place-items:center;padding:16px}.gacha-history-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px)}.gacha-history-card{position:relative;width:min(94vw,560px);max-height:86vh;overflow:hidden;background:linear-gradient(155deg,#181c22,#090b0e);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:20px;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.62)}.gacha-history-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.gacha-history-kicker{font-size:10px;font-weight:950;letter-spacing:1.4px;color:#f9a8d4}.gacha-history-head h2{margin:5px 0 0;font-size:24px}.gacha-history-close{border:0;background:transparent;color:#9ca3af;font-size:30px;line-height:1;cursor:pointer}.gacha-history-count{margin:10px 0 14px;color:#94a3b8;font-size:12px}.gacha-history-list{display:flex;flex-direction:column;gap:9px;max-height:62vh;overflow:auto;padding-right:3px}.gacha-history-item{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:rgba(255,255,255,.025)}.gacha-history-item img,.gacha-history-placeholder{width:54px;height:68px;border-radius:11px;object-fit:cover;object-position:top;flex:0 0 auto}.gacha-history-placeholder{display:grid;place-items:center;background:#15191e;font-size:22px}.gacha-history-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.gacha-history-info time{font-size:10px;color:#94a3b8;font-weight:800}.gacha-history-info strong{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gacha-history-info span{font-size:11px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gacha-history-item>button{border:1px solid rgba(255,255,255,.14);background:#fff;color:#111;border-radius:999px;padding:7px 10px;font-weight:900;font-size:11px;cursor:pointer}.gacha-history-empty{padding:28px 15px;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.1);border-radius:14px;line-height:1.7}.gacha-history-entry{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;border-radius:999px;padding:8px 12px;font-weight:900;font-size:12px;cursor:pointer}.gacha-history-floating{position:fixed;left:14px;bottom:118px;z-index:9997;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:9px 13px;background:rgba(17,20,24,.94);color:#fff;font-weight:900;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}`;
+      #gacha-history-modal{position:fixed;inset:0;z-index:100002;display:grid;place-items:center;padding:16px}.gacha-history-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px)}.gacha-history-card{position:relative;width:min(94vw,560px);max-height:86vh;overflow:hidden;background:linear-gradient(155deg,#181c22,#090b0e);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:20px;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.62)}.gacha-history-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.gacha-history-kicker{font-size:10px;font-weight:950;letter-spacing:1.4px;color:#f9a8d4}.gacha-history-head h2{margin:5px 0 0;font-size:24px}.gacha-history-close{border:0;background:transparent;color:#9ca3af;font-size:30px;line-height:1;cursor:pointer}.gacha-history-count{margin:10px 0 14px;color:#94a3b8;font-size:12px}.gacha-history-list{display:flex;flex-direction:column;gap:9px;max-height:62vh;overflow:auto;padding-right:3px}.gacha-history-item{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:rgba(255,255,255,.025)}.gacha-history-item img,.gacha-history-placeholder{width:54px;height:68px;border-radius:11px;object-fit:cover;object-position:top;flex:0 0 auto}.gacha-history-placeholder{display:grid;place-items:center;background:#15191e;font-size:22px}.gacha-history-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.gacha-history-info time{font-size:10px;color:#94a3b8;font-weight:800}.gacha-history-info strong{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gacha-history-info span{font-size:11px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gacha-history-item>button{border:1px solid rgba(255,255,255,.14);background:#fff;color:#111;border-radius:999px;padding:7px 10px;font-weight:900;font-size:11px;cursor:pointer}.gacha-history-empty{padding:28px 15px;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.1);border-radius:14px;line-height:1.7}`;
     document.head.appendChild(style);
-  };
-
-  const addGameHubEntry = () => {
-    const hub = document.querySelector('[data-game-enhancement-home]');
-    if (!hub || hub.querySelector('[data-gacha-history-entry]')) return;
-    const tip = hub.querySelector('.game-hub__tip') || hub;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'gacha-history-entry';
-    btn.dataset.gachaHistoryEntry = '1';
-    btn.textContent = `📚 抽卡紀錄 (${readHistory().length})`;
-    btn.addEventListener('click', showHistory);
-    tip.insertAdjacentElement('afterend', btn);
-  };
-
-  const addFloatingEntry = () => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    if (!standalone || document.getElementById('gacha-history-floating')) return;
-    const btn = document.createElement('button');
-    btn.id = 'gacha-history-floating';
-    btn.className = 'gacha-history-floating';
-    btn.type = 'button';
-    btn.textContent = '📚 抽卡紀錄';
-    btn.addEventListener('click', showHistory);
-    document.body.appendChild(btn);
   };
 
   window.showGachaHistory = showHistory;
@@ -116,19 +91,14 @@
   const init = () => {
     installStyles();
     syncCurrentIntoHistory();
-    addGameHubEntry();
-    addFloatingEntry();
     let lastDaily = localStorage.getItem(DAILY_KEY);
     setInterval(() => {
       const now = localStorage.getItem(DAILY_KEY);
       if (now !== lastDaily) {
         lastDaily = now;
         syncCurrentIntoHistory();
-        document.querySelectorAll('[data-gacha-history-entry]').forEach(el => { el.textContent = `📚 抽卡紀錄 (${readHistory().length})`; });
       }
-      addGameHubEntry();
-      addFloatingEntry();
-    }, 1000);
+    }, 1500);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
