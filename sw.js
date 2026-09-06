@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v12`;
+const CACHE_NAME = `${CACHE_PREFIX}v13`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
 const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/game-app-enhancements.js?v=2', './src/app/gacha-history.js?v=1', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4'];
 
