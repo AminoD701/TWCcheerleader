@@ -50,14 +50,20 @@ function clearMobileHiddenCards() {
   });
 }
 
-function restoreDisplayLimit({ rerender = false } = {}) {
-  if (savedDisplayLimit == null) return;
+function restoreDisplayLimit({ rerender = false, keepBaseline = false } = {}) {
+  if (savedDisplayLimit == null) return false;
   const next = savedDisplayLimit;
-  savedDisplayLimit = null;
-  if (window.currentDisplayLimit !== next) {
-    window.currentDisplayLimit = next;
-    if (rerender && onGirlsRoute()) window.renderContent?.(true);
-  }
+  if (!keepBaseline) savedDisplayLimit = null;
+  const changed = window.currentDisplayLimit !== next;
+  window.currentDisplayLimit = next;
+  if (changed && rerender && onGirlsRoute()) window.renderContent?.(true);
+  return changed;
+}
+
+function beforeRouteSnapshot(mode) {
+  if (mode !== 'girls' || !favoritesOnly || savedDisplayLimit == null) return;
+  clearMobileHiddenCards();
+  restoreDisplayLimit({ keepBaseline: true });
 }
 
 function ensureExpandedFavoritesRender() {
@@ -74,7 +80,6 @@ function ensureExpandedFavoritesRender() {
 function applyFavorites() {
   if (!isMobile() || !onGirlsRoute()) {
     clearMobileHiddenCards();
-    restoreDisplayLimit();
     updateMeta();
     return;
   }
@@ -104,11 +109,51 @@ function chooseTeam(name) {
   setTimeout(syncUI, 0);
 }
 
-function teamCounts() {
+function favoriteIds() {
+  try {
+    const values = window.CheerStorage?.readArray?.('cheer_favorites') || JSON.parse(localStorage.getItem('cheer_favorites') || '[]');
+    return new Set(Array.isArray(values) ? values : []);
+  } catch (_) { return new Set(); }
+}
+
+function matchesSharedGirlFilters(girl, state) {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  const role = document.getElementById('roleFilter')?.value || 'all';
+  const nat = document.getElementById('natFilter')?.value || 'all';
+  const zodiac = document.getElementById('zodiacFilter')?.value || 'all';
+  if (state.currentSport && state.currentSport !== '全部' && !(girl.sport || '').includes(state.currentSport)) return false;
+  if (search && !(girl.nickname || '').toLowerCase().includes(search) && !(girl.realname || '').toLowerCase().includes(search)) return false;
+  const nStr = girl.nat || '';
+  if (nat === '臺灣' && !(nStr.includes('臺') || nStr.includes('台'))) return false;
+  if (nat === '其他' && (nStr.includes('臺灣') || nStr.includes('台灣') || nStr.includes('韓國') || nStr.includes('日本'))) return false;
+  if (!['all', '臺灣', '其他'].includes(nat) && !nStr.includes(nat)) return false;
+  const cz = (girl.zodiac || '').trim().replace('魔羯', '摩羯').replace('白羊', '牡羊');
+  if (zodiac !== 'all' && cz !== zodiac) return false;
+  if (role !== 'all') {
+    const note = (girl.note || girl['備註'] || girl.備註 || '').trim();
+    const clean = note.replace(/(合作夥伴|合作)/g, '').replace(/^[,\s、，]+|[,\s、，]+$/g, '').trim();
+    const special = clean !== '' && !clean.includes('練習生') && !clean.includes('培訓生');
+    if (role === 'cheerleader' && special) return false;
+    if (role === 'special' && !special) return false;
+  }
+  return true;
+}
+
+function teamCounts(state) {
   const counts = new Map();
-  allCards().forEach(card => {
-    const names = [...card.querySelectorAll('.team-tag-mini')].map(el => el.textContent.trim()).filter(Boolean);
-    new Set(names).forEach(name => counts.set(name, (counts.get(name) || 0) + 1));
+  const seen = new Set();
+  const favs = favoritesOnly ? favoriteIds() : null;
+  const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
+  girls.forEach(girl => {
+    if (!matchesSharedGirlFilters(girl, state)) return;
+    const uid = girl.uid || `${(girl.realname || '').trim()}|${(girl.nickname || '').trim()}`;
+    if (favs && !favs.has(uid)) return;
+    const team = (girl.team || '').trim();
+    if (!team) return;
+    const key = `${uid}\u0000${team}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    counts.set(team, (counts.get(team) || 0) + 1);
   });
   return counts;
 }
@@ -134,7 +179,7 @@ function openSheet(type) {
       list.innerHTML = '<div style="padding:24px;text-align:center;color:#aaa;line-height:1.7">請先選擇球種，再挑選該球種的隊伍。</div>';
       return;
     }
-    const counts = teamCounts();
+    const counts = teamCounts(state);
     const names = ['全部啦啦隊', ...teamButtons().map(teamName).filter(n => n && !n.includes('全部'))];
     list.innerHTML = [...new Set(names)]
       .filter(n => !q || n.toLowerCase().includes(q))
@@ -177,13 +222,25 @@ function updateMeta() {
   meta.textContent = favoritesOnly ? `目前顯示 ${shown} 位收藏女孩` : `目前顯示 ${shown} 位女孩`;
 }
 
+function leaveMobileMode() {
+  if (!favoritesOnly) { restoreDisplayLimit({ rerender: true }); return; }
+  favoritesOnly = false;
+  clearMobileHiddenCards();
+  restoreDisplayLimit({ rerender: true });
+}
+
 function syncUI() {
   const bar = document.getElementById('girls-mobile-filterbar');
   if (!bar) return;
-  if (!isMobile() || !onGirlsRoute()) {
+  if (!onGirlsRoute()) {
     closeSheet();
     clearMobileHiddenCards();
-    restoreDisplayLimit();
+    if (savedDisplayLimit != null) restoreDisplayLimit({ keepBaseline: favoritesOnly });
+    return;
+  }
+  if (!isMobile()) {
+    closeSheet();
+    leaveMobileMode();
     return;
   }
   const state = legacyState();
@@ -255,6 +312,7 @@ function ensureUI() {
   syncUI();
 }
 
+window.CheerGirlsMobileFilters = Object.freeze({ beforeRouteSnapshot });
 window.addEventListener('DOMContentLoaded', () => {
   installStyles();
   ensureUI();
