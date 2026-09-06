@@ -313,8 +313,23 @@ function ensureUI() {
 }
 
 window.CheerGirlsMobileFilters = Object.freeze({ beforeRouteSnapshot });
+window.addEventListener('popstate', () => beforeRouteSnapshot(document.body.dataset.appMode));
+document.addEventListener('click', event => {
+  if (event.target.closest?.('[data-mode],[data-hub-mode]')) beforeRouteSnapshot(document.body.dataset.appMode);
+}, true);
 window.addEventListener('DOMContentLoaded', () => {
   installStyles();
   ensureUI();
   matchMedia(`(max-width: ${MOBILE_MAX}px)`).addEventListener?.('change', syncUI);
+  setTimeout(() => {
+    const routedSetMode = window.setMode;
+    if (typeof routedSetMode === 'function' && !routedSetMode.__girlsMobileWrapped) {
+      const wrapped = (mode, ...args) => {
+        if (mode !== document.body.dataset.appMode) beforeRouteSnapshot(document.body.dataset.appMode);
+        return routedSetMode(mode, ...args);
+      };
+      wrapped.__girlsMobileWrapped = true;
+      window.setMode = wrapped;
+    }
+  }, 0);
 });
