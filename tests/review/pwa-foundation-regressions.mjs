@@ -50,7 +50,7 @@ async function navigationFixture(initial='events') {
   function backToScheduleSelection(){state.schedule=null;}
   const window={setMode:legacySetMode,selectScheduleTeam,backToScheduleSelection,history,addEventListener:(event,fn)=>events[event]=fn};
   const context=vm.createContext({window,document,location,sessionStorage,URL,Map,Set,Object,console,Event:MockEvent,scrollY:0,
-    requestAnimationFrame:fn=>fn(),scrollTo:()=>{}});
+    requestAnimationFrame:fn=>fn(),setTimeout:fn=>{fn();return 1;},scrollTo:()=>{}});
   const config=new vm.SourceTextModule(await read('src/app/navigation-config.js'),{context});
   const nav=new vm.SourceTextModule((await read('src/app/navigation.js'))+'\nexport {navigate,applyMode};',{context});
   await nav.link(specifier=>{assert.equal(specifier,'./navigation-config.js');return config;});
