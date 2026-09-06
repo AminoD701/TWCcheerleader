@@ -1990,6 +1990,45 @@
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
+
+        // Shared state bridge for the new router. Keep legacy lexical state private,
+        // but expose a narrow snapshot/restore API so mobile navigation can preserve
+        // sport/team/schedule/calendar context without rewriting the legacy app.
+        window.CheerLegacyState = Object.freeze({
+            snapshot() {
+                return {
+                    currentSport,
+                    currentTeam,
+                    currentScheduleTeam,
+                    currentScheduleSport,
+                    currentAgency: window.currentAgency ?? null,
+                    currentMatchLeague: window.currentMatchLeague ?? null,
+                    matchCalDate: window.matchCalDate instanceof Date ? window.matchCalDate.toISOString() : null,
+                    matchSelectedDateNum: window.matchSelectedDateNum ?? null,
+                    currentMainCategory: window.currentMainCategory ?? '全部',
+                    currentSubCategory: window.currentSubCategory ?? '全部',
+                    currentNewsHashtag: window.currentNewsHashtag ?? '',
+                    currentDisplayLimit: window.currentDisplayLimit ?? 10
+                };
+            },
+            restore(state = {}) {
+                if (Object.hasOwn(state, 'currentSport')) currentSport = state.currentSport;
+                if (Object.hasOwn(state, 'currentTeam')) currentTeam = state.currentTeam;
+                if (Object.hasOwn(state, 'currentScheduleTeam')) currentScheduleTeam = state.currentScheduleTeam;
+                if (Object.hasOwn(state, 'currentScheduleSport')) currentScheduleSport = state.currentScheduleSport;
+                if (Object.hasOwn(state, 'currentAgency')) window.currentAgency = state.currentAgency;
+                if (Object.hasOwn(state, 'currentMatchLeague')) window.currentMatchLeague = state.currentMatchLeague;
+                if (state.matchCalDate) window.matchCalDate = new Date(state.matchCalDate);
+                if (Object.hasOwn(state, 'matchSelectedDateNum')) window.matchSelectedDateNum = state.matchSelectedDateNum;
+                if (Object.hasOwn(state, 'currentMainCategory')) window.currentMainCategory = state.currentMainCategory;
+                if (Object.hasOwn(state, 'currentSubCategory')) window.currentSubCategory = state.currentSubCategory;
+                if (Object.hasOwn(state, 'currentNewsHashtag')) window.currentNewsHashtag = state.currentNewsHashtag;
+                if (Object.hasOwn(state, 'currentDisplayLimit')) window.currentDisplayLimit = state.currentDisplayLimit;
+                const teamText = document.getElementById('team-btn-text');
+                if (teamText) teamText.innerText = currentTeam || '全部啦啦隊';
+            }
+        });
+
         const CACHE_KEY = "tw_cheerleader_cache_v35";
         const CACHE_TIME = 60 * 60 * 1000; 
 
