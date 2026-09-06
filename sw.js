@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v3`;
+const CACHE_NAME = `${CACHE_PREFIX}v4`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
 const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './app-icon.svg', './favicon-32.png', './app-icon-192.png', './app-icon-512.png', './app-icon-maskable-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js'];
 
