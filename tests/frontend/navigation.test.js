@@ -46,3 +46,31 @@ test('homepage exposes legacy state bridge and fetch timeout cleanup', async () 
   assert.match(html, /window\.CheerLegacyState/);
   assert.match(html, /finally\s*\{\s*clearTimeout\(timer\);\s*\}/);
 });
+
+test('virtual My and More hubs do not rerender underlying legacy content on restore', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /if \(mode === 'my' \|\| mode === 'more'\) return saved/);
+});
+
+test('restored filters preserve scroll after debounced callbacks', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /setTimeout\(\(\) => scrollTo\(0, y\), 380\)/);
+});
+
+test('matches restoration reopens saved league calendar', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /mode === 'matches'[\s\S]*renderMatchCalendar\(true\)/);
+});
+
+test('profile transition snapshots and restores list scroll', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /window\.openProfile = \(\.\.\.args\) => \{/);
+  assert.match(source, /profileReturnState/);
+  assert.match(source, /window\.closeProfile = \(\.\.\.args\) => \{/);
+});
+
+test('theme team selection is preserved across primary navigation', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /legacy\.themeSelection = themeSelection/);
+  assert.match(source, /legacyRenderTeamThemesHub\(themeSelection\)/);
+});
