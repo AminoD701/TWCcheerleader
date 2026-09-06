@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   patch:
-    if: github.event.head_commit.message != 'fix: bust loader URL for active v3 clients'
+    if: "github.event.head_commit.message != 'fix: bust loader URL for active v3 clients'"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
