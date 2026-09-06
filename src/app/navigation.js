@@ -74,6 +74,10 @@ function restoreModeState(mode) {
   const saved = stateByMode.get(mode);
   if (!saved) return saved;
 
+  if (saved.legacy && window.CheerLegacyState?.restore) {
+    window.CheerLegacyState.restore(saved.legacy);
+  }
+
   const restored = new Set();
   document.querySelectorAll('input, select, textarea').forEach(el => {
     const key = el.id || el.name;
@@ -95,10 +99,12 @@ function restoreModeState(mode) {
     if (el.tagName !== 'SELECT') el.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
-  if (mode === 'schedule' && saved.legacy?.scheduleSelection && legacySelectScheduleTeam) {
+  if (!window.CheerLegacyState?.restore && mode === 'schedule' && saved.legacy?.scheduleSelection && legacySelectScheduleTeam) {
     const { team, sport } = saved.legacy.scheduleSelection;
     scheduleSelection = { team, sport };
     legacySelectScheduleTeam(team, sport);
+  } else if (window.CheerLegacyState?.restore && typeof window.renderContent === 'function') {
+    window.renderContent(true);
   }
   return saved;
 }
@@ -114,7 +120,8 @@ function applyMode(mode) {
   canonical.searchParams.set('mode', mode);
   window.history.replaceState({ mode }, '', canonical);
   safeSession.set('cheer_current_tab', mode);
-  document.querySelector('#schedule-section-switcher').hidden = !['schedule', 'matches'].includes(mode);
+  const switcher = document.querySelector('#schedule-section-switcher');
+  if (switcher) switcher.hidden = !['schedule', 'matches'].includes(mode);
   document.querySelectorAll('[data-mode]').forEach(el => {
     const active = el.closest('.primary-nav') ? el.dataset.mode === parentForMode(mode) : el.dataset.mode === mode;
     if (active) el.setAttribute('aria-current', 'page');
@@ -135,9 +142,13 @@ function rememberMode(mode) {
     const el = document.querySelector(`#${key}`);
     if (el && 'value' in el) controls[key] = el.value;
   });
-  const legacy = mode === 'schedule' && scheduleSelection
-    ? { scheduleSelection: { ...scheduleSelection } }
-    : {};
+
+  let legacy = {};
+  if (window.CheerLegacyState?.snapshot) {
+    try { legacy = window.CheerLegacyState.snapshot() || {}; } catch (_) { legacy = {}; }
+  } else if (mode === 'schedule' && scheduleSelection) {
+    legacy = { scheduleSelection: { ...scheduleSelection } };
+  }
   stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls, legacy });
 }
 
@@ -154,7 +165,12 @@ function navigate(mode, { history = true } = {}) {
   applyMode(mode);
 }
 
-window.addEventListener('popstate', () => applyMode(new URL(location.href).searchParams.get('mode') || 'news'));
+window.addEventListener('popstate', () => {
+  const nextMode = new URL(location.href).searchParams.get('mode') || 'news';
+  if (nextMode !== currentMode) rememberMode(currentMode);
+  applyMode(nextMode);
+});
+
 function updateKeyboardState() {
   if (!window.visualViewport) return;
   keyboardOpen = innerHeight - visualViewport.height > 180;
