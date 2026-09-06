@@ -6707,6 +6707,31 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
+            // Keep hidden/restored filters from making the News page look empty after the feed changes.
+            const validNewsMains = new Set(["全部"]);
+            const validNewsSubs = new Map();
+            const validNewsHashtags = new Set();
+            dbNews.forEach(n => {
+                const mainTag = window.normalizeNewsCategory(getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類'));
+                const subTag = window.normalizeNewsSubcategory(n, mainTag);
+                validNewsMains.add(mainTag);
+                if (!validNewsSubs.has(mainTag)) validNewsSubs.set(mainTag, new Set());
+                if (subTag) validNewsSubs.get(mainTag).add(subTag);
+                const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
+                hashRaw.split(/[,\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));
+            });
+            if (!validNewsMains.has(window.currentMainCategory)) {
+                window.currentMainCategory = "全部";
+                window.currentSubCategory = "全部";
+            } else if (window.currentMainCategory === "全部") {
+                window.currentSubCategory = "全部";
+            } else if (window.currentSubCategory !== "全部" && !(validNewsSubs.get(window.currentMainCategory)?.has(window.currentSubCategory))) {
+                window.currentSubCategory = "全部";
+            }
+            if (window.currentNewsHashtag && !validNewsHashtags.has(window.currentNewsHashtag)) {
+                window.currentNewsHashtag = "";
+            }
+
             // 1. 呼叫雙層下拉選單渲染引擎
             window.renderDualTierNewsFilters(dbNews);
 
