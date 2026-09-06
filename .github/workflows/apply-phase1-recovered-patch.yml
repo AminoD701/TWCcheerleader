@@ -5,6 +5,7 @@ on:
     branches:
       - refactor/architecture-pwa-20260906
     paths:
+      - deliverables/pwa-phase1-part-2.patch
       - deliverables/pwa-phase1-part-3.patch
 
 permissions:
