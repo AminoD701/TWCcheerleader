@@ -117,7 +117,36 @@ def load_site_entities() -> tuple[list[str], list[str]]:
     return sorted(names, key=len, reverse=True), sorted(teams, key=len, reverse=True)
 
 
+AMBIGUOUS_LATIN_NAMES = {
+    "ai", "et", "iu", "tv", "mvp", "mlb", "cpbl", "plg", "tpbl", "tvbl", "nba", "kbo",
+}
+
+
+def is_cjk_name(value: str) -> bool:
+    return bool(re.search(r"[\u3400-\u9fff]", value))
+
+
+def usable_girl_name(value: str) -> bool:
+    name = (value or "").strip()
+    if not name:
+        return False
+    if is_cjk_name(name):
+        return len(name) >= 2
+    compact = re.sub(r"[^a-z0-9]", "", name.lower())
+    return len(compact) >= 3 and compact not in AMBIGUOUS_LATIN_NAMES
+
+
+def girl_name_matches(name: str, hay: str) -> bool:
+    if not usable_girl_name(name):
+        return False
+    if is_cjk_name(name):
+        return name in hay
+    # Latin stage names must match as a standalone token, not inside a publisher/domain name.
+    return re.search(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", hay, flags=re.I) is not None
+
+
 def build_queries(girl_names: list[str]) -> list[str]:
+    girl_names = [name for name in girl_names if usable_girl_name(name)]
     queries = list(BASE_QUERIES)
     # Query the actual names present in this website instead of relying only on generic sports feeds.
     # Batching keeps the Google News workload bounded while still covering a broad part of the roster.
@@ -350,7 +379,7 @@ def main() -> None:
             continue
 
         hay = f"{item['title']} {item['description']}"
-        matched_girls = [name for name in girl_names if name in hay][:6]
+        matched_girls = [name for name in girl_names if girl_name_matches(name, hay)][:6]
         matched_teams = [team for team in site_teams if team in hay][:4]
         classified = classify_news(item["title"], item["description"], matched_girls, matched_teams)
         if not classified:
