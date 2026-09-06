@@ -2166,7 +2166,12 @@
                                     return true;
                                 });
 
-                                if (mergedFreshNews.length > 0) dbNews = mergedFreshNews;
+                                if (mergedFreshNews.length > 0) {
+                                    dbNews = mergedFreshNews.map(n => {
+                                        const tag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類');
+                                        return { ...n, tag, subtag: window.normalizeNewsSubcategory(n, tag) };
+                                    });
+                                }
                             } catch(e) {
                                 console.warn('Fresh news refresh failed; using cached news as fallback.', e);
                             }
