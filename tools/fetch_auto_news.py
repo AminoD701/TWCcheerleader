@@ -215,23 +215,33 @@ def classify_news(
     hay = f"{title} {desc}"
     hay_lower = hay.lower()
     has_cheer_word = any(term.lower() in hay_lower for term in CHEER_TERMS)
-    matched_sport = None
+
+    if has_cheer_word:
+        return "啦啦隊情報", (matched_girls[0] if matched_girls else (matched_teams[0] if matched_teams else "綜合"))
+
+    sport_match = None
     for main_category, subcategory, terms in SPORT_RULES:
         if any(term.lower() in hay_lower for term in terms):
-            matched_sport = (main_category, subcategory)
+            sport_match = (main_category, subcategory)
             break
 
-    # Pure sports coverage stays in sports categories even if a roster girl/team name
-    # happens to appear in the article. Only explicit cheer/support wording can promote
-    # a sports-related story into cheerleader news.
-    if matched_sport and not has_cheer_word:
-        return matched_sport
-    if matched_girls or (matched_teams and has_cheer_word):
-        return "啦啦隊情報", (matched_girls[0] if matched_girls else matched_teams[0])
-    if has_cheer_word:
-        return "啦啦隊情報", "綜合"
-    if matched_sport:
-        return matched_sport
+    if sport_match is None:
+        generic_rules = [
+            ("棒球情報", "中職", ["棒球", "中職", "cpbl", "台鋼", "雄鷹", "兄弟", "桃猿", "味全龍", "統一獅", "富邦悍將"]),
+            ("棒球情報", "MLB", ["mlb", "大聯盟", "道奇", "洋基"]),
+            ("籃球情報", "TPBL", ["籃球", "tpbl", "國王", "海神", "攻城獅", "戰神", "雲豹", "中信特攻", "夢想家"]),
+            ("籃球情報", "PLG", ["plg", "p. league", "勇士", "領航猿"]),
+            ("排球情報", "TVBL", ["排球", "職排", "tvbl", "tpvl", "連莊"]),
+        ]
+        for main_category, subcategory, terms in generic_rules:
+            if any(term.lower() in hay_lower for term in terms):
+                sport_match = (main_category, subcategory)
+                break
+
+    if sport_match:
+        return sport_match
+    if matched_girls:
+        return "啦啦隊情報", matched_girls[0]
     return None
 
 

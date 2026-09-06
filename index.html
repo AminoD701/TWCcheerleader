@@ -6718,7 +6718,11 @@ window.renderMinigameStart = function() {
                 if (!validNewsSubs.has(mainTag)) validNewsSubs.set(mainTag, new Set());
                 if (subTag) validNewsSubs.get(mainTag).add(subTag);
                 const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
-                hashRaw.split(/[,\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));
+                if (hashRaw) {
+                    hashRaw.split(/[,\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));
+                } else {
+                    validNewsHashtags.add(mainTag);
+                }
             });
             if (!validNewsMains.has(window.currentMainCategory)) {
                 window.currentMainCategory = "全部";
