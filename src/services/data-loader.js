@@ -31,19 +31,20 @@
       catch (error) { console.warn(`Could not persist ${key}; using downloaded data.`, error); }
       return data;
     } catch (error) {
+      if (!isAvailabilityFailure(error)) {
+        // Parsing, validation and unexpected programming errors must remain visible,
+        // even when a previous valid payload exists.
+        throw error;
+      }
+
       const previous = read(key);
       if (previous) {
         console.warn(`Could not refresh ${key}; using last successful data.`, error);
         return previous;
       }
 
-      if (isAvailabilityFailure(error)) {
-        console.warn(`Could not load ${key}; continuing with an empty dataset.`, error);
-        return [];
-      }
-
-      // Parsing, validation and unexpected programming errors must remain visible.
-      throw error;
+      console.warn(`Could not load ${key}; continuing with an empty dataset.`, error);
+      return [];
     }
   }
 
