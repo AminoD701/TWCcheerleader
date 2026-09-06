@@ -1,0 +1,56 @@
+name: News sport precedence fix
+
+on:
+  push:
+    branches:
+      - fix/news-intel-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enforce sport vs cheer classification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/fetch_auto_news.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''def classify_news(\n    title: str,\n    desc: str,\n    matched_girls: list[str],\n    matched_teams: list[str],\n) -> tuple[str, str] | None:\n    hay = f"{title} {desc}"\n    hay_lower = hay.lower()\n    has_cheer_word = any(term.lower() in hay_lower for term in CHEER_TERMS)\n    if matched_girls or (matched_teams and has_cheer_word):\n        return "啦啦隊情報", (matched_girls[0] if matched_girls else matched_teams[0])\n    if has_cheer_word:\n        return "啦啦隊情報", "綜合"\n    for main_category, subcategory, terms in SPORT_RULES:\n        if any(term.lower() in hay_lower for term in terms):\n            return main_category, subcategory\n    return None\n'''
+          new = '''def classify_news(\n    title: str,\n    desc: str,\n    matched_girls: list[str],\n    matched_teams: list[str],\n) -> tuple[str, str] | None:\n    hay = f"{title} {desc}"\n    hay_lower = hay.lower()\n    has_cheer_word = any(term.lower() in hay_lower for term in CHEER_TERMS)\n\n    # Identify a real sports story before using roster-name matches. Team names and\n    # ambiguous person names must never turn ordinary baseball/basketball/volleyball\n    # coverage into cheerleader news. A sports story only moves to cheerleader news\n    # when the article itself explicitly contains cheerleader-focused wording.\n    sport_match = None\n    for main_category, subcategory, terms in SPORT_RULES:\n        if any(term.lower() in hay_lower for term in terms):\n            sport_match = (main_category, subcategory)\n            break\n\n    if sport_match and not has_cheer_word:\n        return sport_match\n    if matched_girls or (matched_teams and has_cheer_word):\n        return "啦啦隊情報", (matched_girls[0] if matched_girls else matched_teams[0])\n    if has_cheer_word:\n        return "啦啦隊情報", "綜合"\n    if sport_match:\n        return sport_match\n    return None\n'''
+          if old not in text:
+              raise SystemExit('classify_news block not found; refusing blind patch')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Validate classification precedence
+        run: |
+          python - <<'PY'
+          import importlib.util
+          spec = importlib.util.spec_from_file_location('news', 'tools/fetch_auto_news.py')
+          mod = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+          pure_sport = mod.classify_news('中職 王建民談投手調度', '統一獅對兄弟賽前分析', ['小安'], ['統一獅'])
+          assert pure_sport and pure_sport[0] == '棒球情報', pure_sport
+          cheer = mod.classify_news('中職場邊焦點 啦啦隊女孩小安應援', '女孩登場帶動氣氛', ['小安'], ['統一獅'])
+          assert cheer and cheer[0] == '啦啦隊情報', cheer
+          print('classification precedence OK', pure_sport, cheer)
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run complete checks
+        run: npm run check
+      - name: Commit fix and remove one-shot workflow
+        run: |
+          git rm .github/workflows/news-sport-precedence-fix.yml
+          git add tools/fetch_auto_news.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: keep pure sports news out of cheer category"
+          git push
