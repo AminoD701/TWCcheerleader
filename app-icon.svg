@@ -1,15 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="台灣啦啦隊資料庫">
-  <rect width="512" height="512" rx="112" fill="#111418"/>
-  <g fill="#f4f5f7">
-    <circle cx="256" cy="178" r="42"/>
-    <path d="M220 224h72l42 164H178l42-164Z"/>
-    <path d="M225 244 145 143l25-21 92 105-37 17Z"/>
-    <path d="m287 244 80-101-25-21-92 105 37 17Z"/>
-    <path d="m208 382 34 2-22 92h-39l27-94Z"/>
-    <path d="m304 382-34 2 22 92h39l-27-94Z"/>
-  </g>
-  <g fill="#ff8a3d">
-    <circle cx="138" cy="120" r="31"/><circle cx="112" cy="130" r="24"/><circle cx="154" cy="94" r="24"/><circle cx="164" cy="133" r="22"/>
-    <circle cx="374" cy="120" r="31"/><circle cx="400" cy="130" r="24"/><circle cx="358" cy="94" r="24"/><circle cx="348" cy="133" r="22"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="台灣啦啦隊資料庫 TWC">
+  <image href="app-icon-512.png" width="512" height="512" preserveAspectRatio="xMidYMid slice"/>
 </svg>
