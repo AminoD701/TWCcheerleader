@@ -1,0 +1,226 @@
+name: Apply app icon follow-up
+
+on:
+  push:
+    branches:
+      - refactor/architecture-pwa-20260906
+    paths:
+      - .github/workflows/apply-icon-followup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/architecture-pwa-20260906
+          fetch-depth: 0
+
+      - name: Write unified cheerleader icon source and generator
+        run: |
+          cat > app-icon.svg <<'EOF'
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="台灣啦啦隊資料庫">
+            <rect width="512" height="512" rx="112" fill="#111418"/>
+            <g fill="#f4f5f7">
+              <circle cx="256" cy="178" r="42"/>
+              <path d="M220 224h72l42 164H178l42-164Z"/>
+              <path d="M225 244 145 143l25-21 92 105-37 17Z"/>
+              <path d="m287 244 80-101-25-21-92 105 37 17Z"/>
+              <path d="m208 382 34 2-22 92h-39l27-94Z"/>
+              <path d="m304 382-34 2 22 92h39l-27-94Z"/>
+            </g>
+            <g fill="#ff8a3d">
+              <circle cx="138" cy="120" r="31"/><circle cx="112" cy="130" r="24"/><circle cx="154" cy="94" r="24"/><circle cx="164" cy="133" r="22"/>
+              <circle cx="374" cy="120" r="31"/><circle cx="400" cy="130" r="24"/><circle cx="358" cy="94" r="24"/><circle cx="348" cy="133" r="22"/>
+            </g>
+          </svg>
+          EOF
+
+          cat > tools/generate-app-icons.py <<'PY'
+          from pathlib import Path
+          import math, struct, zlib
+
+          ROOT = Path(__file__).resolve().parents[1]
+          GRAPHITE = (17, 20, 24, 255)
+          SILVER = (244, 245, 247, 255)
+          ORANGE = (255, 138, 61, 255)
+
+          def canvas(size):
+              return [list(GRAPHITE) for _ in range(size * size)]
+
+          def put(px, size, x, y, color):
+              if 0 <= x < size and 0 <= y < size:
+                  px[y * size + x] = list(color)
+
+          def circle(px, size, cx, cy, r, color):
+              x0, x1 = max(0, int(cx-r)), min(size-1, int(cx+r))
+              y0, y1 = max(0, int(cy-r)), min(size-1, int(cy+r))
+              rr = r * r
+              for y in range(y0, y1 + 1):
+                  for x in range(x0, x1 + 1):
+                      if (x-cx)**2 + (y-cy)**2 <= rr:
+                          put(px, size, x, y, color)
+
+          def polygon(px, size, pts, color):
+              ys = [p[1] for p in pts]
+              for y in range(max(0, int(min(ys))), min(size-1, int(max(ys))) + 1):
+                  hits = []
+                  for i, (x1, y1) in enumerate(pts):
+                      x2, y2 = pts[(i + 1) % len(pts)]
+                      if (y1 <= y < y2) or (y2 <= y < y1):
+                          hits.append(x1 + (y-y1) * (x2-x1) / (y2-y1))
+                  hits.sort()
+                  for a, b in zip(hits[0::2], hits[1::2]):
+                      for x in range(max(0, math.ceil(a)), min(size-1, math.floor(b)) + 1):
+                          put(px, size, x, y, color)
+
+          def line(px, size, a, b, width, color):
+              x1, y1 = a; x2, y2 = b
+              steps = max(1, int(max(abs(x2-x1), abs(y2-y1)) * 1.5))
+              for i in range(steps + 1):
+                  t = i / steps
+                  circle(px, size, x1 + (x2-x1)*t, y1 + (y2-y1)*t, width/2, color)
+
+          def png_bytes(size, maskable=False):
+              px = canvas(size)
+              s = size / 512
+              def P(x, y): return (x*s, y*s)
+              circle(px, size, 256*s, 178*s, 42*s, SILVER)
+              polygon(px, size, [P(220,224), P(292,224), P(334,388), P(178,388)], SILVER)
+              line(px, size, P(234,244), P(151,139), 31*s, SILVER)
+              line(px, size, P(278,244), P(361,139), 31*s, SILVER)
+              polygon(px, size, [P(205,376),P(244,382),P(220,476),P(181,476)], SILVER)
+              polygon(px, size, [P(307,376),P(268,382),P(292,476),P(331,476)], SILVER)
+              for cx, cy, r in [(138,120,31),(112,130,24),(154,94,24),(164,133,22),(374,120,31),(400,130,24),(358,94,24),(348,133,22)]:
+                  circle(px, size, cx*s, cy*s, r*s, ORANGE)
+              raw = b''.join(b'\x00' + bytes(v for pixel in px[y*size:(y+1)*size] for v in pixel) for y in range(size))
+              def chunk(kind, data):
+                  return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', size, size, 8, 6, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw, 9)) + chunk(b'IEND', b'')
+
+          outputs = {
+              'favicon-32.png': (32, False),
+              'app-icon-192.png': (192, False),
+              'app-icon-512.png': (512, False),
+              'app-icon-maskable-512.png': (512, True),
+          }
+          for name, (size, maskable) in outputs.items():
+              (ROOT / name).write_bytes(png_bytes(size, maskable))
+              print(f'wrote {name} ({size}x{size})')
+          PY
+
+      - name: Update manifest, page wiring, service worker and mobile controls
+        run: |
+          cat > manifest.json <<'EOF'
+          {
+            "name": "台灣啦啦隊資料庫",
+            "short_name": "啦啦隊資料庫",
+            "description": "台灣啦啦隊女孩、活動、班表與賽事資訊",
+            "lang": "zh-TW",
+            "start_url": "./",
+            "scope": "./",
+            "display": "standalone",
+            "display_override": ["standalone", "minimal-ui"],
+            "orientation": "portrait-primary",
+            "background_color": "#050505",
+            "theme_color": "#111418",
+            "categories": ["sports", "entertainment", "lifestyle"],
+            "icons": [
+              {"src": "app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+              {"src": "app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+              {"src": "app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+            ],
+            "shortcuts": [
+              {"name": "公開行程", "short_name": "行程", "url": "./?mode=events"},
+              {"name": "最新消息", "short_name": "消息", "url": "./?mode=news"}
+            ]
+          }
+          EOF
+
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old = '    <link rel="apple-touch-icon" href="baseball.png">'
+          new = '    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">\n    <link rel="apple-touch-icon" sizes="192x192" href="app-icon-192.png">'
+          if old not in s:
+              raise SystemExit('expected legacy apple-touch-icon not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('sw.js')
+          s = p.read_text()
+          s = s.replace("const CACHE_NAME = `${CACHE_PREFIX}v2`;", "const CACHE_NAME = `${CACHE_PREFIX}v3`;", 1)
+          old = "'./app-icon.svg', './src/app/navigation.js'"
+          new = "'./app-icon.svg', './favicon-32.png', './app-icon-192.png', './app-icon-512.png', './app-icon-maskable-512.png', './src/app/navigation.js'"
+          if old not in s:
+              raise SystemExit('expected app shell icon entry not found')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('src/app/navigation.css')
+          s = p.read_text()
+          marker = '@media (max-width: 767px) {'
+          mobile = '''@media (max-width: 767px) {\n  .back-to-top { left: 12px !important; right: auto !important; max-width: 48px; }\n  #pwa-install-btn, #pwa-update-btn, .pwa-update-btn { left: auto !important; right: 12px !important; max-width: min(58vw, 220px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }'''
+          if marker not in s:
+              raise SystemExit('mobile media query not found')
+          p.write_text(s.replace(marker, mobile, 1))
+          PY
+
+      - name: Generate PNG assets and add icon regression tests
+        run: |
+          python tools/generate-app-icons.py
+          cat > tests/frontend/icons.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          function pngSize(path) {
+            const b = readFileSync(path);
+            assert.equal(b.subarray(1, 4).toString(), 'PNG');
+            return [b.readUInt32BE(16), b.readUInt32BE(20)];
+          }
+
+          test('app icon PNG assets have the declared dimensions', () => {
+            assert.deepEqual(pngSize('favicon-32.png'), [32, 32]);
+            assert.deepEqual(pngSize('app-icon-192.png'), [192, 192]);
+            assert.deepEqual(pngSize('app-icon-512.png'), [512, 512]);
+            assert.deepEqual(pngSize('app-icon-maskable-512.png'), [512, 512]);
+          });
+
+          test('manifest and page use unified cheerleader icons without baseball fallback', () => {
+            const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
+            assert.ok(manifest.icons.some(i => i.src === 'app-icon-192.png' && i.purpose === 'any'));
+            assert.ok(manifest.icons.some(i => i.src === 'app-icon-512.png' && i.purpose === 'any'));
+            assert.ok(manifest.icons.some(i => i.src === 'app-icon-maskable-512.png' && i.purpose === 'maskable'));
+            const html = readFileSync('index.html', 'utf8');
+            assert.match(html, /favicon-32\.png/);
+            assert.match(html, /apple-touch-icon[^>]+app-icon-192\.png/);
+            assert.doesNotMatch(html, /apple-touch-icon[^>]+baseball\.png/);
+          });
+          EOF
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify implementation
+        run: |
+          npm ci
+          npm run check
+          python -m pip install pytest
+          python -m pytest -q
+          git diff --check
+
+      - name: Commit verified icon follow-up
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          git add app-icon.svg favicon-32.png app-icon-192.png app-icon-512.png app-icon-maskable-512.png manifest.json index.html sw.js src/app/navigation.css tools/generate-app-icons.py tests/frontend/icons.test.js
+          git commit -m "feat: unify PWA cheerleader app icons"
+          git fetch origin refactor/architecture-pwa-20260906
+          git rebase origin/refactor/architecture-pwa-20260906
+          git push origin HEAD:refactor/architecture-pwa-20260906
