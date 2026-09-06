@@ -2111,7 +2111,7 @@
                     return true;
                 });
                 if (merged.length) {
-                    dbNews = merged.map(n => ({ ...n, tag: window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類') }));
+                    dbNews = merged.map(n => { const tag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類'); return { ...n, tag, subtag: window.normalizeNewsSubcategory(n, tag) }; });
                     window.__newsLastRefresh = Date.now();
                     if (forceRender && currentMode === 'news' && typeof window.renderNewsHub === 'function') {
                         window.renderNewsHub(true);
@@ -2166,7 +2166,12 @@
                                     return true;
                                 });
 
-                                if (mergedFreshNews.length > 0) dbNews = mergedFreshNews;
+                                if (mergedFreshNews.length > 0) {
+                                    dbNews = mergedFreshNews.map(n => {
+                                        const tag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類');
+                                        return { ...n, tag, subtag: window.normalizeNewsSubcategory(n, tag) };
+                                    });
+                                }
                             } catch(e) {
                                 console.warn('Fresh news refresh failed; using cached news as fallback.', e);
                             }
@@ -2239,10 +2244,10 @@
                     newsSeen.add(key);
                     return true;
                 });
-                dbNews = dbNews.map(n => ({
-                    ...n,
-                    tag: window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類')
-                }));
+                dbNews = dbNews.map(n => {
+                    const tag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類');
+                    return { ...n, tag, subtag: window.normalizeNewsSubcategory(n, tag) };
+                });
                 if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
                 if(themesData) dbThemes = themesData.map(t => ({ ...t, safeDate: parseDateFlexible(t.date) })).filter(t => t.safeDate);
                 
@@ -6429,22 +6434,49 @@ window.renderMinigameStart = function() {
             window.scrollTo({top: 0, behavior: 'smooth'}); 
         };
 
-
-        // Canonical news category mapping: legacy Sheet labels + automatic feed labels
+        // Canonical two-tier news taxonomy.
+        // Main category = sport/topic; league/person belongs to the subcategory.
         window.normalizeNewsCategory = function(value) {
             const raw = String(value || '').trim();
             const key = raw.toLowerCase().replace(/[\s_\-+\.]/g, '');
             if (!key) return '未分類';
 
-            if (key.includes('啦啦隊') || key.includes('cheer')) return '啦啦隊';
-            if (key.includes('mlb') || key.includes('大聯盟')) return 'MLB';
-            if (key.includes('cpbl') || key.includes('中華職棒') || key === '中職' || key.includes('中職新聞')) return 'CPBL';
-            if (key.includes('tpbl') || key.includes('台灣職業籃球大聯盟')) return 'TPBL';
-            if (key.includes('plg') || key.includes('pleague')) return 'PLG';
-            if (key.includes('tvbl') || key.includes('tpvl') || key.includes('職業排球') || key === '職排') return 'TVBL';
+            if (key.includes('啦啦隊') || key.includes('cheer')) return '啦啦隊情報';
+            if (key.includes('棒球') || key.includes('baseball') || key.includes('mlb') || key.includes('大聯盟') || key.includes('cpbl') || key.includes('中華職棒') || key === '中職' || key.includes('中職新聞')) return '棒球情報';
+            if (key.includes('籃球') || key.includes('basketball') || key.includes('tpbl') || key.includes('台灣職業籃球大聯盟') || key.includes('plg') || key.includes('pleague')) return '籃球情報';
+            if (key.includes('排球') || key.includes('volleyball') || key.includes('tvbl') || key.includes('tpvl') || key.includes('職排')) return '排球情報';
 
             return raw;
         };
+
+        window.normalizeNewsSubcategory = function(news, mainCategory) {
+            const raw = String(news?.subtag || news?.sub_tag || news?.['子分類'] || news?.subTag || '').trim();
+            const sourceTag = String(news?.tag || news?.['標籤'] || news?.['分類'] || '').trim();
+            const title = String(news?.title || news?.['標題'] || '').trim();
+            const hay = `${raw} ${sourceTag} ${title}`;
+            const key = hay.toLowerCase().replace(/[\s_\-+\.]/g, '');
+
+            if (mainCategory === '棒球情報') {
+                if (key.includes('mlb') || key.includes('大聯盟')) return 'MLB';
+                if (key.includes('cpbl') || key.includes('中華職棒') || key.includes('中職')) return '中職';
+                return raw && raw !== mainCategory ? raw : '其他棒球';
+            }
+            if (mainCategory === '籃球情報') {
+                if (key.includes('tpbl') || key.includes('台灣職業籃球大聯盟')) return 'TPBL';
+                if (key.includes('plg') || key.includes('pleague')) return 'PLG';
+                return raw && raw !== mainCategory ? raw : '其他籃球';
+            }
+            if (mainCategory === '排球情報') {
+                if (key.includes('tvbl') || key.includes('tpvl') || key.includes('台灣職業排球') || key.includes('職排')) return 'TVBL';
+                return raw && raw !== mainCategory ? raw : '其他排球';
+            }
+            if (mainCategory === '啦啦隊情報') {
+                if (raw && !['啦啦隊', '啦啦隊情報', 'cheer'].includes(raw.toLowerCase())) return raw;
+                return '綜合';
+            }
+            return raw || '綜合';
+        };
+
 
         window.renderDualTierNewsFilters = function(allNewsData) {
             const mainContainer = document.getElementById('news-filter-container');
@@ -6460,8 +6492,7 @@ window.renderMinigameStart = function() {
             allNewsData.forEach(n => {
                 let mainTag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || "未分類");
                 // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
-                let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
-                let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
+                let subTag = window.normalizeNewsSubcategory(n, mainTag);
 
                 if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
                 if (subTag && !categoryTree[mainTag].includes(subTag)) {
@@ -6611,8 +6642,7 @@ window.renderMinigameStart = function() {
             allNewsData.forEach(n => {
                 let mainTag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || "未分類");
                 // ✨ 修正：加上 n.subtag 讀取被 PapaParse 轉換後的純小寫欄位
-                let rawSubTag = (n.subtag || n.sub_tag || n['子分類'] || n.subTag || ""); 
-                let subTag = rawSubTag.trim() !== "" ? rawSubTag.trim() : null;
+                let subTag = window.normalizeNewsSubcategory(n, mainTag);
 
                 if (!categoryTree[mainTag]) categoryTree[mainTag] = [];
                 if (subTag && !categoryTree[mainTag].includes(subTag)) {
@@ -6661,6 +6691,13 @@ window.renderMinigameStart = function() {
         // =========================================================================
         window.renderNewsHub = function(skipRefresh = false) {
             const container = document.getElementById('news-container');
+            if (window.currentMainCategory && window.currentMainCategory !== '全部') {
+                const legacyMain = window.currentMainCategory;
+                window.currentMainCategory = window.normalizeNewsCategory(legacyMain);
+                if (window.currentSubCategory && window.currentSubCategory !== '全部') {
+                    window.currentSubCategory = window.normalizeNewsSubcategory({ tag: legacyMain, subtag: window.currentSubCategory }, window.currentMainCategory);
+                }
+            }
             if (!skipRefresh && (!window.__newsLastRefresh || Date.now() - window.__newsLastRefresh > 15000)) {
                 window.refreshLatestNews(true);
             }
@@ -6675,6 +6712,35 @@ window.renderMinigameStart = function() {
                 return defaultVal;
             };
 
+            // Keep hidden/restored filters from making the News page look empty after the feed changes.
+            const validNewsMains = new Set(["全部"]);
+            const validNewsSubs = new Map();
+            const validNewsHashtags = new Set();
+            dbNews.forEach(n => {
+                const mainTag = window.normalizeNewsCategory(getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類'));
+                const subTag = window.normalizeNewsSubcategory(n, mainTag);
+                validNewsMains.add(mainTag);
+                if (!validNewsSubs.has(mainTag)) validNewsSubs.set(mainTag, new Set());
+                if (subTag) validNewsSubs.get(mainTag).add(subTag);
+                const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
+                if (hashRaw) {
+                    hashRaw.split(/[,\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));
+                } else {
+                    validNewsHashtags.add(mainTag);
+                }
+            });
+            if (!validNewsMains.has(window.currentMainCategory)) {
+                window.currentMainCategory = "全部";
+                window.currentSubCategory = "全部";
+            } else if (window.currentMainCategory === "全部") {
+                window.currentSubCategory = "全部";
+            } else if (window.currentSubCategory !== "全部" && !(validNewsSubs.get(window.currentMainCategory)?.has(window.currentSubCategory))) {
+                window.currentSubCategory = "全部";
+            }
+            if (window.currentNewsHashtag && !validNewsHashtags.has(window.currentNewsHashtag)) {
+                window.currentNewsHashtag = "";
+            }
+
             // 1. 呼叫雙層下拉選單渲染引擎
             window.renderDualTierNewsFilters(dbNews);
 
@@ -6683,8 +6749,7 @@ window.renderMinigameStart = function() {
             // 2. 依照主分類、子分類、Hashtag 與「全文檢索」篩選
             let filteredNews = dbNews.map((n, idx) => ({...n, _idx: idx})).filter(n => {
                 let mainTag = window.normalizeNewsCategory(getField(n, ['tag', '標籤', '分類標籤', '分類'], '未分類'));
-                let rawSubTag = getField(n, ['subtag', 'sub_tag', '子分類', 'subTag'], '');
-                let subTag = rawSubTag !== "" ? rawSubTag : "全部";
+                let subTag = window.normalizeNewsSubcategory(n, mainTag);
 
                 let matchMain = (window.currentMainCategory === "全部" || mainTag === window.currentMainCategory);
                 let matchSub = (window.currentSubCategory === "全部" || subTag === window.currentSubCategory);
