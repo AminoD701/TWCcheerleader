@@ -64,16 +64,54 @@ function ensureHub() {
   return hub;
 }
 
+function moreEntryHtml(entry) {
+  if (entry.external) {
+    return `<a href="${entry.external}" target="_blank" rel="noopener noreferrer"><strong>${entry.title}</strong>${entry.note ? `<small>${entry.note}</small>` : ''}</a>`;
+  }
+  if (entry.action) {
+    return `<a href="?mode=more" data-hub-action="${entry.action}"><strong>${entry.title}</strong>${entry.note ? `<small>${entry.note}</small>` : ''}</a>`;
+  }
+  return `<a href="?mode=${entry.target}" data-hub-mode="${entry.target}"><strong>${entry.title}</strong>${entry.note ? `<small>${entry.note}</small>` : ''}</a>`;
+}
+
 function showHub(mode) {
   legacySetMode(mode === 'my' ? 'passport' : 'games');
   document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
   const hub = ensureHub();
   const entries = mode === 'my'
-    ? [['passport', '追星護照', '收藏、個人行程與本命球隊偏好皆保留在這台裝置。'], ['girls', '收藏女孩', '前往女孩圖鑑管理收藏。'], ['events', '個人行程', '前往公開行程加入或移除個人行程。']]
-    : [['news', '最新消息'], ['games', '遊戲與夢幻隊伍'], ['vote', '應援投票'], ['themes', '主題日'], ['agency', '經紀資訊'], ['feedback', '意見回饋']];
-  hub.innerHTML = `<h1>${mode === 'my' ? '我的' : '更多功能'}</h1><div class="navigation-hub__grid">${entries.map(([target, title, note]) => `<a href="?mode=${target}" data-hub-mode="${target}"><strong>${title}</strong>${note ? `<small>${note}</small>` : ''}</a>`).join('')}</div>`;
+    ? [
+        { target: 'passport', title: '追星護照', note: '收藏、個人行程與本命球隊偏好皆保留在這台裝置。' },
+        { target: 'girls', title: '收藏女孩', note: '前往女孩圖鑑管理收藏。' },
+        { target: 'events', title: '個人行程', note: '前往公開行程加入或移除個人行程。' }
+      ]
+    : [
+        { target: 'news', title: '最新消息' },
+        { target: 'games', title: '遊戲中心' },
+        { action: 'gacha-history', title: '📚 今日一抽紀錄', note: '查看每天抽到的幸運女孩紀錄。' },
+        { target: 'vote', title: '應援投票' },
+        { target: 'themes', title: '主題日' },
+        { target: 'agency', title: '經紀資訊' },
+        { target: 'feedback', title: '意見回饋' },
+        { external: 'https://dinosaur071.bobaboba.me', title: '🧋 請我喝珍奶', note: '支持網站持續整理與維護。' }
+      ];
+  hub.innerHTML = `<h1>${mode === 'my' ? '我的' : '更多功能'}</h1><div class="navigation-hub__grid">${entries.map(moreEntryHtml).join('')}</div>`;
   hub.style.display = 'block';
-  hub.onclick = event => { const a = event.target.closest('[data-hub-mode]'); if (a) { event.preventDefault(); navigate(a.dataset.hubMode); } };
+  hub.onclick = event => {
+    const action = event.target.closest('[data-hub-action]');
+    if (action) {
+      event.preventDefault();
+      if (action.dataset.hubAction === 'gacha-history') {
+        if (typeof window.showGachaHistory === 'function') window.showGachaHistory();
+        else alert('抽卡紀錄功能正在載入，請稍後再試一次。');
+      }
+      return;
+    }
+    const a = event.target.closest('[data-hub-mode]');
+    if (a) {
+      event.preventDefault();
+      navigate(a.dataset.hubMode);
+    }
+  };
 }
 
 function restoreModeState(mode) {
@@ -203,6 +241,8 @@ window.addEventListener('DOMContentLoaded', () => {
   legacyOpenProfile = window.openProfile;
   legacyCloseProfile = window.closeProfile;
   legacyRenderTeamThemesHub = window.renderTeamThemesHub;
+
+  document.querySelector('.floating-boba-btn')?.remove();
 
   if (legacySelectScheduleTeam) {
     window.selectScheduleTeam = (team, sport) => {
