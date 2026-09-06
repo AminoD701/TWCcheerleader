@@ -150,15 +150,8 @@
     bar.querySelector('[data-adjust-mode]').addEventListener('click', () => { location.href = '?mode=games'; });
   };
 
-  const createDailyShortcut = () => {
-    if (!isStandalone() || document.getElementById('app-daily-shortcut')) return;
-    const btn = document.createElement('button');
-    btn.id = 'app-daily-shortcut';
-    btn.type = 'button';
-    btn.textContent = '✨ 今日一抽';
-    Object.assign(btn.style, {position:'fixed',left:'14px',bottom:'76px',zIndex:'9997',border:'1px solid rgba(255,255,255,.18)',borderRadius:'999px',padding:'9px 13px',background:'rgba(17,20,24,.94)',color:'#fff',fontWeight:'900',fontSize:'12px',boxShadow:'0 8px 24px rgba(0,0,0,.35)'});
-    btn.addEventListener('click', () => showDailyResult());
-    document.body.appendChild(btn);
+  const removeDailyShortcut = () => {
+    document.getElementById('app-daily-shortcut')?.remove();
   };
 
   const initDailyOnAppOpen = () => {
@@ -169,7 +162,7 @@
       if (!usableGirls().length) return false;
       const result = ensureDailyResult();
       if (result && !wasDoneToday) setTimeout(() => showDailyResult(result, true), 450);
-      createDailyShortcut();
+      removeDailyShortcut();
       enhanceGamesHome();
       return true;
     };
@@ -185,7 +178,7 @@
     installStyles();
     enhanceGamesHome();
     enhanceSubGame();
-    createDailyShortcut();
+    removeDailyShortcut();
   };
 
   window.addEventListener('load', () => {
