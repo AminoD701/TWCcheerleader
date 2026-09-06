@@ -29,7 +29,7 @@ async function navigationFixture(initial='events') {
   const search=element('input'); search.value=''; search.id='searchInput'; elements.set('searchInput',search);
   const ids={girls:'grid-container',events:'event-container',news:'news-container',passport:'passport-container',games:'games-container',schedule:'schedule-container',matches:'matches-container'};
   for(const id of Object.values(ids)){const n=element();n.id=id;n.parentNode=main;main.append(n);}
-  const document={body,head:{append(){}},createElement:element,
+  const document={body,head:{append(){}},createElement:element,addEventListener(){},
     querySelector:sel=>elements.get(sel.slice(1)),
     querySelectorAll:sel=>sel.startsWith('#main-content > div')?main.children.filter(n=>n.tagName==='DIV'&&n.id!=='schedule-section-switcher'):[]};
   const location={href:'https://example.invalid/TWCcheerleader/?mode='+initial};
