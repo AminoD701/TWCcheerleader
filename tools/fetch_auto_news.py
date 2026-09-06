@@ -78,6 +78,8 @@ SPORT_ITEM_LIMITS = {"MLB": 6, "中職": 6, "TPBL": 5, "PLG": 4, "TVBL": 5}
 SPORT_SOURCE_LIMIT = 2
 NAME_QUERY_BATCH_SIZE = 8
 MAX_NAME_QUERY_BATCHES = 24
+TEAM_QUERY_BATCH_SIZE = 6
+MAX_TEAM_QUERY_BATCHES = 8
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152.0 Safari/537.36"
 
 
@@ -145,8 +147,9 @@ def girl_name_matches(name: str, hay: str) -> bool:
     return re.search(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", hay, flags=re.I) is not None
 
 
-def build_queries(girl_names: list[str]) -> list[str]:
+def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
     girl_names = [name for name in girl_names if usable_girl_name(name)]
+    site_teams = [team.strip() for team in site_teams if team and team.strip()]
     queries = list(BASE_QUERIES)
     # Query the actual names present in this website instead of relying only on generic sports feeds.
     # Batching keeps the Google News workload bounded while still covering a broad part of the roster.
@@ -156,6 +159,15 @@ def build_queries(girl_names: list[str]) -> list[str]:
             break
         names_expr = " OR ".join(f'"{name}"' for name in batch)
         queries.append(f"({names_expr}) 啦啦隊")
+
+    # Also search the teams actually represented by the site's roster. This catches
+    # cheerleader/team stories whose headline names the squad or club but omits a girl name.
+    for start in range(0, min(len(site_teams), TEAM_QUERY_BATCH_SIZE * MAX_TEAM_QUERY_BATCHES), TEAM_QUERY_BATCH_SIZE):
+        batch = site_teams[start:start + TEAM_QUERY_BATCH_SIZE]
+        if not batch:
+            break
+        teams_expr = " OR ".join(f'"{team}"' for team in batch)
+        queries.append(f"({teams_expr}) 啦啦隊")
     return queries
 
 
@@ -362,7 +374,7 @@ def main() -> None:
     cutoff = datetime.now(timezone(timedelta(hours=8))) - timedelta(days=MAX_AGE_DAYS)
 
     pool: list[dict] = []
-    for query in build_queries(girl_names):
+    for query in build_queries(girl_names, site_teams):
         try:
             for item in fetch_query(query):
                 item["query"] = query
