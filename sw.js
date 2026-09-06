@@ -1,7 +1,7 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v7`;
+const CACHE_NAME = `${CACHE_PREFIX}v8`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
-const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './app-icon.svg', './app-icon-safe.svg', './favicon-32.png', './app-icon-192.png', './app-icon-512.png', './app-icon-maskable-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4'];
+const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4'];
 
 const isOwnedCache = key => key.startsWith(CACHE_PREFIX) || LEGACY_CACHES.includes(key);
 const canStore = (request, response) => request.cache !== 'no-store' && response && response.ok && response.type !== 'error';
