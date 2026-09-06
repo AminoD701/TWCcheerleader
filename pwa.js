@@ -4,6 +4,38 @@
   let refreshing = false;
   let updateAccepted = false;
 
+  const showInstallGuide = async () => {
+    if (isStandalone()) {
+      alert('你已經使用 APP 模式開啟台灣啦啦隊資料庫了！目前手機版 APP 仍在測試中，若遇到顯示或更新問題歡迎回報。');
+      return;
+    }
+
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice.catch(() => null);
+      deferredPrompt = null;
+      document.getElementById('pwa-install-btn')?.remove();
+      return;
+    }
+
+    const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(isiOS
+      ? '📱 手機 APP 測試中\n\n【iPhone / iPad 安裝方式】\n1. 請使用 Safari 開啟本站\n2. 點下方「分享」按鈕\n3. 選擇「加入主畫面」\n4. 點「加入」即可像一般 APP 一樣從桌面開啟\n\n目前為測試版本，網站更新後會持續同步。'
+      : '📱 手機 APP 測試中\n\n【Android 安裝方式】\n1. 建議使用 Chrome 開啟本站\n2. 點右上角選單\n3. 選擇「安裝應用程式」或「加入主畫面」\n4. 完成後即可像一般 APP 一樣從桌面開啟\n\n若畫面上有「安裝 APP」按鈕，也可以直接點擊安裝。');
+  };
+
+  const updateHomeMarquee = () => {
+    const marquee = document.querySelector('.marquee-wrapper');
+    const content = marquee?.querySelector('.marquee-content');
+    if (!marquee || !content) return;
+
+    marquee.removeAttribute('onclick');
+    marquee.title = '點擊查看手機 APP 安裝教學';
+    marquee.style.cursor = 'pointer';
+    content.innerHTML = '📱【手機 APP 測試中】台灣啦啦隊資料庫現在可以安裝到手機桌面！ <span class="marquee-highlight">iPhone：Safari 分享 → 加入主畫面</span> ｜ Android：Chrome 選單 → 安裝應用程式。點擊這裡查看安裝教學。';
+    marquee.addEventListener('click', showInstallGuide);
+  };
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then(registration => {
@@ -60,19 +92,7 @@
       boxShadow: '0 8px 24px rgba(0,0,0,.35)',
       cursor: 'pointer'
     });
-    btn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice.catch(() => null);
-        deferredPrompt = null;
-        btn.remove();
-        return;
-      }
-      const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      alert(isiOS
-        ? 'iPhone / iPad：請點 Safari 下方「分享」→「加入主畫面」，即可像 APP 一樣使用。'
-        : '請使用瀏覽器選單中的「安裝應用程式」或「加入主畫面」。');
-    });
+    btn.addEventListener('click', showInstallGuide);
     document.body.appendChild(btn);
   };
 
@@ -88,6 +108,7 @@
   });
 
   window.addEventListener('load', () => {
+    updateHomeMarquee();
     if (!isStandalone()) createInstallButton();
   });
 })();
