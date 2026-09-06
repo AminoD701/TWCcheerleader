@@ -1,0 +1,57 @@
+name: Apply recovered Phase 1 patch
+
+on:
+  push:
+    branches:
+      - refactor/architecture-pwa-20260906
+    paths:
+      - deliverables/pwa-phase1-part-3.patch
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/architecture-pwa-20260906
+          fetch-depth: 0
+
+      - name: Reconstruct recovered patch
+        run: |
+          cat deliverables/pwa-phase1-part-1.patch > /tmp/phase1.patch
+          printf '\n\n' >> /tmp/phase1.patch
+          cat deliverables/pwa-phase1-part-2.patch >> /tmp/phase1.patch
+          printf '\n\n' >> /tmp/phase1.patch
+          cat deliverables/pwa-phase1-part-3.patch >> /tmp/phase1.patch
+          wc -l -c /tmp/phase1.patch
+          sha256sum /tmp/phase1.patch
+
+      - name: Apply patch
+        run: |
+          git apply --check /tmp/phase1.patch
+          git apply /tmp/phase1.patch
+          git diff --check
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Frontend checks
+        run: |
+          npm ci
+          npm run check
+
+      - name: Python tests
+        run: python -m pytest -q
+
+      - name: Commit verified implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: apply verified Phase 1 PWA repairs"
+          git push origin HEAD:refactor/architecture-pwa-20260906
