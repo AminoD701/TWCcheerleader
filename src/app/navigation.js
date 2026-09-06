@@ -8,6 +8,9 @@ const safeSession = {
 let currentMode = new URL(location.href).searchParams.get('mode') || safeSession.get('cheer_current_tab') || 'news';
 let keyboardOpen = false;
 let legacySetMode;
+let legacySelectScheduleTeam;
+let legacyBackToScheduleSelection;
+let scheduleSelection = null;
 
 function link(item) {
   return `<a class="primary-nav__item" data-mode="${item.mode}" href="?mode=${item.mode}" aria-label="${item.label}"><svg viewBox="0 0 24 24" aria-hidden="true">${item.icon}</svg><span>${item.label}</span></a>`;
@@ -86,12 +89,17 @@ function restoreModeState(mode) {
     }
   });
 
-  // Legacy filters keep renderer state in event handlers. Re-dispatch after values
-  // are restored so the visible cards and internal filter state match the controls.
   restored.forEach(el => {
+    if (typeof el.dispatchEvent !== 'function') return;
     el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
     if (el.tagName !== 'SELECT') el.dispatchEvent(new Event('change', { bubbles: true }));
   });
+
+  if (mode === 'schedule' && saved.legacy?.scheduleSelection && legacySelectScheduleTeam) {
+    const { team, sport } = saved.legacy.scheduleSelection;
+    scheduleSelection = { team, sport };
+    legacySelectScheduleTeam(team, sport);
+  }
   return saved;
 }
 
@@ -102,8 +110,6 @@ function applyMode(mode) {
   if (hub) { hub.hidden = mode !== 'my' && mode !== 'more'; hub.style.display = hub.hidden ? 'none' : 'block'; }
   if (mode === 'my' || mode === 'more') showHub(mode);
   else legacySetMode(mode);
-  // The legacy renderer may rewrite the URL to only ?mode=. Restore the complete
-  // pre-render URL and update only mode so deep-link parameters such as newsId survive.
   const canonical = new URL(urlBeforeLegacy);
   canonical.searchParams.set('mode', mode);
   window.history.replaceState({ mode }, '', canonical);
@@ -125,18 +131,18 @@ function rememberMode(mode) {
     const key = el.id || el.name;
     if (key) controls[key] = el.value;
   });
-  // Keep compatibility with the legacy filter bar and minimal embedded hosts
-  // which do not expose form controls through querySelectorAll.
   ['searchInput', 'team-filter', 'sport-filter', 'news-category-filter'].forEach(key => {
     const el = document.querySelector(`#${key}`);
     if (el && 'value' in el) controls[key] = el.value;
   });
-  stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls });
+  const legacy = mode === 'schedule' && scheduleSelection
+    ? { scheduleSelection: { ...scheduleSelection } }
+    : {};
+  stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls, legacy });
 }
 
 function navigate(mode, { history = true } = {}) {
   if (mode === currentMode) {
-    // init/data-ready calls intentionally re-render without adding history.
     rememberMode(mode);
     applyMode(mode);
     return;
@@ -157,6 +163,22 @@ function updateKeyboardState() {
 
 window.addEventListener('DOMContentLoaded', () => {
   legacySetMode = window.setMode;
+  legacySelectScheduleTeam = window.selectScheduleTeam;
+  legacyBackToScheduleSelection = window.backToScheduleSelection;
+
+  if (legacySelectScheduleTeam) {
+    window.selectScheduleTeam = (team, sport) => {
+      scheduleSelection = { team, sport };
+      return legacySelectScheduleTeam(team, sport);
+    };
+  }
+  if (legacyBackToScheduleSelection) {
+    window.backToScheduleSelection = () => {
+      scheduleSelection = null;
+      return legacyBackToScheduleSelection();
+    };
+  }
+
   window.setMode = mode => navigate(mode);
   window.visualViewport?.addEventListener('resize', updateKeyboardState);
   renderNavigation();
