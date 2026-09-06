@@ -18,95 +18,10 @@ jobs:
           python-version: '3.12'
       - name: Install crawler dependency
         run: python -m pip install --disable-pip-version-check googlenewsdecoder
-      - name: Patch remaining review findings
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          crawler = Path('tools/fetch_auto_news.py')
-          text = crawler.read_text(encoding='utf-8')
-          pattern = re.compile(r"def classify_news\(.*?\n\n\ndef extract_meta\(", re.S)
-          replacement = '''def classify_news(
-    title: str,
-    desc: str,
-    matched_girls: list[str],
-    matched_teams: list[str],
-) -> tuple[str, str] | None:
-    hay = f"{title} {desc}"
-    hay_lower = hay.lower()
-    has_cheer_word = any(term.lower() in hay_lower for term in CHEER_TERMS)
-
-    # Explicit cheerleader wording always wins. This keeps genuine girl/cheer stories
-    # in the cheer category even when they mention a sports league or club.
-    if has_cheer_word:
-        return "啦啦隊情報", (matched_girls[0] if matched_girls else (matched_teams[0] if matched_teams else "綜合"))
-
-    # Detect ordinary sports coverage before using roster-name matches. Besides the
-    # canonical league/full-team rules, include generic sport words and common short
-    # club aliases so headlines such as "台鋼 VS 統一七局下" cannot be misclassified
-    # merely because a short girl name appears as a substring.
-    sport_match = None
-    for main_category, subcategory, terms in SPORT_RULES:
-        if any(term.lower() in hay_lower for term in terms):
-            sport_match = (main_category, subcategory)
-            break
-
-    if sport_match is None:
-        generic_rules = [
-            ("棒球情報", "中職", ["棒球", "中職", "cpbl", "台鋼", "雄鷹", "兄弟", "桃猿", "味全龍", "統一獅", "富邦悍將"]),
-            ("棒球情報", "MLB", ["mlb", "大聯盟", "道奇", "洋基"]),
-            ("籃球情報", "TPBL", ["籃球", "tpbl", "國王", "海神", "攻城獅", "戰神", "雲豹", "中信特攻", "夢想家"]),
-            ("籃球情報", "PLG", ["plg", "p. league", "勇士", "領航猿"]),
-            ("排球情報", "TVBL", ["排球", "職排", "tvbl", "tpvl", "連莊"]),
-        ]
-        for main_category, subcategory, terms in generic_rules:
-            if any(term.lower() in hay_lower for term in terms):
-                sport_match = (main_category, subcategory)
-                break
-
-    if sport_match:
-        return sport_match
-    if matched_girls:
-        return "啦啦隊情報", matched_girls[0]
-    return None
-
-
-def extract_meta('''
-          new_text, count = pattern.subn(replacement, text, count=1)
-          if count != 1:
-              raise SystemExit(f'classify_news replacement count={count}')
-          crawler.write_text(new_text, encoding='utf-8')
-
-          index = Path('index.html')
-          html = index.read_text(encoding='utf-8')
-          old = '''                const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
-                hashRaw.split(/[,\\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));'''
-          new = '''                const hashRaw = getField(n, ['hashtags', '標籤雲', '關鍵字', 'keywords'], '');
-                if (hashRaw) {
-                    hashRaw.split(/[,\\s、，]+/).filter(Boolean).forEach(tag => validNewsHashtags.add(tag));
-                } else {
-                    // Match the modal/filter fallback: news without explicit hashtags
-                    // still exposes its normalized main category as a clickable tag.
-                    validNewsHashtags.add(mainTag);
-                }'''
-          if old not in html:
-              raise SystemExit('hashtag validity block not found')
-          index.write_text(html.replace(old, new, 1), encoding='utf-8')
-          PY
+      - name: Apply remaining fixes
+        run: python tools/final_news_hotfix.py
       - name: Validate classification regressions
-        run: |
-          python - <<'PY'
-          import importlib.util
-          spec = importlib.util.spec_from_file_location('news', 'tools/fetch_auto_news.py')
-          mod = importlib.util.module_from_spec(spec)
-          spec.loader.exec_module(mod)
-          pure = mod.classify_news('台鋼VS 統一七局下攻勢再起', '今日賽事戰況更新', ['一七'], ['台鋼雄鷹'])
-          assert pure == ('棒球情報', '中職'), pure
-          cheer = mod.classify_news('台鋼啦啦隊女孩一七應援人氣高', '球場應援焦點', ['一七'], ['台鋼雄鷹'])
-          assert cheer and cheer[0] == '啦啦隊情報', cheer
-          print('classification regressions OK', pure, cheer)
-          PY
+        run: python -c "import importlib.util; s=importlib.util.spec_from_file_location('news','tools/fetch_auto_news.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); p=m.classify_news('台鋼VS 統一七局下攻勢再起','今日賽事戰況更新',['一七'],['台鋼雄鷹']); c=m.classify_news('台鋼啦啦隊女孩一七應援人氣高','球場應援焦點',['一七'],['台鋼雄鷹']); assert p==('棒球情報','中職'),p; assert c and c[0]=='啦啦隊情報',c; print(p,c)"
       - name: Regenerate news feed
         run: python tools/fetch_auto_news.py
       - uses: actions/setup-node@v4
@@ -114,20 +29,11 @@ def extract_meta('''
           node-version: 22
       - name: Run complete checks
         run: npm run check
-      - name: Validate fallback hashtag wiring
+      - name: Commit final fixes and remove one-shot files
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          text = Path('index.html').read_text(encoding='utf-8')
-          assert 'validNewsHashtags.add(mainTag);' in text
-          assert 'if (hashRaw)' in text
-          print('fallback hashtag validation OK')
-          PY
-      - name: Commit final fixes and remove one-shot workflow
-        run: |
-          git rm .github/workflows/news-final-hotfix.yml
+          git rm .github/workflows/news-final-hotfix.yml tools/final_news_hotfix.py
           git add tools/fetch_auto_news.py index.html data/auto-news.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "fix: close final news classification review findings"
+          git commit -m "fix: close final news review findings"
           git push
