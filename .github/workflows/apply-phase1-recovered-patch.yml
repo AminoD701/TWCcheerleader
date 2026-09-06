@@ -8,6 +8,7 @@ on:
       - deliverables/pwa-phase1-part-2.patch
       - deliverables/pwa-phase1-part-3.patch
       - deliverables/pwa-phase1-trigger.txt
+      - .github/workflows/apply-phase1-recovered-patch.yml
 
 permissions:
   contents: write
@@ -48,6 +49,9 @@ jobs:
         run: |
           npm ci
           npm run check
+
+      - name: Set up Python tests
+        run: python -m pip install pytest
 
       - name: Python tests
         run: python -m pytest -q
