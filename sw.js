@@ -1,13 +1,12 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v8`;
+const CACHE_NAME = `${CACHE_PREFIX}v9`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
-const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4'];
+const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/game-app-enhancements.js?v=1', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4'];
 
 const isOwnedCache = key => key.startsWith(CACHE_PREFIX) || LEGACY_CACHES.includes(key);
 const canStore = (request, response) => request.cache !== 'no-store' && response && response.ok && response.type !== 'error';
 
 self.addEventListener('install', event => {
-  // addAll rejection intentionally fails installation; an incomplete worker must not take over.
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
 });
 
