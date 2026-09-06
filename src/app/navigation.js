@@ -67,15 +67,44 @@ function showHub(mode) {
   hub.onclick = event => { const a = event.target.closest('[data-hub-mode]'); if (a) { event.preventDefault(); navigate(a.dataset.hubMode); } };
 }
 
+function restoreModeState(mode) {
+  const saved = stateByMode.get(mode);
+  if (!saved) return saved;
+
+  const restored = new Set();
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    const key = el.id || el.name;
+    if (!key || !Object.hasOwn(saved.controls, key)) return;
+    el.value = saved.controls[key];
+    restored.add(el);
+  });
+  Object.entries(saved.controls).forEach(([key, value]) => {
+    const el = document.querySelector(`#${key}`);
+    if (el && 'value' in el) {
+      el.value = value;
+      restored.add(el);
+    }
+  });
+
+  // Legacy filters keep renderer state in event handlers. Re-dispatch after values
+  // are restored so the visible cards and internal filter state match the controls.
+  restored.forEach(el => {
+    el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+    if (el.tagName !== 'SELECT') el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  return saved;
+}
+
 function applyMode(mode) {
   currentMode = mode;
+  const urlBeforeLegacy = new URL(location.href);
   const hub = document.querySelector('#navigation-hub');
   if (hub) { hub.hidden = mode !== 'my' && mode !== 'more'; hub.style.display = hub.hidden ? 'none' : 'block'; }
   if (mode === 'my' || mode === 'more') showHub(mode);
   else legacySetMode(mode);
-  // The legacy renderer remains responsible for content only. Restore the router's
-  // canonical destination after it updates its historic session/URL fields.
-  const canonical = new URL(location.href);
+  // The legacy renderer may rewrite the URL to only ?mode=. Restore the complete
+  // pre-render URL and update only mode so deep-link parameters such as newsId survive.
+  const canonical = new URL(urlBeforeLegacy);
   canonical.searchParams.set('mode', mode);
   window.history.replaceState({ mode }, '', canonical);
   safeSession.set('cheer_current_tab', mode);
@@ -86,17 +115,7 @@ function applyMode(mode) {
     else el.removeAttribute?.('aria-current');
   });
   document.body.dataset.appMode = mode;
-  const saved = stateByMode.get(mode);
-  if (saved) {
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-      const key = el.id || el.name;
-      if (key && Object.hasOwn(saved.controls, key)) el.value = saved.controls[key];
-    });
-    Object.entries(saved.controls).forEach(([key, value]) => {
-      const el = document.querySelector(`#${key}`);
-      if (el && 'value' in el) el.value = value;
-    });
-  }
+  const saved = restoreModeState(mode);
   requestAnimationFrame(() => scrollTo(0, saved?.scroll || 0));
 }
 
