@@ -1,0 +1,153 @@
+name: Direct media news coverage fix
+
+on:
+  push:
+    branches:
+      - fix/direct-media-news-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/direct-media-news-20260906
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Patch crawler for source-targeted media coverage
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tools/fetch_auto_news.py')
+          text = path.read_text(encoding='utf-8')
+
+          old = '''BASE_QUERIES = [\n    "台灣 啦啦隊 女孩",\n    "中職 啦啦隊 女孩",\n    "職籃 啦啦隊 女孩",\n    "韓籍 啦啦隊 台灣",\n    "Passion Sisters OR Rakuten Girls OR Fubon Angels OR Wing Stars",\n    "CPBL 中華職棒",\n    "MLB 台灣",\n    "大谷翔平 MLB",\n    "TPBL 台灣職業籃球大聯盟",\n    "PLG P. LEAGUE+",\n    "TVBL 台灣職業排球聯盟",\n]\n'''
+          new = old + '''\nDIRECT_MEDIA_DOMAINS = [\n    "stars.udn.com",\n    "ctwant.com",\n]\n\nDIRECT_MEDIA_QUERIES = [\n    "site:stars.udn.com 啦啦隊",\n    "site:stars.udn.com 應援 女孩",\n    "site:stars.udn.com 樂天女孩 OR Passion Sisters OR Fubon Angels OR Wing Stars OR Uni Girls",\n    "site:ctwant.com 啦啦隊",\n    "site:ctwant.com 應援 女孩",\n    "site:ctwant.com 樂天女孩 OR Passion Sisters OR Fubon Angels OR Wing Stars OR Uni Girls",\n]\n'''
+          if 'DIRECT_MEDIA_DOMAINS = [' not in text:
+              if old not in text:
+                  raise SystemExit('BASE_QUERIES block not found')
+              text = text.replace(old, new, 1)
+
+          old_build = '''def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:\n    girl_names = [name for name in girl_names if usable_girl_name(name)]\n    site_teams = [team.strip() for team in site_teams if team and team.strip()]\n    queries = list(BASE_QUERIES)\n'''
+          new_build = '''def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:\n    girl_names = [name for name in girl_names if usable_girl_name(name)]\n    site_teams = [team.strip() for team in site_teams if team and team.strip()]\n    queries = list(BASE_QUERIES) + list(DIRECT_MEDIA_QUERIES)\n'''
+          if old_build in text:
+              text = text.replace(old_build, new_build, 1)
+
+          marker = '''        names_expr = " OR ".join(f'"{name}"' for name in batch)\n        queries.append(f"({names_expr}) 啦啦隊")\n'''
+          replacement = marker + '''        # Important entertainment outlets do not always surface cheer stories for generic queries.\n        # Add bounded source-targeted roster queries so articles that mention a girl but omit the word\n        # "啦啦隊" can still enter the candidate pool.\n        for domain in DIRECT_MEDIA_DOMAINS:\n            queries.append(f"site:{domain} ({names_expr})")\n'''
+          if 'source-targeted roster queries' not in text:
+              if marker not in text:
+                  raise SystemExit('girl query marker not found')
+              text = text.replace(marker, replacement, 1)
+
+          team_marker = '''        teams_expr = " OR ".join(f'"{team}"' for team in batch)\n        queries.append(f"({teams_expr}) 啦啦隊")\n'''
+          team_replacement = team_marker + '''        for domain in DIRECT_MEDIA_DOMAINS:\n            queries.append(f"site:{domain} ({teams_expr}) 啦啦隊")\n'''
+          if 'site:{domain} ({teams_expr}) 啦啦隊' not in text:
+              if team_marker not in text:
+                  raise SystemExit('team query marker not found')
+              text = text.replace(team_marker, team_replacement, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Add regression tests
+        shell: bash
+        run: |
+          cat > tests/frontend/news-direct-media.test.js <<'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          const crawler = fs.readFileSync(path.join(__dirname, '../../tools/fetch_auto_news.py'), 'utf8');
+
+          function assert(cond, msg) {
+            if (!cond) throw new Error(msg);
+          }
+
+          assert(crawler.includes('DIRECT_MEDIA_DOMAINS'), 'missing direct media domain config');
+          assert(crawler.includes('stars.udn.com'), 'UDN Stars must be covered');
+          assert(crawler.includes('ctwant.com'), 'CTWANT must be covered');
+          assert(crawler.includes('site:{domain} ({names_expr})'), 'girl roster queries must target priority media domains');
+          assert(crawler.includes('site:{domain} ({teams_expr}) 啦啦隊'), 'team queries must target priority media domains');
+          assert(crawler.includes('site:stars.udn.com 啦啦隊'), 'UDN cheer query missing');
+          assert(crawler.includes('site:ctwant.com 啦啦隊'), 'CTWANT cheer query missing');
+
+          console.log('news direct-media regression: ok');
+          EOF
+
+      - name: Install crawler dependency
+        run: pip install googlenewsdecoder
+
+      - name: Validate targeted queries
+        shell: bash
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          p = Path('tools/fetch_auto_news.py')
+          spec = importlib.util.spec_from_file_location('crawler', p)
+          m = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+
+          queries = m.build_queries(['李多慧', '筠熹'], ['味全龍', '樂天桃猿'])
+          expected = [
+              'site:stars.udn.com 啦啦隊',
+              'site:ctwant.com 啦啦隊',
+              'site:stars.udn.com ("李多慧" OR "筠熹")',
+              'site:ctwant.com ("李多慧" OR "筠熹")',
+          ]
+          for q in expected:
+              assert q in queries, q
+          print('targeted media queries: ok')
+          PY
+
+      - name: Run live crawler
+        run: python tools/fetch_auto_news.py
+
+      - name: Check target-source coverage in generated feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          items = json.loads(Path('data/auto-news.json').read_text(encoding='utf-8'))
+          assert items, 'auto-news feed is empty'
+          urls = [str(x.get('url', '')) for x in items]
+          sources = [str(x.get('source', '')) for x in items]
+          print('generated items:', len(items))
+          print('UDN Stars items:', sum('stars.udn.com' in u for u in urls))
+          print('CTWANT items:', sum('ctwant.com' in u.lower() or 'ctwant' in s.lower() for u, s in zip(urls, sources)))
+          # Coverage is search-result dependent, so do not require a particular publisher on every run.
+          # The structural regression above guarantees both sources are queried directly.
+          PY
+
+      - name: Run complete checks
+        run: npm run check
+
+      - name: Commit product changes and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/direct-media-news-fix.yml
+          git add tools/fetch_auto_news.py tests/frontend/news-direct-media.test.js data/auto-news.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: broaden cheer news coverage for priority media"
+          git push origin HEAD:fix/direct-media-news-20260906
