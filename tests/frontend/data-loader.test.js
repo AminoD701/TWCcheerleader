@@ -52,4 +52,5 @@ test('homepage routes Sheets and JSON adapters through the resilient loader', as
   assert.match(html, /CheerData\.load\('girls-sheet'/);
   assert.match(html, /CheerData\.load\('auto-news'/);
   assert.match(html, /CheerData\.load\('manual-events'/);
+  assert.match(html, /src\/services\/data-loader\.js\?v=4/);
 });
