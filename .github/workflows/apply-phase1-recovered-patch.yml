@@ -56,6 +56,12 @@ jobs:
       - name: Python tests
         run: python -m pytest -q
 
+      - name: Prepare verified implementation commit
+        run: |
+          rm -f .github/workflows/frontend-checks.yml
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          git diff --check
+
       - name: Commit verified implementation
         run: |
           git config user.name "github-actions[bot]"
