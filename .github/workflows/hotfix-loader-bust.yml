@@ -1,0 +1,63 @@
+name: Apply loader cache-bust hotfix
+
+on:
+  push:
+    branches:
+      - hotfix/startup-abort-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message != 'fix: bust loader URL for active v3 clients'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hotfix/startup-abort-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch loader URL and service worker shell
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          index = Path('index.html')
+          text = index.read_text(encoding='utf-8')
+          old = '<script src="./src/services/data-loader.js"></script>'
+          new = '<script src="./src/services/data-loader.js?v=4"></script>'
+          if old not in text and new not in text:
+              raise SystemExit('data-loader script tag not found')
+          text = text.replace(old, new, 1)
+          index.write_text(text, encoding='utf-8')
+
+          sw = Path('sw.js')
+          sw_text = sw.read_text(encoding='utf-8')
+          sw_text = sw_text.replace("'./src/services/data-loader.js'", "'./src/services/data-loader.js?v=4'")
+          sw.write_text(sw_text, encoding='utf-8')
+          PY
+      - name: Add regression assertion
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tests/frontend/data-loader.test.js')
+          text = p.read_text(encoding='utf-8')
+          needle = "  assert.match(html, /CheerData\\.load\\('manual-events'/);\n"
+          insert = needle + "  assert.match(html, /src\\/services\\/data-loader\\.js\\?v=4/);\n"
+          if 'data-loader\\.js\\?v=4' not in text:
+              if needle not in text:
+                  raise SystemExit('test insertion point not found')
+              text = text.replace(needle, insert, 1)
+              p.write_text(text, encoding='utf-8')
+          PY
+      - name: Run frontend tests
+        run: node --test tests/frontend/*.test.js
+      - name: Remove temporary workflow and commit
+        run: |
+          rm .github/workflows/hotfix-loader-bust.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sw.js tests/frontend/data-loader.test.js .github/workflows/hotfix-loader-bust.yml
+          git commit -m 'fix: bust loader URL for active v3 clients'
+          git push origin HEAD:hotfix/startup-abort-20260906
