@@ -18,6 +18,8 @@ jobs:
           python-version: '3.12'
       - name: Install crawler dependency
         run: python -m pip install --disable-pip-version-check googlenewsdecoder
+      - name: Apply crawler quality patch
+        run: python tools/patch_news_crawler_quality.py
       - name: Apply taxonomy patch
         run: python tools/patch_news_categories.py
       - name: Refresh automatic news
@@ -32,6 +34,7 @@ jobs:
           assert rows, 'auto-news.json is empty'
           assert all(r.get('tag') in allowed for r in rows), Counter(r.get('tag') for r in rows)
           assert all(r.get('subtag') for r in rows), 'every news item needs a subcategory'
+          assert not any(r.get('tag') == '啦啦隊情報' and r.get('subtag') in {'ET','AI','TV','MVP'} for r in rows), 'ambiguous short Latin name misclassified as a girl'
           sports=[r for r in rows if r.get('tag') != '啦啦隊情報']
           assert sum(r.get('subtag')=='中職' for r in sports) <= 6
           assert sum(r.get('subtag')=='MLB' for r in sports) <= 6
@@ -46,9 +49,9 @@ jobs:
           node-version: 22
       - name: Run frontend checks
         run: npm run check
-      - name: Commit generated index and feed
+      - name: Commit generated crawler, index and feed
         run: |
-          git add index.html data/auto-news.json
+          git add tools/fetch_auto_news.py index.html data/auto-news.json
           if git diff --cached --quiet; then
             echo "Generated files already current"
             exit 0
