@@ -16,19 +16,20 @@ const {fetchWithLastSuccess}=await import(path.join(root,'src/services/resilient
 class MockEvent { constructor(type,options={}){this.type=type;this.bubbles=!!options.bubbles;} }
 async function navigationFixture(initial='events') {
   const elements=new Map();
-  const body={dataset:{},classList:{toggle(){}},append(node){elements.set(node.id,node);}};
+  const body={dataset:{},classList:{toggle(){},contains(){return false;},add(){},remove(){}},append(node){elements.set(node.id,node);}};
   function element(tag='div') {
-    const node={tagName:tag.toUpperCase(),style:{},children:[],hidden:false,attrs:{},
-      setAttribute(k,v){this.attrs[k]=v;},toggleAttribute(){},addEventListener(){},dispatchEvent(){return true;},closest(){return null;},
+    const node={tagName:tag.toUpperCase(),style:{},children:[],hidden:false,attrs:{},dataset:{},classList:{toggle(){},add(){},remove(){},contains(){return false;}},
+      setAttribute(k,v){this.attrs[k]=v;},toggleAttribute(){},addEventListener(){},dispatchEvent(){return true;},closest(){return null;},querySelector(){return null;},querySelectorAll(){return [];},
       append(child){this.children.push(child);elements.set(child.id,child);},
-      prepend(child){this.children.unshift(child);elements.set(child.id,child);}};
+      prepend(child){this.children.unshift(child);elements.set(child.id,child);},
+      insertBefore(child){this.children.unshift(child);elements.set(child.id,child);}};
     return node;
   }
   const main=element('main');elements.set('main-content',main);
   const search=element('input'); search.value=''; search.id='searchInput'; elements.set('searchInput',search);
   const ids={girls:'grid-container',events:'event-container',news:'news-container',passport:'passport-container',games:'games-container',schedule:'schedule-container',matches:'matches-container'};
-  for(const id of Object.values(ids)){const n=element();n.id=id;main.append(n);}
-  const document={body,createElement:element,
+  for(const id of Object.values(ids)){const n=element();n.id=id;n.parentNode=main;main.append(n);}
+  const document={body,head:{append(){}},createElement:element,addEventListener(){},
     querySelector:sel=>elements.get(sel.slice(1)),
     querySelectorAll:sel=>sel.startsWith('#main-content > div')?main.children.filter(n=>n.tagName==='DIV'&&n.id!=='schedule-section-switcher'):[]};
   const location={href:'https://example.invalid/TWCcheerleader/?mode='+initial};
@@ -48,12 +49,18 @@ async function navigationFixture(initial='events') {
   }
   function selectScheduleTeam(team,sport){state.schedule={team,sport};}
   function backToScheduleSelection(){state.schedule=null;}
-  const window={setMode:legacySetMode,selectScheduleTeam,backToScheduleSelection,history,addEventListener:(event,fn)=>events[event]=fn};
-  const context=vm.createContext({window,document,location,sessionStorage,URL,Map,Set,Object,console,Event:MockEvent,scrollY:0,
+  const media={matches:false,addEventListener(){}};
+  const window={setMode:legacySetMode,selectScheduleTeam,backToScheduleSelection,history,addEventListener:(event,fn)=>events[event]=fn,matchMedia:()=>media};
+  const context=vm.createContext({window,document,location,sessionStorage,URL,Map,Set,Object,console,Event:MockEvent,scrollY:0,matchMedia:()=>media,MutationObserver:class{observe(){}},
     requestAnimationFrame:fn=>fn(),setTimeout:fn=>{fn();return 1;},scrollTo:()=>{}});
   const config=new vm.SourceTextModule(await read('src/app/navigation-config.js'),{context});
+  const mobile=new vm.SourceTextModule(await read('src/app/girls-mobile-filters.js'),{context});
   const nav=new vm.SourceTextModule((await read('src/app/navigation.js'))+'\nexport {navigate,applyMode};',{context});
-  await nav.link(specifier=>{assert.equal(specifier,'./navigation-config.js');return config;});
+  await nav.link(specifier=>{
+    if(specifier==='./navigation-config.js') return config;
+    if(specifier==='./girls-mobile-filters.js') return mobile;
+    throw new Error(`Unexpected navigation import: ${specifier}`);
+  });
   await nav.evaluate(); events.DOMContentLoaded();
   return {nav:nav.namespace,state,elements,body,location,sessionStorage,search,window};
 }

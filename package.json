@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "syntax": "node --check src/app/navigation.js && node --check src/app/navigation-config.js && node --check src/services/resilient-cache.js && node --check src/services/data-loader.js && node --check src/storage/legacy-storage.js && node --check sw.js && node --check pwa.js",
+    "syntax": "node --check src/app/navigation.js && node --check src/app/navigation-config.js && node --check src/app/girls-mobile-filters.js && node --check src/services/resilient-cache.js && node --check src/services/data-loader.js && node --check src/storage/legacy-storage.js && node --check sw.js && node --check pwa.js",
     "test": "node --test tests/frontend/*.test.js",
     "build": "node tools/build-check.js",
     "review": "node --experimental-vm-modules --test tests/review/pwa-foundation-regressions.mjs",
