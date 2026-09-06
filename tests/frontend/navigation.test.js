@@ -28,3 +28,21 @@ test('restored controls re-dispatch events so legacy filter state and cards stay
   assert.match(source, /dispatchEvent\(new Event\(el\.tagName === 'SELECT' \? 'change' : 'input'/);
   assert.match(source, /const saved = restoreModeState\(mode\)/);
 });
+
+test('router snapshots and restores non-form legacy state for team, sport, schedule and calendars', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /CheerLegacyState\?\.snapshot/);
+  assert.match(source, /CheerLegacyState\?\.restore/);
+  assert.match(source, /window\.renderContent\(true\)/);
+});
+
+test('browser Back and Forward preserve the state of the route being left', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /addEventListener\('popstate',[\s\S]*rememberMode\(currentMode\)[\s\S]*applyMode\(nextMode\)/);
+});
+
+test('homepage exposes legacy state bridge and fetch timeout cleanup', async () => {
+  const html = await readFile('index.html', 'utf8');
+  assert.match(html, /window\.CheerLegacyState/);
+  assert.match(html, /finally\s*\{\s*clearTimeout\(timer\);\s*\}/);
+});
