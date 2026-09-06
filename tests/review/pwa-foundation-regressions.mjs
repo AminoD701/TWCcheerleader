@@ -2,7 +2,6 @@
  * Navigation DOM/history/legacy setter are minimal simulations of baseline behavior.
  * Sources are loaded unchanged, with test-only exports for navigation entrypoints.
  * Run from repo: node --experimental-vm-modules --test tests/review/pwa-foundation-regressions.mjs
- * Requires the recovered patch to be applied. The archival-only branch is not an app implementation.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,18 +13,19 @@ const root=process.env.CHEER_REVIEW_ROOT || path.resolve(path.dirname(fileURLToP
 const read=p=>fs.readFile(path.join(root,p),'utf8');
 const memory=()=>{const values=new Map();return {getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};};
 const {fetchWithLastSuccess}=await import(path.join(root,'src/services/resilient-cache.js'));
+class MockEvent { constructor(type,options={}){this.type=type;this.bubbles=!!options.bubbles;} }
 async function navigationFixture(initial='events') {
   const elements=new Map();
   const body={dataset:{},classList:{toggle(){}},append(node){elements.set(node.id,node);}};
   function element(tag='div') {
     const node={tagName:tag.toUpperCase(),style:{},children:[],hidden:false,attrs:{},
-      setAttribute(k,v){this.attrs[k]=v;},toggleAttribute(){},addEventListener(){},
+      setAttribute(k,v){this.attrs[k]=v;},toggleAttribute(){},addEventListener(){},dispatchEvent(){return true;},closest(){return null;},
       append(child){this.children.push(child);elements.set(child.id,child);},
       prepend(child){this.children.unshift(child);elements.set(child.id,child);}};
     return node;
   }
   const main=element('main');elements.set('main-content',main);
-  const search={value:''}; elements.set('searchInput',search);
+  const search=element('input'); search.value=''; search.id='searchInput'; elements.set('searchInput',search);
   const ids={girls:'grid-container',events:'event-container',news:'news-container',passport:'passport-container',games:'games-container',schedule:'schedule-container',matches:'matches-container'};
   for(const id of Object.values(ids)){const n=element();n.id=id;main.append(n);}
   const document={body,createElement:element,
@@ -34,19 +34,22 @@ async function navigationFixture(initial='events') {
   const location={href:'https://example.invalid/TWCcheerleader/?mode='+initial};
   const events={}; const sessionStorage=memory();
   const history={replaceState(state,title,url){location.href=new URL(url,location.href).href;},pushState(state,title,url){location.href=new URL(url,location.href).href;}};
-  const state={mode:initial,data:[],rendered:null,calls:0};
+  const state={mode:initial,data:[],rendered:null,calls:0,schedule:null};
   function legacySetMode(mode) {
     state.mode=mode;state.calls++;
     sessionStorage.setItem('cheer_current_tab',mode);
     const parsed=new URL(location.href);
     history.replaceState({},'',parsed.origin+parsed.pathname+'?mode='+mode);
     search.value='';
+    if (mode==='schedule') state.schedule=null;
     for(const id of Object.values(ids))elements.get(id).style.display='none';
     if(ids[mode])elements.get(ids[mode]).style.display='block';
     state.rendered=state.data.length;
   }
-  const window={setMode:legacySetMode,history,addEventListener:(event,fn)=>events[event]=fn};
-  const context=vm.createContext({window,document,location,sessionStorage,URL,Map,console,scrollY:0,
+  function selectScheduleTeam(team,sport){state.schedule={team,sport};}
+  function backToScheduleSelection(){state.schedule=null;}
+  const window={setMode:legacySetMode,selectScheduleTeam,backToScheduleSelection,history,addEventListener:(event,fn)=>events[event]=fn};
+  const context=vm.createContext({window,document,location,sessionStorage,URL,Map,Set,Object,console,Event:MockEvent,scrollY:0,
     requestAnimationFrame:fn=>fn(),scrollTo:()=>{}});
   const config=new vm.SourceTextModule(await read('src/app/navigation-config.js'),{context});
   const nav=new vm.SourceTextModule((await read('src/app/navigation.js'))+'\nexport {navigate,applyMode};',{context});
@@ -77,6 +80,13 @@ test('NAV-04: search must survive switching main sections',async()=>{
 test('NAV-05: More UI and URL must agree',async()=>{
   const f=await navigationFixture();f.nav.navigate('more');
   assert.equal(new URL(f.location.href).searchParams.get('mode'),'more');
+});
+test('NAV-06: schedule selection must survive switching primary sections',async()=>{
+  const f=await navigationFixture('schedule');
+  f.window.selectScheduleTeam('Team A','棒球');
+  f.nav.navigate('events');
+  f.nav.navigate('schedule');
+  assert.deepEqual(f.state.schedule,{team:'Team A',sport:'棒球'});
 });
 test('DATA-01: quota error must not discard freshly fetched valid data',async()=>{
   const storage={getItem:()=>null,setItem(){throw new Error('QuotaExceededError');}};
