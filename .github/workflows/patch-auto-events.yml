@@ -6,6 +6,11 @@ on:
     paths:
       - 'data/auto-events.json'
       - 'tools/patch_auto_events.py'
+      - 'tools/patch_pwa.py'
+      - 'manifest.json'
+      - 'pwa.js'
+      - 'sw.js'
+      - 'app-icon.svg'
       - '.github/workflows/patch-auto-events.yml'
   workflow_dispatch:
 
@@ -24,6 +29,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Patch Events integration
         run: python tools/patch_auto_events.py
+      - name: Patch PWA app mode
+        run: python tools/patch_pwa.py
       - name: Commit index update
         run: |
           if git diff --quiet -- index.html; then
@@ -33,5 +40,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Integrate automatic public events"
+          git commit -m "Integrate site app mode"
           git push
