@@ -3,6 +3,7 @@
   let deferredPrompt = null;
   let refreshing = false;
   let updateAccepted = false;
+  let registrationRef = null;
 
   const showInstallGuide = async () => {
     if (isStandalone()) {
@@ -36,23 +37,35 @@
     marquee.addEventListener('click', showInstallGuide);
   };
 
+  const offerUpdate = worker => {
+    if (!worker || !navigator.serviceWorker.controller || document.getElementById('pwa-update-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'pwa-update-btn';
+    btn.type = 'button';
+    btn.textContent = '有新版本，點此更新';
+    btn.className = 'pwa-update-btn';
+    btn.onclick = () => {
+      updateAccepted = true;
+      btn.disabled = true;
+      worker.postMessage({ type: 'SKIP_WAITING' });
+    };
+    document.body.appendChild(btn);
+  };
+
+  const checkForUpdate = async () => {
+    if (!registrationRef) return;
+    try {
+      await registrationRef.update();
+      offerUpdate(registrationRef.waiting);
+    } catch (error) {
+      console.warn('PWA update check failed:', error);
+    }
+  };
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(registration => {
-        const offerUpdate = worker => {
-          if (!worker || !navigator.serviceWorker.controller || document.getElementById('pwa-update-btn')) return;
-          const btn = document.createElement('button');
-          btn.id = 'pwa-update-btn';
-          btn.type = 'button';
-          btn.textContent = '有新版本，點此更新';
-          btn.className = 'pwa-update-btn';
-          btn.onclick = () => {
-            updateAccepted = true;
-            btn.disabled = true;
-            worker.postMessage({ type: 'SKIP_WAITING' });
-          };
-          document.body.append(btn);
-        };
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(registration => {
+        registrationRef = registration;
         offerUpdate(registration.waiting);
         registration.addEventListener('updatefound', () => {
           const installing = registration.installing;
@@ -60,7 +73,12 @@
             if (installing.state === 'installed') offerUpdate(registration.waiting || installing);
           });
         });
+        checkForUpdate();
       }).catch(err => console.warn('Service worker registration failed:', err));
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkForUpdate();
     });
   }
 
@@ -116,8 +134,8 @@
     document.head.appendChild(script);
   };
 
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=2', 'game-app-enhancements');
-  loadScriptOnce('./src/app/gacha-history.js?v=1', 'gacha-history');
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=3', 'game-app-enhancements');
+  loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
 
   window.addEventListener('load', () => {
     updateHomeMarquee();
