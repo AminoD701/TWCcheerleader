@@ -4,6 +4,9 @@ import re
 
 import fetch_auto_news as core
 
+# Keep a stable reference before replacing core.build_queries below.
+ORIGINAL_BUILD_QUERIES = core.build_queries
+
 # The original crawler searches roster names together with the word "啦啦隊".
 # That is good for sports coverage, but it can miss entertainment/personal stories
 # whose headline only contains the girl's name (for example UDN Stars / CTWANT).
@@ -28,7 +31,7 @@ def is_safe_expanded_name(name: str) -> bool:
 
 
 def build_expanded_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
-    queries = list(core.build_queries(girl_names, site_teams))
+    queries = list(ORIGINAL_BUILD_QUERIES(girl_names, site_teams))
     safe_names = [name for name in girl_names if is_safe_expanded_name(name)]
 
     limit = min(len(safe_names), EXPANDED_NAME_BATCH_SIZE * MAX_EXPANDED_NAME_BATCHES)
