@@ -110,15 +110,19 @@
   const loadGameEnhancements = () => {
     if (document.querySelector('script[data-game-app-enhancements]')) return;
     const script = document.createElement('script');
-    script.src = './src/app/game-app-enhancements.js?v=1';
+    script.src = './src/app/game-app-enhancements.js?v=2';
     script.defer = true;
     script.dataset.gameAppEnhancements = '1';
     document.head.appendChild(script);
   };
 
+  // pwa.js is itself deferred, so load the game module now. Loading it only from
+  // window.load was too late: the module then registered its own load handler after
+  // that event had already fired, so Daily Gacha never initialized.
+  loadGameEnhancements();
+
   window.addEventListener('load', () => {
     updateHomeMarquee();
-    loadGameEnhancements();
     if (!isStandalone()) createInstallButton();
   });
 })();
