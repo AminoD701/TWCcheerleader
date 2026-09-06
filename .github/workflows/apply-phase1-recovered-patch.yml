@@ -23,12 +23,14 @@ jobs:
       - name: Reconstruct recovered patch
         run: |
           cat deliverables/pwa-phase1-part-1.patch > /tmp/phase1.patch
-          printf '\n\n' >> /tmp/phase1.patch
+          printf '\n' >> /tmp/phase1.patch
           cat deliverables/pwa-phase1-part-2.patch >> /tmp/phase1.patch
-          printf '\n\n' >> /tmp/phase1.patch
+          printf '\n' >> /tmp/phase1.patch
           cat deliverables/pwa-phase1-part-3.patch >> /tmp/phase1.patch
+          printf '\n' >> /tmp/phase1.patch
           wc -l -c /tmp/phase1.patch
           sha256sum /tmp/phase1.patch
+          git apply --numstat /tmp/phase1.patch
 
       - name: Apply patch
         run: |
