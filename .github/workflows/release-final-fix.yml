@@ -1,0 +1,166 @@
+name: Release final fix
+on:
+  push:
+    branches: [release/refactor-hotfix-20260906]
+permissions:
+  contents: write
+jobs:
+  fix-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/refactor-hotfix-20260906
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply final navigation fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/app/navigation.js')
+          s=p.read_text()
+          s=s.replace("let legacyBackToScheduleSelection;\nlet scheduleSelection = null;", "let legacyBackToScheduleSelection;\nlet legacyOpenProfile;\nlet legacyCloseProfile;\nlet legacyRenderTeamThemesHub;\nlet scheduleSelection = null;\nlet themeSelection = null;\nlet profileReturnState = null;")
+          start=s.index('function restoreModeState(mode) {')
+          end=s.index('\nfunction applyMode(mode) {', start)
+          new_restore=r'''function restoreModeState(mode) {
+  const saved = stateByMode.get(mode);
+  if (!saved) return saved;
+  if (mode === 'my' || mode === 'more') return saved;
+
+  if (saved.legacy && window.CheerLegacyState?.restore) {
+    window.CheerLegacyState.restore(saved.legacy);
+  }
+
+  const restored = new Set();
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    const key = el.id || el.name;
+    if (!key || !Object.hasOwn(saved.controls, key)) return;
+    el.value = saved.controls[key];
+    restored.add(el);
+  });
+  Object.entries(saved.controls).forEach(([key, value]) => {
+    const el = document.querySelector(`#${key}`);
+    if (el && 'value' in el) {
+      el.value = value;
+      restored.add(el);
+    }
+  });
+
+  restored.forEach(el => {
+    if (typeof el.dispatchEvent !== 'function') return;
+    el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+    if (el.tagName !== 'SELECT') el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  if (!window.CheerLegacyState?.restore && mode === 'schedule' && saved.legacy?.scheduleSelection && legacySelectScheduleTeam) {
+    const { team, sport } = saved.legacy.scheduleSelection;
+    scheduleSelection = { team, sport };
+    legacySelectScheduleTeam(team, sport);
+  } else if (mode === 'matches' && saved.legacy?.currentMatchLeague && saved.legacy.currentMatchLeague !== '全部' && typeof window.renderMatchCalendar === 'function') {
+    window.renderMatchCalendar(true);
+  } else if (mode === 'themes' && saved.legacy?.themeSelection && legacyRenderTeamThemesHub) {
+    themeSelection = saved.legacy.themeSelection;
+    legacyRenderTeamThemesHub(themeSelection);
+  } else if (window.CheerLegacyState?.restore && typeof window.renderContent === 'function') {
+    window.renderContent(true);
+  }
+  return saved;
+}
+
+function restoreSavedScroll(saved) {
+  const y = saved?.scroll || 0;
+  requestAnimationFrame(() => scrollTo(0, y));
+  setTimeout(() => scrollTo(0, y), 380);
+}
+'''
+          s=s[:start]+new_restore+s[end:]
+          s=s.replace("  const saved = restoreModeState(mode);\n  requestAnimationFrame(() => scrollTo(0, saved?.scroll || 0));", "  const saved = restoreModeState(mode);\n  restoreSavedScroll(saved);")
+          s=s.replace("  } else if (mode === 'schedule' && scheduleSelection) {\n    legacy = { scheduleSelection: { ...scheduleSelection } };\n  }\n  stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls, legacy });", "  } else if (mode === 'schedule' && scheduleSelection) {\n    legacy = { scheduleSelection: { ...scheduleSelection } };\n  }\n  if (mode === 'themes' && themeSelection) legacy.themeSelection = themeSelection;\n  stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls, legacy });")
+          needle="  legacySetMode = window.setMode;\n  legacySelectScheduleTeam = window.selectScheduleTeam;\n  legacyBackToScheduleSelection = window.backToScheduleSelection;"
+          repl=needle+"\n  legacyOpenProfile = window.openProfile;\n  legacyCloseProfile = window.closeProfile;\n  legacyRenderTeamThemesHub = window.renderTeamThemesHub;"
+          s=s.replace(needle,repl)
+          insert=r'''
+
+  if (legacyOpenProfile) {
+    window.openProfile = (...args) => {
+      rememberMode(currentMode);
+      profileReturnState = { mode: currentMode, scroll: stateByMode.get(currentMode)?.scroll ?? (globalThis.scrollY || 0) };
+      return legacyOpenProfile(...args);
+    };
+  }
+  if (legacyCloseProfile) {
+    window.closeProfile = (...args) => {
+      const result = legacyCloseProfile(...args);
+      if (profileReturnState) {
+        const saved = stateByMode.get(profileReturnState.mode);
+        if (saved) saved.scroll = profileReturnState.scroll;
+        restoreSavedScroll(saved || profileReturnState);
+        profileReturnState = null;
+      }
+      return result;
+    };
+  }
+  if (legacyRenderTeamThemesHub) {
+    window.renderTeamThemesHub = selectedTeam => {
+      themeSelection = selectedTeam || null;
+      return legacyRenderTeamThemesHub(selectedTeam);
+    };
+  }
+'''
+          marker="\n  window.setMode = mode => navigate(mode);"
+          s=s.replace(marker,insert+marker)
+          p.write_text(s)
+
+          t=Path('tests/frontend/navigation.test.js')
+          ts=t.read_text()
+          ts += r'''
+
+test('virtual My/More hubs do not rerender underlying legacy content on restore', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /if \(mode === 'my' \|\| mode === 'more'\) return saved/);
+});
+
+test('restored filters preserve scroll after debounced callbacks', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /setTimeout\(\(\) => scrollTo\(0, y\), 380\)/);
+});
+
+test('matches restoration reopens saved league calendar', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /mode === 'matches'.*renderMatchCalendar/s);
+});
+
+test('profile transition snapshots and restores list scroll', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /window\.openProfile = \(\.\.\.args\) => \{/);
+  assert.match(source, /profileReturnState/);
+  assert.match(source, /window\.closeProfile = \(\.\.\.args\) => \{/);
+});
+
+test('theme team selection is preserved across primary navigation', async () => {
+  const source = await readFile('src/app/navigation.js', 'utf8');
+  assert.match(source, /legacy\.themeSelection = themeSelection/);
+  assert.match(source, /legacyRenderTeamThemesHub\(themeSelection\)/);
+});
+'''
+          t.write_text(ts)
+
+          r=Path('tests/review/pwa-foundation-regressions.mjs')
+          rs=r.read_text()
+          rs=rs.replace("requestAnimationFrame:fn=>fn(),scrollTo:()=>{}});", "requestAnimationFrame:fn=>fn(),setTimeout:fn=>{fn();return 1;},scrollTo:()=>{}});")
+          r.write_text(rs)
+          PY
+      - name: Run complete checks
+        run: npm run check
+      - name: Commit final fixes and remove one-shot workflow
+        shell: bash
+        run: |
+          rm .github/workflows/release-final-fix.yml
+          git config user.name "AminoD701"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/app/navigation.js tests/frontend/navigation.test.js tests/review/pwa-foundation-regressions.mjs .github/workflows/release-final-fix.yml
+          git commit -m "fix: close final release navigation regressions"
+          git push origin HEAD:release/refactor-hotfix-20260906
