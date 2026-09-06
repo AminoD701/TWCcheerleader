@@ -16,10 +16,10 @@ test('live Sheets/JSON loader returns downloads even when persistence fails', as
   assert.deepEqual([...(await loader.load('girls', async () => [{ id: 1 }]))], [{ id: 1 }]);
 });
 
-test('live Sheets/JSON loader keeps the last successful payload on failure', async () => {
+test('live Sheets/JSON loader keeps the last successful payload on availability failure', async () => {
   const values = new Map([['cheer_data_girls', JSON.stringify({ data: [{ id: 1 }] })]]);
   const loader = await loaderWith({ getItem: key => values.get(key), setItem: (key, value) => values.set(key, value) });
-  const result = await loader.load('girls', async () => { throw new Error('offline'); });
+  const result = await loader.load('girls', async () => { throw new TypeError('Failed to fetch'); });
   assert.deepEqual([...result], [{ id: 1 }]);
 });
 
@@ -44,6 +44,18 @@ test('malformed non-array source data still fails loudly', async () => {
 
 test('JSON parse failures still propagate when no valid cache exists', async () => {
   const loader = await loaderWith({ getItem: () => null, setItem() {} });
+  await assert.rejects(() => loader.load('manual-events', async () => JSON.parse('{bad json')));
+});
+
+test('malformed source data still fails even when a valid cache exists', async () => {
+  const values = new Map([['cheer_data_girls', JSON.stringify({ data: [{ id: 1 }] })]]);
+  const loader = await loaderWith({ getItem: key => values.get(key), setItem: (key, value) => values.set(key, value) });
+  await assert.rejects(() => loader.load('girls', async () => ({ broken: true })), error => error?.name === 'DataFormatError');
+});
+
+test('JSON parse failures still propagate when a valid cache exists', async () => {
+  const values = new Map([['cheer_data_manual-events', JSON.stringify({ data: [{ id: 1 }] })]]);
+  const loader = await loaderWith({ getItem: key => values.get(key), setItem: (key, value) => values.set(key, value) });
   await assert.rejects(() => loader.load('manual-events', async () => JSON.parse('{bad json')));
 });
 
