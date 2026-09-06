@@ -10,10 +10,23 @@
     } catch (_) { return null; }
   }
 
+  function isAvailabilityFailure(error) {
+    if (!error) return false;
+    const name = String(error.name || '');
+    const message = String(error.message || error);
+
+    if (name === 'AbortError' || name === 'TimeoutError' || name === 'NetworkError') return true;
+    return /signal is aborted|\babort(?:ed)?\b|time(?:d)?\s*out|network(?:error)?|failed to fetch|fetch failed|load failed|HTTP\s+\d{3}/i.test(message);
+  }
+
   async function load(key, request) {
     try {
       const data = await request();
-      if (!Array.isArray(data)) throw new TypeError(`${key} did not return an array`);
+      if (!Array.isArray(data)) {
+        const error = new TypeError(`${key} did not return an array`);
+        error.name = 'DataFormatError';
+        throw error;
+      }
       try { storage()?.setItem(`cheer_data_${key}`, JSON.stringify({ updatedAt: Date.now(), data })); }
       catch (error) { console.warn(`Could not persist ${key}; using downloaded data.`, error); }
       return data;
@@ -24,11 +37,13 @@
         return previous;
       }
 
-      // A single remote source must never make the whole app fail to start.
-      // This is especially important for AbortController timeouts on mobile/PWA,
-      // where browsers may surface the error as "signal is aborted without reason".
-      console.warn(`Could not load ${key}; continuing with an empty dataset.`, error);
-      return [];
+      if (isAvailabilityFailure(error)) {
+        console.warn(`Could not load ${key}; continuing with an empty dataset.`, error);
+        return [];
+      }
+
+      // Parsing, validation and unexpected programming errors must remain visible.
+      throw error;
     }
   }
 
