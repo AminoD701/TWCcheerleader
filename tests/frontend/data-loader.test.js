@@ -23,6 +23,20 @@ test('live Sheets/JSON loader keeps the last successful payload on failure', asy
   assert.deepEqual([...result], [{ id: 1 }]);
 });
 
+test('source failure without cache does not block startup', async () => {
+  const loader = await loaderWith({ getItem: () => null, setItem() {} });
+  const result = await loader.load('events', async () => { throw new Error('network unavailable'); });
+  assert.deepEqual([...result], []);
+});
+
+test('AbortController timeout without cache does not block startup', async () => {
+  const loader = await loaderWith({ getItem: () => null, setItem() {} });
+  const abortError = new Error('signal is aborted without reason');
+  abortError.name = 'AbortError';
+  const result = await loader.load('girls', async () => { throw abortError; });
+  assert.deepEqual([...result], []);
+});
+
 test('homepage routes Sheets and JSON adapters through the resilient loader', async () => {
   const html = await readFile('index.html', 'utf8');
   assert.match(html, /CheerData\.load\('girls-sheet'/);
