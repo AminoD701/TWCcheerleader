@@ -56,7 +56,7 @@ pattern = re.compile(
     re.S,
 )
 if pattern.search(text):
-    text = pattern.sub('\n' + normalize_block + '\n', text, count=1)
+    text = pattern.sub(lambda _: '\n' + normalize_block + '\n', text, count=1)
 elif 'window.normalizeNewsSubcategory = function' not in text:
     anchor = '        window.renderDualTierNewsFilters = function(allNewsData) {'
     if anchor in text:
