@@ -80,8 +80,6 @@ NAME_QUERY_BATCH_SIZE = 8
 MAX_NAME_QUERY_BATCHES = 24
 TEAM_QUERY_BATCH_SIZE = 6
 MAX_TEAM_QUERY_BATCHES = 8
-TEAM_QUERY_BATCH_SIZE = 6
-MAX_TEAM_QUERY_BATCHES = 8
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152.0 Safari/537.36"
 
 
@@ -217,13 +215,23 @@ def classify_news(
     hay = f"{title} {desc}"
     hay_lower = hay.lower()
     has_cheer_word = any(term.lower() in hay_lower for term in CHEER_TERMS)
+    matched_sport = None
+    for main_category, subcategory, terms in SPORT_RULES:
+        if any(term.lower() in hay_lower for term in terms):
+            matched_sport = (main_category, subcategory)
+            break
+
+    # Pure sports coverage stays in sports categories even if a roster girl/team name
+    # happens to appear in the article. Only explicit cheer/support wording can promote
+    # a sports-related story into cheerleader news.
+    if matched_sport and not has_cheer_word:
+        return matched_sport
     if matched_girls or (matched_teams and has_cheer_word):
         return "啦啦隊情報", (matched_girls[0] if matched_girls else matched_teams[0])
     if has_cheer_word:
         return "啦啦隊情報", "綜合"
-    for main_category, subcategory, terms in SPORT_RULES:
-        if any(term.lower() in hay_lower for term in terms):
-            return main_category, subcategory
+    if matched_sport:
+        return matched_sport
     return None
 
 
