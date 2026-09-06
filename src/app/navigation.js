@@ -10,7 +10,12 @@ let keyboardOpen = false;
 let legacySetMode;
 let legacySelectScheduleTeam;
 let legacyBackToScheduleSelection;
+let legacyOpenProfile;
+let legacyCloseProfile;
+let legacyRenderTeamThemesHub;
 let scheduleSelection = null;
+let themeSelection = null;
+let profileReturnState = null;
 
 function link(item) {
   return `<a class="primary-nav__item" data-mode="${item.mode}" href="?mode=${item.mode}" aria-label="${item.label}"><svg viewBox="0 0 24 24" aria-hidden="true">${item.icon}</svg><span>${item.label}</span></a>`;
@@ -73,6 +78,7 @@ function showHub(mode) {
 function restoreModeState(mode) {
   const saved = stateByMode.get(mode);
   if (!saved) return saved;
+  if (mode === 'my' || mode === 'more') return saved;
 
   if (saved.legacy && window.CheerLegacyState?.restore) {
     window.CheerLegacyState.restore(saved.legacy);
@@ -103,10 +109,21 @@ function restoreModeState(mode) {
     const { team, sport } = saved.legacy.scheduleSelection;
     scheduleSelection = { team, sport };
     legacySelectScheduleTeam(team, sport);
+  } else if (mode === 'matches' && saved.legacy?.currentMatchLeague && saved.legacy.currentMatchLeague !== '全部' && typeof window.renderMatchCalendar === 'function') {
+    window.renderMatchCalendar(true);
+  } else if (mode === 'themes' && saved.legacy?.themeSelection && legacyRenderTeamThemesHub) {
+    themeSelection = saved.legacy.themeSelection;
+    legacyRenderTeamThemesHub(themeSelection);
   } else if (window.CheerLegacyState?.restore && typeof window.renderContent === 'function') {
     window.renderContent(true);
   }
   return saved;
+}
+
+function restoreSavedScroll(saved) {
+  const y = saved?.scroll || 0;
+  requestAnimationFrame(() => scrollTo(0, y));
+  setTimeout(() => scrollTo(0, y), 380);
 }
 
 function applyMode(mode) {
@@ -129,7 +146,7 @@ function applyMode(mode) {
   });
   document.body.dataset.appMode = mode;
   const saved = restoreModeState(mode);
-  requestAnimationFrame(() => scrollTo(0, saved?.scroll || 0));
+  restoreSavedScroll(saved);
 }
 
 function rememberMode(mode) {
@@ -149,6 +166,7 @@ function rememberMode(mode) {
   } else if (mode === 'schedule' && scheduleSelection) {
     legacy = { scheduleSelection: { ...scheduleSelection } };
   }
+  if (mode === 'themes' && themeSelection) legacy.themeSelection = themeSelection;
   stateByMode.set(mode, { scroll: globalThis.scrollY || 0, controls, legacy });
 }
 
@@ -181,6 +199,9 @@ window.addEventListener('DOMContentLoaded', () => {
   legacySetMode = window.setMode;
   legacySelectScheduleTeam = window.selectScheduleTeam;
   legacyBackToScheduleSelection = window.backToScheduleSelection;
+  legacyOpenProfile = window.openProfile;
+  legacyCloseProfile = window.closeProfile;
+  legacyRenderTeamThemesHub = window.renderTeamThemesHub;
 
   if (legacySelectScheduleTeam) {
     window.selectScheduleTeam = (team, sport) => {
@@ -192,6 +213,31 @@ window.addEventListener('DOMContentLoaded', () => {
     window.backToScheduleSelection = () => {
       scheduleSelection = null;
       return legacyBackToScheduleSelection();
+    };
+  }
+  if (legacyOpenProfile) {
+    window.openProfile = (...args) => {
+      rememberMode(currentMode);
+      profileReturnState = { mode: currentMode, scroll: stateByMode.get(currentMode)?.scroll ?? (globalThis.scrollY || 0) };
+      return legacyOpenProfile(...args);
+    };
+  }
+  if (legacyCloseProfile) {
+    window.closeProfile = (...args) => {
+      const result = legacyCloseProfile(...args);
+      if (profileReturnState) {
+        const saved = stateByMode.get(profileReturnState.mode);
+        if (saved) saved.scroll = profileReturnState.scroll;
+        restoreSavedScroll(saved || profileReturnState);
+        profileReturnState = null;
+      }
+      return result;
+    };
+  }
+  if (legacyRenderTeamThemesHub) {
+    window.renderTeamThemesHub = selectedTeam => {
+      themeSelection = selectedTeam || null;
+      return legacyRenderTeamThemesHub(selectedTeam);
     };
   }
 
