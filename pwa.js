@@ -107,8 +107,18 @@
     document.getElementById('pwa-install-btn')?.remove();
   });
 
+  const loadGameEnhancements = () => {
+    if (document.querySelector('script[data-game-app-enhancements]')) return;
+    const script = document.createElement('script');
+    script.src = './src/app/game-app-enhancements.js?v=1';
+    script.defer = true;
+    script.dataset.gameAppEnhancements = '1';
+    document.head.appendChild(script);
+  };
+
   window.addEventListener('load', () => {
     updateHomeMarquee();
+    loadGameEnhancements();
     if (!isStandalone()) createInstallButton();
   });
 })();
