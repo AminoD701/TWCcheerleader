@@ -107,19 +107,17 @@
     document.getElementById('pwa-install-btn')?.remove();
   });
 
-  const loadGameEnhancements = () => {
-    if (document.querySelector('script[data-game-app-enhancements]')) return;
+  const loadScriptOnce = (src, dataName) => {
+    if (document.querySelector(`script[data-${dataName}]`)) return;
     const script = document.createElement('script');
-    script.src = './src/app/game-app-enhancements.js?v=2';
+    script.src = src;
     script.defer = true;
-    script.dataset.gameAppEnhancements = '1';
+    script.dataset[dataName.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = '1';
     document.head.appendChild(script);
   };
 
-  // pwa.js is itself deferred, so load the game module now. Loading it only from
-  // window.load was too late: the module then registered its own load handler after
-  // that event had already fired, so Daily Gacha never initialized.
-  loadGameEnhancements();
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=2', 'game-app-enhancements');
+  loadScriptOnce('./src/app/gacha-history.js?v=1', 'gacha-history');
 
   window.addEventListener('load', () => {
     updateHomeMarquee();
