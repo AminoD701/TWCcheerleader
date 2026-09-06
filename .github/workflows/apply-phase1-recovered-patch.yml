@@ -68,4 +68,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "fix: apply verified Phase 1 PWA repairs"
+          git fetch origin refactor/architecture-pwa-20260906
+          git rebase origin/refactor/architecture-pwa-20260906
           git push origin HEAD:refactor/architecture-pwa-20260906
