@@ -1,0 +1,85 @@
+name: Release batch audit
+on:
+  push:
+    branches: [release/refactor-hotfix-20260906]
+    paths: [.github/workflows/release-batch-audit.yml]
+permissions:
+  contents: write
+jobs:
+  audit-and-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/refactor-hotfix-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply audited startup and navigation state fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          marker = '        let currentScheduleTeam = null, currentScheduleSport = null; \n'
+          bridge = '''\n\n        // Shared state bridge for the new router. Keep legacy lexical state private,\n        // but expose a narrow snapshot/restore API so mobile navigation can preserve\n        // sport/team/schedule/calendar context without rewriting the legacy app.\n        window.CheerLegacyState = Object.freeze({\n            snapshot() {\n                return {\n                    currentSport,\n                    currentTeam,\n                    currentScheduleTeam,\n                    currentScheduleSport,\n                    currentAgency: window.currentAgency ?? null,\n                    currentMatchLeague: window.currentMatchLeague ?? null,\n                    matchCalDate: window.matchCalDate instanceof Date ? window.matchCalDate.toISOString() : null,\n                    matchSelectedDateNum: window.matchSelectedDateNum ?? null,\n                    currentMainCategory: window.currentMainCategory ?? '全部',\n                    currentSubCategory: window.currentSubCategory ?? '全部',\n                    currentNewsHashtag: window.currentNewsHashtag ?? '',\n                    currentDisplayLimit: window.currentDisplayLimit ?? 10\n                };\n            },\n            restore(state = {}) {\n                if (Object.hasOwn(state, 'currentSport')) currentSport = state.currentSport;\n                if (Object.hasOwn(state, 'currentTeam')) currentTeam = state.currentTeam;\n                if (Object.hasOwn(state, 'currentScheduleTeam')) currentScheduleTeam = state.currentScheduleTeam;\n                if (Object.hasOwn(state, 'currentScheduleSport')) currentScheduleSport = state.currentScheduleSport;\n                if (Object.hasOwn(state, 'currentAgency')) window.currentAgency = state.currentAgency;\n                if (Object.hasOwn(state, 'currentMatchLeague')) window.currentMatchLeague = state.currentMatchLeague;\n                if (state.matchCalDate) window.matchCalDate = new Date(state.matchCalDate);\n                if (Object.hasOwn(state, 'matchSelectedDateNum')) window.matchSelectedDateNum = state.matchSelectedDateNum;\n                if (Object.hasOwn(state, 'currentMainCategory')) window.currentMainCategory = state.currentMainCategory;\n                if (Object.hasOwn(state, 'currentSubCategory')) window.currentSubCategory = state.currentSubCategory;\n                if (Object.hasOwn(state, 'currentNewsHashtag')) window.currentNewsHashtag = state.currentNewsHashtag;\n                if (Object.hasOwn(state, 'currentDisplayLimit')) window.currentDisplayLimit = state.currentDisplayLimit;\n                const teamText = document.getElementById('team-btn-text');\n                if (teamText) teamText.innerText = currentTeam || '全部啦啦隊';\n            }\n        });\n'''
+          if 'window.CheerLegacyState = Object.freeze' not in s:
+              if marker not in s:
+                  raise SystemExit('legacy-state insertion marker not found')
+              s = s.replace(marker, marker + bridge, 1)
+
+          start = s.find('        async function fetchCSV(url, timeoutMs = 7000) {')
+          end = s.find('        async function loadData()', start)
+          if start < 0 or end < 0:
+              raise SystemExit('fetchCSV/loadData markers not found')
+          segment = s[start:end]
+          if 'clearTimeout(timer)' not in segment:
+              # Append cleanup to the existing try/catch chain without changing fetch semantics.
+              import re
+              patched, count = re.subn(
+                  r'(\n            \}\n)(        \}\n\n)$',
+                  '\n            } finally {\n                clearTimeout(timer);\n            }\n        }\n\n',
+                  segment,
+                  count=1
+              )
+              if count != 1:
+                  raise SystemExit('could not safely add fetchCSV timer cleanup')
+              s = s[:start] + patched + s[end:]
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Static release audit assertions
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const nav = fs.readFileSync('src/app/navigation.js', 'utf8');
+          const sw = fs.readFileSync('sw.js', 'utf8');
+          const loader = fs.readFileSync('src/services/data-loader.js', 'utf8');
+          const checks = [
+            ['legacy state bridge', /window\.CheerLegacyState = Object\.freeze/.test(html)],
+            ['fetch timer cleanup', /finally\s*\{\s*clearTimeout\(timer\);\s*\}/.test(html)],
+            ['versioned loader', /data-loader\.js\?v=4/.test(html)],
+            ['sw v4', /CACHE_NAME = `\$\{CACHE_PREFIX\}v4`/.test(sw)],
+            ['sw loader v4', /data-loader\.js\?v=4/.test(sw)],
+            ['router state snapshot', /CheerLegacyState\?\.snapshot/.test(nav)],
+            ['router state restore', /CheerLegacyState\?\.restore/.test(nav)],
+            ['popstate remembers route', /popstate[\s\S]*rememberMode\(currentMode\)/.test(nav)],
+            ['availability classifier', /isAvailabilityFailure/.test(loader)],
+            ['format errors propagate', /throw error/.test(loader)]
+          ];
+          for (const [name, ok] of checks) {
+            if (!ok) throw new Error(`release audit failed: ${name}`);
+          }
+          JS
+      - name: Run complete frontend regression suite
+        run: npm run check
+      - name: Remove one-shot workflow and commit fixes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git rm .github/workflows/release-batch-audit.yml
+          git add index.html src/app/navigation.js tests/frontend/navigation.test.js tests/review/pwa-foundation-regressions.mjs
+          git diff --cached --quiet || git commit -m 'fix: batch harden release navigation and startup state'
+          git push origin HEAD:release/refactor-hotfix-20260906
