@@ -7,11 +7,19 @@
 
   const removeStandaloneFloatingShortcuts = () => {
     if (!isStandalone()) return;
+
     document.getElementById('app-daily-shortcut')?.remove();
     document.getElementById('gacha-history-floating')?.remove();
     document.querySelectorAll('.floating-boba-btn').forEach(el => el.remove());
+
     const legacyGacha = document.getElementById('gacha-btn-wrapper');
     if (legacyGacha) legacyGacha.style.setProperty('display', 'none', 'important');
+
+    document.querySelectorAll('button,a').forEach(el => {
+      if (el.closest('#navigation-hub')) return;
+      const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (/今日一抽|每日一抽/.test(text)) el.remove();
+    });
   };
 
   if (isStandalone()) {
@@ -46,7 +54,6 @@
     const marquee = document.querySelector('.marquee-wrapper');
     const content = marquee?.querySelector('.marquee-content');
     if (!marquee || !content) return;
-
     marquee.removeAttribute('onclick');
     marquee.title = '點擊查看手機 APP 安裝教學';
     marquee.style.cursor = 'pointer';
@@ -93,7 +100,6 @@
         checkForUpdate();
       }).catch(err => console.warn('Service worker registration failed:', err));
     });
-
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') checkForUpdate();
     });
@@ -147,7 +153,6 @@
     const hub = document.getElementById('navigation-hub');
     const grid = hub?.querySelector('.navigation-hub__grid');
     if (!hub || !grid || document.body.dataset.appMode !== 'more') return;
-
     if (!grid.querySelector('[data-more-daily-draw]')) {
       const daily = document.createElement('a');
       daily.href = '?mode=more';
@@ -167,7 +172,7 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=5', 'game-app-enhancements');
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
 
   window.addEventListener('load', () => {
@@ -176,8 +181,8 @@
     refreshStandaloneUi();
     if (isStandalone()) {
       const observer = new MutationObserver(refreshStandaloneUi);
-      observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-app-mode'] });
-      setInterval(removeStandaloneFloatingShortcuts, 1000);
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      setInterval(removeStandaloneFloatingShortcuts, 500);
     }
   });
 })();
