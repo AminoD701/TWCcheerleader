@@ -23,9 +23,9 @@ test('live Sheets/JSON loader keeps the last successful payload on failure', asy
   assert.deepEqual([...result], [{ id: 1 }]);
 });
 
-test('source failure without cache does not block startup', async () => {
+test('network failure without cache does not block startup', async () => {
   const loader = await loaderWith({ getItem: () => null, setItem() {} });
-  const result = await loader.load('events', async () => { throw new Error('network unavailable'); });
+  const result = await loader.load('events', async () => { throw new TypeError('Failed to fetch'); });
   assert.deepEqual([...result], []);
 });
 
@@ -35,6 +35,16 @@ test('AbortController timeout without cache does not block startup', async () =>
   abortError.name = 'AbortError';
   const result = await loader.load('girls', async () => { throw abortError; });
   assert.deepEqual([...result], []);
+});
+
+test('malformed non-array source data still fails loudly', async () => {
+  const loader = await loaderWith({ getItem: () => null, setItem() {} });
+  await assert.rejects(() => loader.load('girls', async () => ({ broken: true })), error => error?.name === 'DataFormatError');
+});
+
+test('JSON parse failures still propagate when no valid cache exists', async () => {
+  const loader = await loaderWith({ getItem: () => null, setItem() {} });
+  await assert.rejects(() => loader.load('manual-events', async () => JSON.parse('{bad json')));
 });
 
 test('homepage routes Sheets and JSON adapters through the resilient loader', async () => {
