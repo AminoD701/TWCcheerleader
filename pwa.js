@@ -1,12 +1,42 @@
 (() => {
   const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   let deferredPrompt = null;
+  let refreshing = false;
+  let updateAccepted = false;
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed:', err));
+      navigator.serviceWorker.register('./sw.js').then(registration => {
+        const offerUpdate = worker => {
+          if (!worker || !navigator.serviceWorker.controller || document.getElementById('pwa-update-btn')) return;
+          const btn = document.createElement('button');
+          btn.id = 'pwa-update-btn';
+          btn.type = 'button';
+          btn.textContent = '有新版本，點此更新';
+          btn.className = 'pwa-update-btn';
+          btn.onclick = () => {
+            updateAccepted = true;
+            btn.disabled = true;
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          };
+          document.body.append(btn);
+        };
+        offerUpdate(registration.waiting);
+        registration.addEventListener('updatefound', () => {
+          const installing = registration.installing;
+          installing?.addEventListener('statechange', () => {
+            if (installing.state === 'installed') offerUpdate(registration.waiting || installing);
+          });
+        });
+      }).catch(err => console.warn('Service worker registration failed:', err));
     });
   }
+
+  navigator.serviceWorker?.addEventListener('controllerchange', () => {
+    if (refreshing || !updateAccepted) return;
+    refreshing = true;
+    location.reload();
+  });
 
   const createInstallButton = () => {
     if (document.getElementById('pwa-install-btn') || isStandalone()) return;

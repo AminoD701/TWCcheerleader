@@ -4,7 +4,8 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7030081473208944"
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="./src/app/navigation.css">
     <title>台灣啦啦隊資料庫 | </title>
 
     <link rel="manifest" href="manifest.json">
@@ -13,7 +14,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="啦啦隊資料庫">
-    <link rel="apple-touch-icon" href="baseball.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="app-icon-192.png">
     <script defer src="pwa.js"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
@@ -1901,13 +1903,15 @@
         </div>
     </footer>
 
+    <script src="./src/storage/legacy-storage.js"></script>
+    <script src="./src/services/data-loader.js"></script>
     <script>
         // =========================================================================
         // 🚀 O(1) 極速快取字典與集合設定
         // =========================================================================
-        let myFavorites = JSON.parse(localStorage.getItem('cheer_favorites')) || [];
-        let mySchedules = JSON.parse(localStorage.getItem('cheer_my_schedules')) || [];
-        let myHomeTeam = localStorage.getItem('cheer_home_team') || "none";
+        let myFavorites = window.CheerStorage.readArray('cheer_favorites');
+        let mySchedules = window.CheerStorage.readArray('cheer_my_schedules');
+        let myHomeTeam = (() => { try { return localStorage.getItem('cheer_home_team') || "none"; } catch (_) { return "none"; } })();
 
         let favSet = new Set(myFavorites);
         let schedSet = new Set(mySchedules.map(s => s.id));
@@ -2054,9 +2058,8 @@
                 const nt = Date.now();
                 const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
                 const [freshManualNews, freshAutoNews] = await Promise.all([
-                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
-                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
-                        .then(r => r.ok ? r.json() : []).catch(() => [])
+                    window.CheerData.load('news-sheet', () => fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`)),
+                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); }))
                 ]);
                 const seen = new Set();
                 const merged = [
@@ -2109,8 +2112,8 @@
                                 const nt = Date.now();
                                 const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
                                 const [freshManualNews, freshAutoNews] = await Promise.all([
-                                    fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`).catch(() => []),
-                                    fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
+                                    window.CheerData.load('news-sheet', () => fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`)),
+                                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); }))
                                 ]);
 
                                 const newsSeen = new Set();
@@ -2134,9 +2137,8 @@
                                 const et = Date.now();
                                 const eventBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${et}`;
                                 const [freshSheetEvents, freshManualEvents] = await Promise.all([
-                                    fetchCSV(`${eventBaseUrl}&gid=925411186&t=${et}`).catch(() => []),
-                                    fetch(`data/manual-events.json?t=${et}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
-                                        .then(r => r.ok ? r.json() : []).catch(() => [])
+                                    window.CheerData.load('events-sheet', () => fetchCSV(`${eventBaseUrl}&gid=925411186&t=${et}`)),
+                                    window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${et}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
                                 ]);
                                 const eventSeen = new Set();
                                 dbEvents = [
@@ -2166,14 +2168,14 @@
 
             try {
                 const [girlsData, eventsData, schedulesData, newsData, matchesData, themesData, autoNewsData, manualEventsData] = await Promise.all([
-                    fetchCSV(`${baseUrl}&gid=0&t=${t}`).catch(() => []),
-                    fetchCSV(`${baseUrl}&gid=925411186&t=${t}`).catch(() => []),
-                    fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`).catch(() => []),
-                    fetchCSV(`${baseUrl}&gid=417186374&t=${t}`).catch(() => []),
-                    fetchCSV(`${baseUrl}&gid=92509162&t=${t}`).catch(() => []),
-                    fetchCSV(`${baseUrl}&gid=547736461&t=${t}`).catch(() => []),
-                    fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => []),
-                    fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).catch(() => [])
+                    window.CheerData.load('girls-sheet', () => fetchCSV(`${baseUrl}&gid=0&t=${t}`)),
+                    window.CheerData.load('events-sheet', () => fetchCSV(`${baseUrl}&gid=925411186&t=${t}`)),
+                    window.CheerData.load('schedules-sheet', () => fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`)),
+                    window.CheerData.load('news-sheet', () => fetchCSV(`${baseUrl}&gid=417186374&t=${t}`)),
+                    window.CheerData.load('matches-sheet', () => fetchCSV(`${baseUrl}&gid=92509162&t=${t}`)),
+                    window.CheerData.load('themes-sheet', () => fetchCSV(`${baseUrl}&gid=547736461&t=${t}`)),
+                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); })),
+                    window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
                 ]);
 
                 dbGirls = girlsData.filter(i => i.realname); window.dbGirls = dbGirls;
@@ -8075,6 +8077,7 @@ window.renderMinigameStart = function() {
             if (currentMode === 'profile') window.closeProfile(); 
         };
     </script>
+    <script type="module" src="./src/app/navigation.js"></script>
 
 </body>
 </html>
