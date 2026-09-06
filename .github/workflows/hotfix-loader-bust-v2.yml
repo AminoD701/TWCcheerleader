@@ -1,0 +1,33 @@
+name: Hotfix loader URL
+on: [push]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hotfix/startup-abort-20260906
+      - name: Patch files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('<script src="./src/services/data-loader.js"></script>', '<script src="./src/services/data-loader.js?v=4"></script>', 1)
+          p.write_text(s, encoding='utf-8')
+          p = Path('sw.js')
+          s = p.read_text(encoding='utf-8').replace("'./src/services/data-loader.js'", "'./src/services/data-loader.js?v=4'")
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Test
+        run: node --test tests/frontend/*.test.js
+      - name: Commit
+        run: |
+          rm -f .github/workflows/hotfix-loader-bust.yml .github/workflows/hotfix-loader-bust-v2.yml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add -A
+          git diff --cached --quiet || git commit -m 'fix loader url cache bust'
+          git push origin HEAD:hotfix/startup-abort-20260906
