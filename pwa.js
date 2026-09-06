@@ -5,6 +5,23 @@
   let updateAccepted = false;
   let registrationRef = null;
 
+  const removeStandaloneFloatingShortcuts = () => {
+    if (!isStandalone()) return;
+    document.getElementById('app-daily-shortcut')?.remove();
+    document.getElementById('gacha-history-floating')?.remove();
+    document.querySelectorAll('.floating-boba-btn').forEach(el => el.remove());
+    const legacyGacha = document.getElementById('gacha-btn-wrapper');
+    if (legacyGacha) legacyGacha.style.setProperty('display', 'none', 'important');
+  };
+
+  if (isStandalone()) {
+    const emergencyStyle = document.createElement('style');
+    emergencyStyle.id = 'standalone-legacy-shortcut-blocker';
+    emergencyStyle.textContent = '#app-daily-shortcut,#gacha-history-floating,.floating-boba-btn,#gacha-btn-wrapper{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}';
+    document.documentElement.appendChild(emergencyStyle);
+    removeStandaloneFloatingShortcuts();
+  }
+
   const showInstallGuide = async () => {
     if (isStandalone()) {
       alert('你已經使用 APP 模式開啟台灣啦啦隊資料庫了！目前手機版 APP 仍在測試中，若遇到顯示或更新問題歡迎回報。');
@@ -96,19 +113,10 @@
     btn.textContent = '安裝 APP';
     btn.setAttribute('aria-label', '安裝台灣啦啦隊資料庫 APP');
     Object.assign(btn.style, {
-      position: 'fixed',
-      right: '16px',
-      bottom: '18px',
-      zIndex: '99998',
-      border: '1px solid rgba(255,255,255,.3)',
-      borderRadius: '999px',
-      padding: '11px 16px',
-      background: '#111418',
-      color: '#fff',
-      fontWeight: '800',
-      fontSize: '14px',
-      boxShadow: '0 8px 24px rgba(0,0,0,.35)',
-      cursor: 'pointer'
+      position: 'fixed', right: '16px', bottom: '18px', zIndex: '99998',
+      border: '1px solid rgba(255,255,255,.3)', borderRadius: '999px',
+      padding: '11px 16px', background: '#111418', color: '#fff',
+      fontWeight: '800', fontSize: '14px', boxShadow: '0 8px 24px rgba(0,0,0,.35)', cursor: 'pointer'
     });
     btn.addEventListener('click', showInstallGuide);
     document.body.appendChild(btn);
@@ -132,13 +140,6 @@
     script.defer = true;
     script.dataset[dataName.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = '1';
     document.head.appendChild(script);
-  };
-
-  const removeStandaloneFloatingShortcuts = () => {
-    if (!isStandalone()) return;
-    document.getElementById('app-daily-shortcut')?.remove();
-    document.getElementById('gacha-history-floating')?.remove();
-    document.querySelectorAll('.floating-boba-btn').forEach(el => el.remove());
   };
 
   const enhanceStandaloneMore = () => {
@@ -166,7 +167,7 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=4', 'game-app-enhancements');
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=5', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
 
   window.addEventListener('load', () => {
@@ -176,6 +177,7 @@
     if (isStandalone()) {
       const observer = new MutationObserver(refreshStandaloneUi);
       observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-app-mode'] });
+      setInterval(removeStandaloneFloatingShortcuts, 1000);
     }
   });
 })();
