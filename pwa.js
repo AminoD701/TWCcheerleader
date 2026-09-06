@@ -134,11 +134,48 @@
     document.head.appendChild(script);
   };
 
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=3', 'game-app-enhancements');
+  const removeStandaloneFloatingShortcuts = () => {
+    if (!isStandalone()) return;
+    document.getElementById('app-daily-shortcut')?.remove();
+    document.getElementById('gacha-history-floating')?.remove();
+    document.querySelectorAll('.floating-boba-btn').forEach(el => el.remove());
+  };
+
+  const enhanceStandaloneMore = () => {
+    if (!isStandalone()) return;
+    const hub = document.getElementById('navigation-hub');
+    const grid = hub?.querySelector('.navigation-hub__grid');
+    if (!hub || !grid || document.body.dataset.appMode !== 'more') return;
+
+    if (!grid.querySelector('[data-more-daily-draw]')) {
+      const daily = document.createElement('a');
+      daily.href = '?mode=more';
+      daily.dataset.moreDailyDraw = '1';
+      daily.innerHTML = '<strong>✨ 今日一抽</strong><small>查看今天的幸運女孩。</small>';
+      daily.addEventListener('click', event => {
+        event.preventDefault();
+        if (typeof window.showDailyGachaResult === 'function') window.showDailyGachaResult();
+        else alert('今日一抽功能正在載入，請稍後再試一次。');
+      });
+      grid.appendChild(daily);
+    }
+  };
+
+  const refreshStandaloneUi = () => {
+    removeStandaloneFloatingShortcuts();
+    enhanceStandaloneMore();
+  };
+
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=4', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
 
   window.addEventListener('load', () => {
     updateHomeMarquee();
     if (!isStandalone()) createInstallButton();
+    refreshStandaloneUi();
+    if (isStandalone()) {
+      const observer = new MutationObserver(refreshStandaloneUi);
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-app-mode'] });
+    }
   });
 })();
