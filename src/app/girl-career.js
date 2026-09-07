@@ -1,9 +1,20 @@
 (() => {
-  const DATA_URL = './data/girl-careers.json?v=1';
+  const DATA_URL = './data/girl-careers.json?v=2';
   let careerDataPromise = null;
 
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
   const normalize = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const formerPattern = /已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員/;
+  const getNote = record => String(record?.note || record?.['備註'] || record?.備註 || '').trim();
+  const isFormer = record => {
+    const status = normalize(record?.status);
+    return formerPattern.test(getNote(record)) || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
+  };
+
+  window.cheerGirlStatus = window.cheerGirlStatus || {};
+  window.cheerGirlStatus.isFormer = isFormer;
+  window.cheerGirlStatus.isActive = record => !isFormer(record);
+  window.cheerGirlStatus.getNote = getNote;
 
   const loadCareerData = () => {
     if (!careerDataPromise) {
@@ -27,18 +38,19 @@
     const start = record.start || record.startYear || record.from || '';
     const end = record.end || record.endYear || record.to || '';
     if (start && end) return `${esc(start)}－${esc(end)}`;
-    if (start && !end) return `${esc(start)}－現在`;
+    if (start && !end && !isFormer(record)) return `${esc(start)}－現在`;
+    if (start) return `${esc(start)}`;
     if (!start && end) return `－${esc(end)}`;
-    return '期間未註記';
+    return isFormer(record) ? '歷史紀錄' : '現在';
   };
 
   const makeHistoryRows = records => records.map(record => {
     const squad = record.squad || record.team || record.group || '未註記團隊';
     const sportsTeam = record.sportsTeam || record.club || record.organization || '';
     const sport = record.sport || '';
-    const ended = Boolean(record.end || record.endYear || record.to || record.status === 'former' || record.status === 'ended');
-    const badge = ended ? '已結束' : '現役';
-    const note = record.note || '';
+    const ended = Boolean(record.end || record.endYear || record.to || isFormer(record));
+    const badge = ended ? '已離隊' : '現役';
+    const note = getNote(record);
     return `
       <div class="girl-career__item">
         <div class="girl-career__period">${formatPeriod(record)}</div>
@@ -53,19 +65,70 @@
       </div>`;
   }).join('');
 
-  const makeCurrentRows = (teams, sports) => {
-    if (!teams.length) return '';
-    return teams.map((team, index) => `
-      <div class="girl-career__item">
-        <div class="girl-career__period">現在</div>
-        <div class="girl-career__body">
-          <div class="girl-career__title-row">
-            <strong>${esc(team)}</strong>
-            <span class="girl-career__badge is-current">現役</span>
+  const makeCurrentRows = rows => {
+    const seen = new Set();
+    return rows.filter(row => !isFormer(row)).map(row => {
+      const team = String(row.team || '').trim();
+      if (!team || seen.has(team)) return '';
+      seen.add(team);
+      const sport = String(row.sport || '').trim();
+      return `
+        <div class="girl-career__item">
+          <div class="girl-career__period">現在</div>
+          <div class="girl-career__body">
+            <div class="girl-career__title-row">
+              <strong>${esc(team)}</strong>
+              <span class="girl-career__badge is-current">現役</span>
+            </div>
+            ${sport ? `<div class="girl-career__meta">${esc(sport)}</div>` : ''}
           </div>
-          ${sports[index] || sports[0] ? `<div class="girl-career__meta">${esc(sports[index] || sports[0])}</div>` : ''}
-        </div>
-      </div>`).join('');
+        </div>`;
+    }).join('');
+  };
+
+  const makeFormerRowsFromMainData = rows => {
+    const seen = new Set();
+    return rows.filter(isFormer).map(row => {
+      const team = String(row.team || '').trim();
+      if (!team || seen.has(team)) return '';
+      seen.add(team);
+      const sport = String(row.sport || '').trim();
+      const note = getNote(row);
+      return `
+        <div class="girl-career__item">
+          <div class="girl-career__period">歷史紀錄</div>
+          <div class="girl-career__body">
+            <div class="girl-career__title-row">
+              <strong>${esc(team)}</strong>
+              <span class="girl-career__badge is-former">已離隊</span>
+            </div>
+            ${sport ? `<div class="girl-career__meta">${esc(sport)}</div>` : ''}
+            ${note ? `<div class="girl-career__note">${esc(note)}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  };
+
+  const annotateProfileTeamTags = rows => {
+    const profile = document.getElementById('profile-container');
+    if (!profile) return;
+    const byTeam = new Map();
+    rows.forEach(row => {
+      const team = String(row.team || '').trim();
+      if (!team) return;
+      if (!byTeam.has(team)) byTeam.set(team, []);
+      byTeam.get(team).push(row);
+    });
+    profile.querySelectorAll('.profile-team-tag').forEach(tag => {
+      const raw = tag.dataset.originalTeam || tag.textContent?.trim() || '';
+      if (!tag.dataset.originalTeam) tag.dataset.originalTeam = raw.replace(/^前\s+/, '');
+      const team = tag.dataset.originalTeam;
+      const teamRows = byTeam.get(team) || [];
+      const former = teamRows.length > 0 && teamRows.every(isFormer);
+      tag.textContent = former ? `前 ${team}` : team;
+      tag.classList.toggle('is-former-team', former);
+      tag.title = former ? '此團隊資料已標註離隊' : '';
+    });
   };
 
   const injectStyles = () => {
@@ -85,6 +148,7 @@
       .girl-career__badge{font-size:10px;font-weight:900;border-radius:999px;padding:3px 7px}.girl-career__badge.is-current{background:rgba(34,197,94,.13);color:#86efac;border:1px solid rgba(34,197,94,.28)}.girl-career__badge.is-former{background:rgba(148,163,184,.10);color:#cbd5e1;border:1px solid rgba(148,163,184,.22)}
       .girl-career__meta,.girl-career__note{font-size:12px;color:var(--text-sub);margin-top:5px;line-height:1.5}.girl-career__note{color:#cbd5e1}
       .girl-career__empty{padding:14px 0 2px;color:var(--text-sub);font-size:12px;line-height:1.6}
+      .profile-team-tag.is-former-team{opacity:.72;filter:saturate(.65);border-style:dashed!important}
       @media(max-width:768px){.girl-career{margin-top:14px}.girl-career summary{padding:14px}.girl-career__content{padding:0 14px 14px}.girl-career__item{grid-template-columns:1fr;gap:6px}.girl-career__period{font-size:11px}}
     `;
     document.head.appendChild(style);
@@ -105,15 +169,16 @@
     if (existing?.dataset.identity === identity) return;
     existing?.remove();
 
-    const teams = [...profile.querySelectorAll('.profile-team-tag')].map(el => el.textContent?.trim()).filter(Boolean);
-    let sports = [];
+    let mainRows = [];
     if (Array.isArray(window.dbGirls)) {
-      const rows = window.dbGirls.filter(g => normalize(g.realname) === normalize(realname) || (nickname && normalize(g.nickname) === normalize(nickname)));
-      sports = [...new Set(rows.map(g => (g.sport || '').trim()).filter(Boolean))];
+      mainRows = window.dbGirls.filter(g => normalize(g.realname) === normalize(realname) || (nickname && normalize(g.nickname) === normalize(nickname)));
     }
+    annotateProfileTeamTags(mainRows);
 
     const allRecords = await loadCareerData();
     const history = allRecords.filter(record => recordMatches(record, realname, nickname));
+    const activeRows = mainRows.filter(row => !isFormer(row));
+    const formerRows = mainRows.filter(isFormer);
 
     const details = document.createElement('details');
     details.className = 'girl-career';
@@ -124,11 +189,12 @@
         <span class="girl-career__hint">點擊查看</span>
       </summary>
       <div class="girl-career__content">
-        <div class="girl-career__intro">此區保留女孩曾效力或合作過的啦啦隊／球隊紀錄；主頁仍只呈現目前身分。</div>
+        <div class="girl-career__intro">現役狀態以女孩主資料的備註／status 判斷；「已離隊、離隊、退隊、不續約、已卸任、前成員」不再列為現役，但歷史資料仍保留。</div>
+        ${makeCurrentRows(activeRows)}
         ${makeHistoryRows(history)}
-        ${history.length ? '' : makeCurrentRows(teams, sports)}
-        ${history.length || teams.length ? '' : '<div class="girl-career__empty">目前尚未建立個人經歷資料。</div>'}
-        ${history.length === 0 && teams.length ? '<div class="girl-career__empty">目前僅有現役資料；歷史經歷可後續由 <code>data/girl-careers.json</code> 補登，不會影響主頁現役名單。</div>' : ''}
+        ${history.length ? '' : makeFormerRowsFromMainData(formerRows)}
+        ${activeRows.length || history.length || formerRows.length ? '' : '<div class="girl-career__empty">目前尚未建立個人經歷資料。</div>'}
+        ${!activeRows.length && (history.length || formerRows.length) ? '<div class="girl-career__empty">目前無現役所屬隊伍。</div>' : ''}
       </div>`;
 
     hero.insertAdjacentElement('afterend', details);

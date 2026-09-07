@@ -8,9 +8,9 @@
       logo: 'https://storage.googleapis.com/p-xc-m/event/419/squads/c45ab61917b75ee85815bf0d1431b0ebe5bb523b6395705ad65a2540c674a24a?q=100&w=256%25'
     },
     {
-      names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'],
+      names: ['Si-ster', 'Si-ster 可莉女孩', 'Si-ster 可利女孩', 'SiSter', 'SI-STER', '可利工程師', '可利工程師 Si-ster'],
       teamName: '可利工程師',
-      logo: './images/koli_engineer_logo.jpg?v=2'
+      logo: './images/koli_engineer_logo_transparent.svg?v=1'
     }
   ];
 
@@ -34,6 +34,9 @@
     img.alt = `${squad.teamName} logo`;
     img.loading = 'lazy';
     img.style.removeProperty('display');
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center';
+    img.style.background = 'transparent';
     if (className) img.className = className;
     img.onerror = () => {
       img.style.display = 'none';
