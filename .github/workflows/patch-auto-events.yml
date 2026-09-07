@@ -6,6 +6,7 @@ on:
     paths:
       - 'data/auto-events.json'
       - 'tools/patch_auto_events.py'
+      - 'tools/fix_public_event_refresh.py'
       - 'tools/patch_pwa.py'
       - 'manifest.json'
       - 'pwa.js'
@@ -29,6 +30,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Patch Events integration
         run: python tools/patch_auto_events.py
+      - name: Preserve last-known-good public events
+        run: python tools/fix_public_event_refresh.py
       - name: Patch PWA app mode
         run: python tools/patch_pwa.py
       - name: Commit index update
