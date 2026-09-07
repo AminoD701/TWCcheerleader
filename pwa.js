@@ -6,8 +6,8 @@
   let registrationRef = null;
 
   const TEAM_LOGO_OVERRIDES = [
-    { names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'], logo: './images/ace_viva_logo.jpg?v=3', fallback: 'https://raw.githubusercontent.com/AminoD701/TWCcheerleader/main/images/ace_viva_logo.jpg' },
-    { names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'], logo: './images/sister_logo.jpg', fallback: 'https://raw.githubusercontent.com/AminoD701/TWCcheerleader/main/images/sister_logo.jpg' }
+    { names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'], logo: './images/ace_viva_logo.jpg?v=20260907b' },
+    { names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'], logo: './images/sister_logo.jpg?v=20260907b' }
   ];
 
   const normalizeTeamName = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -34,13 +34,6 @@
         img.alt = `${String(label || '').trim()} logo`;
         img.loading = 'lazy';
         img.dataset.teamLogoOverride = '1';
-        if (config.fallback) {
-          img.addEventListener('error', () => {
-            if (img.dataset.logoFallbackApplied === '1') return;
-            img.dataset.logoFallbackApplied = '1';
-            img.src = config.fallback;
-          });
-        }
         if (className) img.className = className;
 
         const labelNode = labelSelector ? el.querySelector(labelSelector) : el.firstChild;
@@ -219,7 +212,7 @@
 
   loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
-  loadScriptOnce('./src/app/team-logo-overrides.js?v=3', 'team-logo-overrides');
+  loadScriptOnce('./src/app/team-logo-overrides.js?v=4', 'team-logo-overrides');
 
   patchTeamLogos();
   const teamLogoObserver = new MutationObserver(patchTeamLogos);
