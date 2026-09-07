@@ -1,7 +1,7 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v26`;
+const CACHE_NAME = `${CACHE_PREFIX}v27`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
-const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/game-app-enhancements.js?v=6', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=7', './src/app/girl-career.js?v=3', './src/app/news-freshness.js?v=1', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/koli_engineer_logo_transparent.svg?v=1', './data/girl-careers.json?v=2'];
+const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js', './src/app/game-app-enhancements.js?v=6', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=8', './src/app/girl-career.js?v=3', './src/app/news-freshness.js?v=1', './src/app/navigation.css', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/koli_engineer_logo_transparent.svg?v=1', './data/girl-careers.json?v=2'];
 
 const isOwnedCache = key => key.startsWith(CACHE_PREFIX) || LEGACY_CACHES.includes(key);
 const canStore = (request, response) => request.cache !== 'no-store' && response && response.ok && response.type !== 'error';
