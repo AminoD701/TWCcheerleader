@@ -1903,6 +1903,8 @@
         </div>
     </footer>
 
+    <script src="./src/app/girl-status.js"></script>
+    <script src="./src/services/news-feed.js"></script>
     <script src="./src/storage/legacy-storage.js"></script>
     <script src="./src/services/data-loader.js?v=4"></script>
     <script>
@@ -2098,7 +2100,7 @@
                 const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
                 const [freshManualNews, freshAutoNews] = await Promise.all([
                     window.CheerData.load('news-sheet', () => fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`)),
-                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); }))
+                    window.CheerData.load('auto-news', () => window.CheerNews.fetchItems(`data/auto-news.json?t=${nt}`))
                 ]);
                 const seen = new Set();
                 const merged = [
@@ -2152,7 +2154,7 @@
                                 const newsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${nt}`;
                                 const [freshManualNews, freshAutoNews] = await Promise.all([
                                     window.CheerData.load('news-sheet', () => fetchCSV(`${newsBaseUrl}&gid=417186374&t=${nt}`)),
-                                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${nt}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); }))
+                                    window.CheerData.load('auto-news', () => window.CheerNews.fetchItems(`data/auto-news.json?t=${nt}`))
                                 ]);
 
                                 const newsSeen = new Set();
@@ -2218,7 +2220,7 @@
                     window.CheerData.load('news-sheet', () => fetchCSV(`${baseUrl}&gid=417186374&t=${t}`)),
                     window.CheerData.load('matches-sheet', () => fetchCSV(`${baseUrl}&gid=92509162&t=${t}`)),
                     window.CheerData.load('themes-sheet', () => fetchCSV(`${baseUrl}&gid=547736461&t=${t}`)),
-                    window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); })),
+                    window.CheerData.load('auto-news', () => window.CheerNews.fetchItems(`data/auto-news.json?t=${t}`)),
                     window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
                 ]);
 
@@ -2414,8 +2416,9 @@
                 return n.includes("台") || n.includes("臺") || n.includes("港") || n.includes("馬");
             };
 
-            if (dbGirls.length > 0) {
-                const luckyGirl = dbGirls[seed % dbGirls.length];
+            const activeGirls = dbGirls.filter(isActiveGirl);
+            if (activeGirls.length > 0) {
+                const luckyGirl = activeGirls[seed % activeGirls.length];
                 const luckyName = isLocalTarget(luckyGirl.nat) ? (luckyGirl.nickname || luckyGirl.realname) : luckyGirl.realname;
 
                 document.getElementById('lucky-girl-content').innerHTML = `
@@ -2429,7 +2432,7 @@
             }
 
             const counts = {};
-            dbSchedules.filter(s => s.safeDate.month === curMonth).forEach(s => counts[s.name] = (counts[s.name] || 0) + 1);
+            dbSchedules.filter(s => s.safeDate.month === curMonth && window.CheerGirlStatus.scheduleIsCurrent(s, dbGirls)).forEach(s => counts[s.name] = (counts[s.name] || 0) + 1);
             const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
             
             if(sorted.length > 0) {
@@ -2453,7 +2456,7 @@
                 document.getElementById('mvp-content').innerHTML = '<div style="color:var(--text-sub)">本月暫無應援數據</div>';
             }
 
-            let birthdayGirlsRaw = dbGirls.filter(g => {
+            let birthdayGirlsRaw = dbGirls.filter(isActiveGirl).filter(g => {
                 let dobStr = String(g.dob || "").replace(/年|月|-/g, '/').replace(/日/g, '').trim();
                 let parts = dobStr.split('/').filter(x => x !== '');
                 let m = 0;
@@ -2676,6 +2679,7 @@
 
             // 1. 抓取這隊今天的班表與女孩 (✨ 終極跨界＋明星賽大融合引擎)
             let scheduledGirls = dbSchedules.filter(s => {
+                if (!window.CheerGirlStatus.scheduleEligible(s, dbGirls)) return false;
                 if (s.safeDate.num !== dateNum) return false;
 
                 let noteStr = (s.note || "").toLowerCase();
@@ -3193,7 +3197,7 @@
             if (wrapper) wrapper.style.display = 'flex'; // 顯示球隊選單
             
             const teamsSet = new Set();
-            dbGirls.forEach(c => { 
+            dbGirls.filter(isActiveGirl).forEach(c => { 
                 if (currentSport === "全部" || (c.sport || "").includes(currentSport)) {
                     if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
                 }
@@ -3385,7 +3389,7 @@
 
         function getVotePool() {
             let uniqueMap = new Map();
-            dbGirls.forEach(g => {
+            dbGirls.filter(isActiveGirl).forEach(g => {
                 if(!uniqueMap.has(g.uid)) {
                     uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "", combinedSport: g.sport || "" });
                 } else {
@@ -3400,7 +3404,7 @@
         function updateVoteTeamDropdown() {
             let validTeams = new Set();
 
-            dbGirls.forEach(g => {
+            dbGirls.filter(isActiveGirl).forEach(g => {
                 if (!g.img || !g.team) return;
                 
                 // ✨ 排除團長與不符資格的女孩 (與名單邏輯保持一致)
@@ -3612,7 +3616,7 @@
             // --- 3. 第二屆專屬：台/港/馬 名單過濾器 ---
             let localGirlMap = new Map();
 
-            dbGirls.forEach(g => {
+            dbGirls.filter(isActiveGirl).forEach(g => {
                 if (!g.img) return;
                 const note = (g.note || g['備註'] || g.備註 || "").trim();
                 if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return;
@@ -4133,7 +4137,7 @@
             let uniqueMap = new Map();
             
             // ✨ 修復 1：移除 .filter(g => g.img)，讓沒有照片的女孩也能上陣！
-            dbGirls.forEach(g => {
+            dbGirls.filter(isActiveGirl).forEach(g => {
                 if(!uniqueMap.has(g.uid)) uniqueMap.set(g.uid, { ...g, combinedTeam: g.team || "", combinedSport: g.sport || "" });
                 else { 
                     let e = uniqueMap.get(g.uid); 
@@ -4180,7 +4184,7 @@
             if (dtState.rule === 'free') {
                 // 初始化時，抓出所有真實存在的球隊名稱，避免出現帶有 _棒球 結尾的系統變數
                 let initialTeams = new Set();
-                dbGirls.filter(g => g.img).forEach(g => {
+                dbGirls.filter(g => isActiveGirl(g) && g.img).forEach(g => {
                     if (g.team && g.team.trim() !== "") initialTeams.add(g.team.trim());
                 });
                 const allTeams = Array.from(initialTeams).sort();
@@ -4229,7 +4233,7 @@
             
             // 智慧蒐集符合該「球種」的所有真實球隊
             let validTeams = new Set();
-            dbGirls.filter(g => g.img).forEach(g => {
+            dbGirls.filter(g => isActiveGirl(g) && g.img).forEach(g => {
                 // ✨ 智慧判斷：如果選了「其他」，就抓出所有「不包含」棒、籃、排的球隊
                 const isMatchSport = fSport === "" || 
                     (fSport === "其他" 
@@ -4850,6 +4854,8 @@
             const sort = document.getElementById('sortFilter').value;
 
             let result = dbGirls.filter(c => {
+                // Default roster is current; a name search also discovers former members.
+                if (!isActiveGirl(c) && (!search || currentTeam !== '全部啦啦隊')) return false;
                 const ms = currentSport === "全部" || (c.sport || "").includes(currentSport);
                 const mt = currentTeam === "全部啦啦隊" || (c.team || "").trim() === currentTeam;
                 const mS = search === "" || (c.nickname || "").toLowerCase().includes(search) || (c.realname || "").toLowerCase().includes(search);
@@ -4899,7 +4905,14 @@
                     if (!e.mN.includes(c.num || "") && c.num && c.num !== "-") e.mN.push(c.num || ""); 
                 } 
             });
-            result = Array.from(mMap.values());
+            result = Array.from(mMap.values()).map(person => {
+                const active = result.filter(row => row.uid === person.uid && isActiveGirl(row));
+                if (!active.length) return person;
+                return { ...person, ...active[0],
+                    mT: [...new Set(active.map(row => row.team || ''))],
+                    mS: [...new Set(active.map(row => row.sport || ''))],
+                    mN: [...new Set(active.map(row => row.num || ''))] };
+            });
         }
 
         result.sort((a,b) => {
@@ -4954,6 +4967,7 @@
 
             let htmlContent = result.slice(0, window.currentDisplayLimit).map(c => {
                 const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
+                if (!isActiveGirl(c)) teams.splice(0, teams.length, ...teams.map(t => `前 ${t}`));
                 const sports = (c.mS || [c.sport || ""]);
                 const cardAccent = (teamThemes[`${teams[0]}_${currentSport==="全部"?"":currentSport}`] || teamThemes[teams[0]] || teamThemes["全部啦啦隊"]).accent;
                 
@@ -5086,7 +5100,7 @@
             if(!c) return;
             
             const allRows = dbGirls.filter(g => g.uid === c.uid);
-            const teams = [...new Set(allRows.map(g => (g.team||"").trim()).filter(t => t))];
+            const teams = [...new Set(allRows.filter(isActiveGirl).map(g => (g.team||"").trim()).filter(t => t))];
             const sports = [...new Set(allRows.map(g => (g.sport||"").trim()).filter(s => s))];
             const nums = [...new Set(allRows.map(g => (g.num||"").trim()).filter(n => n && n !== "-"))].map(n => '#' + String(n).replace(/#/g,''));
             
@@ -5158,6 +5172,7 @@
 
             // ✨ 班表智慧過濾：如果是菜市場名，球隊必須完全符合才算數！
             let herSchedules = dbSchedules.filter(s => {
+                if (!window.CheerGirlStatus.scheduleEligible(s, dbGirls)) return false;
                 if (s.safeDate.year !== currentYear || s.safeDate.month !== currentMonth || s.safeDate.num < todayNum) return false;
                 
                 const sName = s.name.trim();
@@ -5344,6 +5359,7 @@
             let available = [];
             
             dbSchedules.forEach(s => { 
+                if (!window.CheerGirlStatus.scheduleEligible(s, dbGirls)) return;
                 if(s.team && !available.find(a => a.team === s.team && a.sport === s.sport)) {
                     available.push(s); 
                 }
@@ -5388,7 +5404,7 @@
             let data = dbSchedules.filter(s => s.team === currentScheduleTeam && s.sport === currentScheduleSport);
             
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
-            data = data.filter(s => s.safeDate.num >= todayNum);
+            data = data.filter(s => s.safeDate.num >= todayNum && window.CheerGirlStatus.scheduleIsCurrent(s, dbGirls));
             
             if(data.length === 0) {
                 container.innerHTML = `<button class="back-btn" onclick="window.backToScheduleSelection()"><span><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:3;vertical-align:middle;margin-right:5px;"><polyline points="15 18 9 12 15 6"></polyline></svg> 返回大廳 BACK</span></button><div style="text-align:center; padding:100px 50px; color:var(--text-sub); font-weight:700; font-size:18px;">此隊伍目前無未來班表資料。</div>`;
@@ -6019,7 +6035,7 @@ window.renderMinigameStart = function() {
             const targetSize = parseInt(document.getElementById('mg-setup-round').value);
 
             let uniqueMap = new Map();
-            dbGirls.forEach(g => { 
+            dbGirls.filter(isActiveGirl).forEach(g => { 
                 if(!uniqueMap.has(g.uid)) {
                     // ✨ 同時合併運動類型與所屬球隊，避免跨隊女孩被遺漏
                     uniqueMap.set(g.uid, { ...g, allSports: (g.sport || ""), combinedTeam: (g.team || "") });
@@ -6354,7 +6370,9 @@ window.renderMinigameStart = function() {
                 const savedFortuneIdx = localStorage.getItem('cheer_gacha_fortune');
                 
                 // 防呆：如果找不到記憶中的女孩，隨機抓一個備用
-                let girl = girlMap.get(savedUid) || dbGirls.filter(g => g.img)[0];
+                // A saved draw is history; only a newly selected fallback must be active.
+                let girl = girlMap.get(savedUid) || dbGirls.filter(g => isActiveGirl(g) && g.img)[0];
+                if (!girl) return;
                 let fortune = fortunePool[savedFortuneIdx] || fortunePool[0];
                 
                 enterBtn.innerText = "✨ 這是您今日的專屬卡片";
@@ -6370,7 +6388,8 @@ window.renderMinigameStart = function() {
 
             setTimeout(() => {
                 // 隨機抽選女孩(只抽有照片的)與運勢
-                const validGirls = dbGirls.filter(g => g.img);
+                const validGirls = dbGirls.filter(g => isActiveGirl(g) && g.img);
+                if (!validGirls.length) { enterBtn.innerText = '目前沒有可抽取的現役女孩'; return; }
                 const girl = validGirls[Math.floor(Math.random() * validGirls.length)];
                 const fortuneIdx = Math.floor(Math.random() * fortunePool.length);
                 const fortune = fortunePool[fortuneIdx];
@@ -6691,6 +6710,7 @@ window.renderMinigameStart = function() {
         // =========================================================================
         window.renderNewsHub = function(skipRefresh = false) {
             const container = document.getElementById('news-container');
+            window.CheerNews.renderStatus(container);
             if (window.currentMainCategory && window.currentMainCategory !== '全部') {
                 const legacyMain = window.currentMainCategory;
                 window.currentMainCategory = window.normalizeNewsCategory(legacyMain);
@@ -7802,7 +7822,7 @@ window.renderMinigameStart = function() {
             window.scrollTo({top: 0, behavior: 'smooth'});
 
             const allRows = dbGirls.filter(g => g.uid === c.uid);
-            const teams = [...new Set(allRows.map(g => (g.team||"").trim()).filter(t => t))];
+            const teams = [...new Set(allRows.filter(isActiveGirl).map(g => (g.team||"").trim()).filter(t => t))];
             const sports = [...new Set(allRows.map(g => (g.sport||"").trim()).filter(s => s))];
             const nums = [...new Set(allRows.map(g => (g.num||"").trim()).filter(n => n && n !== "-"))].map(n => '#' + String(n).replace(/#/g,''));
             
@@ -7886,6 +7906,7 @@ window.renderMinigameStart = function() {
             const todayNum = parseInt(`${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}`);
             
             let herSchedules = dbSchedules.filter(s => {
+                if (!window.CheerGirlStatus.scheduleEligible(s, dbGirls)) return false;
                 const sName = s.name.trim();
                 return sName === (c.nickname||"").trim() || sName === (c.realname||"").trim();
             }).map(s => ({ ...s, dataType: 'schedule' }));
@@ -8095,7 +8116,7 @@ window.renderMinigameStart = function() {
                             
                             <div class="profile-top-row">
                                 <div class="profile-team-tags">
-                                    ${teams.map(t => `<span class="profile-team-tag">${t}</span>`).join('')}
+                                    <span>CURRENT</span> ${teams.length ? teams.map(t => `<span class="profile-team-tag">${t}</span>`).join('') : '<span>目前無所屬隊伍</span>'}
                                 </div>
                                 <div class="profile-number">${nums.join(' ') || "No.#"}</div>
                             </div>

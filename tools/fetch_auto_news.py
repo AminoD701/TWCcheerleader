@@ -108,6 +108,7 @@ def load_site_entities() -> tuple[list[str], list[str]]:
     names: set[str] = set()
     teams: set[str] = set()
     for row in rows:
+        row = {re.sub(r'[\s_]', '', key.lstrip('\ufeff').lower()): value for key, value in row.items() if key}
         for key in ("realname", "nickname", "name", "姓名", "藝名"):
             value = (row.get(key) or "").strip()
             if 2 <= len(value) <= 20 and value not in {"未知", "無", "-"}:
@@ -116,7 +117,7 @@ def load_site_entities() -> tuple[list[str], list[str]]:
             value = (row.get(key) or "").strip()
             if 2 <= len(value) <= 40 and value not in {"未知", "無", "-", "全部啦啦隊"}:
                 teams.add(value)
-    return sorted(names, key=len, reverse=True), sorted(teams, key=len, reverse=True)
+    return sorted(names, key=lambda value: (-len(value), value)), sorted(teams, key=lambda value: (-len(value), value))
 
 
 AMBIGUOUS_LATIN_NAMES = {
@@ -394,12 +395,16 @@ def main() -> None:
     cutoff = datetime.now(timezone(timedelta(hours=8))) - timedelta(days=MAX_AGE_DAYS)
 
     pool: list[dict] = []
+    succeeded = failed = 0
     for query in build_queries(girl_names, site_teams):
         try:
-            for item in fetch_query(query):
+            items = fetch_query(query)
+            succeeded += 1
+            for item in items:
                 item["query"] = query
                 pool.append(item)
         except Exception as exc:
+            failed += 1
             print(f"query failed: {query}: {exc}")
         time.sleep(0.35)
 
@@ -483,15 +488,41 @@ def main() -> None:
 
     output.sort(key=lambda x: x["date"], reverse=True)
 
-    out_path = Path("data/auto-news.json")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"queries: success={succeeded}, failed={failed}; raw={len(pool)}, candidates={len(candidates)}, selected={len(selected)}")
+    publish_news(output, succeeded=succeeded, failed=failed)
 
     category_counts = Counter(item["tag"] for item in output)
     subcategory_counts = Counter(item["subtag"] for item in output if item["tag"] != "啦啦隊情報")
     print(f"wrote {len(output)} auto news items")
     print(f"main categories: {dict(category_counts)}")
     print(f"sports subcategories: {dict(subcategory_counts)}")
+
+
+def publish_news(output: list[dict], *, succeeded: int, failed: int, directory: Path = Path('data')) -> None:
+    """Only publish usable data; an outage must never erase the last good feed."""
+    if not output or not succeeded:
+        raise RuntimeError('No usable news; preserved previous auto-news.json and metadata')
+    directory.mkdir(parents=True, exist_ok=True)
+    out_path = directory / 'auto-news.json'
+    payload = json.dumps(output, ensure_ascii=False, indent=2) + '\n'
+    changed = not out_path.exists() or out_path.read_bytes() != payload.encode('utf-8')
+    meta_path = directory / 'auto-news-meta.json'
+    now = datetime.now(timezone.utc).isoformat()
+    previous = json.loads(meta_path.read_text(encoding='utf-8')) if meta_path.exists() else {}
+    metadata = {
+        'updatedAt': now if changed else previous.get('updatedAt'),
+        'checkedAt': now,
+        'sha256': hashlib.sha256(payload.encode('utf-8')).hexdigest(),
+        'itemCount': len(output),
+        'queriesSucceeded': succeeded,
+        'queriesFailed': failed,
+        'status': 'partial' if failed else 'ok',
+    }
+    if changed:
+        temporary = out_path.with_suffix('.json.tmp')
+        temporary.write_bytes(payload.encode('utf-8'))
+        temporary.replace(out_path)
+    meta_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
 if __name__ == "__main__":

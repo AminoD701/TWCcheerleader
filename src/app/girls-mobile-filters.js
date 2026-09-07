@@ -145,6 +145,7 @@ function teamCounts(state) {
   const favs = favoritesOnly ? favoriteIds() : null;
   const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
   girls.forEach(girl => {
+    if (!window.isActiveGirl(girl)) return;
     if (!matchesSharedGirlFilters(girl, state)) return;
     const uid = girl.uid || `${(girl.realname || '').trim()}|${(girl.nickname || '').trim()}`;
     if (favs && !favs.has(uid)) return;

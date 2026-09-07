@@ -20,28 +20,29 @@
 
   const recordMatches = (record, realname, nickname) => {
     const keys = [record.realname, record.nickname, record.name, record.girl].map(normalize).filter(Boolean);
+    if (record.girlId) return normalize(record.girlId) === normalize(`${realname}|${nickname}`);
     return keys.includes(normalize(realname)) || (nickname && keys.includes(normalize(nickname)));
   };
 
   const formatPeriod = record => {
-    const start = record.start || record.startYear || record.from || '';
-    const end = record.end || record.endYear || record.to || '';
+    const start = record.startDate || record.start || record.startYear || record.from || '';
+    const end = record.endDate || record.end || record.endYear || record.to || '';
     if (start && end) return `${esc(start)}－${esc(end)}`;
     if (start && !end) return `${esc(start)}－現在`;
     if (!start && end) return `－${esc(end)}`;
     return '期間未註記';
   };
 
-  const makeHistoryRows = records => records.map(record => {
-    const squad = record.squad || record.team || record.group || '未註記團隊';
+  const makeHistoryRows = (records, currentTeams) => records.map(record => {
+    const squad = record.cheerTeam || record.squad || record.team || record.group || '未註記團隊';
     const sportsTeam = record.sportsTeam || record.club || record.organization || '';
     const sport = record.sport || '';
-    const ended = Boolean(record.end || record.endYear || record.to || record.status === 'former' || record.status === 'ended');
+    const ended = Boolean(record.end || record.endYear || record.endDate || record.to || !window.isActiveGirl(record) || !currentTeams.some(team => normalize(team) === normalize(squad)));
     const badge = ended ? '已結束' : '現役';
     const note = record.note || '';
     return `
       <div class="girl-career__item">
-        <div class="girl-career__period">${formatPeriod(record)}</div>
+        <div class="girl-career__period">${ended ? formatPeriod(record).replace('－現在', '（結束時間未註記）') : formatPeriod(record)}</div>
         <div class="girl-career__body">
           <div class="girl-career__title-row">
             <strong>${esc(squad)}</strong>
@@ -105,7 +106,8 @@
     if (existing?.dataset.identity === identity) return;
     existing?.remove();
 
-    const teams = [...profile.querySelectorAll('.profile-team-tag')].map(el => el.textContent?.trim()).filter(Boolean);
+    const rows = (window.dbGirls || []).filter(g => normalize(g.realname) === normalize(realname) && (!nickname || normalize(g.nickname) === normalize(nickname)));
+    const teams = [...new Set(rows.filter(window.isActiveGirl).map(g => g.team).filter(Boolean))];
     let sports = [];
     if (Array.isArray(window.dbGirls)) {
       const rows = window.dbGirls.filter(g => normalize(g.realname) === normalize(realname) || (nickname && normalize(g.nickname) === normalize(nickname)));
@@ -114,18 +116,26 @@
 
     const allRecords = await loadCareerData();
     const history = allRecords.filter(record => recordMatches(record, realname, nickname));
+    // Preserve departed memberships even while the optional curated history is empty.
+    rows.filter(g => !window.isActiveGirl(g) && g.team).forEach(g => {
+      if (!history.some(record => normalize(record.squad || record.team) === normalize(g.team))) {
+        history.push({ squad: g.team, sport: g.sport, status: 'former', note: g.note || g['備註'] || '' });
+      }
+    });
+    // Navigation can change while the history request is pending.
+    if (!hero.isConnected || profile.querySelector('.girl-career')) return;
 
     const details = document.createElement('details');
     details.className = 'girl-career';
     details.dataset.identity = identity;
     details.innerHTML = `
       <summary>
-        <span>📋 個人經歷</span>
+        <span>📋 CAREER 個人經歷</span>
         <span class="girl-career__hint">點擊查看</span>
       </summary>
       <div class="girl-career__content">
         <div class="girl-career__intro">此區保留女孩曾效力或合作過的啦啦隊／球隊紀錄；主頁仍只呈現目前身分。</div>
-        ${makeHistoryRows(history)}
+        ${makeHistoryRows(history, teams)}
         ${history.length ? '' : makeCurrentRows(teams, sports)}
         ${history.length || teams.length ? '' : '<div class="girl-career__empty">目前尚未建立個人經歷資料。</div>'}
         ${history.length === 0 && teams.length ? '<div class="girl-career__empty">目前僅有現役資料；歷史經歷可後續由 <code>data/girl-careers.json</code> 補登，不會影響主頁現役名單。</div>' : ''}

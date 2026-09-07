@@ -172,10 +172,10 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=7', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
   loadScriptOnce('./src/app/team-logo-overrides.js?v=6', 'team-logo-overrides');
-  loadScriptOnce('./src/app/girl-career.js?v=1', 'girl-career');
+  loadScriptOnce('./src/app/girl-career.js?v=2', 'girl-career');
 
   window.addEventListener('load', () => {
     updateHomeMarquee();
