@@ -5,44 +5,6 @@
   let updateAccepted = false;
   let registrationRef = null;
 
-  const TEAM_LOGO_OVERRIDES = [
-    { names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'], logo: './images/ace_viva_logo.jpg?v=20260907b' },
-    { names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'], logo: './images/sister_logo.jpg?v=20260907b' }
-  ];
-
-  const normalizeTeamName = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
-  const teamLogoConfig = value => TEAM_LOGO_OVERRIDES.find(team => team.names.some(name => normalizeTeamName(name) === normalizeTeamName(value)));
-
-  const patchTeamLogos = () => {
-    const targets = [
-      ['.dropdown-item', 'span', ''],
-      ['.schedule-team-btn', 'span', ''],
-      ['.tab-btn', null, 'tab-logo'],
-      ['.match-team-box', '.match-team-name', 'match-team-logo']
-    ];
-
-    targets.forEach(([selector, labelSelector, className]) => {
-      document.querySelectorAll(selector).forEach(el => {
-        const label = labelSelector ? el.querySelector(labelSelector)?.textContent : el.textContent;
-        const config = teamLogoConfig(label);
-        if (!config || el.querySelector('img[data-team-logo-override]')) return;
-
-        if (selector === '.match-team-box') el.querySelector('.match-no-logo')?.remove();
-
-        const img = document.createElement('img');
-        img.src = config.logo;
-        img.alt = `${String(label || '').trim()} logo`;
-        img.loading = 'lazy';
-        img.dataset.teamLogoOverride = '1';
-        if (className) img.className = className;
-
-        const labelNode = labelSelector ? el.querySelector(labelSelector) : el.firstChild;
-        if (selector === '.match-team-box' && labelNode) el.insertBefore(img, labelNode);
-        else el.prepend(img);
-      });
-    });
-  };
-
   const removeStandaloneFloatingShortcuts = () => {
     if (!isStandalone()) return;
 
@@ -212,14 +174,9 @@
 
   loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
-  loadScriptOnce('./src/app/team-logo-overrides.js?v=4', 'team-logo-overrides');
-
-  patchTeamLogos();
-  const teamLogoObserver = new MutationObserver(patchTeamLogos);
-  teamLogoObserver.observe(document.documentElement, { childList: true, subtree: true });
+  loadScriptOnce('./src/app/team-logo-overrides.js?v=5', 'team-logo-overrides');
 
   window.addEventListener('load', () => {
-    patchTeamLogos();
     updateHomeMarquee();
     if (!isStandalone()) createInstallButton();
     refreshStandaloneUi();
