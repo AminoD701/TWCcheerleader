@@ -14,6 +14,7 @@
     }
   ];
 
+  const TARGET_SELECTOR = '.dropdown-item,.schedule-team-btn,.tab-btn,.match-team-box';
   const normalize = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
   const findSquad = text => squads.find(squad => squad.names.some(name => normalize(name) === normalize(text)));
 
@@ -69,14 +70,34 @@
     applyLogo(box, squad, 'match-team-logo', nameEl || box.firstChild);
   };
 
-  const apply = () => {
-    document.querySelectorAll('.dropdown-item').forEach(injectDropdownLogo);
-    document.querySelectorAll('.schedule-team-btn').forEach(injectScheduleLogo);
-    document.querySelectorAll('.tab-btn').forEach(injectTabLogo);
-    document.querySelectorAll('.match-team-box').forEach(injectMatchLogo);
+  const applyElement = el => {
+    if (!el?.matches) return;
+    if (el.matches('.dropdown-item')) injectDropdownLogo(el);
+    else if (el.matches('.schedule-team-btn')) injectScheduleLogo(el);
+    else if (el.matches('.tab-btn')) injectTabLogo(el);
+    else if (el.matches('.match-team-box')) injectMatchLogo(el);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
-  else apply();
-  new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
+  const applyRoot = root => {
+    if (!root) return;
+    if (root.nodeType === Node.ELEMENT_NODE) {
+      applyElement(root);
+      root.querySelectorAll?.(TARGET_SELECTOR).forEach(applyElement);
+      return;
+    }
+    document.querySelectorAll(TARGET_SELECTOR).forEach(applyElement);
+  };
+
+  const boot = () => {
+    applyRoot(document.documentElement);
+    const observer = new MutationObserver(records => {
+      records.forEach(record => {
+        record.addedNodes.forEach(node => applyRoot(node));
+      });
+    });
+    observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
