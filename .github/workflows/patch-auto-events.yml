@@ -7,6 +7,7 @@ on:
       - 'data/auto-events.json'
       - 'tools/patch_auto_events.py'
       - 'tools/fix_public_event_refresh.py'
+      - 'tools/patch_data_resilience.py'
       - 'tools/patch_pwa.py'
       - 'manifest.json'
       - 'pwa.js'
@@ -32,6 +33,8 @@ jobs:
         run: python tools/patch_auto_events.py
       - name: Preserve last-known-good public events
         run: python tools/fix_public_event_refresh.py
+      - name: Protect all Sheet datasets
+        run: python tools/patch_data_resilience.py
       - name: Patch PWA app mode
         run: python tools/patch_pwa.py
       - name: Commit index update
