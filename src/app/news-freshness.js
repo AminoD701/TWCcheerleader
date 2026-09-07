@@ -2,6 +2,7 @@
   const META_URL = './data/auto-news-meta.json';
   let meta = null;
   let loading = null;
+  let renderQueued = false;
 
   const loadMeta = () => {
     if (!loading) {
@@ -55,6 +56,11 @@
     document.head.appendChild(style);
   };
 
+  const setBar = (bar, fallback, html) => {
+    bar.classList.toggle('is-fallback', fallback);
+    if (bar.innerHTML !== html) bar.innerHTML = html;
+  };
+
   const render = async () => {
     const container = document.getElementById('news-container');
     if (!container || container.style.display === 'none') return;
@@ -70,21 +76,25 @@
     const data = meta || await loadMeta();
     const generated = formatTaipei(data?.updatedAt);
     const latestItem = data?.latestItemDate || latestAutoDateFallback();
-    const count = Number.isFinite(Number(data?.itemCount)) ? Number(data.itemCount) : null;
+    const count = generated && Number.isFinite(Number(data?.itemCount)) ? Number(data.itemCount) : null;
 
     if (generated) {
-      bar.classList.remove('is-fallback');
-      bar.innerHTML = `<span class="news-freshness__dot" aria-hidden="true"></span><span>自動情報最後更新：${generated}${count !== null ? ` · ${count} 則` : ''}</span>`;
+      setBar(bar, false, `<span class="news-freshness__dot" aria-hidden="true"></span><span>自動情報最後更新：${generated}${count !== null ? ` · ${count} 則` : ''}</span>`);
     } else if (latestItem) {
-      bar.classList.add('is-fallback');
-      bar.innerHTML = `<span class="news-freshness__dot" aria-hidden="true"></span><span>最新自動情報時間：${latestItem} · 更新紀錄將於下一次爬蟲執行後顯示</span>`;
+      setBar(bar, true, `<span class="news-freshness__dot" aria-hidden="true"></span><span>最新自動情報時間：${latestItem} · 更新紀錄將於下一次爬蟲執行後顯示</span>`);
     } else {
-      bar.classList.add('is-fallback');
-      bar.innerHTML = '<span class="news-freshness__dot" aria-hidden="true"></span><span>自動情報更新時間暫時無法取得</span>';
+      setBar(bar, true, '<span class="news-freshness__dot" aria-hidden="true"></span><span>自動情報更新時間暫時無法取得</span>');
     }
   };
 
-  const scheduleRender = () => requestAnimationFrame(() => { render(); });
+  const scheduleRender = () => {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      render();
+    });
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleRender, { once: true });
   else scheduleRender();
