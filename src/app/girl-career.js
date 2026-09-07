@@ -128,13 +128,23 @@
       if (!tag.dataset.originalTeam) tag.dataset.originalTeam = raw.replace(/^前\s+/, '');
       const team = tag.dataset.originalTeam;
       const teamRows = byTeam.get(team) || [];
-      const former = teamRows.length > 0 && teamRows.every(isFormer);
-      const nextText = former ? `前 ${team}` : team;
-      const nextTitle = former ? '此團隊資料已標註離隊' : '';
+      const hasActive = teamRows.some(row => !isFormer(row));
+      const hasOnlyFormer = teamRows.length > 0 && !hasActive;
 
-      if (tag.textContent !== nextText) tag.textContent = nextText;
-      if (tag.classList.contains('is-former-team') !== former) tag.classList.toggle('is-former-team', former);
-      if (tag.title !== nextTitle) tag.title = nextTitle;
+      // Current-profile tags should only show current teams. Former teams live exclusively
+      // in the career/history section below the profile.
+      if (hasOnlyFormer) {
+        tag.hidden = true;
+        tag.setAttribute('aria-hidden', 'true');
+        tag.classList.add('is-former-team');
+        return;
+      }
+
+      tag.hidden = false;
+      tag.removeAttribute('aria-hidden');
+      tag.classList.remove('is-former-team');
+      if (tag.textContent !== team) tag.textContent = team;
+      if (tag.title) tag.title = '';
     });
   };
 
@@ -155,7 +165,7 @@
       .girl-career__badge{font-size:10px;font-weight:900;border-radius:999px;padding:3px 7px}.girl-career__badge.is-current{background:rgba(34,197,94,.13);color:#86efac;border:1px solid rgba(34,197,94,.28)}.girl-career__badge.is-former{background:rgba(148,163,184,.10);color:#cbd5e1;border:1px solid rgba(148,163,184,.22)}
       .girl-career__meta,.girl-career__note{font-size:12px;color:var(--text-sub);margin-top:5px;line-height:1.5}.girl-career__note{color:#cbd5e1}
       .girl-career__empty{padding:14px 0 2px;color:var(--text-sub);font-size:12px;line-height:1.6}
-      .profile-team-tag.is-former-team{opacity:.72;filter:saturate(.65);border-style:dashed!important}
+      .profile-team-tag.is-former-team{display:none!important}
       @media(max-width:768px){.girl-career{margin-top:14px}.girl-career summary{padding:14px}.girl-career__content{padding:0 14px 14px}.girl-career__item{grid-template-columns:1fr;gap:6px}.girl-career__period{font-size:11px}}
     `;
     document.head.appendChild(style);
