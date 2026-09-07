@@ -174,6 +174,7 @@
 
   loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
+  loadScriptOnce('./src/app/team-logo-overrides.js?v=1', 'team-logo-overrides');
 
   window.addEventListener('load', () => {
     updateHomeMarquee();
