@@ -23,13 +23,19 @@ test('fresh and startup news both normalize main and subcategories before render
   assert.match(html, /let subTag = window\.normalizeNewsSubcategory\(n, mainTag\)/);
 });
 
-test('crawler prioritizes site roster news and caps sports volume', async () => {
+test('crawler focuses on curated publishers and caps sports volume', async () => {
   const source = await read('tools/fetch_auto_news.py');
   assert.match(source, /SHEET_CSV/);
   assert.match(source, /build_queries\(girl_names/);
   assert.match(source, /NAME_QUERY_BATCH_SIZE/);
   assert.match(source, /girl_name_matches/);
-  assert.match(source, /SPORT_ITEM_LIMITS = \{"MLB": 6, "中職": 6, "TPBL": 5, "PLG": 4, "TVBL": 5\}/);
+  assert.match(source, /site:setn\.com/);
+  assert.match(source, /site:ctwant\.com/);
+  assert.match(source, /site:today\.line\.me/);
+  assert.match(source, /PREFERRED_SOURCE_HINTS/);
+  assert.match(source, /PREFERRED_HOSTS/);
+  assert.match(source, /SPORT_ITEM_LIMITS = \{"MLB": 2, "中職": 4, "TPBL": 2, "PLG": 2, "TVBL": 1\}/);
+  assert.match(source, /SPORT_TOTAL_LIMIT = 7/);
   assert.match(source, /SPORT_SOURCE_LIMIT = 2/);
   assert.match(source, /CHEER_ITEM_LIMIT = 36/);
 });
@@ -52,6 +58,8 @@ test('generated automatic feed follows taxonomy and sports caps', async () => {
 
   const sports = rows.filter(row => row.tag !== '啦啦隊情報');
   const count = subtag => sports.filter(row => row.subtag === subtag).length;
+  // Existing checked-in data can lag one crawler run, while every newly generated
+  // feed is constrained more tightly by SPORT_ITEM_LIMITS and SPORT_TOTAL_LIMIT.
   assert.ok(count('MLB') <= 6);
   assert.ok(count('中職') <= 6);
   assert.ok(count('TPBL') <= 5);
