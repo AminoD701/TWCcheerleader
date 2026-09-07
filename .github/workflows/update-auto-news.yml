@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install news URL decoder
         run: python -m pip install --disable-pip-version-check googlenewsdecoder
       - name: Fetch latest cheerleader news
@@ -36,4 +38,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Auto update cheerleader news"
-          git push
+
+          # Other site-maintenance workflows may push to main while the crawler is running.
+          # Rebase the generated news commit onto the latest main before pushing so the
+          # refreshed feed is not silently lost to a non-fast-forward rejection.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying after refreshing main..."
+            sleep 3
+          done
+          echo "Unable to publish refreshed news after 3 attempts"
+          exit 1
