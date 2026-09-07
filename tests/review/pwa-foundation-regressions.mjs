@@ -8,11 +8,11 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 const root=process.env.CHEER_REVIEW_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read=p=>fs.readFile(path.join(root,p),'utf8');
 const memory=()=>{const values=new Map();return {getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};};
-const {fetchWithLastSuccess}=await import(path.join(root,'src/services/resilient-cache.js'));
+const {fetchWithLastSuccess}=await import(pathToFileURL(path.join(root,'src/services/resilient-cache.js')).href);
 class MockEvent { constructor(type,options={}){this.type=type;this.bubbles=!!options.bubbles;} }
 async function navigationFixture(initial='events') {
   const elements=new Map();
@@ -110,7 +110,7 @@ test('PWA-01: first install controllerchange should not force an unrequested rel
   const serviceWorker={controller:null,addEventListener:(event,fn)=>handlers[event]=fn};
   const navigator={serviceWorker};
   const window={navigator,addEventListener(){},matchMedia:()=>({matches:false})};
-  vm.runInNewContext(await read('pwa.js'),{window,navigator,document:{},location:{reload(){reloads++;}},console});
+  vm.runInNewContext(await read('pwa.js'),{window,navigator,document:{addEventListener(){},querySelector(){return true;}},location:{reload(){reloads++;}},console});
   handlers.controllerchange();
   assert.equal(reloads,0);
 });

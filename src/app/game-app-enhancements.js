@@ -20,7 +20,7 @@
 
   const usableGirls = () => (Array.isArray(window.dbGirls) ? window.dbGirls : []).filter(girl => {
     const name = (girl?.realname || girl?.nickname || '').trim();
-    return name && !/^(未知|無|-)$/.test(name);
+    return window.isActiveGirl(girl) && name && !/^(未知|無|-)$/.test(name);
   });
 
   const pickDailyGirl = () => {

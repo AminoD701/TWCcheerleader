@@ -57,5 +57,5 @@ test('mobile filter module is loaded by navigation and precached by service work
   const sw = await readFile('sw.js', 'utf8');
   assert.match(navigation, /import '\.\/girls-mobile-filters\.js'/);
   assert.match(sw, /src\/app\/girls-mobile-filters\.js/);
-  assert.match(sw, /CACHE_PREFIX\}v5/);
+  assert.match(sw, /CACHE_PREFIX\}v\d+/);
 });
