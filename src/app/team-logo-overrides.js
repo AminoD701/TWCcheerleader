@@ -2,11 +2,13 @@
   const teams = [
     {
       names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'],
-      logo: './images/ace_viva_logo.jpg'
+      logo: './images/ace_viva_logo.jpg?v=3',
+      fallback: 'https://raw.githubusercontent.com/AminoD701/TWCcheerleader/main/images/ace_viva_logo.jpg'
     },
     {
       names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'],
-      logo: './images/sister_logo.jpg'
+      logo: './images/sister_logo.jpg',
+      fallback: 'https://raw.githubusercontent.com/AminoD701/TWCcheerleader/main/images/sister_logo.jpg'
     }
   ];
 
@@ -19,6 +21,13 @@
     img.alt = `${team.names[0]} logo`;
     img.loading = 'lazy';
     img.dataset.teamLogoOverride = '1';
+    if (team.fallback) {
+      img.addEventListener('error', () => {
+        if (img.dataset.logoFallbackApplied === '1') return;
+        img.dataset.logoFallbackApplied = '1';
+        img.src = team.fallback;
+      });
+    }
     return img;
   };
 
