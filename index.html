@@ -2185,7 +2185,7 @@
                                     window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${et}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
                                 ]);
                                 const eventSeen = new Set();
-                                dbEvents = [
+                                const refreshedEvents = [
                                     ...(Array.isArray(freshManualEvents) ? freshManualEvents.filter(e => e.eventname || e.girls) : []),
                                     ...(Array.isArray(freshSheetEvents) ? freshSheetEvents.filter(e => e.eventname || e.girls) : [])
                                 ].filter(e => {
@@ -2194,6 +2194,19 @@
                                     eventSeen.add(key);
                                     return true;
                                 }).map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                                if (refreshedEvents.length > 0) {
+                                    dbEvents = refreshedEvents;
+                                    try {
+                                        localStorage.setItem('tw_public_events_last_good', JSON.stringify(refreshedEvents.map(({safeDate, ...event}) => event)));
+                                    } catch (_) {}
+                                } else if (!Array.isArray(dbEvents) || dbEvents.length === 0) {
+                                    try {
+                                        const fallbackEvents = JSON.parse(localStorage.getItem('tw_public_events_last_good') || '[]');
+                                        if (Array.isArray(fallbackEvents) && fallbackEvents.length > 0) {
+                                            dbEvents = fallbackEvents.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                                        }
+                                    } catch (_) {}
+                                }
                             } catch(e) {
                                 console.warn('Fresh public Events refresh failed; using cached Events as fallback.', e);
                             }
@@ -2235,6 +2248,18 @@
                     })
                     .map(e => ({ ...e, safeDate: parseDateFlexible(e.date) }))
                     .filter(e => e.safeDate);
+                if (dbEvents.length > 0) {
+                    try {
+                        localStorage.setItem('tw_public_events_last_good', JSON.stringify(dbEvents.map(({safeDate, ...event}) => event)));
+                    } catch (_) {}
+                } else {
+                    try {
+                        const fallbackEvents = JSON.parse(localStorage.getItem('tw_public_events_last_good') || '[]');
+                        if (Array.isArray(fallbackEvents) && fallbackEvents.length > 0) {
+                            dbEvents = fallbackEvents.map(e => ({ ...e, safeDate: parseDateFlexible(e.date) })).filter(e => e.safeDate);
+                        }
+                    } catch (_) {}
+                }
                 const manualNews = newsData.filter(n => n.title);
                 const automaticNews = Array.isArray(autoNewsData) ? autoNewsData.filter(n => n.title) : [];
                 const newsSeen = new Set();
