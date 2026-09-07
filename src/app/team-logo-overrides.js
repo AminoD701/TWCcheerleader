@@ -1,7 +1,6 @@
 (() => {
-  // The roster/filter label is the cheer squad name, but the visual mark shown
-  // beside it is intentionally the SPORTS TEAM logo. Keep those concepts
-  // separate so squad renames / operator changes do not overwrite team history.
+  // Roster/filter labels use cheer squad names, but visual marks beside them
+  // intentionally show the SPORTS TEAM logo.
   const squads = [
     {
       names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'],
@@ -11,7 +10,7 @@
     {
       names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'],
       teamName: '可利工程師',
-      logo: './images/koli_engineer_logo.svg?v=1'
+      logo: './images/koli_engineer_logo.jpg?v=2'
     }
   ];
 
@@ -19,9 +18,6 @@
   const findSquad = text => squads.find(squad => squad.names.some(name => normalize(name) === normalize(text)));
 
   const applyLogo = (el, squad, className = '', beforeNode = null) => {
-    // Reuse/replace an existing logo even if it came from legacy code. This is
-    // important because the old implementation could leave a broken <img>
-    // which prevented later patches from taking effect.
     let img = el.querySelector('img');
     if (!img) {
       img = document.createElement('img');
@@ -29,7 +25,8 @@
       else el.prepend(img);
     }
 
-    if (img.dataset.teamLogoResolved === squad.teamName && img.src === new URL(squad.logo, document.baseURI).href) return;
+    const resolvedSrc = new URL(squad.logo, document.baseURI).href;
+    if (img.dataset.teamLogoResolved === squad.teamName && img.src === resolvedSrc) return;
 
     img.dataset.teamLogoOverride = '1';
     img.dataset.teamLogoResolved = squad.teamName;
@@ -39,29 +36,26 @@
     img.style.removeProperty('display');
     if (className) img.className = className;
     img.onerror = () => {
-      // Avoid leaving a browser broken-image glyph in the UI.
       img.style.display = 'none';
+      console.warn('Team logo failed to load:', squad.teamName, squad.logo);
     };
   };
 
   const injectDropdownLogo = el => {
     const label = el.querySelector('span')?.textContent || el.textContent;
     const squad = findSquad(label);
-    if (!squad) return;
-    applyLogo(el, squad);
+    if (squad) applyLogo(el, squad);
   };
 
   const injectScheduleLogo = el => {
     const label = el.querySelector('span')?.textContent || el.textContent;
     const squad = findSquad(label);
-    if (!squad) return;
-    applyLogo(el, squad);
+    if (squad) applyLogo(el, squad);
   };
 
   const injectTabLogo = el => {
     const squad = findSquad(el.textContent);
-    if (!squad) return;
-    applyLogo(el, squad, 'tab-logo');
+    if (squad) applyLogo(el, squad, 'tab-logo');
   };
 
   const injectMatchLogo = box => {
@@ -81,6 +75,5 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });
   else apply();
-
   new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
 })();
