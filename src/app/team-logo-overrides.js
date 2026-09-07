@@ -1,61 +1,75 @@
 (() => {
-  const teams = [
+  // The roster/filter label is the cheer squad name, but the visual mark shown
+  // beside it is intentionally the SPORTS TEAM logo. Keep those concepts
+  // separate so squad renames / operator changes do not overwrite team history.
+  const squads = [
     {
       names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'],
-      logo: './images/ace_viva_logo_inline.svg?v=1'
+      teamName: '臺中連莊 Win+Streak',
+      logo: 'https://storage.googleapis.com/p-xc-m/event/419/squads/c45ab61917b75ee85815bf0d1431b0ebe5bb523b6395705ad65a2540c674a24a?q=100&w=256%25'
     },
     {
       names: ['Si-ster', 'Si-ster 可莉女孩', 'SiSter', 'SI-STER'],
-      logo: './images/sister_logo.jpg?v=20260907b'
+      teamName: '可利工程師',
+      logo: './images/koli_engineer_logo.svg?v=1'
     }
   ];
 
   const normalize = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
-  const findTeam = text => teams.find(team => team.names.some(name => normalize(name) === normalize(text)));
+  const findSquad = text => squads.find(squad => squad.names.some(name => normalize(name) === normalize(text)));
 
-  const applyLogo = (el, team, className = '', beforeNode = null) => {
-    let img = el.querySelector('img[data-team-logo-override]');
+  const applyLogo = (el, squad, className = '', beforeNode = null) => {
+    // Reuse/replace an existing logo even if it came from legacy code. This is
+    // important because the old implementation could leave a broken <img>
+    // which prevented later patches from taking effect.
+    let img = el.querySelector('img');
     if (!img) {
       img = document.createElement('img');
-      img.dataset.teamLogoOverride = '1';
       if (beforeNode) el.insertBefore(img, beforeNode);
       else el.prepend(img);
     }
-    img.src = team.logo;
-    img.alt = `${team.names[0]} logo`;
+
+    if (img.dataset.teamLogoResolved === squad.teamName && img.src === new URL(squad.logo, document.baseURI).href) return;
+
+    img.dataset.teamLogoOverride = '1';
+    img.dataset.teamLogoResolved = squad.teamName;
+    img.src = squad.logo;
+    img.alt = `${squad.teamName} logo`;
     img.loading = 'lazy';
+    img.style.removeProperty('display');
     if (className) img.className = className;
     img.onerror = () => {
+      // Avoid leaving a browser broken-image glyph in the UI.
       img.style.display = 'none';
     };
   };
 
   const injectDropdownLogo = el => {
     const label = el.querySelector('span')?.textContent || el.textContent;
-    const team = findTeam(label);
-    if (!team) return;
-    applyLogo(el, team);
+    const squad = findSquad(label);
+    if (!squad) return;
+    applyLogo(el, squad);
   };
 
   const injectScheduleLogo = el => {
     const label = el.querySelector('span')?.textContent || el.textContent;
-    const team = findTeam(label);
-    if (!team) return;
-    applyLogo(el, team);
+    const squad = findSquad(label);
+    if (!squad) return;
+    applyLogo(el, squad);
   };
 
   const injectTabLogo = el => {
-    const team = findTeam(el.textContent);
-    if (!team) return;
-    applyLogo(el, team, 'tab-logo');
+    const squad = findSquad(el.textContent);
+    if (!squad) return;
+    applyLogo(el, squad, 'tab-logo');
   };
 
   const injectMatchLogo = box => {
     const nameEl = box.querySelector('.match-team-name');
-    const team = findTeam(nameEl?.textContent);
-    if (!team) return;
+    const squad = findSquad(nameEl?.textContent);
+    if (!squad) return;
     box.querySelector('.match-no-logo')?.remove();
-    applyLogo(box, team, 'match-team-logo', nameEl || box.firstChild);
+    applyLogo(box, squad, 'match-team-logo', nameEl || box.firstChild);
   };
 
   const apply = () => {
