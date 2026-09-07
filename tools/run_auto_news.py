@@ -20,6 +20,7 @@ OFF_TOPIC_TITLE_TERMS = (
     "股市", "台股", "美股", "ETF", "房市", "房價", "匯率", "理財", "投資",
     "財報", "營收", "科技股", "AI伺服器", "手機評測", "3C", "星座", "命理",
     "穿搭", "必買", "購物", "精品", "球帽", "棒球帽", "手袋", "包包",
+    "睡眠", "長壽", "健康", "醫師", "研究", "器官", "疾病", "糖尿病",
 )
 
 CHEER_SUPPORT_TERMS = (
@@ -68,7 +69,42 @@ def has_political_context(title: str, desc: str) -> bool:
     return contains_any(f"{title} {desc}", POLITICAL_TERMS)
 
 
+def sane_roster_name(name: str) -> bool:
+    value = (name or "").strip()
+    if not value:
+        return False
+    # Reject values that are clearly counts, money, dates, percentages or other
+    # spreadsheet cells accidentally interpreted as a girl name (e.g. "50萬").
+    if re.search(r"\d", value):
+        return False
+    if any(token in value for token in ("萬", "億", "%", "元", "歲", "年", "月", "日", "小時")):
+        return False
+    if value in {"未知", "無", "全部", "綜合", "其他"}:
+        return False
+    return core._original_usable_girl_name(value) if hasattr(core, "_original_usable_girl_name") else True
+
+
+# Keep the core validator but add the spreadsheet-collision guard globally, so
+# both query construction and article matching use exactly the same safe roster.
+if not hasattr(core, "_original_usable_girl_name"):
+    core._original_usable_girl_name = core.usable_girl_name
+
+
+def safe_usable_girl_name(name: str) -> bool:
+    value = (name or "").strip()
+    if not value or re.search(r"\d", value):
+        return False
+    if any(token in value for token in ("萬", "億", "%", "元", "歲", "年", "月", "日", "小時")):
+        return False
+    return core._original_usable_girl_name(value)
+
+
+core.usable_girl_name = safe_usable_girl_name
+
+
 def girl_is_in_title(name: str, title: str) -> bool:
+    if not safe_usable_girl_name(name):
+        return False
     try:
         return core.girl_name_matches(name, title)
     except Exception:
@@ -83,6 +119,8 @@ def strict_cheer_context(
 ) -> bool:
     if has_political_context(title, desc):
         return False
+    if contains_any(title, OFF_TOPIC_TITLE_TERMS):
+        return False
 
     hay = f"{title} {desc}"
     if contains_any(hay, tuple(core.CHEER_TERMS)):
@@ -93,8 +131,7 @@ def strict_cheer_context(
         return False
 
     # A long/exact roster name in the headline is a strong signal for individual
-    # entertainment stories. Short aliases such as 小安 need an extra cheer cue to
-    # avoid collisions with unrelated people.
+    # entertainment stories. Short aliases need an extra cheer cue.
     strong_name = any(
         (len(re.sub(r"\s+", "", name)) >= 3 if core.is_cjk_name(name) else len(name) >= 4)
         for name in title_girls
@@ -109,12 +146,9 @@ def strict_sport_match(title: str, category_terms: tuple[str, ...]) -> bool:
     if not contains_any(title, category_terms):
         return False
 
-    # Reject obvious non-sports uses such as fashion articles about baseball caps
-    # even when a league/team keyword appears in the headline.
     if contains_any(title, OFF_TOPIC_TITLE_TERMS) and not contains_any(title, SPORT_ACTION_TERMS):
         return False
 
-    # League abbreviations or full league names are strong enough on their own.
     strong_markers = (
         "MLB", "大聯盟", "CPBL", "中華職棒", "中職", "TPBL", "PLG",
         "P. LEAGUE+", "P.LEAGUE+", "TVBL", "TPVL", "職排", "職業排球",
@@ -122,7 +156,6 @@ def strict_sport_match(title: str, category_terms: tuple[str, ...]) -> bool:
     if contains_any(title, strong_markers):
         return True
 
-    # A team/player name alone must be accompanied by an actual sports-action word.
     return contains_any(title, SPORT_ACTION_TERMS)
 
 
@@ -134,6 +167,10 @@ def strict_classify_news(
 ) -> tuple[str, str] | None:
     if has_political_context(title, desc):
         return None
+    if contains_any(title, OFF_TOPIC_TITLE_TERMS):
+        return None
+
+    matched_girls = [name for name in matched_girls if safe_usable_girl_name(name)]
 
     if strict_cheer_context(title, desc, matched_girls, matched_teams):
         return "啦啦隊情報", (
@@ -148,11 +185,9 @@ def strict_classify_news(
 
 
 def strict_has_cheer_context(title: str, desc: str, matched_girls: list[str]) -> bool:
-    return strict_cheer_context(title, desc, matched_girls, [])
+    return strict_cheer_context(title, desc, [name for name in matched_girls if safe_usable_girl_name(name)], [])
 
 
-# Replace the permissive classifier used by core.main(). All later URL/source
-# allow-listing, deduplication and output handling remain in fetch_auto_news.py.
 core.classify_news = strict_classify_news
 core.has_cheer_context = strict_has_cheer_context
 
