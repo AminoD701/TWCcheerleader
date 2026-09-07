@@ -1,6 +1,9 @@
 (() => {
   const DATA_URL = './data/girl-careers.json?v=2';
   let careerDataPromise = null;
+  const inFlightIdentities = new Set();
+  let renderScheduled = false;
+  let profileObserver = null;
 
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
   const normalize = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -119,15 +122,19 @@
       if (!byTeam.has(team)) byTeam.set(team, []);
       byTeam.get(team).push(row);
     });
+
     profile.querySelectorAll('.profile-team-tag').forEach(tag => {
       const raw = tag.dataset.originalTeam || tag.textContent?.trim() || '';
       if (!tag.dataset.originalTeam) tag.dataset.originalTeam = raw.replace(/^前\s+/, '');
       const team = tag.dataset.originalTeam;
       const teamRows = byTeam.get(team) || [];
       const former = teamRows.length > 0 && teamRows.every(isFormer);
-      tag.textContent = former ? `前 ${team}` : team;
-      tag.classList.toggle('is-former-team', former);
-      tag.title = former ? '此團隊資料已標註離隊' : '';
+      const nextText = former ? `前 ${team}` : team;
+      const nextTitle = former ? '此團隊資料已標註離隊' : '';
+
+      if (tag.textContent !== nextText) tag.textContent = nextText;
+      if (tag.classList.contains('is-former-team') !== former) tag.classList.toggle('is-former-team', former);
+      if (tag.title !== nextTitle) tag.title = nextTitle;
     });
   };
 
@@ -154,19 +161,24 @@
     document.head.appendChild(style);
   };
 
+  const getProfileIdentity = profile => {
+    const realname = profile?.querySelector('.profile-name-row h1')?.textContent?.trim() || '';
+    const nickname = [...(profile?.querySelectorAll('.profile-name-row span') || [])].map(el => el.textContent?.trim()).find(Boolean) || '';
+    return { realname, nickname, identity: realname ? `${realname}|${nickname}` : '' };
+  };
+
   const injectCareer = async () => {
     injectStyles();
     const profile = document.getElementById('profile-container');
     const hero = profile?.querySelector('.profile-hero-card');
     if (!profile || !hero || profile.style.display === 'none') return;
 
-    const realname = profile.querySelector('.profile-name-row h1')?.textContent?.trim() || '';
-    const nickname = [...profile.querySelectorAll('.profile-name-row span')].map(el => el.textContent?.trim()).find(Boolean) || '';
-    if (!realname) return;
+    const { realname, nickname, identity } = getProfileIdentity(profile);
+    if (!identity) return;
 
-    const identity = `${realname}|${nickname}`;
     const existing = profile.querySelector('.girl-career');
     if (existing?.dataset.identity === identity) return;
+    if (inFlightIdentities.has(identity)) return;
     existing?.remove();
 
     let mainRows = [];
@@ -175,32 +187,76 @@
     }
     annotateProfileTeamTags(mainRows);
 
-    const allRecords = await loadCareerData();
-    const history = allRecords.filter(record => recordMatches(record, realname, nickname));
-    const activeRows = mainRows.filter(row => !isFormer(row));
-    const formerRows = mainRows.filter(isFormer);
+    inFlightIdentities.add(identity);
+    try {
+      const allRecords = await loadCareerData();
 
-    const details = document.createElement('details');
-    details.className = 'girl-career';
-    details.dataset.identity = identity;
-    details.innerHTML = `
-      <summary>
-        <span>📋 個人經歷</span>
-        <span class="girl-career__hint">點擊查看</span>
-      </summary>
-      <div class="girl-career__content">
-        <div class="girl-career__intro">現役狀態以女孩主資料的備註／status 判斷；「已離隊、離隊、退隊、不續約、已卸任、前成員」不再列為現役，但歷史資料仍保留。</div>
-        ${makeCurrentRows(activeRows)}
-        ${makeHistoryRows(history)}
-        ${history.length ? '' : makeFormerRowsFromMainData(formerRows)}
-        ${activeRows.length || history.length || formerRows.length ? '' : '<div class="girl-career__empty">目前尚未建立個人經歷資料。</div>'}
-        ${!activeRows.length && (history.length || formerRows.length) ? '<div class="girl-career__empty">目前無現役所屬隊伍。</div>' : ''}
-      </div>`;
+      const currentProfile = document.getElementById('profile-container');
+      const currentHero = currentProfile?.querySelector('.profile-hero-card');
+      const currentIdentity = getProfileIdentity(currentProfile).identity;
+      if (!currentProfile || !currentHero || currentProfile.style.display === 'none' || currentIdentity !== identity) return;
 
-    hero.insertAdjacentElement('afterend', details);
+      const nowExisting = currentProfile.querySelector('.girl-career');
+      if (nowExisting?.dataset.identity === identity) return;
+      nowExisting?.remove();
+
+      const history = allRecords.filter(record => recordMatches(record, realname, nickname));
+      const activeRows = mainRows.filter(row => !isFormer(row));
+      const formerRows = mainRows.filter(isFormer);
+
+      const details = document.createElement('details');
+      details.className = 'girl-career';
+      details.dataset.identity = identity;
+      details.innerHTML = `
+        <summary>
+          <span>📋 個人經歷</span>
+          <span class="girl-career__hint">點擊查看</span>
+        </summary>
+        <div class="girl-career__content">
+          <div class="girl-career__intro">現役狀態以女孩主資料的備註／status 判斷；「已離隊、離隊、退隊、不續約、已卸任、前成員」不再列為現役，但歷史資料仍保留。</div>
+          ${makeCurrentRows(activeRows)}
+          ${makeHistoryRows(history)}
+          ${history.length ? '' : makeFormerRowsFromMainData(formerRows)}
+          ${activeRows.length || history.length || formerRows.length ? '' : '<div class="girl-career__empty">目前尚未建立個人經歷資料。</div>'}
+          ${!activeRows.length && (history.length || formerRows.length) ? '<div class="girl-career__empty">目前無現役所屬隊伍。</div>' : ''}
+        </div>`;
+
+      currentHero.insertAdjacentElement('afterend', details);
+    } finally {
+      inFlightIdentities.delete(identity);
+    }
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectCareer, { once: true });
-  else injectCareer();
-  new MutationObserver(() => { injectCareer(); }).observe(document.documentElement, { childList: true, subtree: true });
+  const scheduleInjectCareer = () => {
+    if (renderScheduled) return;
+    renderScheduled = true;
+    requestAnimationFrame(() => {
+      renderScheduled = false;
+      injectCareer();
+    });
+  };
+
+  const startProfileObserver = () => {
+    if (profileObserver) return true;
+    const profile = document.getElementById('profile-container');
+    if (!profile) return false;
+
+    profileObserver = new MutationObserver(() => scheduleInjectCareer());
+    profileObserver.observe(profile, { childList: true, subtree: true });
+    scheduleInjectCareer();
+    return true;
+  };
+
+  const boot = () => {
+    injectStyles();
+    if (startProfileObserver()) return;
+
+    const bootObserver = new MutationObserver(() => {
+      if (startProfileObserver()) bootObserver.disconnect();
+    });
+    bootObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
