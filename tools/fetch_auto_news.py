@@ -24,23 +24,39 @@ SHEET_CSV = (
     "pub?output=csv&gid=0"
 )
 
-# The latest-intel feed is a cheerleader feed first. Do not seed it with generic
-# CPBL / MLB / basketball / volleyball queries, because those queries naturally
-# pull in a large amount of news that has nothing to do with cheerleaders.
+# Automatic intel is intentionally source-focused. These queries target the
+# entertainment/sports desks the site owner actually wants instead of the whole
+# Google News sports firehose.
 BASE_QUERIES = [
-    "台灣 啦啦隊 女孩",
-    "中職 啦啦隊 女孩",
-    "職籃 啦啦隊 女孩",
-    "韓籍 啦啦隊 台灣",
-    "Passion Sisters OR Rakuten Girls OR Fubon Angels OR Wing Stars OR Dragon Beauties OR Uni Girls",
+    "site:setn.com 啦啦隊",
+    "site:setn.com 娛樂 啦啦隊",
+    "site:setn.com 體育 啦啦隊",
+    "site:ctwant.com 啦啦隊",
+    "site:ctwant.com 娛樂 啦啦隊",
+    "site:ctwant.com 體育 啦啦隊",
+    "site:setn.com 中職 CPBL",
+    "site:setn.com MLB 大聯盟",
+    "site:setn.com TPBL OR PLG OR 職籃",
+    "site:setn.com TVBL OR 職排",
+    "site:ctwant.com 中職 CPBL",
+    "site:ctwant.com MLB 大聯盟",
+    "site:ctwant.com TPBL OR PLG OR 職籃",
+    "site:ctwant.com TVBL OR 職排",
+    "site:today.line.me 中職 CPBL",
 ]
 
-TRUSTED_HINTS = [
-    "ETtoday", "NOWnews", "三立", "TVBS", "聯合", "自由時報", "自由體育",
-    "中時", "Yahoo", "鏡週刊", "民視", "華視", "緯來", "TSNA", "運動視界",
-    "中央社", "壹蘋", "CTWANT", "太報", "udn", "SETN", "公視", "風傳媒",
-    "報知", "體育", "FOX", "ESPN", "MLB", "Basketball", "Volleyball"
+# Only these publishers are accepted into the automatic feed.
+PREFERRED_SOURCE_HINTS = [
+    "三立", "SETN", "三立新聞網", "娛樂星聞",
+    "CTWANT", "周刊王",
+    "LINE TODAY", "LINE TODAY台灣", "LINE Today",
 ]
+
+PREFERRED_HOSTS = (
+    "setn.com",
+    "ctwant.com",
+    "today.line.me",
+)
 
 SPORT_RULES = [
     ("棒球情報", "MLB", ["MLB", "大聯盟", "道奇", "洋基", "大谷翔平", "鄧愷威", "鈴木誠也", "今永昇太", "菊池雄星"]),
@@ -73,7 +89,10 @@ FALLBACK_IMAGES = {
 MAX_AGE_DAYS = 10
 CHEER_ITEM_LIMIT = 36
 CHEER_GENERIC_LIMIT = 8
-SPORT_ITEM_LIMITS = {"MLB": 6, "中職": 6, "TPBL": 5, "PLG": 4, "TVBL": 5}
+# Sports are intentionally a small side stream. CPBL gets a little more room
+# because LINE TODAY is specifically included as a CPBL source.
+SPORT_ITEM_LIMITS = {"MLB": 2, "中職": 4, "TPBL": 2, "PLG": 2, "TVBL": 1}
+SPORT_TOTAL_LIMIT = 7
 SPORT_SOURCE_LIMIT = 2
 NAME_QUERY_BATCH_SIZE = 8
 MAX_NAME_QUERY_BATCHES = 24
@@ -152,19 +171,24 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
     site_teams = [team.strip() for team in site_teams if team and team.strip()]
     queries = list(BASE_QUERIES)
 
+    # Roster-specific searches are also restricted to the two entertainment/sports
+    # publishers. This catches stories that omit the word "啦啦隊" in the headline.
     for start in range(0, min(len(girl_names), NAME_QUERY_BATCH_SIZE * MAX_NAME_QUERY_BATCHES), NAME_QUERY_BATCH_SIZE):
         batch = girl_names[start:start + NAME_QUERY_BATCH_SIZE]
         if not batch:
             break
         names_expr = " OR ".join(f'"{name}"' for name in batch)
-        queries.append(f"({names_expr}) 啦啦隊")
+        queries.append(f"site:setn.com ({names_expr})")
+        queries.append(f"site:ctwant.com ({names_expr})")
 
+    # Team searches remain cheer-specific so a team name alone cannot flood the feed.
     for start in range(0, min(len(site_teams), TEAM_QUERY_BATCH_SIZE * MAX_TEAM_QUERY_BATCHES), TEAM_QUERY_BATCH_SIZE):
         batch = site_teams[start:start + TEAM_QUERY_BATCH_SIZE]
         if not batch:
             break
         teams_expr = " OR ".join(f'"{team}"' for team in batch)
-        queries.append(f"({teams_expr}) 啦啦隊")
+        queries.append(f"site:setn.com ({teams_expr}) 啦啦隊")
+        queries.append(f"site:ctwant.com ({teams_expr}) 啦啦隊")
     return queries
 
 
@@ -220,8 +244,6 @@ def is_duplicate_story(item: dict, accepted: list[dict]) -> bool:
         same_team = bool(current_teams & previous_teams)
         same_day = item.get("dt") and previous.get("dt") and abs((item["dt"] - previous["dt"]).total_seconds()) <= 36 * 3600
 
-        # Different publishers often rewrite the same story with small headline changes.
-        # Only use the lower threshold when there is a shared person/team and a close publish time.
         if ratio >= RELATED_DUPLICATE_RATIO and same_day and (same_people or same_team):
             return True
     return False
@@ -254,13 +276,23 @@ def source_from_item(item: ET.Element) -> str:
     return "新聞來源"
 
 
+def preferred_source_name(source: str) -> bool:
+    source_lower = (source or "").lower()
+    return any(hint.lower() in source_lower for hint in PREFERRED_SOURCE_HINTS)
+
+
+def preferred_article_host(url: str) -> bool:
+    try:
+        host = urllib.parse.urlsplit(url).netloc.lower().split(":", 1)[0]
+        return any(host == allowed or host.endswith("." + allowed) for allowed in PREFERRED_HOSTS)
+    except Exception:
+        return False
+
+
 def has_cheer_context(title: str, desc: str, matched_girls: list[str]) -> bool:
     hay = f"{title} {desc}".lower()
     if any(term.lower() in hay for term in CHEER_TERMS):
         return True
-
-    # A roster girl's exact name is accepted even when a headline omits the word
-    # "啦啦隊"; generic team-name matches alone are never enough.
     return bool(matched_girls)
 
 
@@ -277,30 +309,10 @@ def classify_news(
     if has_cheer_word:
         return "啦啦隊情報", (matched_girls[0] if matched_girls else (matched_teams[0] if matched_teams else "綜合"))
 
-    # From this point onward the caller has already required a roster-girl match.
-    # Sports taxonomy is kept for a story that genuinely involves a roster girl,
-    # but generic sports headlines can no longer enter the feed.
-    sport_match = None
     for main_category, subcategory, terms in SPORT_RULES:
         if any(term.lower() in hay_lower for term in terms):
-            sport_match = (main_category, subcategory)
-            break
+            return main_category, subcategory
 
-    if sport_match is None:
-        generic_rules = [
-            ("棒球情報", "中職", ["棒球", "中職", "cpbl", "台鋼", "雄鷹", "兄弟", "桃猿", "味全龍", "統一獅", "富邦悍將"]),
-            ("棒球情報", "MLB", ["mlb", "大聯盟", "道奇", "洋基"]),
-            ("籃球情報", "TPBL", ["籃球", "tpbl", "國王", "海神", "攻城獅", "戰神", "雲豹", "中信特攻", "夢想家"]),
-            ("籃球情報", "PLG", ["plg", "p. league", "勇士", "領航猿"]),
-            ("排球情報", "TVBL", ["排球", "職排", "tvbl", "tpvl", "連莊"]),
-        ]
-        for main_category, subcategory, terms in generic_rules:
-            if any(term.lower() in hay_lower for term in terms):
-                sport_match = (main_category, subcategory)
-                break
-
-    if sport_match and matched_girls:
-        return sport_match
     if matched_girls:
         return "啦啦隊情報", matched_girls[0]
     return None
@@ -401,9 +413,10 @@ def fetch_query(query: str) -> list[dict]:
 def sports_importance_score(item: dict) -> int:
     hay = f"{item['title']} {item['description']}"
     score = sum(4 for term in IMPORTANT_SPORT_TERMS if term.lower() in hay.lower())
-    if any(h.lower() in item["source"].lower() for h in TRUSTED_HINTS):
-        score += 3
     score += sum(2 for term in IMPORTANT_SPORT_TERMS if term.lower() in item["title"].lower())
+    # LINE TODAY CPBL is explicitly desired, so slightly prefer it inside the CPBL bucket.
+    if item.get("subcategory") == "中職" and "line" in item.get("source", "").lower():
+        score += 3
     return score
 
 
@@ -425,6 +438,8 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
         is_generic = not item["matched_girls"] and not item["matched_teams"]
         if is_generic and generic_count >= CHEER_GENERIC_LIMIT:
             continue
+        if is_duplicate_story(item, selected_cheer):
+            continue
         selected_cheer.append(item)
         generic_count += int(is_generic)
         if len(selected_cheer) >= CHEER_ITEM_LIMIT:
@@ -436,13 +451,19 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
         bucket.sort(key=lambda item: (sports_importance_score(item), item["dt"]), reverse=True)
         source_counts: Counter[str] = Counter()
         for item in bucket:
+            if len(selected_sports) >= SPORT_TOTAL_LIMIT:
+                break
             source_key = item["source"].lower()
             if source_counts[source_key] >= SPORT_SOURCE_LIMIT:
+                continue
+            if is_duplicate_story(item, selected_sports):
                 continue
             selected_sports.append(item)
             source_counts[source_key] += 1
             if sum(1 for x in selected_sports if x["subcategory"] == subcategory) >= limit:
                 break
+        if len(selected_sports) >= SPORT_TOTAL_LIMIT:
+            break
 
     return sorted(selected_cheer + selected_sports, key=lambda item: item["dt"], reverse=True)
 
@@ -467,27 +488,28 @@ def main() -> None:
         if not dt or dt < cutoff:
             continue
 
+        # Google News source labels are the first allow-list check.
+        if not preferred_source_name(item["source"]):
+            continue
+
         hay = f"{item['title']} {item['description']}"
         matched_girls = [name for name in girl_names if girl_name_matches(name, hay)][:6]
         matched_teams = [team for team in site_teams if team in hay][:4]
-
-        if not has_cheer_context(item["title"], item["description"], matched_girls):
-            continue
-
         classified = classify_news(item["title"], item["description"], matched_girls, matched_teams)
         if not classified:
+            continue
+
+        main_category, subcategory = classified
+
+        # Cheer stories need cheer context/name. Sports stories are allowed without a
+        # cheer match, but only because the source/query set is now narrowly curated.
+        if main_category == "啦啦隊情報" and not has_cheer_context(item["title"], item["description"], matched_girls):
             continue
 
         norm_title = normalize_title(item["title"])
         if not norm_title:
             continue
 
-        source = item["source"]
-        is_trusted = any(h.lower() in source.lower() for h in TRUSTED_HINTS)
-        if not is_trusted and not matched_girls and not matched_teams:
-            continue
-
-        main_category, subcategory = classified
         item.update({
             "dt": dt,
             "norm_title": norm_title,
@@ -510,6 +532,12 @@ def main() -> None:
         original_url = resolve_google_news_url(item["url"])
         final_url, publisher_image, publisher_summary = discover_article_metadata(original_url)
         article_url = final_url if "news.google.com" not in final_url else original_url
+
+        # Second allow-list check uses the actual decoded publisher URL. This prevents
+        # an unexpected source label from sneaking a non-preferred publisher through.
+        if "news.google.com" not in article_url and not preferred_article_host(article_url):
+            continue
+
         canonical_url = canonicalize_url(article_url)
         if canonical_url in seen_url:
             continue
@@ -557,9 +585,11 @@ def main() -> None:
 
     category_counts = Counter(item["tag"] for item in output)
     subcategory_counts = Counter(item["subtag"] for item in output if item["tag"] != "啦啦隊情報")
+    source_counts = Counter(item["source"] for item in output)
     print(f"wrote {len(output)} auto news items")
     print(f"main categories: {dict(category_counts)}")
     print(f"sports subcategories: {dict(subcategory_counts)}")
+    print(f"sources: {dict(source_counts)}")
 
 
 if __name__ == "__main__":
