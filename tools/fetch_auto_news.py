@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import difflib
 import email.utils
 import hashlib
 import html
@@ -23,18 +24,15 @@ SHEET_CSV = (
     "pub?output=csv&gid=0"
 )
 
+# The latest-intel feed is a cheerleader feed first. Do not seed it with generic
+# CPBL / MLB / basketball / volleyball queries, because those queries naturally
+# pull in a large amount of news that has nothing to do with cheerleaders.
 BASE_QUERIES = [
     "台灣 啦啦隊 女孩",
     "中職 啦啦隊 女孩",
     "職籃 啦啦隊 女孩",
     "韓籍 啦啦隊 台灣",
-    "Passion Sisters OR Rakuten Girls OR Fubon Angels OR Wing Stars",
-    "CPBL 中華職棒",
-    "MLB 台灣",
-    "大谷翔平 MLB",
-    "TPBL 台灣職業籃球大聯盟",
-    "PLG P. LEAGUE+",
-    "TVBL 台灣職業排球聯盟",
+    "Passion Sisters OR Rakuten Girls OR Fubon Angels OR Wing Stars OR Dragon Beauties OR Uni Girls",
 ]
 
 TRUSTED_HINTS = [
@@ -54,7 +52,8 @@ SPORT_RULES = [
 
 CHEER_TERMS = [
     "Passion Sisters", "Dragon Beauties", "Rakuten Girls", "Wing Stars",
-    "Uni Girls", "Fubon Angels", "樂天女孩", "啦啦隊", "應援團"
+    "Uni Girls", "Fubon Angels", "樂天女孩", "小龍女", "PS女孩",
+    "啦啦隊", "應援團", "應援女孩", "啦啦隊女神", "啦啦隊女孩"
 ]
 
 IMPORTANT_SPORT_TERMS = [
@@ -80,6 +79,8 @@ NAME_QUERY_BATCH_SIZE = 8
 MAX_NAME_QUERY_BATCHES = 24
 TEAM_QUERY_BATCH_SIZE = 6
 MAX_TEAM_QUERY_BATCHES = 8
+NEAR_DUPLICATE_RATIO = 0.76
+RELATED_DUPLICATE_RATIO = 0.66
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152.0 Safari/537.36"
 
 
@@ -143,7 +144,6 @@ def girl_name_matches(name: str, hay: str) -> bool:
         return False
     if is_cjk_name(name):
         return name in hay
-    # Latin stage names must match as a standalone token, not inside a publisher/domain name.
     return re.search(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", hay, flags=re.I) is not None
 
 
@@ -151,8 +151,7 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
     girl_names = [name for name in girl_names if usable_girl_name(name)]
     site_teams = [team.strip() for team in site_teams if team and team.strip()]
     queries = list(BASE_QUERIES)
-    # Query the actual names present in this website instead of relying only on generic sports feeds.
-    # Batching keeps the Google News workload bounded while still covering a broad part of the roster.
+
     for start in range(0, min(len(girl_names), NAME_QUERY_BATCH_SIZE * MAX_NAME_QUERY_BATCHES), NAME_QUERY_BATCH_SIZE):
         batch = girl_names[start:start + NAME_QUERY_BATCH_SIZE]
         if not batch:
@@ -160,8 +159,6 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
         names_expr = " OR ".join(f'"{name}"' for name in batch)
         queries.append(f"({names_expr}) 啦啦隊")
 
-    # Also search the teams actually represented by the site's roster. This catches
-    # cheerleader/team stories whose headline names the squad or club but omits a girl name.
     for start in range(0, min(len(site_teams), TEAM_QUERY_BATCH_SIZE * MAX_TEAM_QUERY_BATCHES), TEAM_QUERY_BATCH_SIZE):
         batch = site_teams[start:start + TEAM_QUERY_BATCH_SIZE]
         if not batch:
@@ -187,13 +184,64 @@ def parse_pubdate(value: str) -> datetime | None:
         return None
 
 
+def clean_title(title: str) -> str:
+    return re.sub(r"\s+-\s+[^-]{2,40}$", "", title).strip()
+
+
 def normalize_title(title: str) -> str:
-    title = re.sub(r"\s+-\s+[^-]{2,40}$", "", title)
+    title = clean_title(title)
+    title = re.sub(r"^(快訊|獨家|影|圖|新聞)[:：｜|\s-]*", "", title, flags=re.I)
     return re.sub(r"[\s\W_]+", "", title).lower()
 
 
-def clean_title(title: str) -> str:
-    return re.sub(r"\s+-\s+[^-]{2,40}$", "", title).strip()
+def title_similarity(left: str, right: str) -> float:
+    a = normalize_title(left)
+    b = normalize_title(right)
+    if not a or not b:
+        return 0.0
+    if a == b:
+        return 1.0
+    if min(len(a), len(b)) >= 12 and (a in b or b in a):
+        return 0.95
+    return difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def is_duplicate_story(item: dict, accepted: list[dict]) -> bool:
+    for previous in accepted:
+        ratio = title_similarity(item["title"], previous["title"])
+        if ratio >= NEAR_DUPLICATE_RATIO:
+            return True
+
+        current_people = set(item.get("matched_girls") or [])
+        previous_people = set(previous.get("matched_girls") or [])
+        same_people = bool(current_people & previous_people)
+        current_teams = set(item.get("matched_teams") or [])
+        previous_teams = set(previous.get("matched_teams") or [])
+        same_team = bool(current_teams & previous_teams)
+        same_day = item.get("dt") and previous.get("dt") and abs((item["dt"] - previous["dt"]).total_seconds()) <= 36 * 3600
+
+        # Different publishers often rewrite the same story with small headline changes.
+        # Only use the lower threshold when there is a shared person/team and a close publish time.
+        if ratio >= RELATED_DUPLICATE_RATIO and same_day and (same_people or same_team):
+            return True
+    return False
+
+
+def canonicalize_url(url: str) -> str:
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+        query = [
+            (key, value)
+            for key, value in query
+            if not key.lower().startswith("utm_")
+            and key.lower() not in {"fbclid", "gclid", "igshid", "ref", "source", "src"}
+        ]
+        clean_query = urllib.parse.urlencode(query, doseq=True)
+        path = re.sub(r"/+$", "", parsed.path) or "/"
+        return urllib.parse.urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), path, clean_query, ""))
+    except Exception:
+        return url
 
 
 def source_from_item(item: ET.Element) -> str:
@@ -204,6 +252,16 @@ def source_from_item(item: ET.Element) -> str:
     if " - " in title:
         return title.rsplit(" - ", 1)[-1].strip()
     return "新聞來源"
+
+
+def has_cheer_context(title: str, desc: str, matched_girls: list[str]) -> bool:
+    hay = f"{title} {desc}".lower()
+    if any(term.lower() in hay for term in CHEER_TERMS):
+        return True
+
+    # A roster girl's exact name is accepted even when a headline omits the word
+    # "啦啦隊"; generic team-name matches alone are never enough.
+    return bool(matched_girls)
 
 
 def classify_news(
@@ -219,6 +277,9 @@ def classify_news(
     if has_cheer_word:
         return "啦啦隊情報", (matched_girls[0] if matched_girls else (matched_teams[0] if matched_teams else "綜合"))
 
+    # From this point onward the caller has already required a roster-girl match.
+    # Sports taxonomy is kept for a story that genuinely involves a roster girl,
+    # but generic sports headlines can no longer enter the feed.
     sport_match = None
     for main_category, subcategory, terms in SPORT_RULES:
         if any(term.lower() in hay_lower for term in terms):
@@ -238,7 +299,7 @@ def classify_news(
                 sport_match = (main_category, subcategory)
                 break
 
-    if sport_match:
+    if sport_match and matched_girls:
         return sport_match
     if matched_girls:
         return "啦啦隊情報", matched_girls[0]
@@ -294,7 +355,6 @@ def resolve_google_news_url(url: str) -> str:
 
 
 def discover_article_metadata(url: str) -> tuple[str, str, str]:
-    """Return final article URL, publisher image and a short publisher-provided description."""
     try:
         data, final_url, content_type = fetch_bytes(url, timeout=15)
         if "html" not in content_type.lower() and b"<html" not in data[:1200].lower():
@@ -343,7 +403,6 @@ def sports_importance_score(item: dict) -> int:
     score = sum(4 for term in IMPORTANT_SPORT_TERMS if term.lower() in hay.lower())
     if any(h.lower() in item["source"].lower() for h in TRUSTED_HINTS):
         score += 3
-    # Headlines are more valuable than description-only keyword matches.
     score += sum(2 for term in IMPORTANT_SPORT_TERMS if term.lower() in item["title"].lower())
     return score
 
@@ -385,7 +444,6 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
             if sum(1 for x in selected_sports if x["subcategory"] == subcategory) >= limit:
                 break
 
-    # Final feed remains chronological, but sports volume is intentionally capped so cheerleader news is not drowned out.
     return sorted(selected_cheer + selected_sports, key=lambda item: item["dt"], reverse=True)
 
 
@@ -403,7 +461,6 @@ def main() -> None:
             print(f"query failed: {query}: {exc}")
         time.sleep(0.35)
 
-    seen_title: set[str] = set()
     candidates: list[dict] = []
     for item in pool:
         dt = parse_pubdate(item["pubDate"])
@@ -413,12 +470,16 @@ def main() -> None:
         hay = f"{item['title']} {item['description']}"
         matched_girls = [name for name in girl_names if girl_name_matches(name, hay)][:6]
         matched_teams = [team for team in site_teams if team in hay][:4]
+
+        if not has_cheer_context(item["title"], item["description"], matched_girls):
+            continue
+
         classified = classify_news(item["title"], item["description"], matched_girls, matched_teams)
         if not classified:
             continue
 
         norm_title = normalize_title(item["title"])
-        if not norm_title or norm_title in seen_title:
+        if not norm_title:
             continue
 
         source = item["source"]
@@ -435,18 +496,24 @@ def main() -> None:
             "matched_girls": matched_girls,
             "matched_teams": matched_teams,
         })
+
+        if is_duplicate_story(item, candidates):
+            continue
         candidates.append(item)
-        seen_title.add(norm_title)
 
     selected = select_candidates(candidates)
     seen_url: set[str] = set()
+    emitted_items: list[dict] = []
     output: list[dict] = []
 
     for item in selected:
         original_url = resolve_google_news_url(item["url"])
         final_url, publisher_image, publisher_summary = discover_article_metadata(original_url)
         article_url = final_url if "news.google.com" not in final_url else original_url
-        if article_url in seen_url:
+        canonical_url = canonicalize_url(article_url)
+        if canonical_url in seen_url:
+            continue
+        if is_duplicate_story(item, emitted_items):
             continue
 
         main_category = item["main_category"]
@@ -464,7 +531,7 @@ def main() -> None:
         if len(summary) < 20:
             summary = "本則為系統自動彙整之最新相關新聞，請點擊下方「查看原文」閱讀完整報導。"
 
-        uid = hashlib.sha1((article_url or item["title"]).encode("utf-8")).hexdigest()[:16]
+        uid = hashlib.sha1((canonical_url or item["title"]).encode("utf-8")).hexdigest()[:16]
         content = f"來源：{item['source']}\n\n新聞摘要：{summary}"
         output.append({
             "id": f"auto-{uid}",
@@ -479,7 +546,8 @@ def main() -> None:
             "auto": True,
             "img": image_url,
         })
-        seen_url.add(article_url)
+        seen_url.add(canonical_url)
+        emitted_items.append(item)
 
     output.sort(key=lambda x: x["date"], reverse=True)
 
