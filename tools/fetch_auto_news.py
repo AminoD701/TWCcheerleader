@@ -16,7 +16,10 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from googlenewsdecoder import new_decoderv1
+try:
+    from googlenewsdecoder import gnewsdecoder as decode_google_news
+except ImportError:  # backward compatibility with older package releases
+    from googlenewsdecoder import new_decoderv1 as decode_google_news
 
 SHEET_CSV = (
     "https://docs.google.com/spreadsheets/d/e/"
@@ -358,7 +361,7 @@ def resolve_google_news_url(url: str) -> str:
     if "news.google.com" not in url:
         return url
     try:
-        decoded = new_decoderv1(url, interval=0.2)
+        decoded = decode_google_news(url, interval=0.2)
         if isinstance(decoded, dict) and decoded.get("status") and decoded.get("decoded_url"):
             return str(decoded["decoded_url"])
     except Exception as exc:
