@@ -362,10 +362,19 @@ def resolve_google_news_url(url: str) -> str:
         return url
     try:
         decoded = decode_google_news(url, interval=0.2)
-        if isinstance(decoded, dict) and decoded.get("status") and decoded.get("decoded_url"):
-            return str(decoded["decoded_url"])
+        if isinstance(decoded, dict):
+            # googlenewsdecoder <=0.1.x used "status"; newer releases use "success".
+            decoded_ok = bool(decoded.get("success", decoded.get("status", False)))
+            decoded_url = decoded.get("decoded_url")
+            if decoded_ok and decoded_url:
+                return str(decoded_url)
+            message = decoded.get("message")
+            if message:
+                print(f"decode failed: {message}: {url}")
+        else:
+            print(f"decode failed: unexpected decoder result {type(decoded).__name__}: {url}")
     except Exception as exc:
-        print(f"decode failed: {exc}")
+        print(f"decode failed: {exc}: {url}")
     return url
 
 
