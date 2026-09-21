@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install news URL decoder
-        run: python -m pip install --disable-pip-version-check googlenewsdecoder
+        run: python -m pip install --disable-pip-version-check googlenewsdecoder==0.2.1
       - name: Fetch latest cheerleader news
         run: python tools/run_auto_news.py
       - name: Write news refresh metadata
