@@ -2253,8 +2253,34 @@
                                 console.warn('Fresh public Events refresh failed; using cached Events as fallback.', e);
                             }
 
-                            if (typeof window.renderContent === 'function' && (currentMode === 'news' || currentMode === 'events')) {
-                                window.renderContent();
+                            // GIRLS_ALWAYS_REFRESH_V1
+                            // Girl roster changes (including 已離隊) should be visible immediately
+                            // instead of waiting for the one-hour core cache to expire.
+                            try {
+                                const gt = Date.now();
+                                const girlsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${gt}`;
+                                const freshGirls = await window.CheerData.load('girls-sheet', () => fetchCSV(`${girlsBaseUrl}&gid=0&t=${gt}`));
+                                if (Array.isArray(freshGirls) && freshGirls.some(i => i.realname)) {
+                                    dbGirls = freshGirls.filter(i => i.realname);
+                                    window.dbGirls = dbGirls;
+                                    buildGirlMap();
+
+                                    // Keep the existing core cache coherent with the fresh roster.
+                                    try {
+                                        const currentCache = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+                                        if (currentCache) {
+                                            currentCache.dbGirls = dbGirls;
+                                            currentCache.timestamp = Date.now();
+                                            localStorage.setItem(CACHE_KEY, JSON.stringify(currentCache));
+                                        }
+                                    } catch (_) {}
+                                }
+                            } catch(e) {
+                                console.warn('Fresh Girls refresh failed; using cached Girls as fallback.', e);
+                            }
+
+                            if (typeof window.renderContent === 'function' && (currentMode === 'news' || currentMode === 'events' || currentMode === 'girls')) {
+                                window.renderContent(true);
                             }
                             return;
                         }
@@ -4906,6 +4932,70 @@
         }
 
         // =========================================================================
+        // 女孩現役／歷屆狀態
+        // =========================================================================
+        function isFormerGirl(record) {
+            const note = String(record?.note || record?.['備註'] || record?.備註 || "").trim();
+            const status = String(record?.status || "").trim().toLowerCase();
+            return /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(note)
+                || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
+        }
+
+        function renderFormerRosterForCurrentTeam() {
+            let panel = document.getElementById('former-roster');
+            const grid = document.getElementById('grid-container');
+            if (!grid) return;
+
+            if (!panel) {
+                panel = document.createElement('details');
+                panel.id = 'former-roster';
+                panel.className = 'former-roster';
+                grid.insertAdjacentElement('afterend', panel);
+            }
+
+            if (currentMode !== 'girls' || !currentTeam || currentTeam === '全部啦啦隊') {
+                panel.style.display = 'none';
+                return;
+            }
+
+            const seen = new Set();
+            const formerRows = dbGirls.filter(g => {
+                if (!isFormerGirl(g)) return false;
+                if ((g.team || "").trim() !== currentTeam) return false;
+                if (currentSport !== '全部' && !(g.sport || "").includes(currentSport)) return false;
+                const key = g.uid || `${(g.realname || "").trim()}|${(g.nickname || "").trim()}`;
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+
+            if (!formerRows.length) {
+                panel.style.display = 'none';
+                panel.innerHTML = '';
+                return;
+            }
+
+            panel.style.display = 'block';
+            panel.innerHTML = `
+                <summary>
+                    <span>歷屆成員</span>
+                    <span class="former-roster__hint">${formerRows.length} 位已離隊成員</span>
+                </summary>
+                <div class="former-roster__body">
+                    <div class="former-roster__intro">以下為曾效力 ${currentTeam}、目前已離隊的成員。上方女孩圖鑑僅顯示目前成員。</div>
+                    <div class="former-roster__list">
+                        ${formerRows.map(g => {
+                            const name = (g.nickname || g.realname || '未命名成員').trim();
+                            const realname = (g.realname || '').trim();
+                            const note = String(g.note || g['備註'] || g.備註 || '已離隊').trim();
+                            const id = String(g.uid || g.realname || g.nickname || '').replace(/'/g, "\\'");
+                            return `<button type="button" class="former-roster__item" onclick="window.openProfile('${id}')"><strong>${name}</strong><small>${realname && realname !== name ? realname + ' · ' : ''}${note}</small></button>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+        }
+
+        // =========================================================================
         // 女孩卡片網格渲染
         // =========================================================================
         function renderGirls() {
@@ -4917,6 +5007,7 @@
             const sort = document.getElementById('sortFilter').value;
 
             let result = dbGirls.filter(c => {
+                if (isFormerGirl(c)) return false;
                 const ms = currentSport === "全部" || (c.sport || "").includes(currentSport);
                 const mt = currentTeam === "全部啦啦隊" || (c.team || "").trim() === currentTeam;
                 const mS = search === "" || (c.nickname || "").toLowerCase().includes(search) || (c.realname || "").toLowerCase().includes(search);
@@ -5143,6 +5234,7 @@
             }
 
             container.innerHTML = htmlContent;
+            renderFormerRosterForCurrentTeam();
         }
 
         // =========================================================================
