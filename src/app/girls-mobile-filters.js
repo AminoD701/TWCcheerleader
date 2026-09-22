@@ -117,6 +117,7 @@ function favoriteIds() {
 }
 
 function matchesSharedGirlFilters(girl, state) {
+  if (window.CheerGirlsDefaultSort?.isFormer?.(girl) || window.cheerGirlStatus?.isFormer?.(girl)) return false;
   const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   const role = document.getElementById('roleFilter')?.value || 'all';
   const nat = document.getElementById('natFilter')?.value || 'all';
