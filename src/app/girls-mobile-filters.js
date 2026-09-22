@@ -7,6 +7,7 @@ let routeObserver;
 let savedDisplayLimit = null;
 let sheetOwnsScrollLock = false;
 let favoritesRenderInFlight = false;
+let formerRosterObserver;
 
 function isMobile() { return matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches; }
 function legacyState() { try { return window.CheerLegacyState?.snapshot?.() || {}; } catch (_) { return {}; } }
@@ -37,6 +38,18 @@ function installStyles() {
       .girls-filter-option.active{border-color:var(--accent,#ff4757)}
       .girls-filter-option small{color:var(--text-sub,#97a0ad);font-size:12px}
       body.keyboard-open .girls-mobile-filterbar{position:static}
+    }
+    .former-roster{margin:18px 0 6px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.025);overflow:hidden}
+    .former-roster[hidden]{display:none!important}
+    .former-roster summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-weight:900;color:#fff}
+    .former-roster summary::-webkit-details-marker{display:none}.former-roster summary::after{content:'＋';font-size:18px}.former-roster[open] summary::after{content:'−'}
+    .former-roster__hint{font-size:12px;color:var(--text-sub,#97a0ad);font-weight:700}
+    .former-roster__body{border-top:1px solid rgba(255,255,255,.08);padding:10px 14px 14px}
+    .former-roster__intro{font-size:12px;color:var(--text-sub,#97a0ad);line-height:1.6;margin:2px 0 10px}
+    .former-roster__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+    .former-roster__item{min-height:54px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:#151920;color:#fff;padding:9px 11px;text-align:left;cursor:pointer}
+    .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px}
+    @media(max-width:767px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:1fr 1fr}}
     }`;
   document.head.append(style);
 }
@@ -114,6 +127,73 @@ function favoriteIds() {
     const values = window.CheerStorage?.readArray?.('cheer_favorites') || JSON.parse(localStorage.getItem('cheer_favorites') || '[]');
     return new Set(Array.isArray(values) ? values : []);
   } catch (_) { return new Set(); }
+}
+
+function formerGirlsForTeam(team, state) {
+  if (!team || team === '全部啦啦隊') return [];
+  const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
+  const isFormer = girl => window.CheerGirlsDefaultSort?.isFormer?.(girl) || window.cheerGirlStatus?.isFormer?.(girl);
+  const seen = new Set();
+  return girls.filter(girl => {
+    if (!isFormer(girl)) return false;
+    if ((girl.team || '').trim() !== team) return false;
+    if (state.currentSport && state.currentSport !== '全部' && !(girl.sport || '').includes(state.currentSport)) return false;
+    const uid = girl.uid || `${(girl.realname || '').trim()}|${(girl.nickname || '').trim()}`;
+    if (seen.has(uid)) return false;
+    seen.add(uid);
+    return true;
+  });
+}
+
+function ensureFormerRoster() {
+  const grid = document.getElementById('grid-container');
+  if (!grid) return null;
+  let panel = document.getElementById('former-roster');
+  if (panel) return panel;
+  panel = document.createElement('details');
+  panel.id = 'former-roster';
+  panel.className = 'former-roster';
+  panel.hidden = true;
+  grid.insertAdjacentElement('afterend', panel);
+  panel.addEventListener('click', event => {
+    const btn = event.target.closest('[data-former-index]');
+    if (!btn) return;
+    const state = legacyState();
+    const rows = formerGirlsForTeam(state.currentTeam, state);
+    const girl = rows[Number(btn.dataset.formerIndex)];
+    if (girl && typeof window.openProfile === 'function') window.openProfile(girl);
+  });
+  return panel;
+}
+
+function renderFormerRoster() {
+  const panel = ensureFormerRoster();
+  if (!panel || !onGirlsRoute()) {
+    if (panel) panel.hidden = true;
+    return;
+  }
+  const state = legacyState();
+  const team = state.currentTeam || '全部啦啦隊';
+  const rows = formerGirlsForTeam(team, state);
+  if (team === '全部啦啦隊' || !rows.length) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  panel.innerHTML = `
+    <summary>
+      <span>歷屆成員</span>
+      <span class="former-roster__hint">${rows.length} 位已離隊成員</span>
+    </summary>
+    <div class="former-roster__body">
+      <div class="former-roster__intro">這裡保留曾效力 ${team}、目前已離隊的成員紀錄；目前成員仍以上方女孩名單為準。</div>
+      <div class="former-roster__list">${rows.map((girl, index) => {
+        const name = (girl.nickname || girl.realname || '未命名成員').trim();
+        const realname = (girl.realname || '').trim();
+        const note = String(girl.note || girl['備註'] || girl.備註 || '已離隊').trim();
+        return `<button type="button" class="former-roster__item" data-former-index="${index}"><strong>${name}</strong><small>${realname && realname !== name ? `${realname} · ` : ''}${note}</small></button>`;
+      }).join('')}</div>
+    </div>`;
 }
 
 function matchesSharedGirlFilters(girl, state) {
@@ -254,6 +334,7 @@ function syncUI() {
   team.classList.toggle('active', state.currentTeam && state.currentTeam !== '全部啦啦隊');
   fav.classList.toggle('active', favoritesOnly);
   applyFavorites();
+  renderFormerRoster();
 }
 
 function toggleFavorites() {
@@ -310,6 +391,8 @@ function ensureUI() {
   observer.observe(grid, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   routeObserver = new MutationObserver(syncUI);
   routeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-app-mode'] });
+  formerRosterObserver = new MutationObserver(() => { if (onGirlsRoute()) renderFormerRoster(); });
+  formerRosterObserver.observe(grid, { childList: true, subtree: false });
   syncUI();
 }
 
