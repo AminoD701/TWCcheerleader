@@ -5,6 +5,9 @@ import { readFile } from 'node:fs/promises';
 test('girl default sort declares requested category priority', async () => {
   const source = await readFile('src/app/girls-default-sort.js', 'utf8');
   assert.match(source, /MASCOT_RE/);
+  assert.match(source, /FORMER_RE/);
+  assert.match(source, /isFormer/);
+  assert.match(source, /filter\(girl => !isFormer\(girl\)\)/);
   assert.match(source, /TRAINEE_RE/);
   assert.match(source, /return 4/);
   assert.match(source, /return 2/);
