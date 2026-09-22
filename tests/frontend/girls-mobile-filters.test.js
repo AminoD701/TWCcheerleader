@@ -59,3 +59,12 @@ test('mobile filter module is loaded by navigation and precached by service work
   assert.match(sw, /src\/app\/girls-mobile-filters\.js/);
   assert.match(sw, /CACHE_PREFIX\}v5/);
 });
+
+
+test('team view exposes former roster history section', async () => {
+  const source = await readFile('src/app/girls-mobile-filters.js', 'utf8');
+  assert.match(source, /former-roster/);
+  assert.match(source, /歷屆成員/);
+  assert.match(source, /formerGirlsForTeam/);
+  assert.match(source, /CheerGirlsDefaultSort\?\.isFormer/);
+});
