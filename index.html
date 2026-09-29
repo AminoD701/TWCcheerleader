@@ -2132,6 +2132,28 @@
             }
         }
 
+        // Keep Match Center available when the published Sheet is temporarily slow
+        // or a browser has cached an empty response. The bundled snapshot is only
+        // used when the live feed contains no CPBL games.
+        async function loadMatchRows(baseUrl, timestamp) {
+            const liveRows = await window.CheerData.load('matches-sheet', () => fetchCSV(`${baseUrl}&gid=92509162&t=${timestamp}`));
+            if (liveRows.some(row => row.league === 'CPBL')) return liveRows;
+            try {
+                const response = await fetch(`data/matches-snapshot.json?t=${timestamp}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`Match snapshot HTTP ${response.status}`);
+                const snapshot = await response.json();
+                if (Array.isArray(snapshot) && snapshot.some(row => row.league === 'CPBL')) return snapshot;
+            } catch (error) {
+                console.warn('Match snapshot unavailable.', error);
+            }
+            return liveRows;
+        }
+
+        function parseMatchRows(rows) {
+            return rows.map(match => ({ ...match, safeDate: parseDateFlexible(match.date) }))
+                .filter(match => match.safeDate);
+        }
+
         window.refreshLatestNews = async function(forceRender = false) {
             if (window.__newsRefreshInFlight) return;
             window.__newsRefreshInFlight = true;
@@ -2178,7 +2200,7 @@
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = []; // news is never trusted from localStorage
 
-                        dbMatches = parsed.dbMatches || []; 
+                        dbMatches = parsed.dbMatches || [];
                         dbThemes = parsed.dbThemes || []; 
                         
                         if (dbGirls.length > 0) {
@@ -2186,6 +2208,22 @@
                             buildGirlMap();
                             init();
                             enableEnterButton();
+
+                            // Refresh matches even on a fast cached start. A previously
+                            // empty match cache must not hide the live schedule for an hour.
+                            try {
+                                const mt = Date.now();
+                                const matchBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${mt}`;
+                                const refreshedMatches = parseMatchRows(await loadMatchRows(matchBaseUrl, mt));
+                                if (refreshedMatches.some(match => match.league === 'CPBL')) {
+                                    dbMatches = refreshedMatches;
+                                    parsed.dbMatches = dbMatches;
+                                    try { localStorage.setItem(CACHE_KEY, JSON.stringify(parsed)); } catch (_) {}
+                                    if (currentMode === 'matches' && window.currentMatchLeague !== '全部') window.renderMatchCalendar(true);
+                                }
+                            } catch (error) {
+                                console.warn('Match Center refresh failed; using cached matches.', error);
+                            }
 
                             // 核心資料可用快取，但新聞每次進站都重新抓「人工 Sheet + 自動新聞 JSON」。
                             // 不再相信 localStorage 裡的 dbNews，避免新聞頁永久停在舊資料。
@@ -2297,7 +2335,7 @@
                     window.CheerData.load('events-sheet', () => fetchCSV(`${baseUrl}&gid=925411186&t=${t}`)),
                     window.CheerData.load('schedules-sheet', () => fetchCSV(`${baseUrl}&gid=1702657458&t=${t}`)),
                     window.CheerData.load('news-sheet', () => fetchCSV(`${baseUrl}&gid=417186374&t=${t}`)),
-                    window.CheerData.load('matches-sheet', () => fetchCSV(`${baseUrl}&gid=92509162&t=${t}`)),
+                    loadMatchRows(baseUrl, t),
                     window.CheerData.load('themes-sheet', () => fetchCSV(`${baseUrl}&gid=547736461&t=${t}`)),
                     window.CheerData.load('auto-news', () => fetch(`data/auto-news.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`auto-news HTTP ${r.status}`); return r.json(); })),
                     window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
@@ -2341,7 +2379,7 @@
                     const tag = window.normalizeNewsCategory(n.tag || n['標籤'] || n['分類'] || '未分類');
                     return { ...n, tag, subtag: window.normalizeNewsSubcategory(n, tag) };
                 });
-                if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
+                if(matchesData) dbMatches = parseMatchRows(matchesData);
                 if(themesData) dbThemes = themesData.map(t => ({ ...t, safeDate: parseDateFlexible(t.date) })).filter(t => t.safeDate);
                 
                 let flat = [];
@@ -2382,7 +2420,6 @@
 
                 // dbNews already merged above; do not redeclare const variables here.
 
-                if(matchesData) dbMatches = matchesData.map(m => ({ ...m, safeDate: parseDateFlexible(m.date) })).filter(m => m.safeDate);
 
                 buildGirlMap(); 
                 init(); 
