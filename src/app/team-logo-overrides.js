@@ -10,7 +10,7 @@
     {
       names: ['Si-ster', 'Si-ster 可莉女孩', 'Si-ster 可利女孩', 'SiSter', 'SI-STER', '可利工程師', '可利工程師 Si-ster'],
       teamName: '可利工程師',
-      logo: './images/koli_engineer_logo_transparent.svg?v=1'
+      logo: './images/Collie_Engineers_logo.png?v=1'
     }
   ];
 
