@@ -12,6 +12,10 @@ on:
       - 'tools/write_auto_news_meta.py'
       - '.github/workflows/update-auto-news.yml'
 
+concurrency:
+  group: update-auto-news
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
