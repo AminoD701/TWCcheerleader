@@ -305,11 +305,10 @@ def has_cheer_context(
     false positives from entertainment, history, or unrelated sports articles.
     """
     hay = f"{title} {desc}".lower()
-    if any(term.lower() in hay for term in CHEER_TERMS):
-        return True
-    if matched_teams:
-        return True
-    return False
+    # For the cheer feed, require an explicit cheer/support context. Team names
+    # alone are handled by the sports classifiers and must not turn an unrelated
+    # person-name collision into cheerleader news.
+    return any(term.lower() in hay for term in CHEER_TERMS)
 
 
 def classify_news(
