@@ -292,11 +292,24 @@ def preferred_article_host(url: str) -> bool:
         return False
 
 
-def has_cheer_context(title: str, desc: str, matched_girls: list[str]) -> bool:
+def has_cheer_context(
+    title: str,
+    desc: str,
+    matched_girls: list[str],
+    matched_teams: list[str],
+) -> bool:
+    """Require real cheer/team context; a roster-name hit alone is not enough.
+
+    Many cheerleader nicknames are ordinary words or names (for example 小李子,
+    Ella, 大哥). Treating a bare name match as proof of a cheer story creates
+    false positives from entertainment, history, or unrelated sports articles.
+    """
     hay = f"{title} {desc}".lower()
     if any(term.lower() in hay for term in CHEER_TERMS):
         return True
-    return bool(matched_girls)
+    if matched_teams:
+        return True
+    return False
 
 
 def classify_news(
@@ -316,8 +329,8 @@ def classify_news(
         if any(term.lower() in hay_lower for term in terms):
             return main_category, subcategory
 
-    if matched_girls:
-        return "啦啦隊情報", matched_girls[0]
+    # A roster-name match by itself is deliberately not enough to classify a
+    # story as cheerleader news. The article must also carry cheer/team context.
     return None
 
 
@@ -515,7 +528,9 @@ def main() -> None:
 
         # Cheer stories need cheer context/name. Sports stories are allowed without a
         # cheer match, but only because the source/query set is now narrowly curated.
-        if main_category == "啦啦隊情報" and not has_cheer_context(item["title"], item["description"], matched_girls):
+        if main_category == "啦啦隊情報" and not has_cheer_context(
+            item["title"], item["description"], matched_girls, matched_teams
+        ):
             continue
 
         norm_title = normalize_title(item["title"])
