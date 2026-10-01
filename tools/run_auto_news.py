@@ -184,8 +184,18 @@ def strict_classify_news(
     return None
 
 
-def strict_has_cheer_context(title: str, desc: str, matched_girls: list[str]) -> bool:
-    return strict_cheer_context(title, desc, [name for name in matched_girls if safe_usable_girl_name(name)], [])
+def strict_has_cheer_context(
+    title: str,
+    desc: str,
+    matched_girls: list[str],
+    matched_teams: list[str] | None = None,
+) -> bool:
+    return strict_cheer_context(
+        title,
+        desc,
+        [name for name in matched_girls if safe_usable_girl_name(name)],
+        matched_teams or [],
+    )
 
 
 core.classify_news = strict_classify_news
