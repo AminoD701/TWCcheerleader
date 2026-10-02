@@ -122,24 +122,13 @@ def strict_cheer_context(
     if contains_any(title, OFF_TOPIC_TITLE_TERMS):
         return False
 
+    # A roster-name collision is never enough. Cheer news must explicitly
+    # mention cheerleading/support context (啦啦隊、應援、Fubon Angels, etc.).
+    # This intentionally favors precision over recall so K-pop stars, brands,
+    # historical figures, and ordinary words that share a girl nickname do not
+    # leak into the public cheer feed.
     hay = f"{title} {desc}"
-    if contains_any(hay, tuple(core.CHEER_TERMS)):
-        return True
-
-    title_girls = [name for name in matched_girls if girl_is_in_title(name, title)]
-    if not title_girls:
-        return False
-
-    # A long/exact roster name in the headline is a strong signal for individual
-    # entertainment stories. Short aliases need an extra cheer cue.
-    strong_name = any(
-        (len(re.sub(r"\s+", "", name)) >= 3 if core.is_cjk_name(name) else len(name) >= 4)
-        for name in title_girls
-    )
-    if strong_name:
-        return True
-
-    return contains_any(hay, CHEER_SUPPORT_TERMS) or bool(matched_teams)
+    return contains_any(hay, tuple(core.CHEER_TERMS))
 
 
 def strict_sport_match(title: str, category_terms: tuple[str, ...]) -> bool:
