@@ -115,8 +115,10 @@ def load_real_name_set() -> set[str]:
             if not safe_usable_girl_name(value):
                 continue
             # Standalone no-context matching is intentionally limited to
-            # distinctive full names; short 2-character names still need cheer context.
-            if core.is_cjk_name(value) and len(value) < 3:
+            # distinctive CJK full names (e.g. 李多慧、金娜妍). Latin values such
+            # as Momo/Ella/Wendy are too collision-prone even if the sheet happens
+            # to store them in realName, so they still require explicit cheer context.
+            if not core.is_cjk_name(value) or len(value) < 3:
                 continue
             names.add(value)
         return names
