@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 import re
 
 import fetch_auto_news as core
@@ -102,6 +104,30 @@ def safe_usable_girl_name(name: str) -> bool:
 core.usable_girl_name = safe_usable_girl_name
 
 
+def load_real_name_set() -> set[str]:
+    """Load canonical real names separately from nicknames/aliases."""
+    try:
+        raw = core.fetch_text(core.SHEET_CSV)
+        rows = csv.DictReader(io.StringIO(raw))
+        names: set[str] = set()
+        for row in rows:
+            value = (row.get("realName") or row.get("realname") or row.get("姓名") or "").strip()
+            if not safe_usable_girl_name(value):
+                continue
+            # Standalone no-context matching is intentionally limited to
+            # distinctive full names; short 2-character names still need cheer context.
+            if core.is_cjk_name(value) and len(value) < 3:
+                continue
+            names.add(value)
+        return names
+    except Exception as exc:
+        print(f"real-name roster load failed: {exc}")
+        return set()
+
+
+REAL_NAME_SET = load_real_name_set()
+
+
 def girl_is_in_title(name: str, title: str) -> bool:
     if not safe_usable_girl_name(name):
         return False
@@ -122,13 +148,19 @@ def strict_cheer_context(
     if contains_any(title, OFF_TOPIC_TITLE_TERMS):
         return False
 
-    # A roster-name collision is never enough. Cheer news must explicitly
-    # mention cheerleading/support context (啦啦隊、應援、Fubon Angels, etc.).
-    # This intentionally favors precision over recall so K-pop stars, brands,
-    # historical figures, and ordinary words that share a girl nickname do not
-    # leak into the public cheer feed.
     hay = f"{title} {desc}"
-    return contains_any(hay, tuple(core.CHEER_TERMS))
+    if contains_any(hay, tuple(core.CHEER_TERMS)):
+        return True
+
+    # Canonical full real names are substantially less collision-prone than
+    # nicknames. Allow an exact real-name headline match even when the article
+    # omits words such as "啦啦隊" or "應援". Nicknames/aliases still require
+    # explicit cheer context, so Momo/Sana/Ella-style collisions remain blocked.
+    for name in matched_girls:
+        if name in REAL_NAME_SET and girl_is_in_title(name, title):
+            return True
+
+    return False
 
 
 def strict_sport_match(title: str, category_terms: tuple[str, ...]) -> bool:
