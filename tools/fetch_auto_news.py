@@ -31,12 +31,21 @@ SHEET_CSV = (
 # entertainment/sports desks the site owner actually wants instead of the whole
 # Google News sports firehose.
 BASE_QUERIES = [
+    # Cheer / entertainment coverage
     "site:setn.com 啦啦隊",
     "site:setn.com 娛樂 啦啦隊",
     "site:setn.com 體育 啦啦隊",
     "site:ctwant.com 啦啦隊",
     "site:ctwant.com 娛樂 啦啦隊",
     "site:ctwant.com 體育 啦啦隊",
+    "site:ettoday.net 啦啦隊",
+    "site:udn.com 啦啦隊",
+    "site:ltn.com.tw 啦啦隊",
+    "site:nownews.com 啦啦隊",
+    "site:tvbs.com.tw 啦啦隊",
+    "site:tsna.com 啦啦隊",
+
+    # Sports coverage
     "site:setn.com 中職 CPBL",
     "site:setn.com MLB 大聯盟",
     "site:setn.com TPBL OR PLG OR 職籃",
@@ -45,6 +54,16 @@ BASE_QUERIES = [
     "site:ctwant.com MLB 大聯盟",
     "site:ctwant.com TPBL OR PLG OR 職籃",
     "site:ctwant.com TVBL OR 職排",
+    "site:ettoday.net 中職 CPBL",
+    "site:ettoday.net TPBL OR PLG OR 職籃",
+    "site:udn.com 中職 CPBL",
+    "site:udn.com TPBL OR PLG OR 職籃",
+    "site:ltn.com.tw 中職 CPBL",
+    "site:ltn.com.tw MLB 大聯盟",
+    "site:nownews.com 中職 CPBL",
+    "site:nownews.com TPBL OR PLG OR 職籃",
+    "site:tsna.com 中職 CPBL",
+    "site:tsna.com TPBL OR PLG OR 職籃",
     "site:today.line.me 中職 CPBL",
 ]
 
@@ -52,12 +71,24 @@ BASE_QUERIES = [
 PREFERRED_SOURCE_HINTS = [
     "三立", "SETN", "三立新聞網", "娛樂星聞",
     "CTWANT", "周刊王",
+    "ETtoday", "ETtoday新聞雲",
+    "聯合新聞網", "聯合報", "UDN",
+    "自由時報", "自由體育",
+    "NOWnews", "NOWnews今日新聞", "今日新聞",
+    "TVBS", "TVBS新聞網",
+    "TSNA", "TSNA體育新聞團隊",
     "LINE TODAY", "LINE TODAY台灣", "LINE Today",
 ]
 
 PREFERRED_HOSTS = (
     "setn.com",
     "ctwant.com",
+    "ettoday.net",
+    "udn.com",
+    "ltn.com.tw",
+    "nownews.com",
+    "tvbs.com.tw",
+    "tsna.com",
     "today.line.me",
 )
 
