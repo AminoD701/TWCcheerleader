@@ -5101,23 +5101,15 @@
         }
 
         result.sort((a,b) => {
-                if(sort === 'default') { 
-                    const getNatWeight = (nat) => {
-                        if ((nat || "").includes("韓國")) return 1;
-                        if ((nat || "").includes("日本")) return 2;
-                        if ((nat || "").includes("臺灣") || (nat || "").includes("台灣")) return 4;
-                        return 3;
-                    };
-                    let wA = getNatWeight(a.nat); let wB = getNatWeight(b.nat);
-                    if (wA !== wB) return wA - wB;
-
-                    const isLastA = ((a.note || a['備註'] || a.備註 || "").includes('練習生') || (a.note || a['備註'] || a.備註 || "").includes('培訓生') || !a.num || a.num === "-") ? 1 : 0;
-                    const isLastB = ((gB=b).note || gB['備註'] || gB.備註 || "").includes('練習生') || (gB.note || gB['備註'] || gB.備註 || "").includes('培訓生') || !gB.num || gB.num === "-" ? 1 : 0;
-                    if (isLastA !== isLastB) return isLastA - isLastB;
-
-                    let nA = parseInt(String((a.mN||[a.num])[0] || "").replace(/#/g, '')) || 999;
-                    let nB = parseInt(String((b.mN||[b.num])[0] || "").replace(/#/g, '')) || 999;
-                    return nA - nB;
+                if(sort === 'default') {
+                    // 統一使用女孩圖鑑分類排序：
+                    // 外籍啦啦隊 > 台籍啦啦隊 > 練習生 > 特殊身分 > 吉祥物
+                    if (window.CheerGirlsDefaultSort && typeof window.CheerGirlsDefaultSort.categoryRank === 'function') {
+                        const rankA = window.CheerGirlsDefaultSort.categoryRank(a);
+                        const rankB = window.CheerGirlsDefaultSort.categoryRank(b);
+                        if (rankA !== rankB) return rankA - rankB;
+                    }
+                    return 0;
                 }
                 if(sort === 'birthdayAsc') return parseGirlDOB(a.dob).mmdd - parseGirlDOB(b.dob).mmdd;
                 if(sort === 'ageAsc') return parseGirlDOB(b.dob).num - parseGirlDOB(a.dob).num; 
