@@ -1617,6 +1617,38 @@
 #games-container .twc-game-copy>span{color:#a4adbb;font-size:12px;line-height:1.5}
 #games-container .twc-game-arrow{font-size:19px;color:#b9a8e6;align-self:center}
 @media(max-width:600px){#games-container .twc-games-tiles{grid-template-columns:1fr;gap:10px}#games-container .twc-game-tile{min-height:96px;padding:15px;gap:13px}#games-container .twc-game-copy strong{font-size:17px}#games-container .twc-game-icon{width:43px;height:43px}#games-container .twc-game-icon svg{width:24px;height:24px}}
+
+/* Editorial game lobby, responsive and intentionally lightweight. */
+#games-container .twc-games-home{max-width:1100px}
+#games-container .twc-games-heading{position:relative;margin:10px 0 25px;padding:0 0 12px;border-bottom:1px solid rgba(171,151,238,.17)}
+#games-container .twc-games-heading:after{content:'';position:absolute;bottom:-1px;left:0;width:88px;height:2px;background:#9c80da}
+#games-container .twc-games-tiles{display:grid;grid-template-columns:1.12fr 1fr;grid-template-rows:repeat(3,minmax(105px,auto));gap:12px}
+#games-container .twc-game-tile{position:relative;overflow:hidden;min-height:105px;padding:20px 23px;border-radius:16px;background:linear-gradient(115deg,#1c202c,#141820);transition:transform .18s ease,border-color .18s ease,background .18s ease}
+#games-container .twc-game-tile:hover{transform:translateY(-2px);border-color:#8c79bd}
+#games-container .twc-game-tile:focus-visible{outline:2px solid #c5b5ef;outline-offset:3px}
+#games-container .twc-game-tile:before{content:'';position:absolute;right:-36px;top:-65px;width:175px;height:210px;transform:rotate(24deg);background:linear-gradient(90deg,transparent,rgba(163,131,224,.08),transparent);pointer-events:none}
+#games-container .twc-game-tile:after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:#a58be8;transition:width .2s}
+#games-container .twc-game-tile:hover:after{width:100%}
+#games-container .twc-game-feature{grid-row:span 3;min-height:365px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:20px;background:radial-gradient(circle at 90% 17%,rgba(134,101,200,.28),transparent 40%),linear-gradient(135deg,#332547,#191923 80%);border-color:#7660a7}
+#games-container .twc-game-feature .twc-game-icon{width:70px;height:70px;border-color:#71579f;background:rgba(18,16,28,.3)}
+#games-container .twc-game-feature .twc-game-icon svg{width:37px;height:37px}
+#games-container .twc-game-feature .twc-game-copy{flex:0}
+#games-container .twc-game-feature .twc-game-copy strong{font-size:clamp(25px,3vw,32px)}
+#games-container .twc-game-feature .twc-game-copy>span{font-size:14px}
+#games-container .twc-game-feature .twc-game-arrow{position:absolute;bottom:22px;right:25px;align-self:auto}
+#games-container .twc-game-tile:not(.twc-game-feature) .twc-game-copy strong{font-size:20px}
+#games-container .twc-game-arrow{border:1px solid #6b5b8a;border-radius:100%;width:33px;height:33px;display:grid;place-items:center;font-size:18px}
+@media(max-width:700px){
+ #games-container .twc-games-tiles{grid-template-columns:1fr;grid-template-rows:auto}
+ #games-container .twc-game-feature{grid-row:auto;min-height:194px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;padding:20px}
+ #games-container .twc-game-feature .twc-game-icon{width:50px;height:50px}
+ #games-container .twc-game-feature .twc-game-icon svg{width:27px;height:27px}
+ #games-container .twc-game-feature .twc-game-copy strong{font-size:22px}
+ #games-container .twc-game-tile{min-height:103px;padding:17px}
+ #games-container .twc-game-feature .twc-game-arrow{bottom:18px;right:15px}
+ #games-container .twc-game-tile:not(.twc-game-feature) .twc-game-copy strong{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){#games-container .twc-game-tile,#games-container .twc-game-tile:after{transition:none}}
 </style>
 </head>
 <body class="no-scroll">
@@ -8518,7 +8550,7 @@ window.renderMinigameStart = function() {
         };
     </script>
     <script defer data-game-app-enhancements="1" src="./src/app/game-app-enhancements.js?v=13"></script>
-    <script defer src="./src/app/recognition-game.js?v=7"></script>
+    <script defer src="./src/app/recognition-game.js?v=8"></script>
     <script type="module" src="./src/app/navigation.js?v=16"></script>
     <script type="module" src="./src/app/season-spotlight.js?v=2"></script>
 
