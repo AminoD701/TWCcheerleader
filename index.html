@@ -5016,9 +5016,20 @@
         // 女孩現役／歷屆狀態
         // =========================================================================
         function isFormerGirl(record) {
+            const departureSeason = String(
+                record?.departure_season
+                || record?.departureseason
+                || record?.departureSeason
+                || record?.['離隊賽季']
+                || ''
+            ).trim();
             const note = String(record?.note || record?.['備註'] || record?.備註 || "").trim();
             const status = String(record?.status || "").trim().toLowerCase();
-            return /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(note)
+
+            // departure_season is authoritative: any non-empty value means the
+            // member has left the active roster and belongs in the history archive.
+            return Boolean(departureSeason)
+                || /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(note)
                 || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
         }
 
