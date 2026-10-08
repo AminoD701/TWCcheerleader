@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="啦啦隊資料庫">
     <link rel="apple-touch-icon" href="baseball.png">
-    <script defer src="pwa.js"></script>
+    <script defer src="pwa.js?v=3"></script>
     <meta name="theme-color" content="#111418">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,7 +30,6 @@
     <meta name="apple-mobile-web-app-title" content="啦啦隊資料庫">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="twc-app-icon-v3-180.png">
-    <script defer src="pwa.js?v=2"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
@@ -1872,6 +1871,8 @@
         <div id="feedback-container" style="display:none; max-width: 600px; margin: 30px auto 60px; padding: 0 20px;"></div>
         <div id="profile-container" style="display:none; width: 100%; max-width: 1200px; margin: 0 auto 60px; padding: 0 15px;"></div>
         <div id="allstar-container" style="display:none; max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 15px;"></div>
+        <section id="archive-container"></section>
+        <section id="datalab-container"></section>
         <div id="vote-container" class="main-content-container" style="display: none; max-width: 1000px; width: 100%; margin: 30px auto 60px; padding: 0 15px;">
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="font-family: var(--sport-font); font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: #fff; letter-spacing: 4px; margin-bottom: 8px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
@@ -1910,12 +1911,36 @@
     </main>
 
     <footer class="footer">
-        <div class="footer-content">
-            <p> <strong>免責聲明：</strong>本網站所有資料版權均屬原球團及所屬經紀公司所有。行程僅供參考，以官方公佈為準。</p>
-            <div style="margin: 15px 0;">
-                <button onclick="window.setMode('feedback'); window.scrollTo(0,0);" style="background: transparent; color: var(--text-sub); border: 1px solid var(--border-color); padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#fff';" onmouseout="this.style.color='var(--text-sub)'; this.style.borderColor='var(--border-color)';">💡 意見回饋 FEEDBACK</button>
+        <div class="footer-content footer-content--modern">
+            <div class="footer-brand">
+                <div class="footer-brand__eyebrow">TAIWAN CHEERLEADER DATABASE</div>
+                <div class="footer-brand__title">台灣啦啦隊資料庫</div>
+                <p>整理台灣職業運動啦啦隊女孩、賽程、公開行程與生態數據。</p>
             </div>
-            <p style="font-family: var(--sport-font); margin-top: 5px; font-size: 16px; letter-spacing: 2px;">CHEERLEADER DB | SEASON 2026</p>
+            <nav class="footer-links" aria-label="網站底部導覽">
+                <div class="footer-link-group">
+                    <strong>資料庫</strong>
+                    <button type="button" onclick="window.setMode('girls');window.scrollTo(0,0)">女孩圖鑑</button>
+                    <button type="button" onclick="window.setMode('archive');window.scrollTo(0,0)">歷屆成員</button>
+                    <button type="button" onclick="window.setMode('datalab');window.scrollTo(0,0)">生態數據</button>
+                </div>
+                <div class="footer-link-group">
+                    <strong>追星工具</strong>
+                    <button type="button" onclick="window.setMode('events');window.scrollTo(0,0)">公開行程</button>
+                    <button type="button" onclick="window.setMode('schedule');window.scrollTo(0,0)">應援班表</button>
+                    <button type="button" onclick="window.setMode('matches');window.scrollTo(0,0)">比賽賽程</button>
+                </div>
+                <div class="footer-link-group">
+                    <strong>互動</strong>
+                    <button type="button" onclick="window.setMode('games');window.scrollTo(0,0)">遊戲中心</button>
+                    <button type="button" onclick="window.setMode('feedback');window.scrollTo(0,0)">意見回饋</button>
+                    <a href="https://dinosaur071.bobaboba.me" target="_blank" rel="noopener noreferrer">請我喝珍奶</a>
+                </div>
+            </nav>
+            <div class="footer-meta">
+                <p><strong>免責聲明：</strong>本站為非官方資料整理網站；圖片與相關內容版權歸原球團、經紀公司及權利人所有。行程與賽事資訊請以官方公告為準。</p>
+                <div class="footer-signature">CHEERLEADER DB · TAIWAN</div>
+            </div>
         </div>
     </footer>
 
