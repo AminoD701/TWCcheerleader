@@ -44,6 +44,9 @@ BASE_QUERIES = [
     "site:nownews.com 啦啦隊",
     "site:tvbs.com.tw 啦啦隊",
     "site:tsna.com 啦啦隊",
+    "site:tsna.com/tatame 啦啦隊",
+    "site:tsna.com 應援 女孩",
+    "site:tsna.com 啦啦隊 女神",
     "site:chinatimes.com 啦啦隊",
     "site:chinatimes.com 娛樂 啦啦隊",
     "site:chinatimes.com 體育 啦啦隊",
@@ -226,8 +229,8 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
     site_teams = [team.strip() for team in site_teams if team and team.strip()]
     queries = list(BASE_QUERIES)
 
-    # Roster-specific searches are also restricted to the two entertainment/sports
-    # publishers. This catches stories that omit the word "啦啦隊" in the headline.
+    # Roster-specific searches target the publishers with strong cheer coverage.
+    # This catches stories that omit the word "啦啦隊" in the headline.
     for start in range(0, min(len(girl_names), NAME_QUERY_BATCH_SIZE * MAX_NAME_QUERY_BATCHES), NAME_QUERY_BATCH_SIZE):
         batch = girl_names[start:start + NAME_QUERY_BATCH_SIZE]
         if not batch:
@@ -235,6 +238,7 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
         names_expr = " OR ".join(f'"{name}"' for name in batch)
         queries.append(f"site:setn.com ({names_expr})")
         queries.append(f"site:ctwant.com ({names_expr})")
+        queries.append(f"site:tsna.com ({names_expr})")
 
     # Team searches remain cheer-specific so a team name alone cannot flood the feed.
     for start in range(0, min(len(site_teams), TEAM_QUERY_BATCH_SIZE * MAX_TEAM_QUERY_BATCHES), TEAM_QUERY_BATCH_SIZE):
@@ -244,6 +248,7 @@ def build_queries(girl_names: list[str], site_teams: list[str]) -> list[str]:
         teams_expr = " OR ".join(f'"{team}"' for team in batch)
         queries.append(f"site:setn.com ({teams_expr}) 啦啦隊")
         queries.append(f"site:ctwant.com ({teams_expr}) 啦啦隊")
+        queries.append(f"site:tsna.com ({teams_expr}) 啦啦隊")
     return queries
 
 
