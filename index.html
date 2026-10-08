@@ -3578,6 +3578,8 @@
         window.renderGamesHub = function() {
             const container = document.getElementById('games-container');
             if (!container) return;
+            // Keep an active quiz, result card or mistake review mounted during background updates.
+            if (container.querySelector('#recognition-app')) return;
             container.style.cssText = 'display:block;width:100%;max-width:1100px;margin:0 auto;padding:18px 16px 44px;box-sizing:border-box';
             container.innerHTML = `
               <section class="twc-games-home">
