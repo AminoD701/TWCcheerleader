@@ -48,10 +48,13 @@ function installStyles() {
     .former-roster__intro{font-size:12px;color:var(--text-sub,#97a0ad);line-height:1.6;margin:2px 0 10px}
     .former-roster__season{margin-top:14px}.former-roster__season:first-of-type{margin-top:8px}.former-roster__season-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px;padding:8px 2px;border-bottom:1px dashed rgba(255,255,255,.10)}.former-roster__season-title strong{color:#fff;font-size:13px}.former-roster__season-title span{font-size:11px;color:var(--text-sub,#97a0ad);font-weight:800}
     .former-roster__team-group{margin:10px 0 16px}.former-roster__team-title{margin-bottom:7px;color:var(--event-accent,#fff);font-size:12px;font-weight:900;letter-spacing:.4px}
-    .former-roster__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
-    .former-roster__item{min-height:54px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:#151920;color:#fff;padding:9px 11px;text-align:left;cursor:pointer}
-    .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px}
-    @media(max-width:767px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:1fr 1fr}}
+    .former-roster__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .former-roster__item{display:flex;min-width:0;overflow:hidden;flex-direction:column;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:#151920;color:#fff;padding:0;text-align:left;cursor:pointer}
+    .former-roster__photo{width:100%;aspect-ratio:4/5;overflow:hidden;background:#0b0e12}
+    .former-roster__photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+    .former-roster__meta{min-height:62px;padding:9px 10px}
+    .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px;line-height:1.4}
+    @media(max-width:767px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.former-roster__meta{min-height:58px;padding:8px}.former-roster__item strong{font-size:13px}}
     }`;
   document.head.append(style);
 }
@@ -260,7 +263,12 @@ function formerItemHtml(girl, index, season) {
   const note = String(girl.note || girl['備註'] || girl.備註 || '').trim();
   const seasonLabel = season === '未註記' ? '已離隊' : `${season} 賽季離隊`;
   const detail = [realname && realname !== name ? realname : '', seasonLabel, note && note !== '已離隊' ? note : ''].filter(Boolean).join(' · ');
-  return `<button type="button" class="former-roster__item" data-former-index="${index}"><strong>${name}</strong><small>${detail}</small></button>`;
+  const image = String(girl.img || '').trim();
+  const imageUrl = image && window.getCdnUrl ? window.getCdnUrl(image) : image;
+  return `<button type="button" class="former-roster__item" data-former-index="${index}">
+    <span class="former-roster__photo">${imageUrl ? `<img src="${imageUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'">` : ''}</span>
+    <span class="former-roster__meta"><strong>${name}</strong><small>${detail}</small></span>
+  </button>`;
 }
 
 function matchesSharedGirlFilters(girl, state) {
