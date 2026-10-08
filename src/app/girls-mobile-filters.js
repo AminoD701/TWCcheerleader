@@ -59,6 +59,14 @@ function installStyles() {
     html.cheer-app-standalone body[data-app-mode="girls"] .girls-filter-chip{min-height:48px;padding:0 12px;border-radius:12px;border:1px solid #4d5665;background:#171c24;color:#fff;font-size:13px;font-weight:900}
     html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-filterbar__meta{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px;color:#b1bbc9;font-size:12px}
     html.cheer-app-standalone body[data-app-mode="girls"] .girls-filter-clear{min-height:44px;background:transparent;border:0;color:#fff;text-decoration:underline}
+
+    /* Compact mobile roster toolbar: sport and team side by side. */
+    @media(max-width:900px){body[data-app-mode="girls"] .girls-mobile-filterbar__selectors{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) auto;align-items:end;gap:6px;padding:0}body[data-app-mode="girls"] .girls-mobile-select-row{display:contents}body[data-app-mode="girls"] .girls-mobile-select>span{font-size:11px}body[data-app-mode="girls"] .girls-mobile-select select{min-height:39px;height:39px;padding:0 22px 0 7px;font-size:13px;border-radius:9px}body[data-app-mode="girls"] .girls-filter-chip{min-height:39px;height:39px;padding:0 8px;font-size:12px;border-radius:9px}body[data-app-mode="girls"] .girls-mobile-filterbar__meta{padding:2px 0 0;font-size:11px}body[data-app-mode="girls"] .girls-filter-clear{min-height:30px;padding:0 3px;font-size:11px}}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-filterbar__selectors{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) auto;align-items:end;gap:6px;padding:0}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select-row{display:contents}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select select{height:39px;min-height:39px;padding:0 22px 0 7px;font-size:13px;border-radius:9px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-filter-chip{height:39px;min-height:39px;padding:0 8px;font-size:12px;border-radius:9px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-filterbar__meta{padding:2px 0 0;font-size:11px}
     .former-roster{margin:18px 0 6px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.025);overflow:hidden}
     .former-roster[hidden]{display:none!important}
     .former-roster summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-weight:900;color:#fff}
@@ -470,7 +478,7 @@ function syncUI() {
 
     teamSelect.innerHTML = '<option value="">全部現役隊伍</option>' + options.map(item => {
       const key = `${item.sport}\u0000${item.team}`;
-      return `<option value="${key}">${item.team}｜${item.sport}｜${item.count} 位</option>`;
+      return `<option value="${key}">${item.team}</option>`;
     }).join('');
 
     if (currentKey && [...teamSelect.options].some(option => option.value === currentKey)) {
@@ -523,7 +531,7 @@ function ensureUI() {
   bar.innerHTML = `
     <div class="girls-mobile-filterbar__selectors">
       <label class="girls-mobile-select">
-        <span>隊伍篩選</span>
+        <span>隊伍</span>
         <select id="girls-mobile-team-select" aria-label="依隊伍篩選女孩">
           <option value="">全部現役隊伍</option>
         </select>
@@ -535,7 +543,7 @@ function ensureUI() {
             ${SPORTS.map(s => `<option value="${s}">${SPORT_LABEL[s]}</option>`).join('')}
           </select>
         </label>
-        <button class="girls-filter-chip" data-favorites type="button">♥ 我的最愛</button>
+        <button class="girls-filter-chip" data-favorites type="button" aria-label="只顯示我的最愛">♥ 收藏</button>
       </div>
     </div>
     <div class="girls-mobile-filterbar__meta"><span id="girls-mobile-filter-count">目前顯示 0 位女孩</span><button class="girls-filter-clear" data-clear type="button">清除篩選</button></div>`;
