@@ -2289,7 +2289,7 @@
                 if (cached) {
                     const parsed = JSON.parse(cached);
                     
-                    if (Date.now() - parsed.timestamp < CACHE_TIME && parsed.dbThemes) {
+                    if (parsed && Array.isArray(parsed.dbGirls) && parsed.dbGirls.length > 0 && parsed.dbThemes) { // Fast-start from existing data regardless of age; refresh below.
                         dbGirls = normalizeGirlRows(parsed.dbGirls || []); window.dbGirls = dbGirls; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
