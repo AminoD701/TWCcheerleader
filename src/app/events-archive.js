@@ -225,11 +225,11 @@
       }
       if (typeof window.renderEvents === 'function') window.renderEvents();
       tries += 1;
-      if (tries >= 24) clearInterval(routeRetryTimer);
+      if (tries >= 12) clearInterval(routeRetryTimer);
     };
 
     attempt();
-    if (tries < 24) routeRetryTimer = setInterval(attempt, 250);
+    if (tries < 12) routeRetryTimer = setInterval(attempt, 500);
   }
 
   function install() {
@@ -244,7 +244,7 @@
   }
 
   let tries=0;
-  const timer=setInterval(()=>{tries+=1;if(install()||tries>80)clearInterval(timer);},100);
+  const timer=setInterval(()=>{tries+=1;if(install()||tries>24)clearInterval(timer);},250);
   const routeObserver=new MutationObserver(()=>{
     if(document.body?.dataset.appMode==='events') requestAnimationFrame(ensureEventsReady);
     else clearInterval(routeRetryTimer);
