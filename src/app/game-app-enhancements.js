@@ -136,6 +136,14 @@
       <div class="game-hub__tip"><strong>操作提示：</strong>抽卡紀錄與抖內已移到「更多」；遊戲中心只保留遊戲相關入口。</div>`;
     root.replaceChildren(hub);
     hub.querySelector('[data-show-daily]')?.addEventListener('click', () => showDailyResult(result));
+    hub.querySelectorAll('a[href*="?mode="]').forEach(link => {
+      link.addEventListener('click', event => {
+        const target = new URL(link.href, location.href).searchParams.get('mode');
+        if (!target || typeof window.setMode !== 'function') return;
+        event.preventDefault();
+        window.setMode(target);
+      });
+    });
   };
 
   const enhanceSubGame = () => {
@@ -145,9 +153,10 @@
     const bar = document.createElement('div');
     bar.className = 'game-ux-toolbar';
     bar.dataset.gameUxToolbar = '1';
-    bar.innerHTML = `<a href="?mode=games">← 返回遊戲首頁</a><button type="button" data-adjust-mode>重新選擇模式</button>`;
+    bar.innerHTML = `<button type="button" data-game-home>返回遊戲首頁</button><button type="button" data-adjust-mode>重新選擇模式</button>`;
     root.prepend(bar);
-    bar.querySelector('[data-adjust-mode]').addEventListener('click', () => { location.href = '?mode=games'; });
+    bar.querySelector('[data-game-home]').addEventListener('click', () => window.setMode?.('games'));
+    bar.querySelector('[data-adjust-mode]').addEventListener('click', () => window.setMode?.('games'));
   };
 
   const removeDailyShortcut = () => {
