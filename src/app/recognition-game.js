@@ -9,10 +9,15 @@
   };
   const key = 'twc-recognition-best-v1';
   let game = null;
+  let lastResults = [];
   function pool() {
     const rows = window.CheerHomeData?.snapshot?.().girls || [];
     const unique = new Map();
     for(const g of rows) {
+      const note=String(g.note || g['備註'] || g.備註 || '').replace(/合作夥伴|合作/g,'').trim();
+      const role=String(g.role || g.position || g.identity || '').trim();
+      if (/(團長|應援團長|吉祥物|主持人|主持|MC|DJ|總監|領隊|經理|教練|舞監|工作人員|球員|隊長級管理)/i.test(note+' '+role)) continue;
+      if (note && !/(練習生|培訓生|正式成員|現役|已離隊|離隊|退隊|前成員)/.test(note)) continue;
       const nat=String(g.nat || g.nationality || '').trim();
       const foreign=/韓|韓國|日本|日籍|Korea|Japan/i.test(nat);
       const real=String(g.realname || g.name || g.姓名 || '').trim();
@@ -21,7 +26,7 @@
       const name=foreign ? (isReadable(real) ? real : (isReadable(nick) ? nick : '')) : (nick || real);
       const img=String(g.img || '').trim();
       const uid=String(g.uid || name).trim();
-      if (!name || !img) continue;
+      if (!name || !img || /[\uac00-\ud7af\u3040-\u30ff]/u.test(name)) continue;
       if (!unique.has(uid) || (!unique.get(uid).team && g.team)) unique.set(uid,{uid,name,img,team:String(g.team||'').trim(),sport:String(g.sport||'').trim()});
     }
     // Avoid multiple choices sharing the same displayed name.
@@ -47,15 +52,15 @@
       .recognition-result{margin:14px 0;padding:14px;border-radius:12px;background:#272e39;line-height:1.7;font-size:14px}
       .recognition-meta{display:flex;justify-content:space-between;gap:8px;color:#cbd5e1;font-size:13px;font-weight:750}
       .recognition-back{display:block;margin:0 0 16px;padding:9px 0;background:transparent;color:#c5b5fa;border:0;font:700 14px inherit;cursor:pointer}
-      @media(max-width:380px){.recognition-actions{gap:8px}.recognition-btn{font-size:15px;padding:10px 7px}}
+      .recognition-share-preview{text-align:left;border:1px solid #41495b;border-radius:18px;padding:clamp(22px,5vw,38px);background:linear-gradient(145deg,#1a1d28,#11151c);color:#f6f6fa}.recognition-share-kicker{font-size:10px;letter-spacing:1.6px;color:#bba6ee;font-weight:800}.recognition-share-heading{font-size:clamp(23px,5vw,30px);font-weight:850;margin-top:16px}.recognition-share-label{font-size:clamp(24px,5vw,34px);font-weight:900;color:#c8b6fa;margin:22px 0 5px}.recognition-share-score{font-size:clamp(64px,16vw,98px);font-weight:900;line-height:1.22;letter-spacing:-3px}.recognition-share-score span{font-size:.45em;color:#99a2b5}.recognition-share-preview p{color:#c1c7d2;line-height:1.7;font-size:14px;margin:8px 0 25px}.recognition-share-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #39404d;padding-top:18px}.recognition-share-stats div{display:flex;flex-direction:column;gap:6px}.recognition-share-stats small{color:#9ba5b7}.recognition-share-stats strong{font-size:27px}.recognition-share-category{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.recognition-share-category span{font-size:12px;border:1px solid #454b5a;border-radius:7px;padding:8px;color:#d6d9e4}.recognition-share-footer{font-size:10px;letter-spacing:1px;color:#8e97a8;border-top:1px solid #39404d;margin-top:25px;padding-top:16px}\n      @media(max-width:380px){.recognition-actions{gap:8px}.recognition-btn{font-size:15px;padding:10px 7px}}
     `;
     document.head.append(tag);
   }
   function mount(){
-    const root=hub(); if(!root || root.querySelector('#recognition-app, .recognition-entry')) return;
+    const root=hub(); if(!root || root.querySelector('#recognition-app, .recognition-entry, .twc-games-home')) return;
     const cards=root.querySelector('div[style*="flex-wrap"]'); if(!cards) return;
     const button=document.createElement('button'); button.type='button';button.className='recognition-entry';
-    button.innerHTML='<span style="font-size:43px" aria-hidden="true">🧠</span><strong>啦啦隊認人王</strong><small>看照片猜名字，測試你的應援眼力</small>';
+    button.innerHTML='<span style="font-size:33px" aria-hidden="true">RQ</span><strong>啦啦隊認人王</strong><small>看照片猜名字，測試你的應援眼力</small>';
     button.addEventListener('click',open);cards.append(button);
   }
   function frame(html){
@@ -66,9 +71,9 @@
   }
   function back(){game=null;window.renderGamesHub?.();mount();}
   function open(){
-    style();game=null;
+    style();game=null;lastResults=[];
     const n=pool().length;
-    frame('<div class="recognition-panel"><div class="recognition-app-title">🧠 啦啦隊認人王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">⚡ 20 題快賽</button><button class="recognition-btn" data-start="endless">♾️ 無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
+    frame('<div class="recognition-panel"><div class="recognition-app-title">啦啦隊認人王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">20 題快賽</button><button class="recognition-btn" data-start="endless">無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
     hub().querySelectorAll('[data-start]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.start)));
   }
   window.openRecognitionGame = open;
@@ -105,6 +110,7 @@
       game.locked=true;
       const chosen=answers[Number(button.dataset.choice)],ok=chosen.uid===person.uid;
       if(ok)game.correct++;else game.wrong++;
+      lastResults.push({person,ok,answer:chosen.name});
       hub().querySelectorAll('[data-choice]').forEach(b=>{
         b.disabled=true;const item=answers[Number(b.dataset.choice)];
         if(item.uid===person.uid)b.classList.add('correct');
@@ -112,25 +118,81 @@
       });
       const end=game.index+1>=game.limit||(game.mode==='endless'&&game.wrong>=3);
       const feedback=hub().querySelector('#recognition-feedback');
-      feedback.innerHTML='<div class="recognition-result">'+(ok?'✅ 答對了！':'❌ 答錯了！')+' 正確答案：<strong>'+esc(person.name)+'</strong>'+(person.team?'<div>球隊：'+esc(person.team)+'</div>':'')+'</div><button class="recognition-btn primary" type="button" id="recognition-next">'+(end?'查看成績':'下一題 →')+'</button>';
+      feedback.innerHTML='<div class="recognition-result">'+(ok?'答對了！':'答錯了！')+' 正確答案：<strong>'+esc(person.name)+'</strong>'+(person.team?'<div>球隊：'+esc(person.team)+'</div>':'')+'</div><button class="recognition-btn primary" type="button" id="recognition-next">'+(end?'查看成績':'下一題 →')+'</button>';
       hub().querySelector('#recognition-next').addEventListener('click',()=>{game.index++;renderQuestion();},{once:true});
     }));
   }
+  function groupStats(results) {
+    const groups=new Map();
+    for(const r of results) {
+      const sport=r.person.sport || '';
+      const cat=/棒球|CPBL/i.test(sport)?'棒球':/籃球|TPBL|PLG/i.test(sport)?'籃球':/排球|TPVL/i.test(sport)?'排球':'其他';
+      const v=groups.get(cat)||{correct:0,total:0};
+      v.total++;if(r.ok)v.correct++;groups.set(cat,v);
+    }
+    return [...groups.entries()].map(([name,value])=>({name,...value}));
+  }
+  async function shareCard(result) {
+    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
+    const c=canvas.getContext('2d');if(!c)throw new Error('圖片生成失敗');
+    const font='system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
+    const background=c.createLinearGradient(0,0,1080,1350);
+    background.addColorStop(0,'#171b25');background.addColorStop(1,'#0c1016');c.fillStyle=background;c.fillRect(0,0,1080,1350);
+    c.strokeStyle='#384050';c.lineWidth=2;c.strokeRect(50,50,980,1250);
+    c.fillStyle='#ae9add';c.font='700 29px '+font;c.fillText('TWC CHEERLEADER  /  RECOGNITION QUIZ',100,138);
+    c.fillStyle='#ffffff';c.font='800 70px '+font;c.fillText('啦啦隊認人王',100,248);
+    c.fillStyle='#bca9ed';c.font='800 52px '+font;c.fillText(result.label,100,349);
+    c.fillStyle='#748095';c.fillRect(100,393,880,2);
+    c.fillStyle='#a89be7';c.font='700 30px '+font;c.fillText('YOUR SCORE',100,466);
+    c.fillStyle='#ffffff';c.font='800 170px '+font;c.fillText(String(result.correct),100,664);
+    const offset=c.measureText(String(result.correct)).width;
+    c.font='600 85px '+font;c.fillStyle='#8e99ae';c.fillText(' / '+result.answered,108+offset,654);
+    c.fillStyle='#e2e5ed';c.font='500 32px '+font;c.fillText(result.praise,100,743);
+    c.fillStyle='#303744';c.fillRect(100,792,880,2);
+    c.font='600 28px '+font;c.fillStyle='#a3adbd';c.fillText('正確率',100,854);c.fillText('本機最高',570,854);
+    c.font='800 66px '+font;c.fillStyle='#fff';c.fillText(result.percentage+'%',100,934);c.fillText(result.best+' 題',570,934);
+    c.fillStyle='#a9b0bd';c.font='600 27px '+font;c.fillText('各領域成績',100,1013);
+    result.stats.slice(0,3).forEach((group,i)=>{
+      const x=100+i*300,y=1062;
+      c.fillStyle='#222936';c.fillRect(x,y,275,105);
+      c.fillStyle='#c8d0df';c.font='600 25px '+font;c.fillText(group.name,x+18,y+38);
+      c.fillStyle='#fff';c.font='700 34px '+font;c.fillText(group.correct+'/'+group.total,x+18,y+85);
+      c.fillStyle='#a78bfa';c.fillRect(x+125,y+74,Math.round(128*group.correct/group.total),7);
+    });
+    c.fillStyle='#838d9f';c.font='500 26px '+font;c.fillText('你能認出幾位啦啦隊女孩？',100,1240);
+    return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(new File([b],'TWC-recognition-result.png',{type:'image/png'})):reject(new Error('無法輸出圖片')),'image/png'));
+  }
+  async function shareResult(result,button) {
+    button.disabled=true;const original=button.textContent;button.textContent='產生分享圖片中…';
+    try {
+      const file=await shareCard(result);
+      if(navigator.canShare?.({files:[file]}) && navigator.share) {
+        try{await navigator.share({files:[file],title:'啦啦隊認人王',text:'我的認人王成績'});return;}
+        catch(e){if(e.name==='AbortError')return;}
+      }
+      const url=URL.createObjectURL(file);
+      const link=document.createElement('a');link.href=url;link.download=file.name;document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),5000);
+    } catch(e) {alert('分享圖片產生失敗，請稍後再試。');}
+    finally {button.disabled=false;button.textContent=original;}
+  }
   function finish(){
     if(!game)return;
-    const answered=game.index,percentage=answered?Math.round(game.correct/answered*100):0;
-    const label=percentage>=90?'啦啦隊人肉資料庫':percentage>=75?'專業應援粉':percentage>=50?'認人實習生':'應援新鮮人';
+    const answered=lastResults.length,percentage=answered?Math.round(game.correct/answered*100):0;
+    const label=percentage>=90?'人肉應援資料庫':percentage>=75?'資深認人高手':percentage>=50?'應援識人達人':'應援新星';
+    const praise=percentage>=90?'這種辨識力，已經不是普通粉絲等級。':percentage>=75?'對女孩名單這麼熟，實力真的不簡單。':percentage>=50?'你的認人實力正在穩定進步。':'下一次，你一定能認出更多女孩。';
     const previous=storage.get(key)||{};
     const best=Math.max(Number(previous[game.mode])||0,game.correct);
     storage.set(key,{...previous,[game.mode]:best});
-    const share='TWCcheerleader 啦啦隊認人王\n'+(game.mode==='quick'?'20 題快賽':'無限挑戰')+'：'+game.correct+'/'+answered+' 題\n正確率 '+percentage+'%｜'+label;
-    frame('<div class="recognition-panel"><div style="font-size:48px">🏆</div><div class="recognition-app-title">'+esc(label)+'</div><p class="recognition-muted">'+(game.mode==='quick'?'快速認人賽':'無限認人挑戰')+' 挑戰完成</p><div style="font-size:42px;font-weight:900">'+game.correct+' / '+answered+'</div><p class="recognition-muted">正確率 '+percentage+'% · 本機最高答對 '+best+' 題</p><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-again">再玩一次</button><button class="recognition-btn" id="recognition-share">分享成績</button></div><p class="recognition-muted" style="margin-top:15px">成績僅儲存在目前裝置，尚未開放全站排行榜。</p></div>');
+    const stats=groupStats(lastResults);
+    const result={correct:game.correct,answered,percentage,label,praise,best,stats,mode:game.mode};
+    frame('<div class="recognition-share-preview"><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">啦啦隊認人王</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
     document.getElementById('recognition-again').onclick=open;
-    document.getElementById('recognition-share').onclick=async()=>{
-      try{if(navigator.share){await navigator.share({title:'啦啦隊認人王',text:share,url:location.href});return;}
-      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(share);alert('成績已複製！');return;}}
-      catch(e){if(e.name==='AbortError')return;}
-      window.prompt('複製你的成績：',share);
+    document.getElementById('recognition-home').onclick=back;
+    document.getElementById('recognition-share').onclick=e=>shareResult(result,e.currentTarget);
+    document.getElementById('recognition-wrong').onclick=()=>{
+      const wrong=lastResults.filter(x=>!x.ok);
+      frame('<div class="recognition-panel"><h2 class="recognition-app-title">錯題回顧</h2>'+(wrong.length?wrong.map(x=>'<p class="recognition-result">你的答案：'+esc(x.answer)+'<br>正確答案：<strong>'+esc(x.person.name)+'</strong></p>').join(''):'<p>全部答對，太厲害了！</p>')+'</div>');
     };
     game=null;
   }
