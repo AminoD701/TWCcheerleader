@@ -5188,23 +5188,29 @@
 
             window.currentDisplayLimit = window.currentDisplayLimit || 24;
 
-            // ✨ 新增：即時計算全網 TOP 10 女孩，給予專屬榮耀皇冠
-            let girlVotes = [];
-            dbGirls.forEach(g => {
-                let v = 0;
-                if (window.globalVoteData) {
-                    for (let k in window.globalVoteData) {
-                        // 排除新聞心情，將所有賽區的票數加總
-                        if (!k.startsWith('news_') && k.endsWith(g.uid)) {
-                            v += parseInt(window.globalVoteData[k]) || 0;
+            // TOP 10 皇冠與目前篩選無關，不要每次切球隊／搜尋都重掃全站票數。
+            const nowForVoteRank = Date.now();
+            const voteCache = window.__girlsTop10VoteCache;
+            let top10Uids;
+            if (voteCache && nowForVoteRank - voteCache.at < 30000 && voteCache.girlCount === dbGirls.length) {
+                top10Uids = voteCache.uids;
+            } else {
+                const girlVotes = [];
+                dbGirls.forEach(g => {
+                    let v = 0;
+                    if (window.globalVoteData) {
+                        for (const k in window.globalVoteData) {
+                            if (!k.startsWith('news_') && k.endsWith(g.uid)) {
+                                v += parseInt(window.globalVoteData[k]) || 0;
+                            }
                         }
                     }
-                }
-                if (v > 0) girlVotes.push({uid: g.uid, votes: v});
-            });
-            // 排序並抓取前十名的 UID
-            girlVotes.sort((a, b) => b.votes - a.votes);
-            let top10Uids = new Set(girlVotes.slice(0, 10).map(g => g.uid));
+                    if (v > 0) girlVotes.push({uid: g.uid, votes: v});
+                });
+                girlVotes.sort((a, b) => b.votes - a.votes);
+                top10Uids = new Set(girlVotes.slice(0, 10).map(g => g.uid));
+                window.__girlsTop10VoteCache = { at: nowForVoteRank, girlCount: dbGirls.length, uids: top10Uids };
+            }
 
             let htmlContent = result.slice(0, window.currentDisplayLimit).map(c => {
                 const teams = (c.mT || [c.team || ""]).map(t => t.trim()).filter(t => t);
