@@ -40,6 +40,9 @@
   }
 
   let lastRenderKey = '';
+  const promoEndsAt = new Date('2026-10-24T00:00:00+08:00').getTime();
+  const promoActive = () => Date.now() < promoEndsAt;
+  const noticeKey = 'twc_vision_challenge_intro_v1';
 
   function render() {
     const root = document.getElementById('home-container');
@@ -85,6 +88,7 @@
           </div>
         </div>
 
+        ${promoActive() ? `<button type="button" class="twc-vision-promo" data-home-vision aria-label="玩新遊戲 應援眼力王"><span class="twc-vision-promo__badge">NEW · PHOTO CHALLENGE</span><strong>你的應援眼力，有多強？</strong><span>「應援眼力王」新登場！看照片猜女孩，20 題挑戰自己的辨識力。</span><span class="twc-vision-promo__action">立即挑戰 <span aria-hidden="true">↗</span></span></button>` : ''}
         <div class="home-overview__quick">
           <button type="button" data-home-mode="girls"><span>ROSTER</span><strong>女孩圖鑑</strong><small>查看現役與歷屆成員</small></button>
           <button type="button" data-home-mode="events"><span>EVENTS</span><strong>公開行程</strong><small>近期活動與完整月曆</small></button>
@@ -131,18 +135,53 @@
         <div class="home-overview__footnote">資料會隨網站來源更新。完整篩選、月曆與明細請進入對應功能頁。</div>
       </section>`;
 
+    root.querySelector('[data-home-vision]')?.addEventListener('click', () => openMode('games'));
+    scheduleVisionNotice();
     root.querySelectorAll('[data-home-mode]').forEach(btn => {
       btn.addEventListener('click', () => openMode(btn.dataset.homeMode));
     });
   }
 
+  function scheduleVisionNotice() {
+    if(!promoActive() || document.body?.dataset.appMode !== 'home') return;
+    try { if(localStorage.getItem(noticeKey)) return; } catch(_) {}
+    if(document.getElementById('twc-vision-toast')) return;
+    // Never overlay the landing screen or interfere with the initial load.
+    if(document.getElementById('landing-page')?.getBoundingClientRect().height &&
+       getComputedStyle(document.getElementById('landing-page')).display !== 'none') return;
+    const toast=document.createElement('aside');
+    toast.id='twc-vision-toast';
+    toast.setAttribute('aria-label','新遊戲通知');
+    toast.innerHTML='<div><small>新遊戲上線</small><strong>應援眼力王</strong><span>20 題照片挑戰，看看你認得幾位女孩！</span></div><button type="button" data-play>去挑戰</button><button type="button" data-dismiss aria-label="關閉提醒">×</button>';
+    document.body.appendChild(toast);
+    const close=()=>{try{localStorage.setItem(noticeKey,'1')}catch(_){}toast.remove();};
+    toast.querySelector('[data-dismiss]').onclick=close;
+    toast.querySelector('[data-play]').onclick=()=>{close();openMode('games');};
+  }
+  function installVisionStyles(){
+    if(document.getElementById('twc-vision-style'))return;
+    const style=document.createElement('style');style.id='twc-vision-style';
+    style.textContent=`
+    .twc-vision-promo{display:flex;width:100%;margin:16px 0 18px;position:relative;flex-direction:column;align-items:flex-start;gap:8px;padding:18px 21px;border:1px solid rgba(167,139,250,.38);border-radius:14px;background:linear-gradient(110deg,#252034,#151a24 85%);color:#fff;text-align:left;font-family:inherit;cursor:pointer}
+    .twc-vision-promo:hover{border-color:#bba5ed}.twc-vision-promo__badge{font-size:10px;letter-spacing:1.5px;color:#cab6fd;font-weight:800}.twc-vision-promo strong{font-size:20px;font-weight:850}.twc-vision-promo>span:not(.twc-vision-promo__badge):not(.twc-vision-promo__action){font-size:13px;line-height:1.6;color:#bac3d2}.twc-vision-promo__action{font-size:13px;font-weight:850;color:#d5c3ff}
+    #twc-vision-toast{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:8000;display:flex;align-items:center;gap:12px;width:min(92vw,440px);padding:13px 14px;background:#202430;color:#fff;border:1px solid #645682;border-radius:15px;box-shadow:0 12px 38px #0008;font-family:inherit}
+    #twc-vision-toast>div{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}#twc-vision-toast small{color:#bda6f5;font-size:10px}#twc-vision-toast strong{font-size:16px}#twc-vision-toast span{font-size:12px;color:#b9c1d0;line-height:1.4}
+    #twc-vision-toast button{border:0;font:700 13px inherit;cursor:pointer;color:#fff;background:#7053a6;border-radius:9px;padding:10px;white-space:nowrap}#twc-vision-toast [data-dismiss]{color:#b8c0cf;background:transparent;padding:5px;font-size:22px}
+    @media(max-width:540px){.twc-vision-promo{padding:15px}.twc-vision-promo strong{font-size:18px}#twc-vision-toast{bottom:max(74px,calc(env(safe-area-inset-bottom) + 64px));gap:8px}}
+    `;
+    document.head.appendChild(style);
+  }
   function scheduleRender() {
     if (document.body?.dataset.appMode !== 'home') return;
     requestAnimationFrame(render);
   }
 
   function boot() {
+    installVisionStyles();
     render();
+    setTimeout(scheduleVisionNotice, 1800);
+    setTimeout(scheduleVisionNotice, 4500);
+    setTimeout(scheduleVisionNotice, 9000);
     const observer = new MutationObserver(scheduleRender);
     observer.observe(document.body, { attributes:true, attributeFilter:['data-app-mode'] });
 
