@@ -2883,7 +2883,7 @@
             let girlNames = [...new Set(scheduledGirls.map(s => s.name))];
 
             // 2. 抓取這場比賽的詳細資訊 (為了秀出對手)
-            const teamTranslation = { "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy", "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls", "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars", "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster" };
+            const teamTranslation = { "中信兄弟": "Passion Sisters", "富邦悍將": "Fubon Angels", "味全龍": "Dragon Beauties", "統一獅": "Uni-Girls", "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy", "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls", "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars", "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "ACE VIVA", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster" };
             
             let match = dbMatches.find(m => {
                 let h = teamTranslation[m.hometeam] || m.hometeam;
@@ -3076,7 +3076,7 @@
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
                 "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                 "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
-                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
+                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "ACE VIVA", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
             };
 
             // 抓出當天被選中的比賽
@@ -3368,6 +3368,7 @@
             
             const teamsSet = new Set();
             dbGirls.forEach(c => { 
+                if (isFormerGirl(c)) return;
                 if (currentSport === "全部" || (c.sport || "").includes(currentSport)) {
                     if (c.team && c.team.trim() !== "") teamsSet.add(c.team.trim()); 
                 }
@@ -5027,7 +5028,9 @@
             if (departureSeason && record.departureseason !== departureSeason) {
                 record.departureseason = departureSeason;
             }
-            record.__isFormer = Boolean(departureSeason)
+            const historicalTeams = new Set(['Little Witches']);
+            record.__isFormer = historicalTeams.has(String(record.team || '').trim())
+                || Boolean(departureSeason)
                 || /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(record.note || record['備註'] || record.備註 || '').trim())
                 || ['former','ended','departed','inactive','離隊','已離隊'].includes(String(record.status || '').trim().toLowerCase());
             return record;
@@ -5451,7 +5454,7 @@
                     "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
                     "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                     "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
-                    "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
+                    "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "ACE VIVA", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
                 };
 
                 herSchedules.forEach(s => {
@@ -5697,7 +5700,7 @@
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
                 "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                 "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
-                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
+                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "ACE VIVA", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
             };
 
             const dateExtraInfo = {};
@@ -8209,7 +8212,7 @@ window.renderMinigameStart = function() {
                 "樂天桃猿": "Rakuten Girls", "台鋼雄鷹": "Wing Stars", "高雄全家海神": "Aqua Mermaids", "福爾摩沙夢想家": "Formosa Sexy",
                 "新北中信特攻": "Passion Sisters", "新竹攻城獅": "Muse Girls", "新竹御嵿攻城獅": "Muse Girls", "臺北台新戰神": "Taishin Wonders", "桃園台啤永豐雲豹": "Leopard Girls",
                 "新北國王": "New Taipei Queens", "桃園璞園領航猿": "Pilots Crew", "新竹洋基工程": "Youngkey Girls", "臺南台鋼獵鷹": "Wing Stars",
-                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "Little Witches", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
+                "臺北富邦勇士": "Fubon Angels", "臺北伊斯特": "Tokki Cutie", "桃園雲豹飛將": "Peach Girls", "臺中連莊": "ACE VIVA", "台鋼天鷹": "Wing Stars", "可利工程師": "Si-ster"
             };
 
             const iconCal = `<svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2; fill:none; vertical-align:text-bottom; margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
