@@ -175,7 +175,7 @@
   loadScriptOnce('./src/app/data-lab.js?v=7', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=3', 'events-archive');
   loadScriptOnce('./src/app/home-overview.js?v=1', 'home-overview');
-  loadScriptOnce('./src/app/season-spotlight.js?v=3', 'season-spotlight');
+  loadScriptOnce('./src/app/season-spotlight.js?v=4', 'season-spotlight');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
   loadScriptOnce('./src/app/news-page-polish.js?v=1', 'news-page-polish');
 
