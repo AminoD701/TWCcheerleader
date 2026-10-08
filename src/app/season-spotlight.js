@@ -129,6 +129,7 @@ function stageStatus() {
 
 function renderHero() {
   if (!state.stageRows.length) return;
+  if (document.body?.dataset.appMode !== 'home') return;
   const main = document.getElementById('main-content');
   const marquee = main?.querySelector('.marquee-wrapper');
   if (!main || !marquee) return;
@@ -173,6 +174,7 @@ function renderHero() {
 
 function renderMarquee() {
   if (!state.stageRows.length) return;
+  if (document.body?.dataset.appMode !== 'home') return;
   const wrapper = document.querySelector('.marquee-wrapper');
   const content = wrapper?.querySelector('.marquee-content');
   if (!wrapper || !content) return;
@@ -269,9 +271,10 @@ function installHooks() {
 
 function syncHeroVisibility() {
   const hero = document.getElementById('season-spotlight');
-  if (!hero) return;
-  const mode = document.body.dataset.appMode || new URL(location.href).searchParams.get('mode') || '';
-  hero.hidden = ['matches', 'schedule', 'profile'].includes(mode);
+  const wrapper = document.querySelector('.marquee-wrapper');
+  const mode = document.body.dataset.appMode || new URL(location.href).searchParams.get('mode') || 'home';
+  if (hero) hero.hidden = mode !== 'home';
+  if (wrapper?.classList.contains('spotlight-marquee')) wrapper.hidden = mode !== 'home';
 }
 
 function watchNavigation() {
