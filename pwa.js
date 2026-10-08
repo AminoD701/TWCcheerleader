@@ -184,7 +184,7 @@
       ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides']
     ],
     archive: [
-      ['./src/app/former-archive.js?v=8', 'former-archive'],
+      ['./src/app/former-archive.js?v=9', 'former-archive'],
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
     datalab: [
