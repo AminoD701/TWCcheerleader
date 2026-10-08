@@ -83,7 +83,16 @@
     root.innerHTML='<section id="recognition-app" aria-label="渣男鑑定所"><button class="recognition-back" type="button">← 返回遊戲中心</button>'+html+'</section>';
     root.querySelector('.recognition-back').addEventListener('click',back);
   }
-  function back(){clearNext();game=null;window.renderGamesHub?.();mount();}
+  function back(){
+    clearNext();game=null;
+    const root=hub();
+    // Explicit exit must remove the active-quiz marker before hub rendering.
+    // Otherwise renderGamesHub's background-refresh guard blocks this button.
+    if(root) root.querySelector('#recognition-app')?.remove();
+    window.renderGamesHub?.();
+    window.refreshGameAppEnhancements?.();
+    mount();
+  }
   function open(){
     clearNext();style();game=null;lastResults=[];
     const n=pool().length;
