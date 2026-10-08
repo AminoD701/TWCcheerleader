@@ -419,10 +419,7 @@
       return;
     }
     const legacyFormer = document.getElementById('former-roster');
-    if (legacyFormer) {
-      legacyFormer.hidden = true;
-      legacyFormer.open = false;
-    }
+    if (legacyFormer) legacyFormer.hidden = false;
     ensureToolbar();
     if (toolbar) toolbar.style.display = '';
     decorateCards();
@@ -442,23 +439,27 @@
     }
   }
 
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',sync,{once:true});
-  else sync();
-
-  let attempts = 0;
-  const timer = setInterval(() => {
-    attempts += 1;
+  function boot() {
     wrapRender();
-    if (document.body?.dataset.appMode === 'girls') sync();
-    if (attempts > 80) clearInterval(timer);
-  },100);
+    sync();
 
-  const observer = new MutationObserver(() => {
-    if (document.body?.dataset.appMode === 'girls') requestAnimationFrame(sync);
-  });
-  observer.observe(document.body,{attributes:true,attributeFilter:['data-app-mode']});
-  const main = document.getElementById('main-content');
-  if (main) observer.observe(main,{childList:true,subtree:true});
+    // Legacy render functions should already exist when this route module loads.
+    // A few light retries cover slow startup without polling the page for seconds.
+    let attempts = 0;
+    const timer = setInterval(() => {
+      attempts += 1;
+      wrapRender();
+      if (window.renderContent?.__girlsRosterPolish || attempts >= 6) clearInterval(timer);
+    }, 250);
+
+    const observer = new MutationObserver(() => {
+      if (document.body?.dataset.appMode === 'girls') requestAnimationFrame(sync);
+    });
+    observer.observe(document.body,{attributes:true,attributeFilter:['data-app-mode']});
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
 
   window.refreshGirlsRosterPolish = sync;
 })();
