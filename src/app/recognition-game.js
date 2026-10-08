@@ -59,6 +59,13 @@
       .recognition-share-preview{isolation:isolate;position:relative;overflow:hidden;min-height:585px}
       .recognition-share-preview>.recognition-photo-art{position:absolute;z-index:0;right:-13px;top:165px;width:66%;height:68%;object-fit:contain;opacity:.9;pointer-events:none}
       .recognition-share-preview>.recognition-share-kicker,.recognition-share-preview>.recognition-share-heading,.recognition-share-preview>.recognition-share-label,.recognition-share-preview>.recognition-share-score,.recognition-share-preview>p,.recognition-share-preview>.recognition-share-stats,.recognition-share-preview>.recognition-share-category,.recognition-share-preview>.recognition-share-footer{position:relative;z-index:1}
+
+      /* Only recognition results: photographic background with readable foreground */
+      #recognition-app .recognition-share-preview{min-height:570px;background:linear-gradient(150deg,#171a25,#0d111a)!important}
+      #recognition-app .recognition-share-preview>.recognition-photo-art{right:0;top:0;width:58%;height:100%;object-fit:cover;object-position:center;opacity:.84}
+      #recognition-app .recognition-share-preview:before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(13,17,26,.97),rgba(13,17,26,.86) 42%,rgba(13,17,26,.16) 100%);pointer-events:none}
+      #recognition-app .recognition-share-preview:after{z-index:1}
+      @media(max-width:540px){#recognition-app .recognition-share-preview>.recognition-photo-art{width:62%;opacity:.72}#recognition-app .recognition-share-preview:before{background:linear-gradient(90deg,rgba(13,17,26,.97),rgba(13,17,26,.84) 56%,rgba(13,17,26,.24))}}
     `;
     document.head.append(tag);
   }
@@ -150,7 +157,8 @@
       img.onerror=()=>reject(new Error('照片載入失敗'));
       img.src=CHEER_PHOTO;
     });
-    ctx.save();ctx.globalAlpha=.85;ctx.drawImage(img,475,290,560,690);ctx.restore();
+    ctx.save();ctx.globalAlpha=.84;ctx.drawImage(img,505,230,575,930);ctx.restore();
+    const shade=ctx.createLinearGradient(150,0,1050,0);shade.addColorStop(0,'rgba(13,17,26,.93)');shade.addColorStop(.56,'rgba(13,17,26,.78)');shade.addColorStop(1,'rgba(13,17,26,.08)');ctx.fillStyle=shade;ctx.fillRect(0,0,1080,1350);
   }
   async function shareCard(result) {
     const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
