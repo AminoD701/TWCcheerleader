@@ -173,7 +173,7 @@
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
   loadScriptOnce('./src/app/former-archive.js?v=3', 'former-archive');
   loadScriptOnce('./src/app/data-lab.js?v=7', 'data-lab');
-  loadScriptOnce('./src/app/events-archive.js?v=2', 'events-archive');
+  loadScriptOnce('./src/app/events-archive.js?v=3', 'events-archive');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
   loadScriptOnce('./src/app/news-page-polish.js?v=1', 'news-page-polish');
 
