@@ -183,9 +183,10 @@
     if (!isStandalone()) createInstallButton();
     refreshStandaloneUi();
     if (isStandalone()) {
+      // Known legacy shortcuts are permanently blocked by CSS. Only re-sync
+      // when the app route changes instead of scanning the entire DOM twice/sec.
       const observer = new MutationObserver(refreshStandaloneUi);
-      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-      setInterval(removeStandaloneFloatingShortcuts, 500);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['data-app-mode'] });
     }
   });
 })();
