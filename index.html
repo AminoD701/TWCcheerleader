@@ -6253,8 +6253,8 @@ window.renderMinigameStart = function() {
                     <label class="dt-setup-label">1. 選擇參賽陣營</label>
                     <select id="mg-setup-type" class="dt-setup-select">
                         <option value="all">🌍 全圖鑑大亂鬥 (不分賽事)</option>
-                        <option value="tw">🌏 台港馬聯軍 (華語圈女孩)</option>
-                        <option value="foreign">✈️ 駐台外援 (日韓等籍駐台女孩)</option>
+                        <option value="tw">🌏 華語圈女孩 (台港澳馬／混血)</option>
+                        <option value="foreign">✈️ 駐台外援 (韓籍／日籍)</option>
                         <option value="kbo">🇰🇷 韓國職棒 (KBO 專屬)</option>
                         <option value="baseball">⚾ 專屬棒球女孩 (台灣)</option>
                         <option value="basketball">🏀 專屬籃球女孩 (台灣)</option>
@@ -6286,10 +6286,14 @@ window.renderMinigameStart = function() {
                 return Boolean(departureSeason) || formerPattern.test(note);
             };
             const identityKey = g => g.uid || `${String(g.realname || '').trim()}|${String(g.nickname || '').trim()}`;
-            const localNat = value => /(臺灣|台灣|香港|澳門|馬來西亞)/.test(String(value || ''));
-            const foreignNat = value => {
+            const localNat = value => {
                 const n = String(value || '').trim();
-                return Boolean(n) && !localNat(n) && !['未知', '-', '—'].includes(n);
+                return /(臺灣|台灣|台籍|臺籍|香港|港籍|澳門|澳籍|馬來西亞|馬籍|混血)/.test(n);
+            };
+            const koreaJapanNat = value => {
+                const n = String(value || '').trim();
+                if (!n || /混血/.test(n)) return false;
+                return /(韓國|韓籍|Korea|Korean|日本|日籍|Japan|Japanese)/i.test(n);
             };
             const taiwanProTeams = new Set([
                 'Passion Sisters','Fubon Angels','Wing Stars','Uni-Girls','Rakuten Girls','Dragon Beauties',
@@ -6342,11 +6346,11 @@ window.renderMinigameStart = function() {
             if (type === 'tw') {
                 pool = pool.filter(person => person.__activeRows.some(row => localNat(row.nat)));
             } else if (type === 'foreign') {
-                // 駐台外援＝目前仍效力台灣職業球隊、且國籍不是台港澳馬。
-                // 不再以 note 是否為空判定，也不把 KBO-only 女孩混進來。
+                // 駐台外援只收「純韓籍／純日籍」且目前仍在台灣職業聯盟應援者。
+                // 香港、澳門、馬來西亞與任何標示為混血者都歸華語圈。
                 pool = pool.filter(person => person.__activeRows.some(row => {
                     const team = String(row.team || '').trim();
-                    return taiwanProTeams.has(team) && foreignNat(row.nat);
+                    return taiwanProTeams.has(team) && koreaJapanNat(row.nat);
                 }));
             } else if (type === 'kbo') {
                 pool = pool.filter(person => person.__activeRows.some(row => {
