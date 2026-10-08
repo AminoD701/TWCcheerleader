@@ -1,6 +1,6 @@
 (() => {
   const isFormer = girl => {
-    const season = String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
+    const season = String(girl?.departure_season || girl?.departureseason || girl?.departureSeason || girl?.['離隊賽季'] || '').trim();
     if (season) return true;
     const note = String(girl?.note || girl?.['備註'] || girl?.備註 || '').trim();
     const status = String(girl?.status || '').trim().toLowerCase();
@@ -36,7 +36,7 @@
       if(!key)return;
       if(!map.has(key)) map.set(key,{girl:g,seasons:new Set(),teams:new Set(),sports:new Set()});
       const item=map.get(key);
-      const season=String(g.departureseason||g.departure_season||g['離隊賽季']||'').trim();
+      const season=String(g.departure_season||g.departureseason||g.departureSeason||g['離隊賽季']||'').trim();
       if(season)item.seasons.add(season);
       if(g.team)item.teams.add(String(g.team).trim());
       if(g.sport)item.sports.add(String(g.sport).trim());
