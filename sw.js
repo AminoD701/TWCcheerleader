@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v94`;
+const CACHE_NAME = `${CACHE_PREFIX}v95`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
 const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js?v=46', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/recognition-game.js?v=10', './src/assets/recognition-cheer-photo.svg?v=1', './src/app/navigation.js?v=16', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js?v=9', './src/app/girls-default-sort.js?v=7', './src/app/girls-roster-polish.js?v=5', './src/app/game-app-enhancements.js?v=13', './src/app/minigame-refined.js?v=2', './src/app/dreamteam-refined.js?v=2', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=9', './src/app/girl-career.js?v=6', './src/app/former-archive.js?v=9', './src/app/data-lab.js?v=11', './src/app/events-archive.js?v=4', './src/app/home-overview.js?v=3', './src/app/home-overview.css?v=4', './src/app/news-freshness.js?v=2', './src/app/news-page-polish.js?v=1', './src/app/navigation.css?v=7', './src/app/season-spotlight.css?v=1', './src/app/season-spotlight.js?v=4', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/Collie_Engineers_logo.png?v=1', './data/girl-careers.json?v=2'];
 
@@ -8,9 +8,13 @@ const canStore = (request, response) => request.cache !== 'no-store' && response
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(async cache => {
+      // Do not make installation depend on every optional image or route script.
+      await Promise.allSettled(APP_SHELL.map(async path => {
+        const response = await fetch(path, { cache: 'no-store' });
+        if (response.ok) await cache.put(path, response);
+      }));
+    }).then(() => self.skipWaiting())
   );
 });
 
