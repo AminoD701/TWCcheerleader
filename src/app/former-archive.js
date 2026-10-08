@@ -57,14 +57,13 @@
       root.innerHTML='<div class="archive-empty">歷屆成員資料仍在載入中，請稍後再試。</div>';
       return;
     }
-    const seasons=[...new Set(data.flatMap(x=>[...x.seasons]))].sort((a,b)=>{
-      if(a==='歷史隊伍') return 1;
-      if(b==='歷史隊伍') return -1;
-      return Number(b)-Number(a);
-    });
+    const historicalItems=data.filter(x=>[...x.teams].some(team=>HISTORICAL_TEAMS.has(team)));
+    const seasons=[...new Set(data.flatMap(x=>[...x.seasons].filter(s=>s!=='歷史隊伍')))].sort((a,b)=>Number(b)-Number(a));
+    if(historicalItems.length) seasons.push('歷史隊伍');
     const groups=seasons.map(season=>({
       season,
-      items:data.filter(x=>x.seasons.has(season)).sort((a,b)=>(a.girl.nickname||a.girl.realname||'').localeCompare(b.girl.nickname||b.girl.realname||'','zh-Hant'))
+      items:(season==='歷史隊伍' ? historicalItems : data.filter(x=>x.seasons.has(season)))
+        .sort((a,b)=>(a.girl.nickname||a.girl.realname||'').localeCompare(b.girl.nickname||b.girl.realname||'','zh-Hant'))
     }));
     root.innerHTML=`
       <section class="archive-page">
