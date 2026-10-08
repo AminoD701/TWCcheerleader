@@ -2,6 +2,7 @@
   let locked = false;
   let runStats = { picks: 0, championPicks: new Map(), startSize: 0 };
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  const stripEmoji = value => String(value || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').replace(/\s{2,}/g, ' ').trim();
 
   function installStyles() {
     if (document.getElementById('minigame-refined-style')) return;
@@ -63,7 +64,11 @@
       title.insertAdjacentHTML('beforebegin','<div class="mg-refined-kicker">ULTIMATE CHOICE</div>');
       title.insertAdjacentHTML('afterend','<div class="mg-refined-sub">沒有安全答案。一路選到最後，看看誰才是你的絕對本命。</div>');
     }
+    const type = document.getElementById('mg-setup-type');
     const size = document.getElementById('mg-setup-round');
+    [type,size].forEach(select => {
+      [...(select?.options || [])].forEach(option => { option.textContent = stripEmoji(option.textContent); });
+    });
     const update = () => {
       const n = Number(size?.value || 32);
       const btn = root.querySelector('.enter-btn');
@@ -91,6 +96,11 @@
     const vs = root?.querySelector('.vs-container');
     if (!root || !vs || root.querySelector('.mg-refined-progress')) return;
 
+    const title = root.querySelector('.game-title');
+    if (title) {
+      title.textContent = stripEmoji(title.textContent);
+      title.style.textShadow = 'none';
+    }
     const { current,total,round } = matchNumbers();
     const progress = Math.max(0,Math.min(100,((current-1)/Math.max(total,1))*100));
     const bar = document.createElement('div');
@@ -117,7 +127,11 @@
     const root=document.getElementById('minigame-container');
     if(!root||root.querySelector('.mg-refined-final-badge')) return;
     const title=root.querySelector('.game-title');
-    title?.insertAdjacentHTML('afterend','<div style="text-align:center"><span class="mg-refined-final-badge">👑 YOUR CHAMPION</span></div>');
+    if (title) {
+      title.textContent = stripEmoji(title.textContent);
+      title.style.textShadow = 'none';
+      title.insertAdjacentHTML('afterend','<div style="text-align:center"><span class="mg-refined-final-badge">YOUR CHAMPION</span></div>');
+    }
     const champion = window.currentMgMatch
       ? [window.currentMgMatch.A,window.currentMgMatch.B].find(g=>g && root.textContent.includes(g.nickname||g.realname||'')) : null;
     const championKey=champion?.uid||champion?.realname||'';
