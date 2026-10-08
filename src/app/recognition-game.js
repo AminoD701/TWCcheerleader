@@ -13,7 +13,12 @@
     const rows = window.CheerHomeData?.snapshot?.().girls || [];
     const unique = new Map();
     for(const g of rows) {
-      const name=String(g.nickname || g.realname || g.name || g.姓名 || '').trim();
+      const nat=String(g.nat || g.nationality || '').trim();
+      const foreign=/韓|韓國|日本|日籍|Korea|Japan/i.test(nat);
+      const real=String(g.realname || g.name || g.姓名 || '').trim();
+      const nick=String(g.nickname || '').trim();
+      const isReadable = value => /[\u3400-\u9fff]/u.test(value) && !/[\uac00-\ud7af\u3040-\u30ff]/u.test(value);
+      const name=foreign ? (isReadable(real) ? real : (isReadable(nick) ? nick : '')) : (nick || real);
       const img=String(g.img || '').trim();
       const uid=String(g.uid || name).trim();
       if (!name || !img) continue;
