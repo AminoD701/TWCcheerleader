@@ -2073,7 +2073,7 @@
             }
         });
 
-        const CACHE_KEY = "tw_cheerleader_cache_v35";
+        const CACHE_KEY = "tw_cheerleader_cache_v36";
         const CACHE_TIME = 60 * 60 * 1000; 
 
         function enableEnterButton() {
@@ -2239,7 +2239,7 @@
                     const parsed = JSON.parse(cached);
                     
                     if (Date.now() - parsed.timestamp < CACHE_TIME && parsed.dbThemes) {
-                        dbGirls = parsed.dbGirls || []; window.dbGirls = dbGirls; 
+                        dbGirls = normalizeGirlRows(parsed.dbGirls || []); window.dbGirls = dbGirls; 
                         dbEvents = parsed.dbEvents || []; 
                         dbSchedules = parsed.dbSchedules || [];
                         dbNews = []; // news is never trusted from localStorage
@@ -2343,7 +2343,7 @@
                                 const girlsBaseUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT9l-hRhzMwcRdyQHsRs_97fja0Gg4RCcDDMk31u-dSbbQmk_JIUmbPTAj2gaNYmb6bYTwUvv4_1IxN/pub?output=csv&rand=${gt}`;
                                 const freshGirls = await window.CheerData.load('girls-sheet', () => fetchCSV(`${girlsBaseUrl}&gid=0&t=${gt}`));
                                 if (Array.isArray(freshGirls) && freshGirls.some(i => i.realname)) {
-                                    dbGirls = freshGirls.filter(i => i.realname);
+                                    dbGirls = normalizeGirlRows(freshGirls.filter(i => i.realname));
                                     window.dbGirls = dbGirls;
                                     buildGirlMap();
 
@@ -2385,7 +2385,7 @@
                     window.CheerData.load('manual-events', () => fetch(`data/manual-events.json?t=${t}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => { if (!r.ok) throw new Error(`manual-events HTTP ${r.status}`); return r.json(); }))
                 ]);
 
-                dbGirls = girlsData.filter(i => i.realname); window.dbGirls = dbGirls;
+                dbGirls = normalizeGirlRows(girlsData.filter(i => i.realname)); window.dbGirls = dbGirls;
                 const sheetEvents = Array.isArray(eventsData) ? eventsData.filter(e => e.eventname || e.girls) : [];
                 const manualEvents = Array.isArray(manualEventsData) ? manualEventsData.filter(e => e.eventname || e.girls) : [];
                 const eventSeen = new Set();
@@ -2544,7 +2544,7 @@
 
             // ✨ 2. 如果網址沒有指定模式，就去問瀏覽器「剛剛停在哪一頁」(預設是女孩圖鑑 girls)
             if (!targetMode) {
-                targetMode = sessionStorage.getItem('cheer_current_tab') || 'news';
+                targetMode = sessionStorage.getItem('cheer_current_tab') || 'home';
             }
 
             // ✨ 3. 自動幫球迷切換到該分頁！(這會一併觸發 updateTeamTabs 和 renderContent)
@@ -5013,24 +5013,36 @@
         }
 
         // =========================================================================
+        // 女孩資料正規化：所有頁面統一使用同一個離隊欄位
+        // =========================================================================
+        function normalizeGirlRecord(record) {
+            if (!record || typeof record !== 'object') return record;
+            const departureSeason = String(
+                record.departureseason
+                || record.departure_season
+                || record.departureSeason
+                || record['離隊賽季']
+                || ''
+            ).trim();
+            if (departureSeason && record.departureseason !== departureSeason) {
+                record.departureseason = departureSeason;
+            }
+            record.__isFormer = Boolean(departureSeason)
+                || /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(record.note || record['備註'] || record.備註 || '').trim())
+                || ['former','ended','departed','inactive','離隊','已離隊'].includes(String(record.status || '').trim().toLowerCase());
+            return record;
+        }
+
+        function normalizeGirlRows(rows) {
+            return Array.isArray(rows) ? rows.map(normalizeGirlRecord) : [];
+        }
+
+        // =========================================================================
         // 女孩現役／歷屆狀態
         // =========================================================================
         function isFormerGirl(record) {
-            const departureSeason = String(
-                record?.departure_season
-                || record?.departureseason
-                || record?.departureSeason
-                || record?.['離隊賽季']
-                || ''
-            ).trim();
-            const note = String(record?.note || record?.['備註'] || record?.備註 || "").trim();
-            const status = String(record?.status || "").trim().toLowerCase();
-
-            // departure_season is authoritative: any non-empty value means the
-            // member has left the active roster and belongs in the history archive.
-            return Boolean(departureSeason)
-                || /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(note)
-                || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
+            if (typeof record?.__isFormer === 'boolean') return record.__isFormer;
+            return Boolean(normalizeGirlRecord(record)?.__isFormer);
         }
 
         function renderFormerRosterForCurrentTeam() {
