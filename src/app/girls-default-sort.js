@@ -15,7 +15,7 @@
     .trim();
 
   function departureSeason(girl) {
-    return String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
+    return String(girl?.departure_season || girl?.departureseason || girl?.departureSeason || girl?.['離隊賽季'] || '').trim();
   }
 
   function isFormer(girl) {
