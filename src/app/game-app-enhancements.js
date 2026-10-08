@@ -98,7 +98,7 @@
   const enhanceGamesHome = () => {
     if (mode() !== 'games') return;
     const root = gameRoot();
-    if (!root || root.querySelector('[data-game-enhancement-home], #recognition-app')) return;
+    if (!root || root.querySelector('[data-game-enhancement-home], #recognition-app, .twc-games-home')) return;
     const result = ensureDailyResult();
     const hub = document.createElement('section');
     hub.className = 'game-hub';
