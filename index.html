@@ -3348,6 +3348,27 @@
             window.renderContent();
         };
 
+        window.setGirlTeamFilter = function(team, sport) {
+            const nextSport = String(sport || '').trim() || '全部';
+            const nextTeam = String(team || '').trim() || '全部啦啦隊';
+
+            currentSport = nextSport;
+            currentTeam = nextTeam;
+
+            document.querySelectorAll('#sub-nav-sports .sub-btn').forEach(btn => {
+                const active = nextSport === '全部'
+                    ? btn.textContent.includes('全部')
+                    : btn.textContent.includes(nextSport);
+                btn.classList.toggle('active', active);
+            });
+
+            const label = document.getElementById('team-btn-text');
+            if (label) label.innerText = nextTeam;
+
+            updateTeamTabs();
+            window.renderContent(true);
+        };
+
         function updateTeamTabs() {
             const wrapper = document.getElementById('team-dropdown-wrapper');
             const container = document.getElementById('team-menu');
