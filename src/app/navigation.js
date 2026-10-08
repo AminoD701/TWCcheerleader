@@ -18,6 +18,61 @@ let scheduleSelection = null;
 let themeSelection = null;
 let profileReturnState = null;
 
+const ROUTE_OWNERS = Object.freeze({
+  'grid-container': ['girls'],
+  'event-container': ['events'],
+  'schedule-container': ['schedule'],
+  'news-container': ['news','themes'],
+  'matches-container': ['matches'],
+  'games-container': ['games'],
+  'passport-container': ['passport'],
+  'minigame-container': ['minigame'],
+  'dreamteam-container': ['dreamteam'],
+  'agency-container': ['agency'],
+  'feedback-container': ['feedback'],
+  'vote-container': ['vote'],
+  'allstar-container': ['allstar'],
+  'archive-container': ['archive'],
+  'datalab-container': ['datalab'],
+  'navigation-hub': ['my','more']
+});
+
+function modeOwnsContainer(mode, id) {
+  return (ROUTE_OWNERS[id] || []).includes(mode);
+}
+
+function enforceRouteIsolation(mode = document.body?.dataset.appMode || currentMode) {
+  Object.keys(ROUTE_OWNERS).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || modeOwnsContainer(mode, id)) return;
+    if (el.style.display !== 'none') el.style.display = 'none';
+  });
+}
+
+function installRouteIsolationObserver() {
+  if (document.body?.dataset.routeIsolationInstalled === '1') return;
+  document.body.dataset.routeIsolationInstalled = '1';
+  const observer = new MutationObserver(mutations => {
+    const mode = document.body?.dataset.appMode || currentMode;
+    let needsSync = false;
+    for (const mutation of mutations) {
+      const target = mutation.target;
+      if (!(target instanceof HTMLElement)) continue;
+      if (mutation.type === 'attributes' && mutation.attributeName === 'style' && ROUTE_OWNERS[target.id] && !modeOwnsContainer(mode, target.id) && target.style.display !== 'none') {
+        target.style.display = 'none';
+      }
+      if (mutation.type === 'childList') needsSync = true;
+    }
+    if (needsSync) enforceRouteIsolation(mode);
+  });
+  observer.observe(document.getElementById('main-content') || document.body, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['style']
+  });
+}
+
 function link(item) {
   return `<a class="primary-nav__item" data-mode="${item.mode}" href="?mode=${item.mode}" aria-label="${item.label}"><svg viewBox="0 0 24 24" aria-hidden="true">${item.icon}</svg><span>${item.label}</span></a>`;
 }
@@ -209,6 +264,7 @@ function applyMode(mode) {
   if (mode === 'my' || mode === 'more') showHub(mode);
   else if (mode === 'archive' || mode === 'datalab') showCustomMode(mode);
   else legacySetMode(mode);
+  enforceRouteIsolation(mode);
   if (mode === 'events') {
     requestAnimationFrame(() => {
       if (document.body?.dataset.appMode === 'events' && typeof window.renderEvents === 'function') window.renderEvents();
@@ -334,5 +390,6 @@ window.addEventListener('DOMContentLoaded', () => {
   window.setMode = mode => navigate(mode);
   window.visualViewport?.addEventListener('resize', updateKeyboardState);
   renderNavigation();
+  installRouteIsolationObserver();
   applyMode(currentMode);
 });
