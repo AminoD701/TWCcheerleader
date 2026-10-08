@@ -34,7 +34,7 @@ function installStyles() {
       .girls-filter-sheet__panel{width:100%;max-height:min(72vh,620px);overflow:auto;background:#11151b;border-radius:22px 22px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -16px 50px rgba(0,0,0,.5)}
       .girls-filter-sheet__handle{width:44px;height:5px;border-radius:999px;background:#59616d;margin:2px auto 12px}
       .girls-filter-sheet__title{font-size:18px;font-weight:950;margin:0 0 12px}.girls-filter-sheet__search{width:100%;min-height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0b0e12;color:#fff;padding:0 14px;font-size:16px;margin-bottom:10px;box-sizing:border-box}
-      .girls-filter-sheet__list{display:grid;gap:8px}.girls-filter-option{min-height:50px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#171c23;color:#fff;padding:0 14px;text-align:left;font-weight:900;display:flex;align-items:center;justify-content:space-between;gap:12px}
+      .girls-filter-sheet__list{display:grid;gap:8px}.girls-filter-option{min-height:54px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#171c23;color:#fff;padding:0 14px;text-align:left;font-weight:900;display:flex;align-items:center;justify-content:space-between;gap:12px}
       .girls-filter-option.active{border-color:var(--accent,#ff4757)}
       .girls-filter-option small{color:var(--text-sub,#97a0ad);font-size:12px}
       body.keyboard-open .girls-mobile-filterbar{position:static}
@@ -123,7 +123,12 @@ function applyFavorites() {
 function isHistoricalTeamName(name) { return window.CheerGirlsDefaultSort?.historicalTeams?.has?.(String(name || '').trim()) || String(name || '').trim() === 'Little Witches'; }
 function teamButtons() { return [...document.querySelectorAll('#team-menu .dropdown-item')].filter(btn => !btn.disabled && !isHistoricalTeamName(teamName(btn))); }
 function teamName(btn) { return (btn.querySelector('span')?.textContent || btn.textContent || '').trim(); }
-function chooseTeam(name) {
+function chooseTeam(name, sport = '') {
+  if (typeof window.setGirlTeamFilter === 'function') {
+    window.setGirlTeamFilter(name, sport || legacyState().currentSport || '全部');
+    setTimeout(syncUI, 0);
+    return;
+  }
   const btn = teamButtons().find(b => teamName(b) === name || (name === '全部啦啦隊' && teamName(b).includes('全部')));
   if (btn) btn.click();
   setTimeout(syncUI, 0);
@@ -298,22 +303,39 @@ function matchesSharedGirlFilters(girl, state) {
   return true;
 }
 
-function teamCounts(state) {
-  const counts = new Map();
-  const seen = new Set();
-  const favs = favoritesOnly ? favoriteIds() : null;
+function activeTeamOptions() {
   const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
+  const favs = favoritesOnly ? favoriteIds() : null;
+  const byKey = new Map();
+
   girls.forEach(girl => {
-    if (!matchesSharedGirlFilters(girl, state)) return;
+    if (isHistoricalTeamName(girl?.team)) return;
+    if (window.CheerGirlsDefaultSort?.isFormer?.(girl) || window.cheerGirlStatus?.isFormer?.(girl) || girl?.__isFormer) return;
+
+    const team = String(girl?.team || '').trim();
+    const sport = String(girl?.sport || '').trim();
+    if (!team || !sport) return;
+
     const uid = girl.uid || `${(girl.realname || '').trim()}|${(girl.nickname || '').trim()}`;
     if (favs && !favs.has(uid)) return;
-    const team = (girl.team || '').trim();
-    if (!team) return;
-    const key = `${uid}\u0000${team}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    counts.set(team, (counts.get(team) || 0) + 1);
+
+    const key = `${sport}\u0000${team}`;
+    if (!byKey.has(key)) byKey.set(key, { team, sport, ids: new Set() });
+    byKey.get(key).ids.add(uid);
   });
+
+  const order = new Map(['棒球','籃球','排球','其他'].map((sport, index) => [sport,index]));
+  return [...byKey.values()]
+    .map(item => ({ team:item.team, sport:item.sport, count:item.ids.size }))
+    .sort((a,b)=>(order.get(a.sport) ?? 99)-(order.get(b.sport) ?? 99)
+      || a.team.localeCompare(b.team,'zh-Hant'));
+}
+
+function teamCounts(state) {
+  const counts = new Map();
+  activeTeamOptions()
+    .filter(item => !state.currentSport || state.currentSport === '全部' || item.sport.includes(state.currentSport))
+    .forEach(item => counts.set(item.team, (counts.get(item.team) || 0) + item.count));
   return counts;
 }
 
@@ -325,7 +347,7 @@ function openSheet(type) {
   const list = sheet.querySelector('.girls-filter-sheet__list');
   const state = legacyState();
   title.textContent = type === 'sport' ? '選擇球種' : '選擇隊伍';
-  search.hidden = type === 'sport' || state.currentSport === '全部';
+  search.hidden = type === 'sport';
   search.value = '';
 
   const render = () => {
@@ -334,16 +356,18 @@ function openSheet(type) {
       list.innerHTML = SPORTS.map(s => `<button class="girls-filter-option ${state.currentSport === s ? 'active' : ''}" data-sport="${s}"><span>${SPORT_LABEL[s]}</span></button>`).join('');
       return;
     }
-    if (!state.currentSport || state.currentSport === '全部') {
-      list.innerHTML = '<div style="padding:24px;text-align:center;color:#aaa;line-height:1.7">請先選擇球種，再挑選該球種的隊伍。</div>';
-      return;
-    }
-    const counts = teamCounts(state);
-    const names = ['全部啦啦隊', ...teamButtons().map(teamName).filter(n => n && !n.includes('全部'))];
-    list.innerHTML = [...new Set(names)]
-      .filter(n => !q || n.toLowerCase().includes(q))
-      .map(n => `<button class="girls-filter-option ${state.currentTeam === n ? 'active' : ''}" data-team="${n}"><span>${n}</span>${n === '全部啦啦隊' ? '' : `<small>${counts.get(n) || 0} 位</small>`}</button>`)
-      .join('') || '<div style="padding:24px;text-align:center;color:#888">找不到隊伍</div>';
+    const options = activeTeamOptions()
+      .filter(item => !q || item.team.toLowerCase().includes(q) || item.sport.toLowerCase().includes(q));
+    const currentSport = state.currentSport || '全部';
+    const resetActive = state.currentTeam === '全部啦啦隊';
+    list.innerHTML = `
+      <button class="girls-filter-option ${resetActive ? 'active' : ''}" data-team="全部啦啦隊" data-team-sport="${currentSport}">
+        <span>全部啦啦隊</span><small>${currentSport === '全部' ? '全部球種' : currentSport}</small>
+      </button>
+      ${options.map(item => `<button class="girls-filter-option ${state.currentTeam === item.team && state.currentSport === item.sport ? 'active' : ''}" data-team="${item.team}" data-team-sport="${item.sport}">
+        <span>${item.team}</span><small>${item.sport} · ${item.count} 位</small>
+      </button>`).join('')}
+    ` || '<div style="padding:24px;text-align:center;color:#888">找不到隊伍</div>';
   };
   render();
   search.oninput = render;
@@ -355,7 +379,7 @@ function openSheet(type) {
       window.setSport?.(sport.dataset.sport, legacyBtn || null);
       closeSheet(); setTimeout(syncUI, 0);
     } else if (team) {
-      chooseTeam(team.dataset.team); closeSheet();
+      chooseTeam(team.dataset.team, team.dataset.teamSport || ''); closeSheet();
     }
   };
   sheet.classList.add('open');
@@ -413,7 +437,9 @@ function syncUI() {
   const team = bar.querySelector('[data-open="team"]');
   const fav = bar.querySelector('[data-favorites]');
   sport.textContent = `球種：${SPORT_LABEL[state.currentSport] || state.currentSport || '全部球種'}`;
-  team.textContent = state.currentSport === '全部' ? '隊伍：先選球種' : `隊伍：${state.currentTeam || '全部啦啦隊'}`;
+  team.textContent = state.currentTeam && state.currentTeam !== '全部啦啦隊'
+    ? `隊伍：${state.currentTeam}`
+    : '隊伍：全部隊伍';
   sport.classList.toggle('active', state.currentSport && state.currentSport !== '全部');
   team.classList.toggle('active', state.currentTeam && state.currentTeam !== '全部啦啦隊');
   fav.classList.toggle('active', favoritesOnly);
@@ -454,7 +480,7 @@ function ensureUI() {
   const bar = document.createElement('section');
   bar.id = 'girls-mobile-filterbar';
   bar.className = 'girls-mobile-filterbar';
-  bar.innerHTML = `<div class="girls-mobile-filterbar__row"><button class="girls-filter-chip" data-open="sport">球種：全部球種</button><button class="girls-filter-chip" data-open="team">隊伍：先選球種</button><button class="girls-filter-chip" data-favorites>♥ 我的最愛</button></div><div class="girls-mobile-filterbar__meta"><span id="girls-mobile-filter-count">目前顯示 0 位女孩</span><button class="girls-filter-clear" data-clear>清除篩選</button></div>`;
+  bar.innerHTML = `<div class="girls-mobile-filterbar__row"><button class="girls-filter-chip" data-open="team">👥 隊伍：全部隊伍</button><button class="girls-filter-chip" data-open="sport">🏐 球種：全部球種</button><button class="girls-filter-chip" data-favorites>♥ 我的最愛</button></div><div class="girls-mobile-filterbar__meta"><span id="girls-mobile-filter-count">目前顯示 0 位女孩</span><button class="girls-filter-clear" data-clear>清除篩選</button></div>`;
   grid.parentNode.insertBefore(bar, grid);
   bar.onclick = event => {
     const open = event.target.closest('[data-open]');
