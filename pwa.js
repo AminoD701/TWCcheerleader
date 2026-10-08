@@ -163,21 +163,75 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/girls-default-sort.js?v=5', 'girls-default-sort');
-  loadScriptOnce('./src/app/girls-roster-polish.js?v=3', 'girls-roster-polish');
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements');
-  loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
-  loadScriptOnce('./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined');
-  loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
-  loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
-  loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
-  loadScriptOnce('./src/app/former-archive.js?v=4', 'former-archive');
-  loadScriptOnce('./src/app/data-lab.js?v=8', 'data-lab');
-  loadScriptOnce('./src/app/events-archive.js?v=4', 'events-archive');
-  loadScriptOnce('./src/app/home-overview.js?v=2', 'home-overview');
-  loadScriptOnce('./src/app/season-spotlight.js?v=4', 'season-spotlight');
-  loadScriptOnce('./src/app/news-freshness.js?v=2', 'news-freshness');
-  loadScriptOnce('./src/app/news-page-polish.js?v=1', 'news-page-polish');
+  const routeAssets = Object.freeze({
+    home: [
+      ['./src/app/home-overview.js?v=3', 'home-overview'],
+      ['./src/app/season-spotlight.js?v=4', 'season-spotlight']
+    ],
+    girls: [
+      ['./src/app/girls-default-sort.js?v=6', 'girls-default-sort'],
+      ['./src/app/girls-roster-polish.js?v=3', 'girls-roster-polish'],
+      ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides'],
+      ['./src/app/girl-career.js?v=6', 'girl-career']
+    ],
+    events: [
+      ['./src/app/events-archive.js?v=4', 'events-archive']
+    ],
+    schedule: [
+      ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides']
+    ],
+    matches: [
+      ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides']
+    ],
+    archive: [
+      ['./src/app/former-archive.js?v=5', 'former-archive'],
+      ['./src/app/girl-career.js?v=6', 'girl-career']
+    ],
+    datalab: [
+      ['./src/app/data-lab.js?v=9', 'data-lab']
+    ],
+    news: [
+      ['./src/app/news-freshness.js?v=2', 'news-freshness'],
+      ['./src/app/news-page-polish.js?v=1', 'news-page-polish']
+    ],
+    themes: [
+      ['./src/app/news-page-polish.js?v=1', 'news-page-polish']
+    ],
+    games: [
+      ['./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements']
+    ],
+    minigame: [
+      ['./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements'],
+      ['./src/app/minigame-refined.js?v=2', 'minigame-refined']
+    ],
+    dreamteam: [
+      ['./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements'],
+      ['./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined']
+    ],
+    more: [
+      ['./src/app/gacha-history.js?v=2', 'gacha-history']
+    ],
+    my: [
+      ['./src/app/gacha-history.js?v=2', 'gacha-history']
+    ]
+  });
+
+  const loadRouteAssets = mode => {
+    (routeAssets[mode] || []).forEach(([src, name]) => loadScriptOnce(src, name));
+  };
+
+  const syncRouteAssets = () => {
+    const mode = document.body?.dataset.appMode
+      || new URL(location.href).searchParams.get('mode')
+      || 'home';
+    loadRouteAssets(mode);
+  };
+
+  syncRouteAssets();
+  new MutationObserver(syncRouteAssets).observe(document.body, {
+    attributes: true,
+    attributeFilter: ['data-app-mode']
+  });
 
   window.addEventListener('load', () => {
     if (!isStandalone()) createInstallButton();
