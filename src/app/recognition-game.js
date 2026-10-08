@@ -13,10 +13,10 @@
     const rows = window.CheerHomeData?.snapshot?.().girls || [];
     const unique = new Map();
     for(const g of rows) {
-      const name=String(g.name || g.姓名 || '').trim();
+      const name=String(g.nickname || g.realname || g.name || g.姓名 || '').trim();
       const img=String(g.img || '').trim();
       const uid=String(g.uid || name).trim();
-      if (!name || !img || !/^https?:\/\/|^\//i.test(img)) continue;
+      if (!name || !img) continue;
       if (!unique.has(uid) || (!unique.get(uid).team && g.team)) unique.set(uid,{uid,name,img,team:String(g.team||'').trim(),sport:String(g.sport||'').trim()});
     }
     // Avoid multiple choices sharing the same displayed name.
@@ -69,7 +69,7 @@
   window.openRecognitionGame = open;
   function start(mode){
     const all=shuffle(pool());
-    if(all.length<4){frame('<div class="recognition-panel">目前可用照片不足四位，請稍後等女孩圖鑑載入完成再試。<div class="recognition-actions"><button class="recognition-btn primary" id="retry-recognition">重新載入</button></div></div>');document.getElementById('retry-recognition').onclick=open;return;}
+    if(all.length<4){frame('<div class="recognition-panel">女孩圖鑑正在載入，請稍候再試。<div class="recognition-actions"><button class="recognition-btn primary" id="retry-recognition">重新載入</button></div></div>');document.getElementById('retry-recognition').onclick=open;return;}
     game={mode,all,limit:mode==='quick'?Math.min(20,all.length):all.length,index:0,correct:0,wrong:0,locked:false};
     renderQuestion();
   }
