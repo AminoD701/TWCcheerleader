@@ -59,6 +59,10 @@
     }));
     root.innerHTML=`
       <section class="archive-page">
+        <div class="archive-switchbar">
+          <button type="button" data-archive-back>現役女孩</button>
+          <button type="button" class="active">歷屆成員</button>
+        </div>
         <div class="archive-hero">
           <div><span>CHEERLEADER HISTORY</span><h1>歷屆成員資料庫</h1><p>保留曾經出現在本站資料庫中的啦啦隊女孩。離隊後不會從網站消失，而是依離隊賽季轉入歷史資料。</p></div>
           <div class="archive-total"><strong>${data.length}</strong><small>歷屆女孩</small></div>
@@ -80,6 +84,7 @@
             </section>`).join('')}
         </div>
       </section>`;
+    root.querySelector('[data-archive-back]')?.addEventListener('click',()=>window.setMode?.('girls'));
     root.querySelector('.archive-tabs')?.addEventListener('click',e=>{
       const btn=e.target.closest('[data-archive-season]'); if(!btn)return;
       root.querySelectorAll('[data-archive-season]').forEach(x=>x.classList.toggle('active',x===btn));
@@ -90,15 +95,16 @@
       const group=groups.find(g=>g.season===card.dataset.archiveSeasonKey);
       const item=group?.items[Number(card.dataset.archiveIndex)];
       if(item?.girl && typeof window.openProfile==='function') window.openProfile(item.girl);
-    },{once:true});
+    });
   }
 
   function style(){
     if(document.getElementById('former-archive-style'))return;
     const s=document.createElement('style');s.id='former-archive-style';s.textContent=`
       .former-archive-entry{display:none;max-width:1200px;margin:10px auto 18px;padding:18px 20px;border:1px solid rgba(255,255,255,.11);border-radius:16px;background:radial-gradient(circle at 90% 0,rgba(56,189,248,.12),transparent 34%),linear-gradient(145deg,#161b22,#0e1116);align-items:center;justify-content:space-between;gap:18px}
-      body[data-app-mode="girls"] .former-archive-entry{display:flex}.former-archive-entry>div{display:flex;flex-direction:column;gap:5px}.former-archive-entry span{font:900 10px/1 var(--sport-font);letter-spacing:1.8px;color:#7dd3fc}.former-archive-entry strong{font-size:20px;color:#fff}.former-archive-entry small{color:#94a3b8;line-height:1.55}.former-archive-entry button{white-space:nowrap;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:#fff;color:#101318;padding:11px 15px;font-weight:950;cursor:pointer}
+      body[data-app-mode="girls"] .former-archive-entry{display:none}.former-archive-entry>div{display:flex;flex-direction:column;gap:5px}.former-archive-entry span{font:900 10px/1 var(--sport-font);letter-spacing:1.8px;color:#7dd3fc}.former-archive-entry strong{font-size:20px;color:#fff}.former-archive-entry small{color:#94a3b8;line-height:1.55}.former-archive-entry button{white-space:nowrap;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:#fff;color:#101318;padding:11px 15px;font-weight:950;cursor:pointer}
       #archive-container{display:none;width:100%;max-width:1180px;margin:20px auto 70px;padding:0 16px;box-sizing:border-box}body[data-app-mode="archive"] #archive-container{display:block}
+      .archive-switchbar{display:flex;justify-content:flex-end;gap:6px;margin:0 0 12px}.archive-switchbar button{min-height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:#11161c;color:#9aa5b2;font-size:11px;font-weight:900;cursor:pointer}.archive-switchbar button.active{color:#fff;border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.07)}
       .archive-hero{display:flex;justify-content:space-between;align-items:end;gap:24px;padding:28px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:radial-gradient(circle at 90% 0,rgba(56,189,248,.15),transparent 35%),#10141a}.archive-hero span{font:900 11px/1 var(--sport-font);letter-spacing:2px;color:#7dd3fc}.archive-hero h1{margin:7px 0 8px;color:#fff;font-size:clamp(28px,5vw,44px)}.archive-hero p{margin:0;max-width:680px;color:#94a3b8;line-height:1.7}.archive-total{text-align:center;min-width:110px}.archive-total strong{display:block;font:950 42px/1 var(--sport-font);color:#fff}.archive-total small{color:#94a3b8}
       .archive-tabs{display:flex;gap:8px;overflow:auto;margin:18px 0 14px;padding-bottom:3px}.archive-tabs button{border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#12171d;color:#aab3bf;padding:9px 13px;font-weight:900;white-space:nowrap}.archive-tabs button.active{background:#fff;color:#111}.archive-season__head{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px;color:#fff}.archive-season__head span{color:#94a3b8;font-size:12px}.archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.archive-card{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:#12171d;color:#fff;text-align:left;padding:0;cursor:pointer}.archive-card__photo{aspect-ratio:4/5;background:#0b0e12}.archive-card__photo img{width:100%;height:100%;object-fit:cover;object-position:top}.archive-card__body{padding:11px}.archive-card__body strong{display:block;font-size:16px}.archive-card__body small,.archive-card__body span{display:block;margin-top:3px;color:#94a3b8;font-size:11px;line-height:1.4}.archive-empty{padding:40px;text-align:center;color:#94a3b8}
       @media(max-width:700px){.former-archive-entry{margin:8px 10px 14px;padding:15px;align-items:flex-start}.former-archive-entry button{padding:9px 11px;font-size:12px}.former-archive-entry small{font-size:11px}.archive-hero{align-items:flex-start;flex-direction:column}.archive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
