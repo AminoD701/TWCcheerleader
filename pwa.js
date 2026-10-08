@@ -95,7 +95,7 @@
   }
 
   navigator.serviceWorker?.addEventListener('controllerchange', () => {
-    if (refreshing || !updateAccepted) return;
+    if (refreshing) return;
     refreshing = true;
     location.reload();
   });
