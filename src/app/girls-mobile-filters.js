@@ -120,7 +120,8 @@ function applyFavorites() {
   updateMeta();
 }
 
-function teamButtons() { return [...document.querySelectorAll('#team-menu .dropdown-item')].filter(btn => !btn.disabled); }
+function isHistoricalTeamName(name) { return window.CheerGirlsDefaultSort?.historicalTeams?.has?.(String(name || '').trim()) || String(name || '').trim() === 'Little Witches'; }
+function teamButtons() { return [...document.querySelectorAll('#team-menu .dropdown-item')].filter(btn => !btn.disabled && !isHistoricalTeamName(teamName(btn))); }
 function teamName(btn) { return (btn.querySelector('span')?.textContent || btn.textContent || '').trim(); }
 function chooseTeam(name) {
   const btn = teamButtons().find(b => teamName(b) === name || (name === '全部啦啦隊' && teamName(b).includes('全部')));
@@ -138,6 +139,7 @@ function favoriteIds() {
 function formerGirlsForTeam(team, state) {
   const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
   const isFormer = girl => {
+    if (isHistoricalTeamName(girl?.team)) return true;
     const departureSeason = String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
     if (departureSeason) return true;
     if (window.CheerGirlsDefaultSort?.isFormer?.(girl)) return true;
