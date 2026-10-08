@@ -201,6 +201,45 @@
       .datalab-two{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:12px}.datalab-table{display:grid;gap:7px}.datalab-table>div{padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.08)}.datalab-table small{color:#86efac}.datalab-zodiac-table>div.is-top{padding:11px 12px;border:1px solid rgba(134,239,172,.22);border-radius:11px;background:rgba(134,239,172,.05)}.datalab-zodiac-table>div.is-top b{color:#bbf7d0}.datalab-league-row__main{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center}.datalab-league-row__nat{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.datalab-league-row__nat span{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.05);color:#9ca7b5;font-size:10px;font-weight:800}
       @media(max-width:900px){.datalab-nationality-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
       @media(max-width:760px){.datalab-hero{flex-direction:column;align-items:flex-start}.datalab-kpis{grid-template-columns:1fr 1fr}.datalab-filters{grid-template-columns:1fr 1fr}.datalab-two{grid-template-columns:1fr}.datalab-result-list{grid-template-columns:1fr 1fr}.datalab-nationality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.datalab-league-row__main{grid-template-columns:1fr auto}.datalab-league-row__main small{grid-column:1/-1}}
+
+      @media(max-width:900px){
+        body[data-app-mode="datalab"] #datalab-container{margin:0 auto 110px;padding:10px 14px 0;overflow-x:clip}
+        .datalab{display:grid;gap:12px;min-width:0}
+        .datalab-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:12px;padding:20px 16px;border-radius:19px;background:radial-gradient(circle at top right,rgba(134,239,172,.15),transparent 65%),#111920}
+        .datalab-hero h1{font-size:clamp(23px,6vw,32px);line-height:1.2;margin:9px 0}
+        .datalab-hero p{font-size:11px;line-height:1.6}
+        .datalab-total{min-width:68px;padding:10px;border-radius:12px;background:rgba(134,239,172,.07);border:1px solid rgba(134,239,172,.25)}
+        .datalab-total strong{font-size:30px;color:#bbf7d0}
+        .datalab-total small{display:block;font-size:10px}
+        .datalab-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+        .datalab-kpis>div{min-width:0;padding:13px;border-radius:14px}
+        .datalab-kpis strong{font-size:28px}
+        .datalab-kpis small{font-size:11px}
+        .datalab-panel,.datalab-query{min-width:0;padding:15px 13px;border-radius:17px;margin:0}
+        .datalab-section-title{align-items:center;margin-bottom:12px}
+        .datalab-section-title strong{font-size:18px}
+        .datalab-nationality-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+        .datalab-nationality-grid>div{min-width:0;padding:12px 4px;border-radius:11px}
+        .datalab-nationality-grid small{font-size:10px;white-space:normal;line-height:1.3}
+        .datalab-nationality-grid strong{font-size:24px}
+        .datalab-two{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0}
+        .datalab-league-row{padding:11px 0!important}
+        .datalab-league-row__main{display:flex;align-items:center;gap:9px}
+        .datalab-league-row__main b{font-size:14px}
+        .datalab-league-row__main span{margin-left:auto;font-weight:900;font-size:12px}
+        .datalab-league-row__main small{font-size:10px}
+        .datalab-zodiac-table{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+        .datalab-zodiac-table>div{display:flex;justify-content:space-between;align-items:center;gap:5px;min-width:0;padding:11px 8px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#171d24}
+        .datalab-zodiac-table b{font-size:12px}
+        .datalab-zodiac-table span{font-size:11px;white-space:nowrap}
+        .datalab-filters{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+        .datalab-filters label{min-width:0}
+        .datalab-filters select,.datalab-filters input{min-width:0;font-size:16px}
+        .datalab-result-list{grid-template-columns:1fr;gap:7px}
+        .datalab-result-list button{padding:12px;border-radius:11px}
+        .datalab-result-list strong{font-size:13px}
+        .datalab-result-list small{font-size:11px}
+      }
     `;document.head.appendChild(s);
   }
   function boot(){style();if(document.body?.dataset.appMode==='datalab')render();}
