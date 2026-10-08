@@ -9,7 +9,7 @@
   const TPBL_TEAMS=new Set(['Aqua Mermaids','Formosa Sexy','Passion Sisters','Muse Girls','Taishin Wonders','Leopard Girls','New Taipei Queens']);
   const PLG_TEAMS=new Set(['Pilots Crew','Youngkey Girls','Wing Stars','Fubon Angels']);
   const TPVL_TEAMS=new Set(['Tokki Cutie','Peach Girls','Little Witches','Wing Stars','Si-ster']);
-  const isFormer=g=>Boolean(String(g?.departureseason||g?.departure_season||g?.['離隊賽季']||'').trim())||/(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(g?.note||''));
+  const isFormer=g=>Boolean(String(g?.departure_season||g?.departureseason||g?.departureSeason||g?.['離隊賽季']||'').trim())||/(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(g?.note||''));
   const uid=g=>String(g?.uid||`${String(g?.realname||'').trim()}|${String(g?.nickname||'').trim()}`).trim();
   const noteText=g=>String(g?.note||g?.['備註']||g?.備註||'').trim();
   const cleanedNote=g=>noteText(g)
