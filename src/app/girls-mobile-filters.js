@@ -167,7 +167,7 @@ function ensureFormerRoster() {
   panel.id = 'former-roster';
   panel.className = 'former-roster';
   panel.hidden = true;
-  grid.insertAdjacentElement('afterend', panel);
+  grid.insertAdjacentElement('beforebegin', panel);
   panel.addEventListener('click', event => {
     const btn = event.target.closest('[data-former-index]');
     if (!btn) return;
