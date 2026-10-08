@@ -9,15 +9,21 @@
   const normalize = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
   const formerPattern = /已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員/;
   const getNote = record => String(record?.note || record?.['備註'] || record?.備註 || '').trim();
+  const getDepartureSeason = record => String(record?.departureseason || record?.departure_season || record?.['離隊賽季'] || '').trim();
   const isFormer = record => {
     const status = normalize(record?.status);
-    return formerPattern.test(getNote(record)) || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
+    return Boolean(getDepartureSeason(record)) || formerPattern.test(getNote(record)) || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
+  };
+  const formerLabel = record => {
+    const season = getDepartureSeason(record);
+    return season ? `${season} 賽季離隊` : '已離隊';
   };
 
   window.cheerGirlStatus = window.cheerGirlStatus || {};
   window.cheerGirlStatus.isFormer = isFormer;
   window.cheerGirlStatus.isActive = record => !isFormer(record);
   window.cheerGirlStatus.getNote = getNote;
+  window.cheerGirlStatus.getDepartureSeason = getDepartureSeason;
 
   const loadCareerData = () => {
     if (!careerDataPromise) {
@@ -52,7 +58,7 @@
     const sportsTeam = record.sportsTeam || record.club || record.organization || '';
     const sport = record.sport || '';
     const ended = Boolean(record.end || record.endYear || record.to || isFormer(record));
-    const badge = ended ? '已離隊' : '現役';
+    const badge = ended ? formerLabel(record) : '現役';
     const note = getNote(record);
     return `
       <div class="girl-career__item">
@@ -97,13 +103,14 @@
       seen.add(team);
       const sport = String(row.sport || '').trim();
       const note = getNote(row);
+      const season = getDepartureSeason(row);
       return `
         <div class="girl-career__item">
-          <div class="girl-career__period">歷史紀錄</div>
+          <div class="girl-career__period">${season ? `${esc(season)} SEASON` : '歷史紀錄'}</div>
           <div class="girl-career__body">
             <div class="girl-career__title-row">
               <strong>${esc(team)}</strong>
-              <span class="girl-career__badge is-former">已離隊</span>
+              <span class="girl-career__badge is-former">${esc(formerLabel(row))}</span>
             </div>
             ${sport ? `<div class="girl-career__meta">${esc(sport)}</div>` : ''}
             ${note ? `<div class="girl-career__note">${esc(note)}</div>` : ''}
@@ -223,7 +230,7 @@
           <span class="girl-career__hint">點擊查看</span>
         </summary>
         <div class="girl-career__content">
-          <div class="girl-career__intro">現役狀態以女孩主資料的備註／status 判斷；「已離隊、離隊、退隊、不續約、已卸任、前成員」不再列為現役，但歷史資料仍保留。</div>
+          <div class="girl-career__intro">現役／歷屆狀態以女孩主資料為準；有 departure_season 的成員會依賽季明確標示離隊年份，歷史資料仍完整保留。</div>
           ${makeCurrentRows(activeRows)}
           ${makeHistoryRows(history)}
           ${history.length ? '' : makeFormerRowsFromMainData(formerRows)}
