@@ -147,7 +147,7 @@ function renderHero() {
     ? `下一戰｜${formatDate(next)} ${next.time || ''}｜${next.awayteam} @ ${next.hometeam}`
     : (state.latestFinal ? `最新戰況｜${state.latestFinal.awayteam} ${state.latestFinal.awayscore}：${state.latestFinal.homescore} ${state.latestFinal.hometeam}` : '完整賽程已公布');
 
-  hero.innerHTML = `
+  const nextMarkup = `
     <div class="season-spotlight__eyebrow"><span class="season-spotlight__live-dot"></span> 2026 CPBL POSTSEASON</div>
     <div class="season-spotlight__body">
       <div>
@@ -160,6 +160,10 @@ function renderHero() {
         <button type="button" class="season-spotlight__button">查看季後賽賽程 <span>→</span></button>
       </div>
     </div>`;
+  if (hero.dataset.renderKey !== nextMarkup) {
+    hero.innerHTML = nextMarkup;
+    hero.dataset.renderKey = nextMarkup;
+  }
   hero.querySelector('button')?.addEventListener('click', goToPostseason);
   hero.addEventListener('click', event => {
     if (!event.target.closest('button')) goToPostseason();
