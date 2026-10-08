@@ -106,8 +106,8 @@
     attempts += 1;
     const ready = applyDefaultSort();
     installRenderGuard();
-    if ((ready && window.renderContent?.__activeGirlsOnly) || attempts >= 120) clearInterval(timer);
-  }, 150);
+    if ((ready && window.renderContent?.__activeGirlsOnly) || attempts >= 12) clearInterval(timer);
+  }, 250);
 
   window.addEventListener('load', () => {
     installRenderGuard();
