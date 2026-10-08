@@ -73,20 +73,20 @@
     const root=hub(); if(!root || root.querySelector('#recognition-app, .recognition-entry, .twc-games-home')) return;
     const cards=root.querySelector('div[style*="flex-wrap"]'); if(!cards) return;
     const button=document.createElement('button'); button.type='button';button.className='recognition-entry';
-    button.innerHTML='<span style="font-size:33px" aria-hidden="true">RQ</span><strong>啦啦隊認人王</strong><small>看照片猜名字，測試你的應援眼力</small>';
+    button.innerHTML='<span style="font-size:33px" aria-hidden="true">RQ</span><strong>應援眼力王</strong><small>看照片猜名字，測試你的應援眼力</small>';
     button.addEventListener('click',open);cards.append(button);
   }
   function frame(html){
     const root=hub();if(!root)return;
     root.style.display='flex';root.style.flexDirection='column';root.style.alignItems='stretch';
-    root.innerHTML='<section id="recognition-app" aria-label="啦啦隊認人王"><button class="recognition-back" type="button">← 返回遊戲中心</button>'+html+'</section>';
+    root.innerHTML='<section id="recognition-app" aria-label="應援眼力王"><button class="recognition-back" type="button">← 返回遊戲中心</button>'+html+'</section>';
     root.querySelector('.recognition-back').addEventListener('click',back);
   }
   function back(){clearNext();game=null;window.renderGamesHub?.();mount();}
   function open(){
     clearNext();style();game=null;lastResults=[];
     const n=pool().length;
-    frame('<div class="recognition-panel"><div class="recognition-app-title">啦啦隊認人王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">20 題快賽</button><button class="recognition-btn" data-start="endless">無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
+    frame('<div class="recognition-panel"><div class="recognition-app-title">應援眼力王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">20 題快賽</button><button class="recognition-btn" data-start="endless">無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
     hub().querySelectorAll('[data-start]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.start)));
   }
   window.openRecognitionGame = open;
@@ -169,7 +169,7 @@
     try { await drawCheerPhoto(c); } catch(error) { console.warn('Recognition background unavailable', error); }
     c.strokeStyle='#384050';c.lineWidth=2;c.strokeRect(50,50,980,1250);
     c.fillStyle='#ae9add';c.font='700 29px '+font;c.fillText('TWC CHEERLEADER  /  RECOGNITION QUIZ',100,138);
-    c.fillStyle='#ffffff';c.font='800 70px '+font;c.fillText('啦啦隊認人王',100,248);
+    c.fillStyle='#ffffff';c.font='800 70px '+font;c.fillText('應援眼力王',100,248);
     c.fillStyle='#bca9ed';c.font='800 52px '+font;c.fillText(result.label,100,349);
     c.fillStyle='#748095';c.fillRect(100,393,880,2);
     c.fillStyle='#a89be7';c.font='700 30px '+font;c.fillText('YOUR SCORE',100,466);
@@ -196,7 +196,7 @@
     try {
       const file=await shareCard(result);
       if(navigator.canShare?.({files:[file]}) && navigator.share) {
-        try{await navigator.share({files:[file],title:'啦啦隊認人王',text:'我的認人王成績'});return;}
+        try{await navigator.share({files:[file],title:'應援眼力王',text:'我的認人王成績'});return;}
         catch(e){if(e.name==='AbortError')return;}
       }
       const url=URL.createObjectURL(file);
@@ -215,7 +215,7 @@
     storage.set(key,{...previous,[game.mode]:best});
     const stats=groupStats(lastResults);
     const result={correct:game.correct,answered,percentage,label,praise,best,stats,mode:game.mode};
-    frame('<div class="recognition-share-preview"><img class="recognition-photo-art" src="'+CHEER_PHOTO+'" alt="" aria-hidden="true"><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">啦啦隊認人王</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
+    frame('<div class="recognition-share-preview"><img class="recognition-photo-art" src="'+CHEER_PHOTO+'" alt="" aria-hidden="true"><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">應援眼力王</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
     document.getElementById('recognition-again').onclick=open;
     document.getElementById('recognition-home').onclick=back;
     document.getElementById('recognition-share').onclick=e=>shareResult(result,e.currentTarget);
