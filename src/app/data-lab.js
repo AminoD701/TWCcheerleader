@@ -17,11 +17,12 @@
     .replace(/^[,\s、，]+|[,\s、，]+$/g,'')
     .trim();
   const isTrainee=g=>/(練習生|培訓生)/.test(cleanedNote(g));
+  const isNewMember=g=>/(新成員|新加入|新人)/.test(cleanedNote(g));
   const isStatsEligible=g=>{
     if(isFormer(g)) return false;
     if(String(g?.sport||'').trim()==='其他') return false;
     const note=cleanedNote(g);
-    return !note || isTrainee(g);
+    return !note || isTrainee(g) || isNewMember(g);
   };
   const leagueFor=g=>{
     const team=String(g.team||'').trim(),sport=String(g.sport||'');
@@ -112,14 +113,17 @@
       ...natBreakdown({})
     };
     const zodiacCounts=['牡羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚'].map(z=>({z,count:count({zodiac:z})})).sort((a,b)=>b.count-a.count);
+    const topZodiac=zodiacCounts[0] || {z:'—',count:0};
+    const heightKnown=people.flatMap(p=>p.rows.map(h)).filter(x=>x!=null);
+    const avgHeight=heightKnown.length ? (heightKnown.reduce((sum,x)=>sum+x,0)/heightKnown.length).toFixed(1) : '—';
     root.innerHTML=`
       <section class="datalab">
-        <div class="datalab-hero"><div><span>CHEER ECOSYSTEM</span><h1>啦啦隊生態數據</h1><p>統計僅納入現役正式啦啦隊女孩與練習生／培訓生，排除應援團長、吉祥物及其他特殊身分，也不納入「其他」球種分類。</p></div><div class="datalab-total"><strong>${people.length}</strong><small>統計女孩</small></div></div>
+        <div class="datalab-hero"><div><span>CHEER ECOSYSTEM</span><h1>啦啦隊生態數據</h1><p>統計納入現役正式啦啦隊女孩、練習生／培訓生與新成員；排除應援團長、吉祥物及其他特殊身分，也不納入「其他」球種分類。</p></div><div class="datalab-total"><strong>${people.length}</strong><small>統計女孩</small></div></div>
         <div class="datalab-kpis">
-          <div><small>CPBL 外籍</small><strong>${count({league:'CPBL',nat:'foreign'})}</strong><span>位</span></div>
-          <div><small>TPBL 外籍</small><strong>${count({league:'TPBL',nat:'foreign'})}</strong><span>位</span></div>
+          <div><small>外籍女孩</small><strong>${allNat.foreign}</strong><span>位</span></div>
+          <div><small>最多星座</small><strong>${topZodiac.z}</strong><span>${topZodiac.count} 位</span></div>
+          <div><small>平均身高</small><strong>${avgHeight}</strong><span>${avgHeight==='—'?'':'cm'}</span></div>
           <div><small>身高 160+</small><strong>${count({height:160})}</strong><span>位</span></div>
-          <div><small>巨蟹座</small><strong>${count({zodiac:'巨蟹'})}</strong><span>位</span></div>
         </div>
         <section class="datalab-panel datalab-nationality">
           <div class="datalab-section-title"><div><span>NATIONALITY</span><strong>現役國籍結構</strong></div></div>
