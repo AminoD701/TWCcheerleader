@@ -11,6 +11,72 @@
     return String(girl?.uid || `${String(girl?.realname || '').trim()}|${String(girl?.nickname || '').trim()}`).trim();
   }
 
+  function legacyState() {
+    try { return window.CheerLegacyState?.snapshot?.() || {}; }
+    catch (_) { return {}; }
+  }
+
+  function currentFilters() {
+    const state = legacyState();
+    return {
+      sport: String(state.currentSport || '全部').trim(),
+      team: String(state.currentTeam || '全部啦啦隊').trim(),
+      search: String(document.getElementById('searchInput')?.value || '').trim(),
+      role: String(document.getElementById('roleFilter')?.value || 'all').trim(),
+      nat: String(document.getElementById('natFilter')?.value || 'all').trim(),
+      zodiac: String(document.getElementById('zodiacFilter')?.value || 'all').trim()
+    };
+  }
+
+  function matchesFilters(girl, filters = currentFilters()) {
+    if (isFormer(girl)) return false;
+    if (filters.sport && filters.sport !== '全部' && !String(girl?.sport || '').includes(filters.sport)) return false;
+    if (filters.team && filters.team !== '全部啦啦隊' && String(girl?.team || '').trim() !== filters.team) return false;
+
+    const haystack = `${String(girl?.nickname || '')} ${String(girl?.realname || '')}`.toLowerCase();
+    if (filters.search && !haystack.includes(filters.search.toLowerCase())) return false;
+
+    const nat = String(girl?.nat || '');
+    if (filters.nat === '臺灣' && !/(臺灣|台灣|臺籍|台籍)/.test(nat)) return false;
+    if (filters.nat === '其他' && /(臺灣|台灣|臺籍|台籍|韓國|韓籍|日本|日籍)/.test(nat)) return false;
+    if (!['all','臺灣','其他'].includes(filters.nat) && filters.nat && !nat.includes(filters.nat)) return false;
+
+    const zodiac = String(girl?.zodiac || '').trim().replace('魔羯','摩羯').replace('白羊','牡羊');
+    if (filters.zodiac !== 'all' && filters.zodiac && zodiac !== filters.zodiac) return false;
+
+    if (filters.role !== 'all') {
+      const note = String(girl?.note || '').replace(/(合作夥伴|合作)/g,'').trim();
+      const trainee = /練習生|培訓/.test(note);
+      const mascot = /吉祥物/.test(note);
+      const special = Boolean(note) && !trainee && !mascot && !formerPattern.test(note);
+      if (filters.role === 'cheerleader' && (trainee || mascot || special)) return false;
+      if (filters.role === 'special' && !(trainee || mascot || special)) return false;
+    }
+    return true;
+  }
+
+  function matchedActiveCount() {
+    const seen = new Set();
+    (Array.isArray(window.dbGirls) ? window.dbGirls : []).forEach(girl => {
+      if (!matchesFilters(girl)) return;
+      const key = personKey(girl);
+      if (key) seen.add(key);
+    });
+    return seen.size;
+  }
+
+  function filterLabels() {
+    const filters = currentFilters();
+    const labels = [];
+    if (filters.sport && filters.sport !== '全部') labels.push(filters.sport);
+    if (filters.team && filters.team !== '全部啦啦隊') labels.push(filters.team);
+    if (filters.search) labels.push(`搜尋：${filters.search}`);
+    if (filters.nat && filters.nat !== 'all') labels.push(filters.nat === '臺灣' ? '台籍' : filters.nat);
+    if (filters.zodiac && filters.zodiac !== 'all') labels.push(filters.zodiac);
+    if (filters.role && filters.role !== 'all') labels.push(filters.role === 'cheerleader' ? '一般啦啦隊' : '特殊身分');
+    return labels;
+  }
+
   function activeCount() {
     const seen = new Set();
     (Array.isArray(window.dbGirls) ? window.dbGirls : []).forEach(girl => {
@@ -79,6 +145,9 @@
       }
       .girls-roster-toolbar__title strong{font-size:21px}
       .girls-roster-toolbar__title span{color:#8f9aa8;font-size:11px;font-weight:800}
+      .girls-roster-toolbar__filters{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+      .girls-roster-filter-pill{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(255,255,255,.035);color:#aeb8c5;font-size:10px;font-weight:850}
+      .girls-roster-filter-pill--empty{color:#697481}
       .girls-roster-toolbar__tabs{display:flex;gap:6px}
       .girls-roster-tab{
         min-height:36px;
@@ -235,6 +304,8 @@
           gap:9px;
         }
         .girls-roster-toolbar__title strong{font-size:19px}
+        .girls-roster-toolbar__filters{margin-top:7px;gap:4px}
+        .girls-roster-filter-pill{font-size:9px;min-height:22px;padding:0 7px}
         .girls-roster-toolbar__tabs{width:100%}
         .girls-roster-tab{flex:1;min-height:40px}
         body[data-app-mode="girls"] #grid-container{
@@ -291,13 +362,23 @@
     }
     const shown = [...grid.querySelectorAll(':scope > .card')].filter(card => card.style.display !== 'none').length;
     const total = activeCount();
-    const signature = `${shown}|${total}`;
+    const matched = matchedActiveCount();
+    const labels = filterLabels();
+    const signature = `${shown}|${matched}|${total}|${labels.join('~')}`;
     if (toolbar.dataset.signature !== signature) {
       toolbar.dataset.signature = signature;
+      const resultText = labels.length
+        ? `目前顯示 ${shown} 位 · 符合篩選 ${matched} 位 · 現役總數 ${total} 位`
+        : `目前顯示 ${shown} 位 · 資料庫現役 ${total} 位`;
       toolbar.innerHTML = `
         <div>
           <div class="girls-roster-toolbar__eyebrow">CHEERLEADER ROSTER</div>
-          <div class="girls-roster-toolbar__title"><strong>現役女孩</strong><span>目前顯示 ${shown} 位 · 資料庫現役 ${total} 位</span></div>
+          <div class="girls-roster-toolbar__title"><strong>現役女孩</strong><span>${resultText}</span></div>
+          <div class="girls-roster-toolbar__filters">
+            ${labels.length
+              ? labels.map(label => `<span class="girls-roster-filter-pill">${label.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}</span>`).join('')
+              : '<span class="girls-roster-filter-pill girls-roster-filter-pill--empty">目前顯示全部現役成員</span>'}
+          </div>
         </div>
         <div class="girls-roster-toolbar__tabs">
           <button type="button" class="girls-roster-tab is-active" data-girls-view="active">現役女孩</button>
@@ -336,6 +417,11 @@
     if (document.body?.dataset.appMode !== 'girls') {
       if (toolbar) toolbar.style.display = 'none';
       return;
+    }
+    const legacyFormer = document.getElementById('former-roster');
+    if (legacyFormer) {
+      legacyFormer.hidden = true;
+      legacyFormer.open = false;
     }
     ensureToolbar();
     if (toolbar) toolbar.style.display = '';
