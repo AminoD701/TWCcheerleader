@@ -1,5 +1,5 @@
 import { NAV_ITEMS, parentForMode } from './navigation-config.js';
-import './girls-mobile-filters.js?v=2';
+import './girls-mobile-filters.js?v=5';
 
 const stateByMode = new Map();
 const safeSession = {
