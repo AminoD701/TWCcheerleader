@@ -98,6 +98,8 @@
     if(!game)return;
     if(game.index>=game.limit || (game.mode==='endless' && game.wrong>=3)){finish();return;}
     game.locked=false;
+    const previousRect=hub()?.querySelector('#recognition-app')?.getBoundingClientRect();
+    if(previousRect && (previousRect.top < -80 || previousRect.top > window.innerHeight-100)) hub()?.scrollIntoView({block:'start',behavior:'instant'});
     const person=game.all[game.index],answers=choices(person);
     const total=game.mode==='quick'?game.limit:'題庫 '+game.limit;
     frame('<div class="recognition-panel"><div class="recognition-meta"><span>'+esc(game.mode==='quick'?'快速認人賽':'無限認人挑戰')+'</span><span>第 '+(game.index+1)+' / '+total+' 題</span></div><div class="recognition-progress"><span style="width:'+100*game.index/game.limit+'%"></span></div><div class="recognition-meta"><span>✓ 答對 '+game.correct+'</span><span>✕ 答錯 '+game.wrong+(game.mode==='endless'?' / 3':'')+'</span></div><img class="recognition-photo" alt="請猜猜照片中女孩的名字" src="'+esc(person.img)+'"><p style="font-weight:800;margin:8px 0">這位女孩是誰？</p><div class="recognition-actions">'+answers.map((g,i)=>'<button type="button" class="recognition-btn" data-choice="'+i+'">'+esc(g.name)+'</button>').join('')+'</div><div id="recognition-feedback" aria-live="polite"></div></div>');
