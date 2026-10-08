@@ -164,6 +164,7 @@
   };
 
   loadScriptOnce('./src/app/girls-default-sort.js?v=3', 'girls-default-sort');
+  loadScriptOnce('./src/app/girls-roster-polish.js?v=1', 'girls-roster-polish');
   loadScriptOnce('./src/app/game-app-enhancements.js?v=7', 'game-app-enhancements');
   loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
   loadScriptOnce('./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined');
