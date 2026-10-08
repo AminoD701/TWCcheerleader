@@ -1599,6 +1599,25 @@
             .match-time-badge { font-size: 14px; padding: 3px 8px; }
         }
     </style> 
+<style id="twc-game-hub-unified-style">
+.t wc{}
+#games-container .twc-games-home{width:100%;max-width:1000px;margin:0 auto;color:#f4f5f8}
+#games-container .twc-games-heading{text-align:left;margin:8px 0 24px}
+#games-container .twc-games-kicker{font-size:11px;letter-spacing:2px;font-weight:850;color:#ab97ee}
+#games-container .twc-games-heading h1{font-size:clamp(27px,4vw,38px);font-weight:900;letter-spacing:.02em;margin:5px 0 8px;color:#fff;text-shadow:none}
+#games-container .twc-games-heading p{font-size:14px;color:#9ca6b5;margin:0;line-height:1.65}
+#games-container .twc-games-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#games-container .twc-game-tile{font-family:inherit;cursor:pointer;min-width:0;min-height:118px;display:flex;align-items:center;text-align:left;gap:17px;border-radius:17px;border:1px solid #303743;background:#171b22;color:#f5f5f7;padding:19px;transition:border-color .15s,background .15s}
+#games-container .twc-game-tile:hover{border-color:#72658f;background:#20212a}
+#games-container .twc-game-feature{border-color:#6e599b;background:linear-gradient(120deg,#292238,#191b25)}
+#games-container .twc-game-icon{font-size:31px;flex-shrink:0;line-height:1}
+#games-container .twc-game-copy{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+#games-container .twc-game-copy small{color:#b29ae6;font-size:10px;letter-spacing:1px;font-weight:850}
+#games-container .twc-game-copy strong{color:#fff;font-size:19px;line-height:1.3}
+#games-container .twc-game-copy>span{color:#a4adbb;font-size:12px;line-height:1.5}
+#games-container .twc-game-arrow{font-size:19px;color:#b9a8e6;align-self:center}
+@media(max-width:600px){#games-container .twc-games-tiles{grid-template-columns:1fr;gap:10px}#games-container .twc-game-tile{min-height:96px;padding:15px;gap:13px}#games-container .twc-game-copy strong{font-size:17px}#games-container .twc-game-icon{font-size:27px}}
+</style>
 </head>
 <body class="no-scroll">
 
@@ -3526,38 +3545,22 @@
         // =========================================================================
         window.renderGamesHub = function() {
             const container = document.getElementById('games-container');
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.alignItems = 'center';
-            container.style.padding = '20px 15px';
-
+            if (!container) return;
+            container.style.cssText = 'display:block;width:100%;max-width:1100px;margin:0 auto;padding:18px 16px 44px;box-sizing:border-box';
             container.innerHTML = `
-                <div style="text-align: center; margin-bottom: 35px; margin-top: 10px;">
-                    <div class="game-title" style="font-size: clamp(28px, 6vw, 42px); letter-spacing: 4px; text-shadow: 3px 3px 0px #9c27b0;">遊樂互動 GAMES</div>
-                    <p style="color:var(--text-sub); font-weight:700; letter-spacing: 2px;">請選擇想體驗的互動應援模式</p>
+              <section class="twc-games-home">
+                <div class="twc-games-heading"><span class="twc-games-kicker">PLAYGROUND / TWC</span><h1>娛樂互動</h1><p>今天想玩什麼？選一種玩法，開啟你的應援時刻。</p></div>
+                <div class="twc-games-tiles">
+                  <button type="button" class="twc-game-tile twc-game-feature" data-twc-action="recognition"><span class="twc-game-icon">🧠</span><span class="twc-game-copy"><small>PHOTO QUIZ</small><strong>啦啦隊認人王</strong><span>看照片猜名字，挑戰你的認人實力</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="minigame"><span class="twc-game-icon">⚔️</span><span class="twc-game-copy"><small>ULTIMATE CHOICE</small><strong>殘酷二選一</strong><span>誰才是你的絕對本命？</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="dreamteam"><span class="twc-game-icon">🌟</span><span class="twc-game-copy"><small>DREAM TEAM</small><strong>夢幻陣容</strong><span>打造你的專屬應援隊伍</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="vote"><span class="twc-game-icon">🏆</span><span class="twc-game-copy"><small>FAN VOTE</small><strong>全民應援大賞</strong><span>為喜歡的女孩投下支持的一票</span></span><span class="twc-game-arrow">↗</span></button>
                 </div>
-                
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 1000px;">
-                    
-                    <div onclick="window.setMode('vote')" style="flex: 1 1 280px; max-width: 320px; background: linear-gradient(135deg, #1c2128, #111418); border: 2px solid var(--border-color); border-bottom: 6px solid #ffd700; border-radius: 12px; padding: 35px 20px; text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 20px rgba(0,0,0,0.5);" onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.borderColor='#ffd700'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.3)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.5)';">
-                        <div style="font-size: 55px; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">🏆</div>
-                        <div style="font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 8px;">全民應援大賞</div>
-                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700;">為你的專屬本命女孩投票護盤</div>
-                    </div>
-
-                    <div onclick="window.setMode('minigame')" style="flex: 1 1 280px; max-width: 320px; background: linear-gradient(135deg, #1c2128, #111418); border: 2px solid var(--border-color); border-bottom: 6px solid #00e676; border-radius: 12px; padding: 35px 20px; text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 20px rgba(0,0,0,0.5);" onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.borderColor='#00e676'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,230,118,0.3)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.5)';">
-                        <div style="font-size: 55px; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">⚔️</div>
-                        <div style="font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 8px;">殘酷二選一</div>
-                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700;">最艱難的抉擇，測出你的絕對本命</div>
-                    </div>
-
-                    <div onclick="window.setMode('dreamteam')" style="flex: 1 1 280px; max-width: 320px; background: linear-gradient(135deg, #1c2128, #111418); border: 2px solid var(--border-color); border-bottom: 6px solid #ff0044; border-radius: 12px; padding: 35px 20px; text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 20px rgba(0,0,0,0.5);" onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.borderColor='#ff0044'; this.style.boxShadow='0 15px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,0,68,0.3)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border-color)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.5)';">
-                        <div style="font-size: 55px; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">🌟</div>
-                        <div style="font-family: var(--sport-font); font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 8px;">夢幻陣容</div>
-                        <div style="font-size: 14px; color: var(--text-sub); font-weight: 700;">自訂戰術，打造你的全明星應援隊</div>
-                    </div>
-                </div>
-            `;
+              </section>`;
+            container.querySelectorAll('[data-twc-action]').forEach(btn => btn.addEventListener('click', () => {
+              if (btn.dataset.twcAction === 'recognition') window.openRecognitionGame?.();
+              else window.setMode?.(btn.dataset.twcAction);
+            }));
         };
         // =========================================================================
         // 🏆 全民應援大賞 全網雲端連線計票引擎 (Google Sheets 伺服器版)
