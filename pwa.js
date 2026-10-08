@@ -188,7 +188,7 @@
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
     datalab: [
-      ['./src/app/data-lab.js?v=10', 'data-lab']
+      ['./src/app/data-lab.js?v=11', 'data-lab']
     ],
     news: [
       ['./src/app/news-freshness.js?v=2', 'news-freshness'],
