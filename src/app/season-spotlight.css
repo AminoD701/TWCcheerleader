@@ -158,7 +158,9 @@
 .match-card.is-postseason { border-top-color: #00b0ff !important; }
 .match-postseason-ribbon {
   position: absolute;
-  top: 13px; left: 13px;
+  top: 12px;
+  right: 12px;
+  left: auto;
   z-index: 7;
   padding: 5px 8px;
   border-radius: 3px;
@@ -167,6 +169,34 @@
   font: 900 9px/1 var(--sport-font);
   letter-spacing: 1.2px;
   pointer-events: none;
+}
+
+.match-card.is-postseason .match-header-bar {
+  position: relative;
+  justify-content: center;
+  padding-left: 135px;
+  padding-right: 135px;
+  min-height: 52px;
+}
+
+.match-card.is-postseason .match-header-bar > span:first-child {
+  position: absolute;
+  left: 15px;
+  max-width: calc(50% - 82px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match-card.is-postseason .match-time-badge {
+  margin: 0 auto;
+  min-width: 82px;
+  text-align: center;
+}
+
+.match-card.is-postseason .match-postseason-ribbon {
+  top: 12px;
+  right: 12px;
 }
 
 @keyframes season-pulse {
@@ -189,4 +219,25 @@
   .match-postseason-banner strong { font-size: 16px; }
   .match-postseason-banner small { font-size: 11px; line-height: 1.4; }
   .match-postseason-banner__mark { font-size: 23px; }
+  .match-card.is-postseason .match-header-bar {
+    min-height: 48px;
+    padding-left: 105px;
+    padding-right: 105px;
+  }
+  .match-card.is-postseason .match-header-bar > span:first-child {
+    left: 10px;
+    max-width: calc(50% - 62px);
+    font-size: 10px;
+  }
+  .match-card.is-postseason .match-time-badge {
+    min-width: 70px;
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+  .match-card.is-postseason .match-postseason-ribbon {
+    top: 11px;
+    right: 9px;
+    font-size: 8px;
+    padding: 4px 6px;
+  }
 }
