@@ -50,17 +50,6 @@
       : '📱 手機 APP 測試中\n\n【Android 安裝方式】\n1. 建議使用 Chrome 開啟本站\n2. 點右上角選單\n3. 選擇「安裝應用程式」或「加入主畫面」\n4. 完成後即可像一般 APP 一樣從桌面開啟\n\n若畫面上有「安裝 APP」按鈕，也可以直接點擊安裝。');
   };
 
-  const updateHomeMarquee = () => {
-    const marquee = document.querySelector('.marquee-wrapper');
-    const content = marquee?.querySelector('.marquee-content');
-    if (!marquee || !content) return;
-    marquee.removeAttribute('onclick');
-    marquee.title = '點擊查看手機 APP 安裝教學';
-    marquee.style.cursor = 'pointer';
-    content.innerHTML = '📱【手機 APP 測試中】台灣啦啦隊資料庫現在可以安裝到手機桌面！ <span class="marquee-highlight">iPhone：Safari 分享 → 加入主畫面</span> ｜ Android：Chrome 選單 → 安裝應用程式。點擊這裡查看安裝教學。';
-    marquee.addEventListener('click', showInstallGuide);
-  };
-
   const offerUpdate = worker => {
     if (!worker || !navigator.serviceWorker.controller || document.getElementById('pwa-update-btn')) return;
     const btn = document.createElement('button');
@@ -187,7 +176,6 @@
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
 
   window.addEventListener('load', () => {
-    updateHomeMarquee();
     if (!isStandalone()) createInstallButton();
     refreshStandaloneUi();
     if (isStandalone()) {
