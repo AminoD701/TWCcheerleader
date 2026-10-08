@@ -57,7 +57,7 @@
       .recognition-share-preview{text-align:left;border:1px solid #41495b;border-radius:18px;padding:clamp(22px,5vw,38px);background:linear-gradient(145deg,#1a1d28,#11151c);color:#f6f6fa}.recognition-share-kicker{font-size:10px;letter-spacing:1.6px;color:#bba6ee;font-weight:800}.recognition-share-heading{font-size:clamp(23px,5vw,30px);font-weight:850;margin-top:16px}.recognition-share-label{font-size:clamp(24px,5vw,34px);font-weight:900;color:#c8b6fa;margin:22px 0 5px}.recognition-share-score{font-size:clamp(64px,16vw,98px);font-weight:900;line-height:1.22;letter-spacing:-3px}.recognition-share-score span{font-size:.45em;color:#99a2b5}.recognition-share-preview p{color:#c1c7d2;line-height:1.7;font-size:14px;margin:8px 0 25px}.recognition-share-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #39404d;padding-top:18px}.recognition-share-stats div{display:flex;flex-direction:column;gap:6px}.recognition-share-stats small{color:#9ba5b7}.recognition-share-stats strong{font-size:27px}.recognition-share-category{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.recognition-share-category span{font-size:12px;border:1px solid #454b5a;border-radius:7px;padding:8px;color:#d6d9e4}.recognition-share-footer{font-size:10px;letter-spacing:1px;color:#8e97a8;border-top:1px solid #39404d;margin-top:25px;padding-top:16px}\n      .recognition-share-preview{position:relative;overflow:hidden;max-width:560px;margin:0 auto;min-height:570px;border:1px solid #615574!important;border-radius:12px!important;background:radial-gradient(circle at 93% 6%,rgba(120,91,173,.16),transparent 42%),linear-gradient(160deg,#171a22,#0c0f15)!important}.recognition-share-preview:after{content:'RQ';position:absolute;top:6px;right:18px;font:italic 800 100px Georgia,serif;color:rgba(176,147,242,.075);pointer-events:none}.recognition-share-label{margin-top:30px!important;font-size:clamp(28px,7vw,40px)!important}.recognition-share-score{font-family:Georgia,serif;font-size:clamp(82px,20vw,125px)!important;color:#d0c0f4!important;letter-spacing:-5px!important}.recognition-share-score span{font-family:Georgia,serif;font-weight:400}.recognition-share-stats{margin-top:28px}.recognition-share-category{border-top:1px solid #343b49;padding-top:20px}.recognition-share-preview .recognition-share-footer{margin-top:28px} @media(max-width:380px){.recognition-actions{gap:8px}.recognition-btn{font-size:15px;padding:10px 7px}}
 
       .recognition-share-preview{isolation:isolate;position:relative;overflow:hidden;min-height:585px}
-      .recognition-share-preview>.recognition-silhouette{position:absolute;z-index:-1;right:-5px;bottom:12px;width:53%;height:auto;color:#a993d8;opacity:.15;pointer-events:none}
+      .recognition-share-preview>.recognition-photo-art{position:absolute;z-index:0;right:-13px;top:165px;width:66%;height:68%;object-fit:contain;opacity:.9;pointer-events:none}
       .recognition-share-preview>.recognition-share-kicker,.recognition-share-preview>.recognition-share-heading,.recognition-share-preview>.recognition-share-label,.recognition-share-preview>.recognition-share-score,.recognition-share-preview>p,.recognition-share-preview>.recognition-share-stats,.recognition-share-preview>.recognition-share-category,.recognition-share-preview>.recognition-share-footer{position:relative;z-index:1}
     `;
     document.head.append(tag);
@@ -142,11 +142,15 @@
     }
     return [...groups.entries()].map(([name,value])=>({name,...value}));
   }
-  function drawCheerSilhouette(c,x,y,scale=1){
-    c.save();c.translate(x,y);c.scale(scale,scale);c.fillStyle='rgba(169,147,216,0.18)';
-    const outlines=["M174 77 C169 49 150 30 126 31 C102 32 88 51 89 76 C90 93 100 105 112 112 L109 132 C99 144 86 145 75 161 L62 198 C54 217 58 232 76 238 C85 239 94 236 99 228 L117 191 L112 235 L103 283 L85 334 L200 334 L177 274 L166 219 L171 170 C165 154 151 142 141 133 L140 111 C154 101 161 86 158 69 Z","M139 39 C161 41 177 61 179 91 C182 116 200 127 216 149 C191 150 174 136 165 120 C152 104 149 72 139 39 Z","M94 142 C78 134 66 121 53 102 L31 69 C24 58 13 56 10 66 C7 72 10 79 16 88 L43 135 C52 154 69 171 81 174 Z","M168 148 C186 164 193 188 200 211 L221 263 C224 274 217 282 207 277 C200 275 197 271 192 262 L163 207 Z","M113 232 C96 255 90 290 72 334 L210 334 C190 282 179 258 163 233 C148 243 129 246 113 232 Z"];
-    for(const outline of outlines)c.fill(new Path2D(outline));
-    c.restore();
+  const CHEER_PHOTO = './src/assets/recognition-cheer-photo.svg?v=1';
+  async function drawCheerPhoto(ctx) {
+    const img = new Image();
+    await new Promise((resolve,reject) => {
+      img.onload=resolve;
+      img.onerror=()=>reject(new Error('照片載入失敗'));
+      img.src=CHEER_PHOTO;
+    });
+    ctx.save();ctx.globalAlpha=.85;ctx.drawImage(img,475,290,560,690);ctx.restore();
   }
   async function shareCard(result) {
     const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
@@ -154,7 +158,7 @@
     const font='system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
     const background=c.createLinearGradient(0,0,1080,1350);
     background.addColorStop(0,'#171b25');background.addColorStop(1,'#0c1016');c.fillStyle=background;c.fillRect(0,0,1080,1350);
-    drawCheerSilhouette(c,560,300,2.35);
+    try { await drawCheerPhoto(c); } catch(error) { console.warn('Recognition background unavailable', error); }
     c.strokeStyle='#384050';c.lineWidth=2;c.strokeRect(50,50,980,1250);
     c.fillStyle='#ae9add';c.font='700 29px '+font;c.fillText('TWC CHEERLEADER  /  RECOGNITION QUIZ',100,138);
     c.fillStyle='#ffffff';c.font='800 70px '+font;c.fillText('啦啦隊認人王',100,248);
@@ -203,7 +207,7 @@
     storage.set(key,{...previous,[game.mode]:best});
     const stats=groupStats(lastResults);
     const result={correct:game.correct,answered,percentage,label,praise,best,stats,mode:game.mode};
-    frame('<div class="recognition-share-preview"><svg class="recognition-silhouette" viewBox="0 0 230 340" fill="currentColor" aria-hidden="true"><path d="M174 77 C169 49 150 30 126 31 C102 32 88 51 89 76 C90 93 100 105 112 112 L109 132 C99 144 86 145 75 161 L62 198 C54 217 58 232 76 238 C85 239 94 236 99 228 L117 191 L112 235 L103 283 L85 334 L200 334 L177 274 L166 219 L171 170 C165 154 151 142 141 133 L140 111 C154 101 161 86 158 69 Z"/><path d="M139 39 C161 41 177 61 179 91 C182 116 200 127 216 149 C191 150 174 136 165 120 C152 104 149 72 139 39 Z"/><path d="M94 142 C78 134 66 121 53 102 L31 69 C24 58 13 56 10 66 C7 72 10 79 16 88 L43 135 C52 154 69 171 81 174 Z"/><path d="M168 148 C186 164 193 188 200 211 L221 263 C224 274 217 282 207 277 C200 275 197 271 192 262 L163 207 Z"/><path d="M113 232 C96 255 90 290 72 334 L210 334 C190 282 179 258 163 233 C148 243 129 246 113 232 Z"/></svg><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">啦啦隊認人王</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
+    frame('<div class="recognition-share-preview"><img class="recognition-photo-art" src="'+CHEER_PHOTO+'" alt="" aria-hidden="true"><<div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">啦啦隊認人王</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
     document.getElementById('recognition-again').onclick=open;
     document.getElementById('recognition-home').onclick=back;
     document.getElementById('recognition-share').onclick=e=>shareResult(result,e.currentTarget);
