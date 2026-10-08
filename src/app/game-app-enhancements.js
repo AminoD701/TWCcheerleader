@@ -98,7 +98,7 @@
   const enhanceGamesHome = () => {
     if (mode() !== 'games') return;
     const root = gameRoot();
-    if (!root || root.querySelector('[data-game-enhancement-home]')) return;
+    if (!root || root.querySelector('[data-game-enhancement-home], #recognition-app')) return;
     const result = ensureDailyResult();
     const hub = document.createElement('section');
     hub.className = 'game-hub';
@@ -109,7 +109,7 @@
         <div><h2>遊戲中心</h2><p>選一個模式開始，每個玩法都保留自己的進度與設定。</p></div>
         <div class="game-hub__badge">GAME HUB</div>
       </div>
-      <div class="game-hub__grid">
+      <div class="game-hub__grid">\n        <button type="button" class="game-mode-card game-mode-card--recognition" data-open-recognition>\n          <div class="game-mode-card__icon" aria-hidden="true">🧠</div>\n          <div class="game-mode-card__eyebrow">PHOTO QUIZ</div>\n          <div class="game-mode-card__title">啦啦隊認人王</div>\n          <div class="game-mode-card__desc">看照片猜名字，挑戰 20 題快賽或無限認人模式。</div>\n          <div class="game-mode-card__status"><span>四選一認人挑戰</span><span class="game-mode-card__go">開始挑戰</span></div>\n        </button>
         <button type="button" class="game-mode-card game-mode-card--daily" data-show-daily>
           <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.8L19 10l-5.1 2.2L12 17l-1.9-4.8L5 10l5.1-2.2L12 3z"/><path d="M19 3l.8 2.1L22 6l-2.2.9L19 9l-.8-2.1L16 6l2.2-.9L19 3z"/></svg></div>
           <div class="game-mode-card__eyebrow">DAILY GACHA</div>
@@ -135,7 +135,7 @@
       </div>
       <div class="game-hub__tip"><strong>操作提示：</strong>抽卡紀錄與抖內已移到「更多」；遊戲中心只保留遊戲相關入口。</div>`;
     root.replaceChildren(hub);
-    hub.querySelector('[data-show-daily]')?.addEventListener('click', () => showDailyResult(result));
+    hub.querySelector('[data-show-daily]')?.addEventListener('click', () => showDailyResult(result));\n    hub.querySelector('[data-open-recognition]')?.addEventListener('click', () => window.openRecognitionGame?.());
     hub.querySelectorAll('a[href*="?mode="]').forEach(link => {
       link.addEventListener('click', event => {
         const target = new URL(link.href, location.href).searchParams.get('mode');
