@@ -133,7 +133,16 @@ function favoriteIds() {
 
 function formerGirlsForTeam(team, state) {
   const girls = Array.isArray(window.dbGirls) ? window.dbGirls : [];
-  const isFormer = girl => window.CheerGirlsDefaultSort?.isFormer?.(girl) || window.cheerGirlStatus?.isFormer?.(girl);
+  const isFormer = girl => {
+    const departureSeason = String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
+    if (departureSeason) return true;
+    if (window.CheerGirlsDefaultSort?.isFormer?.(girl)) return true;
+    if (window.cheerGirlStatus?.isFormer?.(girl)) return true;
+    const note = String(girl?.note || girl?.['備註'] || girl?.備註 || '').trim();
+    const status = String(girl?.status || '').trim().toLowerCase();
+    return /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(note)
+      || ['former','ended','departed','inactive','離隊','已離隊'].includes(status);
+  };
   const allTeams = !team || team === '全部啦啦隊';
   const seen = new Set();
   return girls.filter(girl => {
