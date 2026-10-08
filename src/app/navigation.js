@@ -247,6 +247,14 @@ function rememberMode(mode) {
 function navigate(mode, { history = true } = {}) {
   if (mode === currentMode) {
     rememberMode(mode);
+
+    // Interactive game pages keep their in-progress DOM/state when background
+    // data initialization calls setMode(currentMode) again.
+    if (mode === 'minigame' || mode === 'dreamteam') {
+      const root = document.getElementById(mode === 'minigame' ? 'minigame-container' : 'dreamteam-container');
+      if (root && root.childElementCount > 0 && root.textContent.trim()) return;
+    }
+
     applyMode(mode);
     return;
   }
