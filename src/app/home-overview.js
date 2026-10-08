@@ -71,7 +71,7 @@
       events: upcoming.map(item => [item.date, item.time, item.eventname, item.host]),
       news: latestNews.map(item => [item.id, item.date, item.title, item.tag, item.subtag])
     });
-    if (renderKey === lastRenderKey && root.querySelector('.home-overview')) return;
+    if (renderKey === lastRenderKey && root.querySelector('.home-overview')) { scheduleVisionNotice(); return; }
     lastRenderKey = renderKey;
 
     root.innerHTML = `
@@ -173,15 +173,21 @@
   }
   function scheduleRender() {
     if (document.body?.dataset.appMode !== 'home') return;
-    requestAnimationFrame(render);
+    requestAnimationFrame(() => { render(); scheduleVisionNotice(); });
   }
 
   function boot() {
     installVisionStyles();
     render();
-    setTimeout(scheduleVisionNotice, 1800);
-    setTimeout(scheduleVisionNotice, 4500);
-    setTimeout(scheduleVisionNotice, 9000);
+    // Wait for the actual homepage, not an arbitrary short load window.
+    let noticeChecks = 0;
+    const noticeTimer = setInterval(() => {
+      noticeChecks++;
+      scheduleVisionNotice();
+      let seen = false;
+      try { seen = Boolean(localStorage.getItem(noticeKey)); } catch (_) {}
+      if (seen || document.getElementById('twc-vision-toast') || noticeChecks >= 60 || !promoActive()) clearInterval(noticeTimer);
+    }, 2000);
     const observer = new MutationObserver(scheduleRender);
     observer.observe(document.body, { attributes:true, attributeFilter:['data-app-mode'] });
 
