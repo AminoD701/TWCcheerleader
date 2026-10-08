@@ -209,9 +209,11 @@
       ['./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined']
     ],
     more: [
+      ['./src/app/game-app-enhancements.js?v=9', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ],
     my: [
+      ['./src/app/game-app-enhancements.js?v=9', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ]
   });
