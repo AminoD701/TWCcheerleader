@@ -1,7 +1,11 @@
 (() => {
   const formerPattern = /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/;
 
+  const HISTORICAL_TEAMS = new Set(['Little Witches']);
+
   function isFormer(girl) {
+    const team = String(girl?.team || '').trim();
+    if (HISTORICAL_TEAMS.has(team)) return true;
     const season = String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
     if (season) return true;
     return formerPattern.test(String(girl?.note || '').trim());
@@ -411,8 +415,16 @@
     });
   }
 
+  function hideHistoricalTeamControls() {
+    document.querySelectorAll('#team-menu .dropdown-item').forEach(btn => {
+      const name = (btn.querySelector('span')?.textContent || btn.textContent || '').trim();
+      if (HISTORICAL_TEAMS.has(name)) btn.hidden = true;
+    });
+  }
+
   function sync() {
     installStyles();
+    hideHistoricalTeamControls();
     const toolbar = document.getElementById('girls-roster-toolbar');
     if (document.body?.dataset.appMode !== 'girls') {
       if (toolbar) toolbar.style.display = 'none';
