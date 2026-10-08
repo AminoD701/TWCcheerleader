@@ -6,6 +6,8 @@
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
+      body:not([data-app-mode="events"]) #event-container{display:none!important}
+      body[data-app-mode="events"] #event-container{display:flex!important}
       .events-quick,.events-calendar{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
       .events-quick__heading,.events-calendar__heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 14px;padding:0 2px}
       .events-quick__heading strong,.events-calendar__heading strong{font-family:var(--sport-font);font-size:18px;letter-spacing:1.5px;color:#fff}
@@ -78,10 +80,14 @@
     const container = document.getElementById('event-container');
     if (!container || document.body?.dataset.appMode !== 'events') return;
 
-    container.querySelector('.events-quick')?.remove();
-    container.querySelector('.events-calendar')?.remove();
+    const sourceCards = [...container.querySelectorAll('.event-date-card')]
+      .filter(card => !card.closest('.events-quick,.events-calendar'));
 
-    const sourceCards = [...container.querySelectorAll('.event-date-card')];
+    // If the enhanced calendar already exists, a second observer/render tick must
+    // not delete it just because the legacy source cards were already consumed.
+    if (!sourceCards.length && container.querySelector('.events-calendar')) return;
+    if (!sourceCards.length) return;
+
     const records = sourceCards.map(card => {
       const date = cardDate(card);
       return date ? { ...date, template:card.cloneNode(true) } : null;
@@ -89,6 +95,8 @@
 
     if (!records.length) return;
 
+    container.querySelector('.events-quick')?.remove();
+    container.querySelector('.events-calendar')?.remove();
     container.querySelectorAll('.event-grid,.event-section-divider').forEach(el => el.remove());
 
     const byDate = new Map();
@@ -196,6 +204,34 @@
     container.appendChild(calendarSection);
   }
 
+  let routeRetryTimer = 0;
+
+  function ensureEventsReady() {
+    clearInterval(routeRetryTimer);
+    if (document.body?.dataset.appMode !== 'events') return;
+
+    let tries = 0;
+    const attempt = () => {
+      if (document.body?.dataset.appMode !== 'events') {
+        clearInterval(routeRetryTimer);
+        return;
+      }
+      const container = document.getElementById('event-container');
+      const ready = Boolean(container?.querySelector('.events-calendar,.event-date-card'));
+      if (ready) {
+        requestAnimationFrame(decorate);
+        clearInterval(routeRetryTimer);
+        return;
+      }
+      if (typeof window.renderEvents === 'function') window.renderEvents();
+      tries += 1;
+      if (tries >= 24) clearInterval(routeRetryTimer);
+    };
+
+    attempt();
+    if (tries < 24) routeRetryTimer = setInterval(attempt, 250);
+  }
+
   function install() {
     const original=window.renderEvents;
     if(typeof original!=='function'||original.__eventsCalendarWrapped)return false;
@@ -203,12 +239,19 @@
     wrapped.__eventsCalendarWrapped=true;
     wrapped.__originalRenderEvents=original;
     window.renderEvents=wrapped;
-    if(document.body?.dataset.appMode==='events') requestAnimationFrame(decorate);
+    if(document.body?.dataset.appMode==='events') requestAnimationFrame(ensureEventsReady);
     return true;
   }
 
   let tries=0;
   const timer=setInterval(()=>{tries+=1;if(install()||tries>80)clearInterval(timer);},100);
-  const routeObserver=new MutationObserver(()=>{if(document.body?.dataset.appMode==='events')requestAnimationFrame(decorate);});
-  window.addEventListener('load',()=>{install();routeObserver.observe(document.body,{attributes:true,attributeFilter:['data-app-mode']});if(document.body?.dataset.appMode==='events')requestAnimationFrame(decorate);},{once:true});
+  const routeObserver=new MutationObserver(()=>{
+    if(document.body?.dataset.appMode==='events') requestAnimationFrame(ensureEventsReady);
+    else clearInterval(routeRetryTimer);
+  });
+  window.addEventListener('load',()=>{
+    install();
+    routeObserver.observe(document.body,{attributes:true,attributeFilter:['data-app-mode']});
+    if(document.body?.dataset.appMode==='events') requestAnimationFrame(ensureEventsReady);
+  },{once:true});
 })();
