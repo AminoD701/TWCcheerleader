@@ -1,7 +1,7 @@
 const CACHE_PREFIX = 'tw-cheerleader-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v82`;
+const CACHE_NAME = `${CACHE_PREFIX}v83`;
 const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
-const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js?v=36', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js?v=16', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js?v=9', './src/app/girls-default-sort.js?v=7', './src/app/girls-roster-polish.js?v=5', './src/app/game-app-enhancements.js?v=9', './src/app/minigame-refined.js?v=2', './src/app/dreamteam-refined.js?v=2', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=9', './src/app/girl-career.js?v=6', './src/app/former-archive.js?v=9', './src/app/data-lab.js?v=10', './src/app/events-archive.js?v=4', './src/app/home-overview.js?v=3', './src/app/home-overview.css?v=4', './src/app/news-freshness.js?v=2', './src/app/news-page-polish.js?v=1', './src/app/navigation.css?v=7', './src/app/season-spotlight.css?v=1', './src/app/season-spotlight.js?v=4', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/Collie_Engineers_logo.png?v=1', './data/girl-careers.json?v=2'];
+const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js?v=37', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/navigation.js?v=16', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js?v=9', './src/app/girls-default-sort.js?v=7', './src/app/girls-roster-polish.js?v=5', './src/app/game-app-enhancements.js?v=9', './src/app/minigame-refined.js?v=2', './src/app/dreamteam-refined.js?v=2', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=9', './src/app/girl-career.js?v=6', './src/app/former-archive.js?v=9', './src/app/data-lab.js?v=10', './src/app/events-archive.js?v=4', './src/app/home-overview.js?v=3', './src/app/home-overview.css?v=4', './src/app/news-freshness.js?v=2', './src/app/news-page-polish.js?v=1', './src/app/navigation.css?v=7', './src/app/season-spotlight.css?v=1', './src/app/season-spotlight.js?v=4', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/Collie_Engineers_logo.png?v=1', './data/girl-careers.json?v=2'];
 
 const isOwnedCache = key => key.startsWith(CACHE_PREFIX) || LEGACY_CACHES.includes(key);
 const canStore = (request, response) => request.cache !== 'no-store' && response && response.ok && response.type !== 'error';
@@ -35,6 +35,18 @@ self.addEventListener('fetch', event => {
       if (cacheResponse) event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put('./index.html', cacheResponse)).catch(() => undefined));
       return response;
     }).catch(async () => (await caches.match('./index.html')) || (await caches.match('./')) || new Response('目前離線，且尚無可用內容。', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })));
+    return;
+  }
+
+  // Online-first for active code/styles: installed PWAs must not execute stale JS/CSS.
+  // Keep offline fallback, while versioned static images can stay stale-while-revalidate.
+  if (/\\.(?:js|css)$/i.test(new URL(request.url).pathname)) {
+    event.respondWith(fetch(request).then(response => {
+      if (canStore(request, response)) {
+        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone())).catch(() => undefined));
+      }
+      return response;
+    }).catch(async () => (await caches.match(request)) || new Response('Offline', { status: 503 })));
     return;
   }
 
