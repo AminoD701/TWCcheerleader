@@ -11,9 +11,14 @@
     .replace(/^[,\s、，]+|[,\s、，]+$/g, '')
     .trim();
 
+  function departureSeason(girl) {
+    return String(girl?.departureseason || girl?.departure_season || girl?.['離隊賽季'] || '').trim();
+  }
+
   function isFormer(girl) {
     const status = String(girl?.status || '').trim().toLowerCase();
-    return FORMER_RE.test(noteText(girl))
+    return Boolean(departureSeason(girl))
+      || FORMER_RE.test(noteText(girl))
       || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
   }
 
@@ -81,6 +86,7 @@
     categoryRank,
     sortGirls,
     isFormer,
+    departureSeason,
     applyDefaultSort
   });
 
