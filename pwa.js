@@ -166,7 +166,7 @@
 
   const routeAssets = Object.freeze({
     home: [
-      ['./src/app/home-overview.js?v=3', 'home-overview'],
+      ['./src/app/home-overview.js?v=4', 'home-overview'],
       ['./src/app/season-spotlight.js?v=4', 'season-spotlight']
     ],
     girls: [
@@ -199,22 +199,22 @@
       ['./src/app/news-page-polish.js?v=1', 'news-page-polish']
     ],
     games: [
-      ['./src/app/game-app-enhancements.js?v=13', 'game-app-enhancements']
+      ['./src/app/game-app-enhancements.js?v=14', 'game-app-enhancements']
     ],
     minigame: [
-      ['./src/app/game-app-enhancements.js?v=13', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=14', 'game-app-enhancements'],
       ['./src/app/minigame-refined.js?v=2', 'minigame-refined']
     ],
     dreamteam: [
-      ['./src/app/game-app-enhancements.js?v=13', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=14', 'game-app-enhancements'],
       ['./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined']
     ],
     more: [
-      ['./src/app/game-app-enhancements.js?v=13', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=14', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ],
     my: [
-      ['./src/app/game-app-enhancements.js?v=13', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=14', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ]
   });
