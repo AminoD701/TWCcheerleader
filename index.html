@@ -5,7 +5,8 @@
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <link rel="stylesheet" href="./src/app/navigation.css?v=6">
+    <link rel="stylesheet" href="./src/app/navigation.css?v=7">
+    <link rel="stylesheet" href="./src/app/home-overview.css?v=1">
     <link rel="stylesheet" href="./src/app/season-spotlight.css?v=1">
     <title>台灣啦啦隊資料庫</title>
 
@@ -15,17 +16,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="啦啦隊資料庫">
-    <link rel="apple-touch-icon" href="baseball.png">
-    <script defer src="pwa.js"></script>
-    <meta name="theme-color" content="#111418">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="啦啦隊資料庫">
     <meta name="description" content="台灣啦啦隊女孩、球隊、賽事與應援情報資料庫。">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="twc-app-icon-v3-180.png">
-    <script defer src="pwa.js?v=18"></script>
+    <script defer src="pwa.js?v=19"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
@@ -1849,6 +1843,7 @@
     </div>
 
     <main id="main-content">
+        <section id="home-container"></section>
         <div class="marquee-wrapper" onclick="window.setMode('vote')" title="點擊前往第二屆應援大賞！">
             <div class="marquee-content">
                 🏆【第二屆·台港馬人氣大賞】將於 8/5 ~ 9/5 正式引爆！🔥 <span class="marquee-highlight">目前為全網測試階段</span>，快點擊此處前往【應援大賞 VOTE】搶先為你的本命女孩投票護盤！👑
@@ -2025,6 +2020,17 @@
         }
 
         let dbGirls = [], dbEvents = [], dbSchedules = [], dbNews = [], dbMatches = [], dbThemes = [];
+        window.CheerHomeData = Object.freeze({
+            snapshot() {
+                return {
+                    girls: dbGirls,
+                    events: dbEvents,
+                    news: dbNews,
+                    matches: dbMatches,
+                    themes: dbThemes
+                };
+            }
+        });
         let currentMode = "news", currentSport = "全部", currentTeam = "全部啦啦隊";
         let currentScheduleTeam = null, currentScheduleSport = null; 
 
@@ -8442,7 +8448,7 @@ window.renderMinigameStart = function() {
             if (currentMode === 'profile') window.closeProfile(); 
         };
     </script>
-    <script type="module" src="./src/app/navigation.js?v=8"></script>
+    <script type="module" src="./src/app/navigation.js?v=9"></script>
     <script type="module" src="./src/app/season-spotlight.js?v=2"></script>
 
 </body>
