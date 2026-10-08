@@ -6,7 +6,7 @@ const safeSession = {
   get(key) { try { return sessionStorage.getItem(key); } catch (_) { return null; } },
   set(key, value) { try { sessionStorage.setItem(key, value); } catch (_) { /* navigation still works */ } }
 };
-let currentMode = new URL(location.href).searchParams.get('mode') || safeSession.get('cheer_current_tab') || 'news';
+let currentMode = new URL(location.href).searchParams.get('mode') || safeSession.get('cheer_current_tab') || 'home';
 let keyboardOpen = false;
 let legacySetMode;
 let legacySelectScheduleTeam;
@@ -19,6 +19,7 @@ let themeSelection = null;
 let profileReturnState = null;
 
 const ROUTE_OWNERS = Object.freeze({
+  'home-container': ['home'],
   'grid-container': ['girls'],
   'event-container': ['events'],
   'schedule-container': ['schedule'],
@@ -90,6 +91,20 @@ function renderNavigation() {
     navigate(anchor.dataset.mode);
   });
   document.body.append(nav);
+  const brand = document.querySelector('.site-header-brand');
+  if (brand && !brand.dataset.homeBound) {
+    brand.dataset.homeBound = '1';
+    brand.setAttribute('role','link');
+    brand.setAttribute('tabindex','0');
+    brand.setAttribute('title','回首頁');
+    brand.addEventListener('click', () => navigate('home'));
+    brand.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        navigate('home');
+      }
+    });
+  }
   renderSectionSwitcher();
 }
 
@@ -220,15 +235,19 @@ function showCustomMode(mode) {
   document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
   document.querySelectorAll('#main-content > section').forEach(el => { el.style.display = 'none'; });
 
-  let panel = document.getElementById(mode === 'archive' ? 'archive-container' : 'datalab-container');
+  const panelId = mode === 'home' ? 'home-container' : mode === 'archive' ? 'archive-container' : 'datalab-container';
+  let panel = document.getElementById(panelId);
   if (!panel) {
     panel = document.createElement('section');
-    panel.id = mode === 'archive' ? 'archive-container' : 'datalab-container';
+    panel.id = panelId;
     document.getElementById('main-content')?.appendChild(panel);
   }
   panel.style.display = 'block';
 
-  if (mode === 'archive') {
+  if (mode === 'home') {
+    panel.innerHTML ||= '<div style="padding:40px;text-align:center;color:#94a3b8">首頁資料載入中…</div>';
+    window.renderHomeOverview?.();
+  } else if (mode === 'archive') {
     panel.innerHTML ||= '<div style="padding:40px;text-align:center;color:#94a3b8">歷屆成員資料載入中…</div>';
     window.renderFormerArchive?.();
   } else if (mode === 'datalab') {
@@ -299,7 +318,7 @@ function applyMode(mode) {
   const hub = document.querySelector('#navigation-hub');
   if (hub) { hub.hidden = mode !== 'my' && mode !== 'more'; hub.style.display = hub.hidden ? 'none' : 'block'; }
   if (mode === 'my' || mode === 'more') showHub(mode);
-  else if (mode === 'archive' || mode === 'datalab') showCustomMode(mode);
+  else if (mode === 'home' || mode === 'archive' || mode === 'datalab') showCustomMode(mode);
   else legacySetMode(mode);
   enforceRouteIsolation(mode);
   if (mode === 'events') {
@@ -314,7 +333,7 @@ function applyMode(mode) {
   const switcher = document.querySelector('#schedule-section-switcher');
   if (switcher) switcher.hidden = !['schedule', 'matches'].includes(mode);
   document.querySelectorAll('[data-mode]').forEach(el => {
-    const active = el.closest('.primary-nav') ? el.dataset.mode === parentForMode(mode) : el.dataset.mode === mode;
+    const active = el.closest('.primary-nav') ? (mode !== 'home' && el.dataset.mode === parentForMode(mode)) : el.dataset.mode === mode;
     if (active) el.setAttribute('aria-current', 'page');
     else el.removeAttribute?.('aria-current');
   });
@@ -365,7 +384,7 @@ function navigate(mode, { history = true } = {}) {
 }
 
 window.addEventListener('popstate', () => {
-  const nextMode = new URL(location.href).searchParams.get('mode') || 'news';
+  const nextMode = new URL(location.href).searchParams.get('mode') || 'home';
   if (nextMode !== currentMode) rememberMode(currentMode);
   applyMode(nextMode);
 });
