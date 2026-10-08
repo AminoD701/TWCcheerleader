@@ -10,6 +10,8 @@ let favoritesRenderInFlight = false;
 let formerRosterObserver;
 
 function isStandalone() { return matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+// iOS home-screen apps can report a desktop-like layout viewport: do not hide their filters.
+document.documentElement.classList.toggle('cheer-app-standalone', isStandalone());
 function isMobile() { return isStandalone() || matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches; }
 function legacyState() { try { return window.CheerLegacyState?.snapshot?.() || {}; } catch (_) { return {}; } }
 function allCards() { return [...document.querySelectorAll('#grid-container > .card')]; }
@@ -45,6 +47,18 @@ function installStyles() {
       .girls-filter-option small{color:var(--text-sub,#97a0ad);font-size:12px}
       body.keyboard-open .girls-mobile-filterbar{position:static}
     }
+    /* iOS installed PWA: show selectors regardless of CSS viewport width. */
+    html.cheer-app-standalone body[data-app-mode="girls"] #sub-nav-sports,
+    html.cheer-app-standalone body[data-app-mode="girls"] #team-dropdown-wrapper{display:none!important}
+    html.cheer-app-standalone body[data-app-mode="girls"] #girls-mobile-filterbar{display:block!important;position:relative!important;z-index:90;margin:12px 0;padding:12px 0;background:#0b0d11}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-filterbar__selectors{display:grid;gap:8px;padding:0 2px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select{display:flex;flex-direction:column;gap:5px;min-width:0}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select>span{color:#b1bbc9;font-size:12px;font-weight:900}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-select select{box-sizing:border-box;display:block;width:100%;min-height:48px;border-radius:12px;border:1px solid #4d5665;background:#171c24;color:white;padding:0 10px;font-size:16px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-filter-chip{min-height:48px;padding:0 12px;border-radius:12px;border:1px solid #4d5665;background:#171c24;color:#fff;font-size:13px;font-weight:900}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-mobile-filterbar__meta{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px;color:#b1bbc9;font-size:12px}
+    html.cheer-app-standalone body[data-app-mode="girls"] .girls-filter-clear{min-height:44px;background:transparent;border:0;color:#fff;text-decoration:underline}
     .former-roster{margin:18px 0 6px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.025);overflow:hidden}
     .former-roster[hidden]{display:none!important}
     .former-roster summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-weight:900;color:#fff}
