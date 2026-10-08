@@ -43,7 +43,8 @@ self.addEventListener('fetch', event => {
   if (/\\.(?:js|css)$/i.test(new URL(request.url).pathname)) {
     event.respondWith(fetch(request).then(response => {
       if (canStore(request, response)) {
-        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone())).catch(() => undefined));
+        const cacheCopy = response.clone();
+        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, cacheCopy)).catch(() => undefined));
       }
       return response;
     }).catch(async () => (await caches.match(request)) || new Response('Offline', { status: 503 })));
