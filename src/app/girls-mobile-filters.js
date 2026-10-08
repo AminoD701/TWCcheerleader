@@ -1,4 +1,4 @@
-const MOBILE_MAX = 767;
+const MOBILE_MAX = 900;
 const SPORTS = ['全部', '棒球', '籃球', '排球', '其他'];
 const SPORT_LABEL = { '全部': '全部球種', '棒球': '棒球', '籃球': '籃球', '排球': '排球', '其他': '其他' };
 let favoritesOnly = false;
@@ -9,7 +9,8 @@ let sheetOwnsScrollLock = false;
 let favoritesRenderInFlight = false;
 let formerRosterObserver;
 
-function isMobile() { return matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches; }
+function isStandalone() { return matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function isMobile() { return isStandalone() || matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches; }
 function legacyState() { try { return window.CheerLegacyState?.snapshot?.() || {}; } catch (_) { return {}; } }
 function allCards() { return [...document.querySelectorAll('#grid-container > .card')]; }
 function visibleCards() { return allCards().filter(card => card.style.display !== 'none'); }
@@ -21,7 +22,7 @@ function installStyles() {
   style.id = 'girls-mobile-filter-styles';
   style.textContent = `
     .girls-mobile-filterbar,.girls-filter-sheet{display:none}
-    @media (max-width:767px){
+    @media (max-width:900px){
       body[data-app-mode="girls"] #sub-nav-sports,body[data-app-mode="girls"] #team-dropdown-wrapper{display:none!important}
       body[data-app-mode="girls"] .girls-mobile-filterbar{display:block;position:sticky;top:0;z-index:90;margin:0 -2px 12px;padding:10px 2px 8px;background:linear-gradient(180deg,rgba(10,12,16,.98),rgba(10,12,16,.92));backdrop-filter:blur(12px)}
       .girls-mobile-filterbar__row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 2px}.girls-mobile-filterbar__row::-webkit-scrollbar{display:none}
@@ -55,7 +56,7 @@ function installStyles() {
     .former-roster__photo img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%;background:#0b0e12}
     .former-roster__meta{min-height:62px;padding:9px 10px}
     .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px;line-height:1.4}
-    @media(max-width:767px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.former-roster__meta{min-height:58px;padding:8px}.former-roster__item strong{font-size:13px}}
+    @media(max-width:900px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.former-roster__meta{min-height:58px;padding:8px}.former-roster__item strong{font-size:13px}}
     }`;
   document.head.append(style);
 }
@@ -511,19 +512,51 @@ window.addEventListener('popstate', () => beforeRouteSnapshot(document.body.data
 document.addEventListener('click', event => {
   if (event.target.closest?.('[data-mode],[data-hub-mode]')) beforeRouteSnapshot(document.body.dataset.appMode);
 }, true);
-window.addEventListener('DOMContentLoaded', () => {
+function bootMobileGirlsFilters() {
   installStyles();
   ensureUI();
-  matchMedia(`(max-width: ${MOBILE_MAX}px)`).addEventListener?.('change', syncUI);
+  syncUI();
+
+  matchMedia(`(max-width: ${MOBILE_MAX}px)`).addEventListener?.('change', () => {
+    ensureUI();
+    syncUI();
+  });
+
+  let attempts = 0;
+  const retry = setInterval(() => {
+    attempts += 1;
+    ensureUI();
+    if (document.getElementById('girls-mobile-filterbar') || attempts >= 24) {
+      clearInterval(retry);
+      syncUI();
+    }
+  }, 250);
+
   setTimeout(() => {
     const routedSetMode = window.setMode;
     if (typeof routedSetMode === 'function' && !routedSetMode.__girlsMobileWrapped) {
       const wrapped = (mode, ...args) => {
         if (mode !== document.body.dataset.appMode) beforeRouteSnapshot(document.body.dataset.appMode);
-        return routedSetMode(mode, ...args);
+        const result = routedSetMode(mode, ...args);
+        requestAnimationFrame(() => {
+          ensureUI();
+          syncUI();
+        });
+        return result;
       };
       wrapped.__girlsMobileWrapped = true;
       window.setMode = wrapped;
     }
   }, 0);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootMobileGirlsFilters, { once:true });
+} else {
+  bootMobileGirlsFilters();
+}
+
+window.addEventListener('load', () => {
+  ensureUI();
+  syncUI();
+}, { once:true });
