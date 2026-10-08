@@ -125,7 +125,6 @@ function hideCustomPanels(exceptMode = '') {
 
 function showCustomMode(mode) {
   hideCustomPanels(mode);
-  legacySetMode('games');
   document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
   document.querySelectorAll('#main-content > section').forEach(el => { el.style.display = 'none'; });
 
