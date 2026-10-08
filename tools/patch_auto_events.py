@@ -11,13 +11,9 @@ text = text.replace('外籍行程大廳', '公開行程大廳')
 text = text.replace('外籍行程與賽事專屬彈窗', '公開行程與賽事專屬彈窗')
 text = text.replace("'${e.eventname||\"外籍行程\"}'", "'${e.eventname||\"公開行程\"}'")
 
-# New cache namespace, and public Events are refreshed separately below on every visit.
-text = re.sub(
-    r'const CACHE_KEY = "tw_cheerleader_cache_v\d+";',
-    'const CACHE_KEY = "tw_cheerleader_cache_v35";',
-    text,
-    count=1,
-)
+# Public Events maintenance must never rewrite the core Girls/data cache namespace.
+# Cache versioning is owned by the main app so roster/schema fixes cannot be
+# accidentally rolled back by this workflow.
 
 # Remove the browser-side "+新增活動" tool completely.
 text = re.sub(
