@@ -2,22 +2,41 @@
   const TEAM_LEAGUE={
     'Uni-Girls':'CPBL','Rakuten Girls':'CPBL','Dragon Beauties':'CPBL',
     'Aqua Mermaids':'TPBL','Formosa Sexy':'TPBL','Muse Girls':'TPBL','Taishin Wonders':'TPBL','Leopard Girls':'TPBL','New Taipei Queens':'TPBL',
-    'Pilots Crew':'PLG','Youngkey Girls':'PLG','Tokki Cutie':'TPVL','Peach Girls':'TPVL','Little Witches':'TPVL','Si-ster':'TPVL'
+    'Pilots Crew':'PLG','Youngkey Girls':'PLG',
+    'Tokki Cutie':'TPVL','Peach Girls':'TPVL','Little Witches':'TPVL','Si-ster':'TPVL'
   };
+  const CPBL_TEAMS=new Set(['Passion Sisters','Fubon Angels','Wing Stars','Uni-Girls','Rakuten Girls','Dragon Beauties']);
+  const TPBL_TEAMS=new Set(['Aqua Mermaids','Formosa Sexy','Passion Sisters','Muse Girls','Taishin Wonders','Leopard Girls','New Taipei Queens']);
+  const PLG_TEAMS=new Set(['Pilots Crew','Youngkey Girls','Wing Stars','Fubon Angels']);
+  const TPVL_TEAMS=new Set(['Tokki Cutie','Peach Girls','Little Witches','Wing Stars','Si-ster']);
   const isFormer=g=>Boolean(String(g?.departureseason||g?.departure_season||g?.['離隊賽季']||'').trim())||/(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(g?.note||''));
-  const uid=g=>String(g?.uid||g?.realname||g?.nickname||'').trim();
+  const uid=g=>String(g?.uid||`${String(g?.realname||'').trim()}|${String(g?.nickname||'').trim()}`).trim();
   const leagueFor=g=>{
     const team=String(g.team||'').trim(),sport=String(g.sport||'');
-    if(TEAM_LEAGUE[team])return TEAM_LEAGUE[team];
-    if(team.includes('Passion Sisters'))return sport.includes('籃')?'TPBL':'CPBL';
-    if(team.includes('Fubon Angels'))return sport.includes('籃')?'PLG':'CPBL';
-    if(team.includes('Wing Stars'))return sport.includes('排')?'TPVL':sport.includes('籃')?'PLG':'CPBL';
-    if(sport.includes('棒'))return 'CPBL';
-    return '';
+    if(team==='Passion Sisters') return sport.includes('籃')?'TPBL':'CPBL';
+    if(team==='Fubon Angels') return sport.includes('籃')?'PLG':'CPBL';
+    if(team==='Wing Stars') return sport.includes('排')?'TPVL':sport.includes('籃')?'PLG':'CPBL';
+    if(CPBL_TEAMS.has(team) && sport.includes('棒')) return 'CPBL';
+    if(TPBL_TEAMS.has(team) && sport.includes('籃')) return 'TPBL';
+    if(PLG_TEAMS.has(team) && sport.includes('籃')) return 'PLG';
+    if(TPVL_TEAMS.has(team) && sport.includes('排')) return 'TPVL';
+    return TEAM_LEAGUE[team] || '';
   };
-  const foreign=g=>{const n=String(g.nat||'').trim();return Boolean(n)&&!/(臺灣|台灣)/.test(n)&&n!=='未知'&&n!=='-';};
-  const h=g=>{const n=parseFloat(String(g.height||'').replace(/[^d.]/g,''));return Number.isFinite(n)?n:null;};
-  const zodiac=g=>String(g.zodiac||'').trim().replace('魔羯','摩羯').replace('白羊','牡羊');
+  const normalizeNat=value=>String(value||'').trim().replace(/\s+/g,'');
+  const foreign=g=>{
+    const n=normalizeNat(g.nat);
+    return Boolean(n)&&!/(臺灣|台灣)/.test(n)&&!['未知','-','—'].includes(n);
+  };
+  const h=g=>{
+    const raw=String(g.height||'').match(/\d+(?:\.\d+)?/);
+    const n=raw?Number(raw[0]):NaN;
+    return Number.isFinite(n)?n:null;
+  };
+  const zodiac=g=>String(g.zodiac||'')
+    .trim()
+    .replace(/座$/,'')
+    .replace('魔羯','摩羯')
+    .replace('白羊','牡羊');
 
   function activePeople(){
     const map=new Map();
@@ -79,7 +98,7 @@
       root.querySelector('#datalab-result-list').innerHTML=result.slice(0,60).map(p=>{
         const g=p.girl,name=g.nickname||g.realname||'未命名';
         const leagues=[...new Set(p.rows.map(leagueFor).filter(Boolean))].join('／');
-        return `<button data-dl-uid="${uid(g)}"><strong>${name}</strong><small>${leagues||g.team||''} · ${g.nat||'國籍未填'}${h(g)?' · '+h(g)+'cm':''}${zodiac(g)?' · '+zodiac(g)+'座':''}</small></button>`;
+        return `<button data-dl-uid="${uid(g)}"><strong>${name}</strong><small>${leagues||g.team||''} · ${g.nat||'國籍未填'}${h(g)!=null?' · '+h(g)+'cm':''}${zodiac(g)?' · '+zodiac(g)+'座':''}</small></button>`;
       }).join('')+(result.length>60?'<div class="datalab-more">結果超過 60 位，請再增加條件縮小範圍。</div>':'');
     };
     controls.forEach(x=>x.addEventListener('input',update));update();
