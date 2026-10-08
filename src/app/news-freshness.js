@@ -99,7 +99,15 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleRender, { once: true });
   else scheduleRender();
 
-  new MutationObserver(scheduleRender).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  const routeObserver = new MutationObserver(scheduleRender);
+  routeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-app-mode'] });
+
+  const newsContainer = document.getElementById('news-container');
+  if (newsContainer) {
+    const newsObserver = new MutationObserver(scheduleRender);
+    newsObserver.observe(newsContainer, { childList: true });
+  }
+
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       meta = null;
