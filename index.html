@@ -5093,7 +5093,12 @@
                             const realname = (g.realname || '').trim();
                             const note = String(g.note || g['備註'] || g.備註 || '已離隊').trim();
                             const id = String(g.uid || g.realname || g.nickname || '').replace(/'/g, "\\'");
-                            return `<button type="button" class="former-roster__item" onclick="window.openProfile('${id}')"><strong>${name}</strong><small>${realname && realname !== name ? realname + ' · ' : ''}${note}</small></button>`;
+                            const image = String(g.img || '').trim();
+                            const imageUrl = image && window.getCdnUrl ? window.getCdnUrl(image) : image;
+                            return `<button type="button" class="former-roster__item" onclick="window.openProfile('${id}')">
+                                <span class="former-roster__photo">${imageUrl ? `<img src="${imageUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'">` : ''}</span>
+                                <span class="former-roster__meta"><strong>${name}</strong><small>${realname && realname !== name ? realname + ' · ' : ''}${note}</small></span>
+                            </button>`;
                         }).join('')}
                     </div>
                 </div>`;
