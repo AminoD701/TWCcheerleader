@@ -174,3 +174,229 @@ input:focus-visible{
   .grid-container .card,
   .grid-container .card:hover{transition:none!important;transform:none!important}
 }
+
+
+/* =========================================================
+   Comfort pass v2 — hierarchy, controls, sticky areas, modals
+   ========================================================= */
+:root{
+  --surface-1:#11161c;
+  --surface-2:#151b22;
+  --surface-3:#1a212a;
+  --ui-border:rgba(255,255,255,.09);
+  --ui-border-strong:rgba(255,255,255,.16);
+  --ui-text:#eef2f7;
+  --ui-muted:#98a3b1;
+  --ui-shadow:0 12px 32px rgba(0,0,0,.26);
+}
+
+/* Header / sticky controls */
+.sticky-filter-wrapper{
+  top:0!important;
+  padding:11px 16px!important;
+  border-bottom:1px solid var(--ui-border)!important;
+  background:rgba(12,15,20,.88)!important;
+  backdrop-filter:blur(16px) saturate(120%)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.20)!important;
+}
+.filters{
+  gap:9px!important;
+}
+.filters input,
+.filters select,
+.controls-container select,
+.controls-container input,
+#news-filter-dropdowns select{
+  min-height:42px!important;
+  border:1px solid var(--ui-border-strong)!important;
+  border-radius:10px!important;
+  background:var(--surface-1)!important;
+  color:var(--ui-text)!important;
+  padding:9px 12px!important;
+  font-size:13px!important;
+  font-weight:750!important;
+  box-shadow:none!important;
+}
+.filters input:focus,
+.filters select:focus,
+.controls-container input:focus,
+.controls-container select:focus,
+#news-filter-dropdowns select:focus{
+  border-color:rgba(255,255,255,.38)!important;
+  background:var(--surface-2)!important;
+}
+.tab-btn,
+.team-filter-btn,
+.sport-filter-btn{
+  min-height:38px;
+  border-radius:999px!important;
+  border-width:1px!important;
+  box-shadow:none!important;
+}
+
+/* Common headings */
+.section-title,
+.page-title,
+.navigation-hub__title{
+  letter-spacing:.2px!important;
+  line-height:1.2!important;
+}
+.section-subtitle,
+.page-subtitle,
+.navigation-hub__subtitle{
+  color:var(--ui-muted)!important;
+  line-height:1.65!important;
+}
+
+/* General content panels */
+.main-content-container,
+.navigation-hub,
+#feedback-container,
+#agency-container,
+#profile-container{
+  border-radius:18px;
+}
+.navigation-hub{
+  padding:22px!important;
+  background:linear-gradient(145deg,rgba(18,23,29,.98),rgba(10,13,17,.98))!important;
+  box-shadow:var(--ui-shadow)!important;
+}
+.navigation-hub__grid{
+  gap:10px!important;
+}
+.navigation-hub__item{
+  border:1px solid var(--ui-border)!important;
+  border-radius:14px!important;
+  background:rgba(255,255,255,.025)!important;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease!important;
+}
+.navigation-hub__item:hover{
+  transform:translateY(-2px)!important;
+  border-color:var(--ui-border-strong)!important;
+  background:rgba(255,255,255,.045)!important;
+}
+
+/* Modal / sheet polish */
+.modal-content,
+.modal .modal-content,
+.bottom-sheet,
+.sheet-panel{
+  border:1px solid var(--ui-border)!important;
+  border-radius:18px!important;
+  background:linear-gradient(160deg,#141a21,#0d1116)!important;
+  box-shadow:0 28px 80px rgba(0,0,0,.56)!important;
+}
+.modal-header,
+.modal-title{
+  border-bottom-color:var(--ui-border)!important;
+}
+.modal-close,
+.close-btn{
+  border-radius:999px!important;
+  background:rgba(255,255,255,.06)!important;
+  border:1px solid var(--ui-border)!important;
+}
+
+/* Empty and loading states */
+.empty-state,
+.loading-state,
+.no-data,
+.archive-empty,
+.datalab-empty{
+  max-width:720px;
+  margin:24px auto;
+  padding:30px 24px!important;
+  border:1px dashed rgba(255,255,255,.11)!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.02)!important;
+  color:var(--ui-muted)!important;
+  line-height:1.7!important;
+}
+
+/* Better text rhythm inside cards */
+.card .realname,
+.card .meta,
+.card .team,
+.card small{
+  line-height:1.5;
+}
+.card .nickname{
+  line-height:1.15!important;
+}
+.info-section > *:last-child{
+  margin-bottom:0!important;
+}
+
+/* Links and subtle interaction */
+a{
+  text-underline-offset:3px;
+}
+button{
+  font-family:inherit;
+}
+button:not(:disabled){
+  touch-action:manipulation;
+}
+button:disabled{
+  cursor:not-allowed!important;
+  opacity:.5!important;
+}
+
+/* Desktop reading width */
+@media(min-width:1180px){
+  .event-list-container,
+  .schedule-matrix-container,
+  #matches-container,
+  #games-container{
+    padding-left:20px!important;
+    padding-right:20px!important;
+  }
+}
+
+/* Mobile comfort */
+@media(max-width:767px){
+  .sticky-filter-wrapper{
+    padding:8px 10px!important;
+    backdrop-filter:blur(14px)!important;
+  }
+  .filters{
+    gap:7px!important;
+  }
+  .filters input,
+  .filters select,
+  .controls-container input,
+  .controls-container select,
+  #news-filter-dropdowns select{
+    min-height:40px!important;
+    font-size:12px!important;
+    padding:8px 10px!important;
+  }
+  .navigation-hub{
+    margin:10px!important;
+    padding:14px!important;
+    border-radius:16px!important;
+  }
+  .navigation-hub__grid{
+    grid-template-columns:1fr!important;
+  }
+  .modal-content,
+  .modal .modal-content{
+    width:calc(100% - 16px)!important;
+    max-height:88dvh!important;
+    margin:6dvh auto!important;
+    border-radius:16px!important;
+  }
+  .card .nickname{
+    font-size:21px!important;
+  }
+  .realname{
+    font-size:12px!important;
+  }
+}
+
+/* Avoid sticky UI fighting with open modal / keyboard */
+body.no-scroll .sticky-filter-wrapper,
+body.keyboard-open .sticky-filter-wrapper{
+  position:relative!important;
+  top:auto!important;
+}
