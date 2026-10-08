@@ -174,7 +174,7 @@
   loadScriptOnce('./src/app/data-lab.js?v=3', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=2', 'events-archive');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
-  loadScriptOnce('./src/app/home-dashboard.js?v=1', 'home-dashboard');
+  loadScriptOnce('./src/app/news-page-polish.js?v=1', 'news-page-polish');
 
   window.addEventListener('load', () => {
     if (!isStandalone()) createInstallButton();
