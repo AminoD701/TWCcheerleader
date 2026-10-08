@@ -42,7 +42,7 @@
   let lastRenderKey = '';
   const promoEndsAt = new Date('2026-10-24T00:00:00+08:00').getTime();
   const promoActive = () => Date.now() < promoEndsAt;
-  const noticeKey = 'twc_vision_challenge_intro_v1';
+  const noticeKey = 'twc_scumbag_challenge_intro_v1';
 
   function render() {
     const root = document.getElementById('home-container');
@@ -88,7 +88,7 @@
           </div>
         </div>
 
-        ${promoActive() ? `<button type="button" class="twc-vision-promo" data-home-vision aria-label="玩新遊戲 應援眼力王"><span class="twc-vision-promo__badge">NEW · PHOTO CHALLENGE</span><strong>你的應援眼力，有多強？</strong><span>「應援眼力王」新登場！看照片猜女孩，20 題挑戰自己的辨識力。</span><span class="twc-vision-promo__action">立即挑戰 <span aria-hidden="true">↗</span></span></button>` : ''}
+        ${promoActive() ? `<button type="button" class="twc-vision-promo" data-home-vision aria-label="玩新遊戲 渣男鑑定所"><span class="twc-vision-promo__badge">NEW · PHOTO CHALLENGE</span><strong>你是純情派，還是海王級？</strong><span>「渣男鑑定所」新登場！看照片猜女孩，闖過四種關卡，測測你的渣男潛力。</span><span class="twc-vision-promo__action">立即挑戰 <span aria-hidden="true">↗</span></span></button>` : ''}
         <div class="home-overview__quick">
           <button type="button" data-home-mode="girls"><span>ROSTER</span><strong>女孩圖鑑</strong><small>查看現役與歷屆成員</small></button>
           <button type="button" data-home-mode="events"><span>EVENTS</span><strong>公開行程</strong><small>近期活動與完整月曆</small></button>
@@ -152,7 +152,7 @@
     const toast=document.createElement('aside');
     toast.id='twc-vision-toast';
     toast.setAttribute('aria-label','新遊戲通知');
-    toast.innerHTML='<div><small>新遊戲上線</small><strong>應援眼力王</strong><span>20 題照片挑戰，看看你認得幾位女孩！</span></div><button type="button" data-play>去挑戰</button><button type="button" data-dismiss aria-label="關閉提醒">×</button>';
+    toast.innerHTML='<div><small>新遊戲上線</small><strong>渣男鑑定所</strong><span>猜照片挑戰，認得越多越難解釋！</span></div><button type="button" data-play>去挑戰</button><button type="button" data-dismiss aria-label="關閉提醒">×</button>';
     document.body.appendChild(toast);
     const close=()=>{try{localStorage.setItem(noticeKey,'1')}catch(_){}toast.remove();};
     toast.querySelector('[data-dismiss]').onclick=close;
