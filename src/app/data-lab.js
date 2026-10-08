@@ -47,7 +47,7 @@
   };
   const foreign=g=>['korean','japanese','mixed','malaysian','otherForeign'].includes(nationalityCategory(g));
   const displayName=g=>{
-    if(nationalityCategory(g)==='korean'){
+    if(['korean','japanese'].includes(nationalityCategory(g))){
       const real=String(g?.realname||'').trim();
       if(real) return real;
     }
@@ -71,7 +71,7 @@
       if(!map.has(key))map.set(key,{girl:g,rows:[]});
       const person=map.get(key);
       person.rows.push(g);
-      if(nationalityCategory(g)==='korean' && String(g?.realname||'').trim()) person.girl=g;
+      if(['korean','japanese'].includes(nationalityCategory(g)) && String(g?.realname||'').trim()) person.girl=g;
     });
     return [...map.values()];
   }
