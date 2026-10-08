@@ -86,6 +86,8 @@ function showHub(mode) {
       ]
     : [
         { target: 'news', title: '最新消息' },
+        { target: 'archive', title: '🗂️ 歷屆成員資料庫', note: '依離隊賽季查看歷屆女孩，離隊後資料仍完整保留。' },
+        { target: 'datalab', title: '📊 啦啦隊生態數據', note: '查聯盟、國籍、身高、星座與現役女孩分布。' },
         { target: 'games', title: '遊戲中心' },
         { action: 'gacha-history', title: '📚 今日一抽紀錄', note: '查看每天抽到的幸運女孩紀錄。' },
         { target: 'vote', title: '應援投票' },
@@ -112,6 +114,28 @@ function showHub(mode) {
       navigate(a.dataset.hubMode);
     }
   };
+}
+
+function showCustomMode(mode) {
+  legacySetMode('games');
+  document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
+  document.querySelectorAll('#main-content > section').forEach(el => { el.style.display = 'none'; });
+
+  let panel = document.getElementById(mode === 'archive' ? 'archive-container' : 'datalab-container');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = mode === 'archive' ? 'archive-container' : 'datalab-container';
+    document.getElementById('main-content')?.appendChild(panel);
+  }
+  panel.style.display = 'block';
+
+  if (mode === 'archive') {
+    panel.innerHTML ||= '<div style="padding:40px;text-align:center;color:#94a3b8">歷屆成員資料載入中…</div>';
+    window.renderFormerArchive?.();
+  } else if (mode === 'datalab') {
+    panel.innerHTML ||= '<div style="padding:40px;text-align:center;color:#94a3b8">生態數據載入中…</div>';
+    window.renderDataLab?.();
+  }
 }
 
 function restoreModeState(mode) {
@@ -172,6 +196,7 @@ function applyMode(mode) {
   const hub = document.querySelector('#navigation-hub');
   if (hub) { hub.hidden = mode !== 'my' && mode !== 'more'; hub.style.display = hub.hidden ? 'none' : 'block'; }
   if (mode === 'my' || mode === 'more') showHub(mode);
+  else if (mode === 'archive' || mode === 'datalab') showCustomMode(mode);
   else legacySetMode(mode);
   const canonical = new URL(urlBeforeLegacy);
   canonical.searchParams.set('mode', mode);
