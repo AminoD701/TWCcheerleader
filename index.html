@@ -3512,7 +3512,11 @@
             else if (currentMode === 'vote') { vote.style.display = 'block'; window.initVoteHall(); } 
             else if (currentMode === 'matches') { matches.style.display = 'block'; window.renderMatchesSelection(); }
             else if (currentMode === 'themes') { news.style.display = 'flex'; window.renderTeamThemesHub(); }
-            else if (currentMode === 'games') { gamesHub.style.display = 'flex'; window.renderGamesHub(); }
+            else if (currentMode === 'games') {
+                gamesHub.style.display = 'flex';
+                window.renderGamesHub();
+                requestAnimationFrame(() => window.refreshGameAppEnhancements?.());
+            }
             else if (currentMode === 'agency') { agency.style.display = 'block'; window.renderAgencyHub(); }
             else if (currentMode === 'allstar') { allstar.style.display = 'block'; window.renderAllStarMap(); }
         };
