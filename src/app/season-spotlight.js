@@ -190,7 +190,10 @@ function renderMarquee() {
   } else {
     message = `🔥 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　季後賽焦點已上線　｜　點擊查看完整賽程`;
   }
-  content.innerHTML = message;
+  if (content.dataset.spotlightMessage !== message) {
+    content.innerHTML = message;
+    content.dataset.spotlightMessage = message;
+  }
 }
 
 function decorateLeagueSelection() {
