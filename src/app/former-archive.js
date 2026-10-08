@@ -67,6 +67,13 @@
           <div><span>CHEERLEADER HISTORY</span><h1>歷屆成員資料庫</h1><p>保留曾經出現在本站資料庫中的啦啦隊女孩。離隊後不會從網站消失，而是依離隊賽季轉入歷史資料。</p></div>
           <div class="archive-total"><strong>${data.length}</strong><small>歷屆女孩</small></div>
         </div>
+        <div class="archive-tools">
+          <label class="archive-search">
+            <span>搜尋歷屆成員</span>
+            <input type="search" id="archive-search-input" placeholder="輸入姓名或隊伍" autocomplete="off">
+          </label>
+          <div class="archive-search-result" id="archive-search-result">共 ${data.length} 位歷屆女孩</div>
+        </div>
         <div class="archive-tabs">${seasons.map((s,i)=>`<button data-archive-season="${esc(s)}" class="${i===0?'active':''}">${esc(s)} 賽季</button>`).join('')}</div>
         <div class="archive-groups">
           ${groups.map((group,i)=>`
@@ -89,7 +96,30 @@
       const btn=e.target.closest('[data-archive-season]'); if(!btn)return;
       root.querySelectorAll('[data-archive-season]').forEach(x=>x.classList.toggle('active',x===btn));
       root.querySelectorAll('[data-season-panel]').forEach(panel=>{panel.hidden=panel.dataset.seasonPanel!==btn.dataset.archiveSeason;});
+      applyArchiveSearch();
     });
+
+    const searchInput=root.querySelector('#archive-search-input');
+    const resultText=root.querySelector('#archive-search-result');
+    const applyArchiveSearch=()=>{
+      const q=String(searchInput?.value||'').trim().toLowerCase();
+      const activeSeason=root.querySelector('[data-archive-season].active')?.dataset.archiveSeason;
+      let visible=0;
+      root.querySelectorAll('.archive-card').forEach(card=>{
+        const panel=card.closest('[data-season-panel]');
+        const inSeason=!activeSeason||panel?.dataset.seasonPanel===activeSeason;
+        const text=(card.textContent||'').toLowerCase();
+        const show=inSeason&&(!q||text.includes(q));
+        card.hidden=!show;
+        if(show)visible+=1;
+      });
+      root.querySelectorAll('[data-season-panel]').forEach(panel=>{
+        panel.hidden=Boolean(activeSeason&&panel.dataset.seasonPanel!==activeSeason);
+      });
+      if(resultText)resultText.textContent=q ? `找到 ${visible} 位符合搜尋` : `本賽季顯示 ${visible} 位`;
+    };
+    searchInput?.addEventListener('input',applyArchiveSearch);
+    applyArchiveSearch();
     root.addEventListener('click',e=>{
       const card=e.target.closest('.archive-card'); if(!card)return;
       const group=groups.find(g=>g.season===card.dataset.archiveSeasonKey);
@@ -106,8 +136,8 @@
       #archive-container{display:none;width:100%;max-width:1180px;margin:20px auto 70px;padding:0 16px;box-sizing:border-box}body[data-app-mode="archive"] #archive-container{display:block}
       .archive-switchbar{display:flex;justify-content:flex-end;gap:6px;margin:0 0 12px}.archive-switchbar button{min-height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:#11161c;color:#9aa5b2;font-size:11px;font-weight:900;cursor:pointer}.archive-switchbar button.active{color:#fff;border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.07)}
       .archive-hero{display:flex;justify-content:space-between;align-items:end;gap:24px;padding:28px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:radial-gradient(circle at 90% 0,rgba(56,189,248,.15),transparent 35%),#10141a}.archive-hero span{font:900 11px/1 var(--sport-font);letter-spacing:2px;color:#7dd3fc}.archive-hero h1{margin:7px 0 8px;color:#fff;font-size:clamp(28px,5vw,44px)}.archive-hero p{margin:0;max-width:680px;color:#94a3b8;line-height:1.7}.archive-total{text-align:center;min-width:110px}.archive-total strong{display:block;font:950 42px/1 var(--sport-font);color:#fff}.archive-total small{color:#94a3b8}
-      .archive-tabs{display:flex;gap:8px;overflow:auto;margin:18px 0 14px;padding-bottom:3px}.archive-tabs button{border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#12171d;color:#aab3bf;padding:9px 13px;font-weight:900;white-space:nowrap}.archive-tabs button.active{background:#fff;color:#111}.archive-season__head{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px;color:#fff}.archive-season__head span{color:#94a3b8;font-size:12px}.archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.archive-card{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:#12171d;color:#fff;text-align:left;padding:0;cursor:pointer}.archive-card__photo{aspect-ratio:4/5;background:#0b0e12}.archive-card__photo img{width:100%;height:100%;object-fit:cover;object-position:top}.archive-card__body{padding:11px}.archive-card__body strong{display:block;font-size:16px}.archive-card__body small,.archive-card__body span{display:block;margin-top:3px;color:#94a3b8;font-size:11px;line-height:1.4}.archive-empty{padding:40px;text-align:center;color:#94a3b8}
-      @media(max-width:700px){.former-archive-entry{margin:8px 10px 14px;padding:15px;align-items:flex-start}.former-archive-entry button{padding:9px 11px;font-size:12px}.former-archive-entry small{font-size:11px}.archive-hero{align-items:flex-start;flex-direction:column}.archive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      .archive-tools{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:18px 0 10px}.archive-search{display:flex;flex-direction:column;gap:6px;min-width:min(100%,320px)}.archive-search span{color:#94a3b8;font-size:11px;font-weight:900}.archive-search input{height:42px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0d1116;color:#fff;padding:0 13px;outline:none}.archive-search input:focus{border-color:rgba(125,211,252,.5);box-shadow:0 0 0 3px rgba(125,211,252,.08)}.archive-search-result{color:#94a3b8;font-size:11px;font-weight:800;padding-bottom:4px}.archive-tabs{display:flex;gap:8px;overflow:auto;margin:10px 0 14px;padding-bottom:3px}.archive-tabs button{border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#12171d;color:#aab3bf;padding:9px 13px;font-weight:900;white-space:nowrap}.archive-tabs button.active{background:#fff;color:#111}.archive-season__head{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px;color:#fff}.archive-season__head span{color:#94a3b8;font-size:12px}.archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.archive-card{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:#12171d;color:#fff;text-align:left;padding:0;cursor:pointer}.archive-card__photo{aspect-ratio:4/5;background:#0b0e12}.archive-card__photo img{width:100%;height:100%;object-fit:cover;object-position:top}.archive-card__body{padding:11px}.archive-card__body strong{display:block;font-size:16px}.archive-card__body small,.archive-card__body span{display:block;margin-top:3px;color:#94a3b8;font-size:11px;line-height:1.4}.archive-empty{padding:40px;text-align:center;color:#94a3b8}
+      @media(max-width:700px){.former-archive-entry{margin:8px 10px 14px;padding:15px;align-items:flex-start}.former-archive-entry button{padding:9px 11px;font-size:12px}.former-archive-entry small{font-size:11px}.archive-hero{align-items:flex-start;flex-direction:column}.archive-tools{align-items:stretch;flex-direction:column;gap:7px}.archive-search{min-width:0}.archive-search-result{padding:0}.archive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     `;document.head.appendChild(s);
   }
 
