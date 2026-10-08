@@ -25,8 +25,13 @@ function installStyles() {
     @media (max-width:900px){
       body[data-app-mode="girls"] #sub-nav-sports,body[data-app-mode="girls"] #team-dropdown-wrapper{display:none!important}
       body[data-app-mode="girls"] .girls-mobile-filterbar{display:block;position:sticky;top:0;z-index:90;margin:0 -2px 12px;padding:10px 2px 8px;background:linear-gradient(180deg,rgba(10,12,16,.98),rgba(10,12,16,.92));backdrop-filter:blur(12px)}
-      .girls-mobile-filterbar__row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 2px}.girls-mobile-filterbar__row::-webkit-scrollbar{display:none}
-      .girls-filter-chip{min-height:48px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:#151920;color:#fff;font-weight:900;white-space:nowrap;font-size:14px}
+      .girls-mobile-filterbar__selectors{display:grid;gap:8px;padding:0 2px}
+      .girls-mobile-select-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+      .girls-mobile-select{display:flex;flex-direction:column;gap:5px;min-width:0}
+      .girls-mobile-select>span{padding-left:3px;color:#97a0ad;font-size:10px;font-weight:900;letter-spacing:.6px}
+      .girls-mobile-select select{width:100%;min-height:48px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:#151920;color:#fff;padding:0 38px 0 13px;font-size:14px;font-weight:900;outline:none}
+      .girls-mobile-select select:focus{border-color:var(--accent,#ff4757);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#ff4757) 22%,transparent)}
+      .girls-filter-chip{min-height:48px;padding:0 14px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:#151920;color:#fff;font-weight:900;white-space:nowrap;font-size:13px}
       .girls-filter-chip.active{border-color:var(--accent,#ff4757);box-shadow:0 0 0 1px var(--accent,#ff4757) inset}
       .girls-mobile-filterbar__meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px 0;font-size:12px;color:var(--text-sub,#97a0ad);font-weight:800}
       .girls-filter-clear{min-height:48px;border:0;background:transparent;color:#fff;text-decoration:underline;font-weight:900;padding:0 8px}
@@ -434,15 +439,35 @@ function syncUI() {
     return;
   }
   const state = legacyState();
-  const sport = bar.querySelector('[data-open="sport"]');
-  const team = bar.querySelector('[data-open="team"]');
+  const sportSelect = bar.querySelector('#girls-mobile-sport-select');
+  const teamSelect = bar.querySelector('#girls-mobile-team-select');
   const fav = bar.querySelector('[data-favorites]');
-  sport.textContent = `球種：${SPORT_LABEL[state.currentSport] || state.currentSport || '全部球種'}`;
-  team.textContent = state.currentTeam && state.currentTeam !== '全部啦啦隊'
-    ? `隊伍：${state.currentTeam}`
-    : '隊伍：全部隊伍';
-  sport.classList.toggle('active', state.currentSport && state.currentSport !== '全部');
-  team.classList.toggle('active', state.currentTeam && state.currentTeam !== '全部啦啦隊');
+
+  if (sportSelect) {
+    sportSelect.value = state.currentSport || '全部';
+  }
+
+  if (teamSelect) {
+    const options = activeTeamOptions();
+    const currentKey = state.currentTeam && state.currentTeam !== '全部啦啦隊'
+      ? `${state.currentSport || ''}\u0000${state.currentTeam}`
+      : '';
+    const previousKey = teamSelect.value;
+
+    teamSelect.innerHTML = '<option value="">全部現役隊伍</option>' + options.map(item => {
+      const key = `${item.sport}\u0000${item.team}`;
+      return `<option value="${key}">${item.team}｜${item.sport}｜${item.count} 位</option>`;
+    }).join('');
+
+    if (currentKey && [...teamSelect.options].some(option => option.value === currentKey)) {
+      teamSelect.value = currentKey;
+    } else if (!currentKey) {
+      teamSelect.value = '';
+    } else if ([...teamSelect.options].some(option => option.value === previousKey)) {
+      teamSelect.value = previousKey;
+    }
+  }
+
   fav.classList.toggle('active', favoritesOnly);
   applyFavorites();
   renderFormerRoster();
@@ -481,11 +506,49 @@ function ensureUI() {
   const bar = document.createElement('section');
   bar.id = 'girls-mobile-filterbar';
   bar.className = 'girls-mobile-filterbar';
-  bar.innerHTML = `<div class="girls-mobile-filterbar__row"><button class="girls-filter-chip" data-open="team">👥 隊伍：全部隊伍</button><button class="girls-filter-chip" data-open="sport">🏐 球種：全部球種</button><button class="girls-filter-chip" data-favorites>♥ 我的最愛</button></div><div class="girls-mobile-filterbar__meta"><span id="girls-mobile-filter-count">目前顯示 0 位女孩</span><button class="girls-filter-clear" data-clear>清除篩選</button></div>`;
+  bar.innerHTML = `
+    <div class="girls-mobile-filterbar__selectors">
+      <label class="girls-mobile-select">
+        <span>隊伍篩選</span>
+        <select id="girls-mobile-team-select" aria-label="依隊伍篩選女孩">
+          <option value="">全部現役隊伍</option>
+        </select>
+      </label>
+      <div class="girls-mobile-select-row">
+        <label class="girls-mobile-select">
+          <span>球種</span>
+          <select id="girls-mobile-sport-select" aria-label="依球種篩選女孩">
+            ${SPORTS.map(s => `<option value="${s}">${SPORT_LABEL[s]}</option>`).join('')}
+          </select>
+        </label>
+        <button class="girls-filter-chip" data-favorites type="button">♥ 我的最愛</button>
+      </div>
+    </div>
+    <div class="girls-mobile-filterbar__meta"><span id="girls-mobile-filter-count">目前顯示 0 位女孩</span><button class="girls-filter-clear" data-clear type="button">清除篩選</button></div>`;
   grid.parentNode.insertBefore(bar, grid);
+
+  const teamSelect = bar.querySelector('#girls-mobile-team-select');
+  const sportSelect = bar.querySelector('#girls-mobile-sport-select');
+
+  teamSelect?.addEventListener('change', () => {
+    if (!teamSelect.value) {
+      const state = legacyState();
+      chooseTeam('全部啦啦隊', state.currentSport || '全部');
+      return;
+    }
+    const [sport, team] = teamSelect.value.split('\u0000');
+    chooseTeam(team, sport);
+  });
+
+  sportSelect?.addEventListener('change', () => {
+    const sport = sportSelect.value || '全部';
+    const legacyBtn = [...document.querySelectorAll('#sub-nav-sports .sub-btn')]
+      .find(btn => sport === '全部' ? btn.textContent.includes('全部') : btn.textContent.includes(sport));
+    window.setSport?.(sport, legacyBtn || null);
+    requestAnimationFrame(syncUI);
+  });
+
   bar.onclick = event => {
-    const open = event.target.closest('[data-open]');
-    if (open) return openSheet(open.dataset.open);
     if (event.target.closest('[data-favorites]')) return toggleFavorites();
     if (event.target.closest('[data-clear]')) return clearFilters();
   };
