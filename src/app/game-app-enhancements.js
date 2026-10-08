@@ -92,7 +92,7 @@
     document.head.appendChild(style);
   };
 
-  const mode = () => new URLSearchParams(location.search).get('mode') || '';
+  const mode = () => document.body?.dataset.appMode || new URLSearchParams(location.search).get('mode') || '';
   const gameRoot = () => document.getElementById('games-container') || [...document.querySelectorAll('#main-content > div')].find(el => /遊樂互動|GAMES/i.test(el.textContent || ''));
 
   const enhanceGamesHome = () => {
@@ -185,8 +185,14 @@
 
   const refreshEnhancements = () => {
     installStyles();
-    enhanceGamesHome();
-    enhanceSubGame();
+    const current = mode();
+    const games = document.getElementById('games-container');
+    if (games && !['games','minigame','dreamteam'].includes(current)) games.style.display = 'none';
+    document.querySelectorAll('[data-game-ux-toolbar]').forEach(el => {
+      if (!['minigame','dreamteam'].includes(current)) el.remove();
+    });
+    if (current === 'games') enhanceGamesHome();
+    else if (['minigame','dreamteam'].includes(current)) enhanceSubGame();
     removeDailyShortcut();
   };
 
