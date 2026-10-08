@@ -44,6 +44,9 @@ BASE_QUERIES = [
     "site:nownews.com 啦啦隊",
     "site:tvbs.com.tw 啦啦隊",
     "site:tsna.com 啦啦隊",
+    "site:chinatimes.com 啦啦隊",
+    "site:chinatimes.com 娛樂 啦啦隊",
+    "site:chinatimes.com 體育 啦啦隊",
 
     # Sports coverage
     "site:setn.com 中職 CPBL",
@@ -65,6 +68,10 @@ BASE_QUERIES = [
     "site:tsna.com 中職 CPBL",
     "site:tsna.com TPBL OR PLG OR 職籃",
     "site:today.line.me 中職 CPBL",
+    "site:chinatimes.com 中職 CPBL",
+    "site:chinatimes.com MLB 大聯盟",
+    "site:chinatimes.com TPBL OR PLG OR 職籃",
+    "site:chinatimes.com TVBL OR 職排",
 ]
 
 # Only these publishers are accepted into the automatic feed.
@@ -78,6 +85,7 @@ PREFERRED_SOURCE_HINTS = [
     "TVBS", "TVBS新聞網",
     "TSNA", "TSNA體育新聞團隊",
     "LINE TODAY", "LINE TODAY台灣", "LINE Today",
+    "中時新聞網", "中國時報", "中時新聞網 Chinatimes.com", "China Times",
 ]
 
 PREFERRED_HOSTS = (
@@ -90,6 +98,7 @@ PREFERRED_HOSTS = (
     "tvbs.com.tw",
     "tsna.com",
     "today.line.me",
+    "chinatimes.com",
 )
 
 SPORT_RULES = [
@@ -134,6 +143,18 @@ TEAM_QUERY_BATCH_SIZE = 6
 MAX_TEAM_QUERY_BATCHES = 8
 NEAR_DUPLICATE_RATIO = 0.76
 RELATED_DUPLICATE_RATIO = 0.66
+EVENT_SIMILARITY_RATIO = 0.34
+EVENT_STORY_LIMIT = 2
+EVENT_WINDOW_HOURS = 42
+EVENT_ACTION_TERMS = (
+    "離隊", "畢業", "退隊", "退團", "加盟", "加入", "轉隊", "續約", "不續約",
+    "宣布", "證實", "告別", "引退", "退休", "受傷", "傷退", "復出", "停賽",
+    "奪冠", "封王", "晉級", "淘汰", "開幕", "出走", "換血",
+)
+EVENT_STOP_TERMS = {
+    "啦啦隊", "女神", "女孩", "球迷", "粉絲", "中職", "職棒", "職籃",
+    "今日", "今天", "最新", "震撼", "驚傳", "親揭", "曝光", "網友",
+}
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/152.0 Safari/537.36"
 
 
@@ -264,24 +285,107 @@ def title_similarity(left: str, right: str) -> float:
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
+def title_terms(title: str) -> set[str]:
+    """Extract useful event words from a Chinese news headline.
+
+    Character bigrams make this work for Chinese without an external tokenizer.
+    Numbers are kept separately because counts such as "7人" are often important
+    clues that two publishers are covering the exact same event.
+    """
+    cleaned = clean_title(title)
+    words = set(re.findall(r"[A-Za-z][A-Za-z0-9.+-]{1,20}|\d+|[\u3400-\u9fff]{2,8}", cleaned))
+    useful: set[str] = set()
+    for word in words:
+        if word in EVENT_STOP_TERMS:
+            continue
+        if re.fullmatch(r"[\u3400-\u9fff]{2,8}", word):
+            if len(word) <= 4:
+                useful.add(word)
+            for index in range(len(word) - 1):
+                pair = word[index:index + 2]
+                if pair not in EVENT_STOP_TERMS:
+                    useful.add(pair)
+        else:
+            useful.add(word.lower())
+    return useful
+
+
+def event_similarity(left: dict, right: dict) -> float:
+    a = title_terms(left.get("title", ""))
+    b = title_terms(right.get("title", ""))
+    if not a or not b:
+        return 0.0
+    return len(a & b) / max(1, len(a | b))
+
+
+def same_event_context(item: dict, previous: dict) -> bool:
+    if not item.get("dt") or not previous.get("dt"):
+        return False
+    seconds = abs((item["dt"] - previous["dt"]).total_seconds())
+    if seconds > EVENT_WINDOW_HOURS * 3600:
+        return False
+
+    current_people = set(item.get("matched_girls") or [])
+    previous_people = set(previous.get("matched_girls") or [])
+    current_teams = set(item.get("matched_teams") or [])
+    previous_teams = set(previous.get("matched_teams") or [])
+
+    shared_people = current_people & previous_people
+    shared_teams = current_teams & previous_teams
+    if not shared_people and not shared_teams:
+        return False
+
+    left_hay = f"{item.get('title','')} {item.get('description','')}"
+    right_hay = f"{previous.get('title','')} {previous.get('description','')}"
+    shared_actions = {
+        term for term in EVENT_ACTION_TERMS
+        if term in left_hay and term in right_hay
+    }
+
+    left_numbers = set(re.findall(r"\d+", item.get("title", "")))
+    right_numbers = set(re.findall(r"\d+", previous.get("title", "")))
+    shared_numbers = left_numbers & right_numbers
+
+    similarity = event_similarity(item, previous)
+    return (
+        similarity >= EVENT_SIMILARITY_RATIO
+        or (bool(shared_actions) and bool(shared_people or shared_teams))
+        or (bool(shared_numbers) and bool(shared_teams) and similarity >= 0.22)
+    )
+
+
 def is_duplicate_story(item: dict, accepted: list[dict]) -> bool:
+    """Drop literal/near-identical rewrites; event-level caps are handled separately."""
     for previous in accepted:
         ratio = title_similarity(item["title"], previous["title"])
         if ratio >= NEAR_DUPLICATE_RATIO:
             return True
 
-        current_people = set(item.get("matched_girls") or [])
-        previous_people = set(previous.get("matched_girls") or [])
-        same_people = bool(current_people & previous_people)
-        current_teams = set(item.get("matched_teams") or [])
-        previous_teams = set(previous.get("matched_teams") or [])
-        same_team = bool(current_teams & previous_teams)
         same_day = item.get("dt") and previous.get("dt") and abs((item["dt"] - previous["dt"]).total_seconds()) <= 36 * 3600
-
-        if ratio >= RELATED_DUPLICATE_RATIO and same_day and (same_people or same_team):
-            return True
+        if ratio >= RELATED_DUPLICATE_RATIO and same_day:
+            current_people = set(item.get("matched_girls") or [])
+            previous_people = set(previous.get("matched_girls") or [])
+            current_teams = set(item.get("matched_teams") or [])
+            previous_teams = set(previous.get("matched_teams") or [])
+            if (current_people & previous_people) or (current_teams & previous_teams):
+                return True
     return False
 
+
+def event_story_count(item: dict, accepted: list[dict]) -> int:
+    return sum(1 for previous in accepted if same_event_context(item, previous))
+
+
+def article_quality_score(item: dict) -> tuple:
+    """Prefer useful representative coverage when many publishers report one event."""
+    source = str(item.get("source") or "").lower()
+    source_bonus = 0
+    if any(name in source for name in ("聯合", "udn", "ettoday", "自由", "中時", "chinatimes", "tvbs", "三立", "setn", "tsna")):
+        source_bonus = 2
+    description_len = len(strip_html(item.get("description") or ""))
+    image_bonus = int(bool(item.get("rssImage")))
+    people_bonus = min(len(item.get("matched_girls") or []), 3)
+    return (source_bonus, image_bonus, min(description_len, 320), people_bonus, item.get("dt"))
 
 def canonicalize_url(url: str) -> str:
     try:
@@ -483,7 +587,7 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
         key=lambda item: (
             bool(item["matched_girls"]),
             len(item["matched_girls"]),
-            item["dt"],
+            article_quality_score(item),
         ),
         reverse=True,
     )
@@ -495,6 +599,8 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
             continue
         if is_duplicate_story(item, selected_cheer):
             continue
+        if event_story_count(item, selected_cheer) >= EVENT_STORY_LIMIT:
+            continue
         selected_cheer.append(item)
         generic_count += int(is_generic)
         if len(selected_cheer) >= CHEER_ITEM_LIMIT:
@@ -503,7 +609,7 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
     selected_sports: list[dict] = []
     for subcategory, limit in SPORT_ITEM_LIMITS.items():
         bucket = [item for item in sports if item["subcategory"] == subcategory]
-        bucket.sort(key=lambda item: (sports_importance_score(item), item["dt"]), reverse=True)
+        bucket.sort(key=lambda item: (sports_importance_score(item), article_quality_score(item)), reverse=True)
         source_counts: Counter[str] = Counter()
         for item in bucket:
             if len(selected_sports) >= SPORT_TOTAL_LIMIT:
@@ -512,6 +618,8 @@ def select_candidates(candidates: list[dict]) -> list[dict]:
             if source_counts[source_key] >= SPORT_SOURCE_LIMIT:
                 continue
             if is_duplicate_story(item, selected_sports):
+                continue
+            if event_story_count(item, selected_sports) >= EVENT_STORY_LIMIT:
                 continue
             selected_sports.append(item)
             source_counts[source_key] += 1
@@ -599,6 +707,8 @@ def main() -> None:
         if canonical_url in seen_url:
             continue
         if is_duplicate_story(item, emitted_items):
+            continue
+        if event_story_count(item, emitted_items) >= EVENT_STORY_LIMIT:
             continue
 
         main_category = item["main_category"]
