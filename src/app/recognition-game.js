@@ -66,6 +66,7 @@
     frame('<div class="recognition-panel"><div class="recognition-app-title">🧠 啦啦隊認人王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">⚡ 20 題快賽</button><button class="recognition-btn" data-start="endless">♾️ 無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
     hub().querySelectorAll('[data-start]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.start)));
   }
+  window.openRecognitionGame = open;
   function start(mode){
     const all=shuffle(pool());
     if(all.length<4){frame('<div class="recognition-panel">目前可用照片不足四位，請稍後等女孩圖鑑載入完成再試。<div class="recognition-actions"><button class="recognition-btn primary" id="retry-recognition">重新載入</button></div></div>');document.getElementById('retry-recognition').onclick=open;return;}
