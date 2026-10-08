@@ -43,3 +43,13 @@
   body.no-scroll .primary-nav, .modal.active ~ .primary-nav { visibility: hidden; pointer-events: none; }
 }
 @media (prefers-reduced-motion: reduce) { .primary-nav *, .section-switcher * { scroll-behavior: auto !important; transition: none !important; } }
+
+
+.footer{margin-top:70px;border-top:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,#0d1014,#090b0e);color:#fff}
+.footer-content--modern{max-width:1180px;margin:0 auto;padding:34px 20px 26px;display:grid;grid-template-columns:minmax(240px,1.25fr) 2fr;gap:28px}
+.footer-brand__eyebrow{font:900 10px/1 var(--sport-font);letter-spacing:2px;color:var(--event-accent,#7dd3fc)}
+.footer-brand__title{font-size:23px;font-weight:950;margin-top:7px}.footer-brand p{max-width:390px;margin:9px 0 0;color:#8f9aa8;font-size:12px;line-height:1.7}
+.footer-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.footer-link-group{display:flex;flex-direction:column;align-items:flex-start;gap:7px}.footer-link-group strong{font-size:12px;color:#fff;margin-bottom:4px}.footer-link-group button,.footer-link-group a{border:0;background:transparent;padding:2px 0;color:#9aa5b2;font:700 12px/1.5 var(--tc-font);text-decoration:none;cursor:pointer;text-align:left}.footer-link-group button:hover,.footer-link-group a:hover{color:#fff}
+.footer-meta{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.07)}.footer-meta p{margin:0;max-width:760px;color:#6f7a87;font-size:10px;line-height:1.65}.footer-signature{white-space:nowrap;color:#8994a1;font:900 11px/1 var(--sport-font);letter-spacing:1.8px}
+.footer #pwa-install-btn{grid-column:auto;position:static!important;margin:12px 0 0!important}
+@media(max-width:760px){.footer-content--modern{grid-template-columns:1fr;padding:28px 16px calc(88px + env(safe-area-inset-bottom,0px));gap:22px}.footer-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px}.footer-meta{grid-column:auto;align-items:flex-start;flex-direction:column}.footer-signature{font-size:10px}.footer #pwa-install-btn{margin:10px 0 0!important}}
