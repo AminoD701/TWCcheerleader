@@ -179,7 +179,11 @@ function renderMarquee() {
   wrapper.classList.add('spotlight-marquee');
   wrapper.dataset.label = 'POSTSEASON';
   wrapper.title = '查看 CPBL 季後賽賽程';
-  wrapper.onclick = goToPostseason;
+  wrapper.onclick = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    goToPostseason();
+  };
 
   const next = state.next;
   let message;
