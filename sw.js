@@ -1,69 +1,63 @@
-const CACHE_NAME = 'tw-cheerleader-pwa-v37';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './pwa.js',
-  './app-icon.svg'
-];
+const CACHE_PREFIX = 'tw-cheerleader-pwa-';
+const CACHE_NAME = `${CACHE_PREFIX}v93`;
+const LEGACY_CACHES = ['tw-cheerleader-pwa-v1'];
+const APP_SHELL = ['./', './index.html', './manifest.json', './pwa.js?v=46', './favicon-32.png', './twc-app-icon-v3-180.png', './twc-app-icon-v3-192.png', './twc-app-icon-v3-512.png', './src/app/recognition-game.js?v=9', './src/assets/recognition-cheer-photo.svg?v=1', './src/app/navigation.js?v=16', './src/app/navigation-config.js', './src/app/girls-mobile-filters.js?v=9', './src/app/girls-default-sort.js?v=7', './src/app/girls-roster-polish.js?v=5', './src/app/game-app-enhancements.js?v=13', './src/app/minigame-refined.js?v=2', './src/app/dreamteam-refined.js?v=2', './src/app/gacha-history.js?v=2', './src/app/team-logo-overrides.js?v=9', './src/app/girl-career.js?v=6', './src/app/former-archive.js?v=9', './src/app/data-lab.js?v=11', './src/app/events-archive.js?v=4', './src/app/home-overview.js?v=3', './src/app/home-overview.css?v=4', './src/app/news-freshness.js?v=2', './src/app/news-page-polish.js?v=1', './src/app/navigation.css?v=7', './src/app/season-spotlight.css?v=1', './src/app/season-spotlight.js?v=4', './src/storage/legacy-storage.js', './src/services/data-loader.js?v=4', './images/Collie_Engineers_logo.png?v=1', './data/girl-careers.json?v=2'];
+
+const isOwnedCache = key => key.startsWith(CACHE_PREFIX) || LEGACY_CACHES.includes(key);
+const canStore = (request, response) => request.cache !== 'no-store' && response && response.ok && response.type !== 'error';
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
-      .catch(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil(caches.keys()
+    .then(keys => Promise.all(keys.filter(key => isOwnedCache(key) && key !== CACHE_NAME).map(key => caches.delete(key))))
+    .then(() => self.clients.claim()));
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (request.method !== 'GET') return;
-
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (url.pathname.endsWith('/data/cpbl-live.json')) {
-    event.respondWith(
-      fetch(request, { cache: 'no-store' })
-        .then(response => { if (response.ok) caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone())); return response; })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
+  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  if (request.cache === 'no-store') { event.respondWith(fetch(request)); return; }
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
-          return response;
-        })
-        .catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
-    );
+    event.respondWith(fetch(request).then(response => {
+      const cacheResponse = canStore(request, response) ? response.clone() : null;
+      if (cacheResponse) event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put('./index.html', cacheResponse)).catch(() => undefined));
+      return response;
+    }).catch(async () => (await caches.match('./index.html')) || (await caches.match('./')) || new Response('目前離線，且尚無可用內容。', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })));
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      const network = fetch(request).then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    })
-  );
-});
+  // Online-first for active code/styles: installed PWAs must not execute stale JS/CSS.
+  // Keep offline fallback, while versioned static images can stay stale-while-revalidate.
+  if (/\\.(?:js|css)$/i.test(new URL(request.url).pathname)) {
+    event.respondWith(fetch(request).then(response => {
+      if (canStore(request, response)) {
+        const cacheCopy = response.clone();
+        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, cacheCopy)).catch(() => undefined));
+      }
+      return response;
+    }).catch(async () => (await caches.match(request)) || new Response('Offline', { status: 503 })));
+    return;
+  }
 
+  event.respondWith(caches.match(request).then(cached => {
+    const update = fetch(request).then(response => {
+      const cacheResponse = canStore(request, response) ? response.clone() : null;
+      if (cacheResponse) event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, cacheResponse)).catch(() => undefined));
+      return response;
+    });
+    if (cached) { event.waitUntil(update.catch(() => undefined)); return cached; }
+    return update.catch(() => new Response('Offline', { status: 503 }));
+  }));
+});
