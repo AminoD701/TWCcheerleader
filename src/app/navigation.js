@@ -200,6 +200,8 @@ function restoreSavedScroll(saved) {
 function applyMode(mode) {
   currentMode = mode;
   document.body.dataset.appMode = mode;
+  const eventContainer = document.getElementById('event-container');
+  if (eventContainer && mode !== 'events') eventContainer.style.display = 'none';
   hideCustomPanels(mode);
   const urlBeforeLegacy = new URL(location.href);
   const hub = document.querySelector('#navigation-hub');
@@ -207,6 +209,11 @@ function applyMode(mode) {
   if (mode === 'my' || mode === 'more') showHub(mode);
   else if (mode === 'archive' || mode === 'datalab') showCustomMode(mode);
   else legacySetMode(mode);
+  if (mode === 'events') {
+    requestAnimationFrame(() => {
+      if (document.body?.dataset.appMode === 'events' && typeof window.renderEvents === 'function') window.renderEvents();
+    });
+  }
   const canonical = new URL(urlBeforeLegacy);
   canonical.searchParams.set('mode', mode);
   window.history.replaceState({ mode }, '', canonical);
