@@ -169,8 +169,8 @@
       ['./src/app/season-spotlight.js?v=4', 'season-spotlight']
     ],
     girls: [
-      ['./src/app/girls-default-sort.js?v=6', 'girls-default-sort'],
-      ['./src/app/girls-roster-polish.js?v=4', 'girls-roster-polish'],
+      ['./src/app/girls-default-sort.js?v=7', 'girls-default-sort'],
+      ['./src/app/girls-roster-polish.js?v=5', 'girls-roster-polish'],
       ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides'],
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
@@ -184,11 +184,11 @@
       ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides']
     ],
     archive: [
-      ['./src/app/former-archive.js?v=7', 'former-archive'],
+      ['./src/app/former-archive.js?v=8', 'former-archive'],
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
     datalab: [
-      ['./src/app/data-lab.js?v=9', 'data-lab']
+      ['./src/app/data-lab.js?v=10', 'data-lab']
     ],
     news: [
       ['./src/app/news-freshness.js?v=2', 'news-freshness'],
