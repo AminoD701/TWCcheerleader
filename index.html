@@ -19,7 +19,7 @@
     <meta name="description" content="台灣啦啦隊女孩、球隊、賽事與應援情報資料庫。">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="twc-app-icon-v3-180.png">
-    <script defer src="pwa.js?v=42"></script>
+    <script defer src="pwa.js?v=43"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-19L6EYRWKE"></script>
     <script> 
@@ -1600,7 +1600,7 @@
         }
     </style> 
 <style id="twc-game-hub-unified-style">
-.t wc{}
+
 #games-container .twc-games-home{width:100%;max-width:1000px;margin:0 auto;color:#f4f5f8}
 #games-container .twc-games-heading{text-align:left;margin:8px 0 24px}
 #games-container .twc-games-kicker{font-size:11px;letter-spacing:2px;font-weight:850;color:#ab97ee}
@@ -1610,13 +1610,13 @@
 #games-container .twc-game-tile{font-family:inherit;cursor:pointer;min-width:0;min-height:118px;display:flex;align-items:center;text-align:left;gap:17px;border-radius:17px;border:1px solid #303743;background:#171b22;color:#f5f5f7;padding:19px;transition:border-color .15s,background .15s}
 #games-container .twc-game-tile:hover{border-color:#72658f;background:#20212a}
 #games-container .twc-game-feature{border-color:#6e599b;background:linear-gradient(120deg,#292238,#191b25)}
-#games-container .twc-game-icon{font-size:31px;flex-shrink:0;line-height:1}
+#games-container .twc-game-icon{display:grid;place-items:center;width:46px;height:46px;border:1px solid #394052;border-radius:12px;color:#b7a5e6;background:#1f2330;flex-shrink:0}#games-container .twc-game-icon svg{display:block;width:26px;height:26px}
 #games-container .twc-game-copy{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
 #games-container .twc-game-copy small{color:#b29ae6;font-size:10px;letter-spacing:1px;font-weight:850}
 #games-container .twc-game-copy strong{color:#fff;font-size:19px;line-height:1.3}
 #games-container .twc-game-copy>span{color:#a4adbb;font-size:12px;line-height:1.5}
 #games-container .twc-game-arrow{font-size:19px;color:#b9a8e6;align-self:center}
-@media(max-width:600px){#games-container .twc-games-tiles{grid-template-columns:1fr;gap:10px}#games-container .twc-game-tile{min-height:96px;padding:15px;gap:13px}#games-container .twc-game-copy strong{font-size:17px}#games-container .twc-game-icon{font-size:27px}}
+@media(max-width:600px){#games-container .twc-games-tiles{grid-template-columns:1fr;gap:10px}#games-container .twc-game-tile{min-height:96px;padding:15px;gap:13px}#games-container .twc-game-copy strong{font-size:17px}#games-container .twc-game-icon{width:43px;height:43px}#games-container .twc-game-icon svg{width:24px;height:24px}}
 </style>
 </head>
 <body class="no-scroll">
@@ -3551,10 +3551,10 @@
               <section class="twc-games-home">
                 <div class="twc-games-heading"><span class="twc-games-kicker">PLAYGROUND / TWC</span><h1>娛樂互動</h1><p>今天想玩什麼？選一種玩法，開啟你的應援時刻。</p></div>
                 <div class="twc-games-tiles">
-                  <button type="button" class="twc-game-tile twc-game-feature" data-twc-action="recognition"><span class="twc-game-icon">🧠</span><span class="twc-game-copy"><small>PHOTO QUIZ</small><strong>啦啦隊認人王</strong><span>看照片猜名字，挑戰你的認人實力</span></span><span class="twc-game-arrow">↗</span></button>
-                  <button type="button" class="twc-game-tile" data-twc-action="minigame"><span class="twc-game-icon">⚔️</span><span class="twc-game-copy"><small>ULTIMATE CHOICE</small><strong>殘酷二選一</strong><span>誰才是你的絕對本命？</span></span><span class="twc-game-arrow">↗</span></button>
-                  <button type="button" class="twc-game-tile" data-twc-action="dreamteam"><span class="twc-game-icon">🌟</span><span class="twc-game-copy"><small>DREAM TEAM</small><strong>夢幻陣容</strong><span>打造你的專屬應援隊伍</span></span><span class="twc-game-arrow">↗</span></button>
-                  <button type="button" class="twc-game-tile" data-twc-action="vote"><span class="twc-game-icon">🏆</span><span class="twc-game-copy"><small>FAN VOTE</small><strong>全民應援大賞</strong><span>為喜歡的女孩投下支持的一票</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile twc-game-feature" data-twc-action="recognition"><span class="twc-game-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="24" height="20" rx="3"/><circle cx="16" cy="14" r="3.5"/><path d="M9 23c.8-4 4-5.5 7-5.5s6.2 1.5 7 5.5"/></svg></span><span class="twc-game-copy"><small>PHOTO QUIZ</small><strong>啦啦隊認人王</strong><span>看照片猜名字，挑戰你的認人實力</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="minigame"><span class="twc-game-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="11" height="22" rx="2"/><rect x="18" y="5" width="11" height="22" rx="2"/><path d="M10.5 12l-3.5 4 3.5 4M21.5 12l3.5 4-3.5 4"/></svg></span><span class="twc-game-copy"><small>ULTIMATE CHOICE</small><strong>殘酷二選一</strong><span>誰才是你的絕對本命？</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="dreamteam"><span class="twc-game-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="16" cy="8" r="4"/><circle cx="6.5" cy="15" r="3"/><circle cx="25.5" cy="15" r="3"/><path d="M8 27v-3c0-4.5 3.6-7 8-7s8 2.5 8 7v3M1.5 26v-3c0-2.2 1-4 3.3-4.8M30.5 26v-3c0-2.2-1-4-3.3-4.8"/></svg></span><span class="twc-game-copy"><small>DREAM TEAM</small><strong>夢幻陣容</strong><span>打造你的專屬應援隊伍</span></span><span class="twc-game-arrow">↗</span></button>
+                  <button type="button" class="twc-game-tile" data-twc-action="vote"><span class="twc-game-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="15" width="22" height="13" rx="2"/><path d="M10 15V5h12v10M12.5 10h7M12 21h8M12 24h5"/></svg></span><span class="twc-game-copy"><small>FAN VOTE</small><strong>全民應援大賞</strong><span>為喜歡的女孩投下支持的一票</span></span><span class="twc-game-arrow">↗</span></button>
                 </div>
               </section>`;
             container.querySelectorAll('[data-twc-action]').forEach(btn => btn.addEventListener('click', () => {
