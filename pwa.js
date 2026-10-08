@@ -198,22 +198,22 @@
       ['./src/app/news-page-polish.js?v=1', 'news-page-polish']
     ],
     games: [
-      ['./src/app/game-app-enhancements.js?v=10', 'game-app-enhancements']
+      ['./src/app/game-app-enhancements.js?v=11', 'game-app-enhancements']
     ],
     minigame: [
-      ['./src/app/game-app-enhancements.js?v=10', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=11', 'game-app-enhancements'],
       ['./src/app/minigame-refined.js?v=2', 'minigame-refined']
     ],
     dreamteam: [
-      ['./src/app/game-app-enhancements.js?v=10', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=11', 'game-app-enhancements'],
       ['./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined']
     ],
     more: [
-      ['./src/app/game-app-enhancements.js?v=10', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=11', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ],
     my: [
-      ['./src/app/game-app-enhancements.js?v=10', 'game-app-enhancements'],
+      ['./src/app/game-app-enhancements.js?v=11', 'game-app-enhancements'],
       ['./src/app/gacha-history.js?v=2', 'gacha-history']
     ]
   });
