@@ -161,8 +161,9 @@ function restoreModeState(mode) {
 
 function restoreSavedScroll(saved) {
   const y = saved?.scroll || 0;
-  requestAnimationFrame(() => scrollTo(0, y));
-  setTimeout(() => scrollTo(0, y), 380);
+  requestAnimationFrame(() => {
+    if (Math.abs((globalThis.scrollY || 0) - y) > 2) scrollTo(0, y);
+  });
 }
 
 function applyMode(mode) {
