@@ -116,16 +116,18 @@
     const btn = document.createElement('button');
     btn.id = 'pwa-install-btn';
     btn.type = 'button';
-    btn.textContent = '安裝 APP';
+    btn.textContent = '📱 安裝 APP';
     btn.setAttribute('aria-label', '安裝台灣啦啦隊資料庫 APP');
     Object.assign(btn.style, {
-      position: 'fixed', right: '16px', bottom: '18px', zIndex: '99998',
+      position: 'static', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      margin: '14px auto 0', zIndex: 'auto',
       border: '1px solid rgba(255,255,255,.3)', borderRadius: '999px',
-      padding: '11px 16px', background: '#111418', color: '#fff',
-      fontWeight: '800', fontSize: '14px', boxShadow: '0 8px 24px rgba(0,0,0,.35)', cursor: 'pointer'
+      padding: '10px 16px', background: '#111418', color: '#fff',
+      fontWeight: '800', fontSize: '13px', boxShadow: 'none', cursor: 'pointer'
     });
     btn.addEventListener('click', showInstallGuide);
-    document.body.appendChild(btn);
+    const footerContent = document.querySelector('.footer .footer-content');
+    (footerContent || document.body).appendChild(btn);
   };
 
   window.addEventListener('beforeinstallprompt', event => {
