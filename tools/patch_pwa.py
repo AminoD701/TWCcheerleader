@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 path = Path('index.html')
 text = path.read_text(encoding='utf-8')
@@ -14,7 +15,9 @@ head_additions = '''<link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="baseball.png">
     <script defer src="pwa.js"></script>'''
 
-if 'src="pwa.js"' not in text:
+has_pwa_script = bool(re.search(r'<script[^>]+src=["\'](?:\./)?pwa\.js(?:\?v=\d+)?["\']', text))
+
+if not has_pwa_script:
     if manifest in text:
         text = text.replace(manifest, head_additions, 1)
     else:
