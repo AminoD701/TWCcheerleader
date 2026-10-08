@@ -53,24 +53,21 @@ function enforceRouteIsolation(mode = document.body?.dataset.appMode || currentM
 function installRouteIsolationObserver() {
   if (document.body?.dataset.routeIsolationInstalled === '1') return;
   document.body.dataset.routeIsolationInstalled = '1';
+
   const observer = new MutationObserver(mutations => {
     const mode = document.body?.dataset.appMode || currentMode;
-    let needsSync = false;
     for (const mutation of mutations) {
       const target = mutation.target;
-      if (!(target instanceof HTMLElement)) continue;
-      if (mutation.type === 'attributes' && mutation.attributeName === 'style' && ROUTE_OWNERS[target.id] && !modeOwnsContainer(mode, target.id) && target.style.display !== 'none') {
+      if (!(target instanceof HTMLElement) || !ROUTE_OWNERS[target.id]) continue;
+      if (!modeOwnsContainer(mode, target.id) && target.style.display !== 'none') {
         target.style.display = 'none';
       }
-      if (mutation.type === 'childList') needsSync = true;
     }
-    if (needsSync) enforceRouteIsolation(mode);
   });
-  observer.observe(document.getElementById('main-content') || document.body, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['style']
+
+  Object.keys(ROUTE_OWNERS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el, { attributes: true, attributeFilter: ['style'] });
   });
 }
 
