@@ -181,7 +181,7 @@
   loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
   loadScriptOnce('./src/app/former-archive.js?v=1', 'former-archive');
-  loadScriptOnce('./src/app/data-lab.js?v=1', 'data-lab');
+  loadScriptOnce('./src/app/data-lab.js?v=2', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=2', 'events-archive');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
 
