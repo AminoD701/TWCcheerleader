@@ -164,14 +164,14 @@
   };
 
   loadScriptOnce('./src/app/girls-default-sort.js?v=3', 'girls-default-sort');
-  loadScriptOnce('./src/app/girls-roster-polish.js?v=1', 'girls-roster-polish');
+  loadScriptOnce('./src/app/girls-roster-polish.js?v=2', 'girls-roster-polish');
   loadScriptOnce('./src/app/game-app-enhancements.js?v=7', 'game-app-enhancements');
   loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
   loadScriptOnce('./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
   loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
-  loadScriptOnce('./src/app/former-archive.js?v=1', 'former-archive');
+  loadScriptOnce('./src/app/former-archive.js?v=2', 'former-archive');
   loadScriptOnce('./src/app/data-lab.js?v=3', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=2', 'events-archive');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
