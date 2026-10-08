@@ -126,8 +126,8 @@
       fontWeight: '800', fontSize: '13px', boxShadow: 'none', cursor: 'pointer'
     });
     btn.addEventListener('click', showInstallGuide);
-    const footerContent = document.querySelector('.footer .footer-content');
-    (footerContent || document.body).appendChild(btn);
+    const footerTarget = document.querySelector('.footer .footer-brand') || document.querySelector('.footer .footer-content');
+    (footerTarget || document.body).appendChild(btn);
   };
 
   window.addEventListener('beforeinstallprompt', event => {
@@ -180,6 +180,8 @@
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
   loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
+  loadScriptOnce('./src/app/former-archive.js?v=1', 'former-archive');
+  loadScriptOnce('./src/app/data-lab.js?v=1', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=2', 'events-archive');
   loadScriptOnce('./src/app/news-freshness.js?v=1', 'news-freshness');
 
