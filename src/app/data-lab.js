@@ -11,6 +11,18 @@
   const TPVL_TEAMS=new Set(['Tokki Cutie','Peach Girls','Little Witches','Wing Stars','Si-ster']);
   const isFormer=g=>Boolean(String(g?.departureseason||g?.departure_season||g?.['離隊賽季']||'').trim())||/(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/.test(String(g?.note||''));
   const uid=g=>String(g?.uid||`${String(g?.realname||'').trim()}|${String(g?.nickname||'').trim()}`).trim();
+  const noteText=g=>String(g?.note||g?.['備註']||g?.備註||'').trim();
+  const cleanedNote=g=>noteText(g)
+    .replace(/(合作夥伴|合作)/g,'')
+    .replace(/^[,\s、，]+|[,\s、，]+$/g,'')
+    .trim();
+  const isTrainee=g=>/(練習生|培訓生)/.test(cleanedNote(g));
+  const isStatsEligible=g=>{
+    if(isFormer(g)) return false;
+    if(String(g?.sport||'').trim()==='其他') return false;
+    const note=cleanedNote(g);
+    return !note || isTrainee(g);
+  };
   const leagueFor=g=>{
     const team=String(g.team||'').trim(),sport=String(g.sport||'');
     if(team==='Passion Sisters') return sport.includes('籃')?'TPBL':'CPBL';
@@ -34,6 +46,13 @@
     return 'otherForeign';
   };
   const foreign=g=>['korean','japanese','mixed','malaysian','otherForeign'].includes(nationalityCategory(g));
+  const displayName=g=>{
+    if(nationalityCategory(g)==='korean'){
+      const real=String(g?.realname||'').trim();
+      if(real) return real;
+    }
+    return String(g?.nickname||g?.realname||'未命名').trim();
+  };
   const h=g=>{
     const raw=String(g.height||'').match(/\d+(?:\.\d+)?/);
     const n=raw?Number(raw[0]):NaN;
@@ -47,10 +66,12 @@
 
   function activePeople(){
     const map=new Map();
-    (Array.isArray(window.dbGirls)?window.dbGirls:[]).filter(g=>!isFormer(g)).forEach(g=>{
+    (Array.isArray(window.dbGirls)?window.dbGirls:[]).filter(isStatsEligible).forEach(g=>{
       const key=uid(g);if(!key)return;
       if(!map.has(key))map.set(key,{girl:g,rows:[]});
-      map.get(key).rows.push(g);
+      const person=map.get(key);
+      person.rows.push(g);
+      if(nationalityCategory(g)==='korean' && String(g?.realname||'').trim()) person.girl=g;
     });
     return [...map.values()];
   }
@@ -93,7 +114,7 @@
     const zodiacCounts=['牡羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚'].map(z=>({z,count:count({zodiac:z})})).sort((a,b)=>b.count-a.count);
     root.innerHTML=`
       <section class="datalab">
-        <div class="datalab-hero"><div><span>CHEER ECOSYSTEM</span><h1>啦啦隊生態數據</h1><p>所有數字直接依目前現役女孩資料即時計算，快速掌握聯盟、國籍、身高與星座分布。</p></div><div class="datalab-total"><strong>${people.length}</strong><small>現役女孩</small></div></div>
+        <div class="datalab-hero"><div><span>CHEER ECOSYSTEM</span><h1>啦啦隊生態數據</h1><p>統計僅納入現役正式啦啦隊女孩與練習生／培訓生，排除應援團長、吉祥物及其他特殊身分，也不納入「其他」球種分類。</p></div><div class="datalab-total"><strong>${people.length}</strong><small>統計女孩</small></div></div>
         <div class="datalab-kpis">
           <div><small>CPBL 外籍</small><strong>${count({league:'CPBL',nat:'foreign'})}</strong><span>位</span></div>
           <div><small>TPBL 外籍</small><strong>${count({league:'TPBL',nat:'foreign'})}</strong><span>位</span></div>
@@ -150,7 +171,7 @@
       const result=people.filter(p=>matches(p,filters));
       root.querySelector('#datalab-result-count').innerHTML=`<strong>${result.length}</strong><small> 位符合</small>`;
       root.querySelector('#datalab-result-list').innerHTML=result.slice(0,60).map(p=>{
-        const g=p.girl,name=g.nickname||g.realname||'未命名';
+        const g=p.girl,name=displayName(g);
         const leagues=[...new Set(p.rows.map(leagueFor).filter(Boolean))].join('／');
         return `<button data-dl-uid="${uid(g)}"><strong>${name}</strong><small>${leagues||g.team||''} · ${g.nat||'國籍未填'}${h(g)!=null?' · '+h(g)+'cm':''}${zodiac(g)?' · '+zodiac(g)+'座':''}</small></button>`;
       }).join('')+(result.length>60?'<div class="datalab-more">結果超過 60 位，請再增加條件縮小範圍。</div>':'');
