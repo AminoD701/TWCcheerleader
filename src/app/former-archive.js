@@ -144,5 +144,5 @@
   function boot(){style();ensureEntry();if(document.body?.dataset.appMode==='archive')render();}
   window.renderFormerArchive=render;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  let tries=0;const timer=setInterval(()=>{tries++;ensureEntry();if((window.dbGirls||[]).length){if(document.body?.dataset.appMode==='archive')render();clearInterval(timer);}else if(tries>80)clearInterval(timer);},250);
+  let tries=0;const timer=setInterval(()=>{tries++;ensureEntry();if((window.dbGirls||[]).length){if(document.body?.dataset.appMode==='archive')render();clearInterval(timer);}else if(tries>16)clearInterval(timer);},300);
 })();
