@@ -30,13 +30,14 @@
 
 @media (max-width: 767px) {
   .back-to-top { left: 12px !important; right: auto !important; max-width: 48px; }
-  #pwa-install-btn, #pwa-update-btn, .pwa-update-btn { left: auto !important; right: 12px !important; max-width: min(58vw, 220px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pwa-update-btn, .pwa-update-btn { left: auto !important; right: 12px !important; max-width: min(58vw, 220px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pwa-install-btn { position: static !important; inset: auto !important; left: auto !important; right: auto !important; top: auto !important; bottom: auto !important; transform: none !important; max-width: none !important; }
   body { padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px)); }
   .controls-container > .dropdowns-row:first-child { display: none; }
   .primary-nav { position: fixed; inset: auto 0 0; top: auto; height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px)); padding: 4px max(2px, env(safe-area-inset-left, 0px)) env(safe-area-inset-bottom, 0px); gap: 0; border-top: 1px solid #3b4450; border-bottom: 0; }
   .primary-nav__item { flex: 1; min-width: 0; min-height: 48px; flex-direction: column; gap: 1px; border-radius: 8px; font-size: 12px; }
   .primary-nav__item svg { width: 21px; height: 21px; }
-  #pwa-install-btn, #pwa-update-btn, .back-to-top { bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px) !important; }
+  #pwa-update-btn, .back-to-top { bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px) !important; }
   body.keyboard-open .primary-nav { display: none; }
   body.keyboard-open { padding-bottom: 0; }
   body.no-scroll .primary-nav, .modal.active ~ .primary-nav { visibility: hidden; pointer-events: none; }
