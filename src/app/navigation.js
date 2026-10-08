@@ -199,6 +199,7 @@ function restoreSavedScroll(saved) {
 
 function applyMode(mode) {
   currentMode = mode;
+  document.body.dataset.appMode = mode;
   hideCustomPanels(mode);
   const urlBeforeLegacy = new URL(location.href);
   const hub = document.querySelector('#navigation-hub');
@@ -217,7 +218,6 @@ function applyMode(mode) {
     if (active) el.setAttribute('aria-current', 'page');
     else el.removeAttribute?.('aria-current');
   });
-  document.body.dataset.appMode = mode;
   const saved = restoreModeState(mode);
   restoreSavedScroll(saved);
 }
