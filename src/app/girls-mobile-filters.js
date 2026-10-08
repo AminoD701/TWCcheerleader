@@ -46,6 +46,7 @@ function installStyles() {
     .former-roster__hint{font-size:12px;color:var(--text-sub,#97a0ad);font-weight:700}
     .former-roster__body{border-top:1px solid rgba(255,255,255,.08);padding:10px 14px 14px}
     .former-roster__intro{font-size:12px;color:var(--text-sub,#97a0ad);line-height:1.6;margin:2px 0 10px}
+    .former-roster__season{margin-top:14px}.former-roster__season:first-of-type{margin-top:8px}.former-roster__season-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px;padding:8px 2px;border-bottom:1px dashed rgba(255,255,255,.10)}.former-roster__season-title strong{color:#fff;font-size:13px}.former-roster__season-title span{font-size:11px;color:var(--text-sub,#97a0ad);font-weight:800}
     .former-roster__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
     .former-roster__item{min-height:54px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:#151920;color:#fff;padding:9px 11px;text-align:left;cursor:pointer}
     .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px}
@@ -180,19 +181,41 @@ function renderFormerRoster() {
     return;
   }
   panel.hidden = false;
+  const bySeason = new Map();
+  rows.forEach((girl, index) => {
+    const season = String(girl.departureseason || girl.departure_season || girl['離隊賽季'] || '').trim() || '未註記';
+    if (!bySeason.has(season)) bySeason.set(season, []);
+    bySeason.get(season).push({ girl, index });
+  });
+  const seasonOrder = [...bySeason.keys()].sort((a, b) => {
+    if (a === '未註記') return 1;
+    if (b === '未註記') return -1;
+    return Number(b) - Number(a);
+  });
+  const seasonHtml = seasonOrder.map(season => {
+    const items = bySeason.get(season) || [];
+    const title = season === '未註記' ? '其他歷屆成員' : `${season} 賽季離隊成員`;
+    return `
+      <section class="former-roster__season">
+        <div class="former-roster__season-title"><strong>${title}</strong><span>${items.length} 位</span></div>
+        <div class="former-roster__list">${items.map(({ girl, index }) => {
+          const name = (girl.nickname || girl.realname || '未命名成員').trim();
+          const realname = (girl.realname || '').trim();
+          const note = String(girl.note || girl['備註'] || girl.備註 || '').trim();
+          const seasonLabel = season === '未註記' ? '已離隊' : `${season} 賽季離隊`;
+          const detail = [realname && realname !== name ? realname : '', seasonLabel, note && note !== '已離隊' ? note : ''].filter(Boolean).join(' · ');
+          return `<button type="button" class="former-roster__item" data-former-index="${index}"><strong>${name}</strong><small>${detail}</small></button>`;
+        }).join('')}</div>
+      </section>`;
+  }).join('');
   panel.innerHTML = `
     <summary>
       <span>歷屆成員</span>
-      <span class="former-roster__hint">${rows.length} 位已離隊成員</span>
+      <span class="former-roster__hint">${rows.length} 位離隊成員</span>
     </summary>
     <div class="former-roster__body">
-      <div class="former-roster__intro">這裡保留曾效力 ${team}、目前已離隊的成員紀錄；目前成員仍以上方女孩名單為準。</div>
-      <div class="former-roster__list">${rows.map((girl, index) => {
-        const name = (girl.nickname || girl.realname || '未命名成員').trim();
-        const realname = (girl.realname || '').trim();
-        const note = String(girl.note || girl['備註'] || girl.備註 || '已離隊').trim();
-        return `<button type="button" class="former-roster__item" data-former-index="${index}"><strong>${name}</strong><small>${realname && realname !== name ? `${realname} · ` : ''}${note}</small></button>`;
-      }).join('')}</div>
+      <div class="former-roster__intro">這裡依賽季整理曾效力 ${team} 的離隊成員；目前成員仍以上方女孩名單為準。</div>
+      ${seasonHtml}
     </div>`;
 }
 
