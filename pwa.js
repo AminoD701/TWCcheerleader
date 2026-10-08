@@ -175,8 +175,9 @@
   };
 
   loadScriptOnce('./src/app/girls-default-sort.js?v=3', 'girls-default-sort');
-  loadScriptOnce('./src/app/game-app-enhancements.js?v=6', 'game-app-enhancements');
-  loadScriptOnce('./src/app/minigame-refined.js?v=1', 'minigame-refined');
+  loadScriptOnce('./src/app/game-app-enhancements.js?v=7', 'game-app-enhancements');
+  loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
+  loadScriptOnce('./src/app/dreamteam-refined.js?v=1', 'dreamteam-refined');
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
   loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
