@@ -133,25 +133,62 @@ function showHub(mode) {
   legacySetMode(mode === 'my' ? 'passport' : 'games');
   document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
   const hub = ensureHub();
-  const entries = mode === 'my'
+  const groups = mode === 'my'
     ? [
-        { target: 'passport', title: '追星護照', note: '收藏、個人行程與本命球隊偏好皆保留在這台裝置。' },
-        { target: 'girls', title: '收藏女孩', note: '前往女孩圖鑑管理收藏。' },
-        { target: 'events', title: '個人行程', note: '前往公開行程加入或移除個人行程。' }
+        {
+          label: 'MY SPACE',
+          title: '我的收藏與行程',
+          entries: [
+            { target: 'passport', title: '追星護照', note: '收藏、個人行程與本命球隊偏好皆保留在這台裝置。' },
+            { target: 'girls', title: '收藏女孩', note: '回到女孩圖鑑查看與管理收藏。' },
+            { target: 'events', title: '個人行程', note: '前往公開行程查看已加入的活動。' }
+          ]
+        }
       ]
     : [
-        { target: 'news', title: '最新消息' },
-        { target: 'archive', title: '🗂️ 歷屆成員資料庫', note: '依離隊賽季查看歷屆女孩，離隊後資料仍完整保留。' },
-        { target: 'datalab', title: '📊 啦啦隊生態數據', note: '查聯盟、國籍、身高、星座與現役女孩分布。' },
-        { target: 'games', title: '遊戲中心' },
-        { action: 'gacha-history', title: '📚 今日一抽紀錄', note: '查看每天抽到的幸運女孩紀錄。' },
-        { target: 'vote', title: '應援投票' },
-        { target: 'themes', title: '主題日' },
-        { target: 'agency', title: '經紀資訊' },
-        { target: 'feedback', title: '意見回饋' },
-        { external: 'https://dinosaur071.bobaboba.me', title: '🧋 請我喝珍奶', note: '支持網站持續整理與維護。' }
+        {
+          label: 'DISCOVER',
+          title: '資料與情報',
+          entries: [
+            { target: 'news', title: '最新情報', note: '查看近期啦啦隊新聞與網站整理情報。' },
+            { target: 'archive', title: '歷屆成員', note: '依離隊賽季回顧歷屆女孩。' },
+            { target: 'datalab', title: '生態數據', note: '查看聯盟、國籍、身高與星座分布。' },
+            { target: 'themes', title: '主題日', note: '查看球隊主題日與特殊活動。' },
+            { target: 'agency', title: '經紀資訊', note: '整理女孩與經紀公司的公開資訊。' }
+          ]
+        },
+        {
+          label: 'PLAY',
+          title: '互動玩法',
+          entries: [
+            { target: 'games', title: '遊戲中心', note: '進入網站互動玩法。' },
+            { action: 'gacha-history', title: '今日一抽紀錄', note: '查看每天抽到的幸運女孩。' },
+            { target: 'vote', title: '應援投票', note: '參加網站期間限定應援活動。' }
+          ]
+        },
+        {
+          label: 'SITE',
+          title: '網站工具',
+          entries: [
+            { target: 'feedback', title: '意見回饋', note: '回報資料問題或提出功能建議。' },
+            { external: 'https://dinosaur071.bobaboba.me', title: '請我喝珍奶', note: '支持網站持續整理與維護。' }
+          ]
+        }
       ];
-  hub.innerHTML = `<h1>${mode === 'my' ? '我的' : '更多功能'}</h1><div class="navigation-hub__grid">${entries.map(moreEntryHtml).join('')}</div>`;
+  hub.innerHTML = `
+    <div class="navigation-hub__hero">
+      <span>${mode === 'my' ? 'PERSONAL' : 'EXPLORE'}</span>
+      <h1>${mode === 'my' ? '我的' : '更多功能'}</h1>
+      <p>${mode === 'my' ? '收藏、行程與個人偏好集中在這裡。' : '把比較少用、但值得保留的功能整理成清楚分類。'}</p>
+    </div>
+    <div class="navigation-hub__sections">
+      ${groups.map(group => `
+        <section class="navigation-hub__section">
+          <div class="navigation-hub__section-head"><span>${group.label}</span><strong>${group.title}</strong></div>
+          <div class="navigation-hub__grid">${group.entries.map(moreEntryHtml).join('')}</div>
+        </section>
+      `).join('')}
+    </div>`;
   hub.style.display = 'block';
   hub.onclick = event => {
     const action = event.target.closest('[data-hub-action]');
