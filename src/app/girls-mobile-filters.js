@@ -50,8 +50,9 @@ function installStyles() {
     .former-roster__team-group{margin:10px 0 16px}.former-roster__team-title{margin-bottom:7px;color:var(--event-accent,#fff);font-size:12px;font-weight:900;letter-spacing:.4px}
     .former-roster__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
     .former-roster__item{display:flex;min-width:0;overflow:hidden;flex-direction:column;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:#151920;color:#fff;padding:0;text-align:left;cursor:pointer}
-    .former-roster__photo{width:100%;aspect-ratio:4/5;overflow:hidden;background:#0b0e12}
-    .former-roster__photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+    .former-roster__photo{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(145deg,#0b0e12,#171c23)}
+    .former-roster__photo::before{content:'NO PHOTO';position:absolute;inset:0;display:grid;place-items:center;color:#59616d;font:900 10px/1 var(--sport-font);letter-spacing:1.2px}
+    .former-roster__photo img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%;background:#0b0e12}
     .former-roster__meta{min-height:62px;padding:9px 10px}
     .former-roster__item strong{display:block;font-size:14px}.former-roster__item small{display:block;margin-top:4px;color:var(--text-sub,#97a0ad);font-size:11px;line-height:1.4}
     @media(max-width:767px){.former-roster{margin-top:12px}.former-roster__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.former-roster__meta{min-height:58px;padding:8px}.former-roster__item strong{font-size:13px}}
@@ -266,7 +267,7 @@ function formerItemHtml(girl, index, season) {
   const image = String(girl.img || '').trim();
   const imageUrl = image && window.getCdnUrl ? window.getCdnUrl(image) : image;
   return `<button type="button" class="former-roster__item" data-former-index="${index}">
-    <span class="former-roster__photo">${imageUrl ? `<img src="${imageUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none'">` : ''}</span>
+    <span class="former-roster__photo">${imageUrl ? `<img src="${imageUrl}" alt="${name}" loading="lazy" decoding="async" onerror="this.remove()">` : ''}</span>
     <span class="former-roster__meta"><strong>${name}</strong><small>${detail}</small></span>
   </button>`;
 }
