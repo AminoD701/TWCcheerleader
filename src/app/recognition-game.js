@@ -10,6 +10,8 @@
   const key = 'twc-recognition-best-v1';
   let game = null;
   let lastResults = [];
+  let nextTimer = null;
+  const clearNext = () => { if(nextTimer){clearTimeout(nextTimer);nextTimer=null;} };
   function pool() {
     const rows = window.CheerHomeData?.snapshot?.().girls || [];
     const unique = new Map();
@@ -47,12 +49,12 @@
       .recognition-btn{min-height:52px;padding:12px 14px;border:1px solid #525b6d;border-radius:13px;background:#252c39;color:#fff;font:700 16px/1.4 inherit;cursor:pointer;overflow-wrap:anywhere}
       .recognition-btn.primary{background:#7152cc;border-color:#8b70dd}.recognition-btn:disabled{opacity:.7;cursor:default}
       .recognition-btn.correct{background:#135a42;border-color:#27b481}.recognition-btn.wrong{background:#6d3038;border-color:#f17b88}
-      .recognition-photo{display:block;width:100%;max-height:390px;aspect-ratio:4/3;object-fit:contain;background:#0e1117;border-radius:16px;margin:14px auto 16px}
+      .recognition-photo{display:block;width:100%;height:clamp(210px,42vh,370px);object-fit:contain;background:#0e1117;border-radius:12px;margin:10px auto 12px}
       .recognition-progress{height:7px;border-radius:20px;overflow:hidden;background:#323948;margin:12px 0 18px}.recognition-progress span{display:block;height:100%;background:#a78bfa}
-      .recognition-result{margin:14px 0;padding:14px;border-radius:12px;background:#272e39;line-height:1.7;font-size:14px}
-      .recognition-meta{display:flex;justify-content:space-between;gap:8px;color:#cbd5e1;font-size:13px;font-weight:750}
+      .recognition-result{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#272e39;line-height:1.5;font-size:13px}
+      #recognition-app .recognition-panel{padding:clamp(12px,3vw,22px)}#recognition-app .recognition-actions{margin-top:10px}#recognition-app [data-choice]{min-height:49px}#recognition-feedback{min-height:0}#recognition-app .recognition-answer-status{margin:10px 0 0;font-weight:750;color:#c5b0fa;font-size:13px} .recognition-meta{display:flex;justify-content:space-between;gap:8px;color:#cbd5e1;font-size:13px;font-weight:750}
       .recognition-back{display:block;margin:0 0 16px;padding:9px 0;background:transparent;color:#c5b5fa;border:0;font:700 14px inherit;cursor:pointer}
-      .recognition-share-preview{text-align:left;border:1px solid #41495b;border-radius:18px;padding:clamp(22px,5vw,38px);background:linear-gradient(145deg,#1a1d28,#11151c);color:#f6f6fa}.recognition-share-kicker{font-size:10px;letter-spacing:1.6px;color:#bba6ee;font-weight:800}.recognition-share-heading{font-size:clamp(23px,5vw,30px);font-weight:850;margin-top:16px}.recognition-share-label{font-size:clamp(24px,5vw,34px);font-weight:900;color:#c8b6fa;margin:22px 0 5px}.recognition-share-score{font-size:clamp(64px,16vw,98px);font-weight:900;line-height:1.22;letter-spacing:-3px}.recognition-share-score span{font-size:.45em;color:#99a2b5}.recognition-share-preview p{color:#c1c7d2;line-height:1.7;font-size:14px;margin:8px 0 25px}.recognition-share-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #39404d;padding-top:18px}.recognition-share-stats div{display:flex;flex-direction:column;gap:6px}.recognition-share-stats small{color:#9ba5b7}.recognition-share-stats strong{font-size:27px}.recognition-share-category{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.recognition-share-category span{font-size:12px;border:1px solid #454b5a;border-radius:7px;padding:8px;color:#d6d9e4}.recognition-share-footer{font-size:10px;letter-spacing:1px;color:#8e97a8;border-top:1px solid #39404d;margin-top:25px;padding-top:16px}\n      @media(max-width:380px){.recognition-actions{gap:8px}.recognition-btn{font-size:15px;padding:10px 7px}}
+      .recognition-share-preview{text-align:left;border:1px solid #41495b;border-radius:18px;padding:clamp(22px,5vw,38px);background:linear-gradient(145deg,#1a1d28,#11151c);color:#f6f6fa}.recognition-share-kicker{font-size:10px;letter-spacing:1.6px;color:#bba6ee;font-weight:800}.recognition-share-heading{font-size:clamp(23px,5vw,30px);font-weight:850;margin-top:16px}.recognition-share-label{font-size:clamp(24px,5vw,34px);font-weight:900;color:#c8b6fa;margin:22px 0 5px}.recognition-share-score{font-size:clamp(64px,16vw,98px);font-weight:900;line-height:1.22;letter-spacing:-3px}.recognition-share-score span{font-size:.45em;color:#99a2b5}.recognition-share-preview p{color:#c1c7d2;line-height:1.7;font-size:14px;margin:8px 0 25px}.recognition-share-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #39404d;padding-top:18px}.recognition-share-stats div{display:flex;flex-direction:column;gap:6px}.recognition-share-stats small{color:#9ba5b7}.recognition-share-stats strong{font-size:27px}.recognition-share-category{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.recognition-share-category span{font-size:12px;border:1px solid #454b5a;border-radius:7px;padding:8px;color:#d6d9e4}.recognition-share-footer{font-size:10px;letter-spacing:1px;color:#8e97a8;border-top:1px solid #39404d;margin-top:25px;padding-top:16px}\n      .recognition-share-preview{position:relative;overflow:hidden;max-width:560px;margin:0 auto;min-height:570px;border:1px solid #615574!important;border-radius:12px!important;background:radial-gradient(circle at 93% 6%,rgba(120,91,173,.16),transparent 42%),linear-gradient(160deg,#171a22,#0c0f15)!important}.recognition-share-preview:after{content:'RQ';position:absolute;top:6px;right:18px;font:italic 800 100px Georgia,serif;color:rgba(176,147,242,.075);pointer-events:none}.recognition-share-label{margin-top:30px!important;font-size:clamp(28px,7vw,40px)!important}.recognition-share-score{font-family:Georgia,serif;font-size:clamp(82px,20vw,125px)!important;color:#d0c0f4!important;letter-spacing:-5px!important}.recognition-share-score span{font-family:Georgia,serif;font-weight:400}.recognition-share-stats{margin-top:28px}.recognition-share-category{border-top:1px solid #343b49;padding-top:20px}.recognition-share-preview .recognition-share-footer{margin-top:28px} @media(max-width:380px){.recognition-actions{gap:8px}.recognition-btn{font-size:15px;padding:10px 7px}}
     `;
     document.head.append(tag);
   }
@@ -69,16 +71,16 @@
     root.innerHTML='<section id="recognition-app" aria-label="啦啦隊認人王"><button class="recognition-back" type="button">← 返回遊戲中心</button>'+html+'</section>';
     root.querySelector('.recognition-back').addEventListener('click',back);
   }
-  function back(){game=null;window.renderGamesHub?.();mount();}
+  function back(){clearNext();game=null;window.renderGamesHub?.();mount();}
   function open(){
-    style();game=null;lastResults=[];
+    clearNext();style();game=null;lastResults=[];
     const n=pool().length;
     frame('<div class="recognition-panel"><div class="recognition-app-title">啦啦隊認人王</div><p class="recognition-muted">看照片選出正確姓名，每題四選一。答錯也能認識新女孩！<br>所有題目使用網站女孩圖鑑資料。</p><p class="recognition-muted">目前可出題女孩：'+n+' 位</p><div class="recognition-actions"><button class="recognition-btn primary" data-start="quick">20 題快賽</button><button class="recognition-btn" data-start="endless">無限挑戰</button></div><p class="recognition-muted" style="margin-top:16px">無限挑戰答錯 3 題結束；每輪不重複出題。</p></div>');
     hub().querySelectorAll('[data-start]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.start)));
   }
   window.openRecognitionGame = open;
   function start(mode){
-    const all=shuffle(pool());
+    clearNext();const all=shuffle(pool());
     if(all.length<4){frame('<div class="recognition-panel">女孩圖鑑正在載入，請稍候再試。<div class="recognition-actions"><button class="recognition-btn primary" id="retry-recognition">重新載入</button></div></div>');document.getElementById('retry-recognition').onclick=open;return;}
     game={mode,all,limit:mode==='quick'?Math.min(20,all.length):all.length,index:0,correct:0,wrong:0,locked:false};
     renderQuestion();
@@ -118,8 +120,10 @@
       });
       const end=game.index+1>=game.limit||(game.mode==='endless'&&game.wrong>=3);
       const feedback=hub().querySelector('#recognition-feedback');
-      feedback.innerHTML='<div class="recognition-result">'+(ok?'答對了！':'答錯了！')+' 正確答案：<strong>'+esc(person.name)+'</strong>'+(person.team?'<div>球隊：'+esc(person.team)+'</div>':'')+'</div><button class="recognition-btn primary" type="button" id="recognition-next">'+(end?'查看成績':'下一題 →')+'</button>';
-      hub().querySelector('#recognition-next').addEventListener('click',()=>{game.index++;renderQuestion();},{once:true});
+      feedback.innerHTML='<div class="recognition-answer-status" role="status">'+(ok?'答對了':'答錯了，正確答案：'+esc(person.name))+' · '+(end?'即將顯示成績':'自動進入下一題')+'</div>';
+      const expectedGame=game;
+      clearNext();
+      nextTimer=setTimeout(()=>{nextTimer=null;if(game!==expectedGame)return;game.index++;renderQuestion();},ok?680:1050);
     }));
   }
   function groupStats(results) {
@@ -177,7 +181,7 @@
     finally {button.disabled=false;button.textContent=original;}
   }
   function finish(){
-    if(!game)return;
+    clearNext();if(!game)return;
     const answered=lastResults.length,percentage=answered?Math.round(game.correct/answered*100):0;
     const label=percentage>=90?'人肉應援資料庫':percentage>=75?'資深認人高手':percentage>=50?'應援識人達人':'應援新星';
     const praise=percentage>=90?'這種辨識力，已經不是普通粉絲等級。':percentage>=75?'對女孩名單這麼熟，實力真的不簡單。':percentage>=50?'你的認人實力正在穩定進步。':'下一次，你一定能認出更多女孩。';
