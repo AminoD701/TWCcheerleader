@@ -170,7 +170,7 @@
     ],
     girls: [
       ['./src/app/girls-default-sort.js?v=6', 'girls-default-sort'],
-      ['./src/app/girls-roster-polish.js?v=3', 'girls-roster-polish'],
+      ['./src/app/girls-roster-polish.js?v=4', 'girls-roster-polish'],
       ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides'],
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
