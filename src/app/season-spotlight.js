@@ -173,7 +173,6 @@ function renderHero() {
 }
 
 function renderMarquee() {
-  if (!state.stageRows.length) return;
   if (document.body?.dataset.appMode !== 'home') return;
   const wrapper = document.querySelector('.marquee-wrapper');
   const content = wrapper?.querySelector('.marquee-content');
@@ -189,12 +188,12 @@ function renderMarquee() {
 
   const next = state.next;
   let message;
-  if (next) {
+  if (state.stageRows.length && next) {
     message = `🔥 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　下一戰 <span class="marquee-highlight">${formatDate(next)} ${next.time || ''}</span>　${next.awayteam} @ ${next.hometeam}　｜　📍 ${next.venue || '場地待定'}　｜　點擊查看完整賽程`;
-  } else if (state.latestFinal) {
+  } else if (state.stageRows.length && state.latestFinal) {
     message = `🏆 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　最新戰況 <span class="marquee-highlight">${state.latestFinal.awayteam} ${state.latestFinal.awayscore}：${state.latestFinal.homescore} ${state.latestFinal.hometeam}</span>　｜　點擊查看完整賽程`;
   } else {
-    message = `🔥 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　季後賽焦點已上線　｜　點擊查看完整賽程`;
+    message = '🔥 2026 CPBL POSTSEASON　｜　<strong>季後賽焦點</strong>　｜　台灣大賽與季後賽最新戰況　｜　點擊查看完整賽程';
   }
   if (content.dataset.spotlightMessage !== message) {
     content.innerHTML = message;
@@ -281,19 +280,31 @@ function watchNavigation() {
   const observer = new MutationObserver(() => {
     syncHeroVisibility();
     installHooks();
+    if (document.body?.dataset.appMode === 'home') renderMarquee();
   });
   observer.observe(document.body, { attributes: true, attributeFilter: ['data-app-mode'] });
+
+  const content = document.querySelector('.marquee-wrapper .marquee-content');
+  if (content) {
+    const contentObserver = new MutationObserver(() => {
+      if (document.body?.dataset.appMode !== 'home') return;
+      const text = (content.textContent || '').trim();
+      if (!/CPBL|POSTSEASON|季後賽|台灣大賽/.test(text)) requestAnimationFrame(renderMarquee);
+    });
+    contentObserver.observe(content, { childList: true, subtree: true, characterData: true });
+  }
 }
 
 async function boot() {
+  watchNavigation();
+  renderMarquee();
   try {
     const rows = await loadRows();
     updateState(rows);
-    if (!state.stageRows.length) return;
     renderMarquee();
+    if (!state.stageRows.length) return;
     renderHero();
     installHooks();
-    watchNavigation();
     window.setInterval(async () => {
       try {
         updateState(await loadRows());
