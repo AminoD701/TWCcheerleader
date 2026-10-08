@@ -220,6 +220,10 @@
       const history = allRecords.filter(record => recordMatches(record, realname, nickname));
       const activeRows = mainRows.filter(row => !isFormer(row));
       const formerRows = mainRows.filter(isFormer);
+      const departureSeasons = [...new Set(formerRows.map(getDepartureSeason).filter(Boolean))].sort((a,b) => Number(b) - Number(a));
+      const profileStatusHint = !activeRows.length && departureSeasons.length
+        ? `${departureSeasons[0]} 賽季離隊成員`
+        : '點擊查看';
 
       const details = document.createElement('details');
       details.className = 'girl-career';
@@ -227,7 +231,7 @@
       details.innerHTML = `
         <summary>
           <span>📋 個人經歷</span>
-          <span class="girl-career__hint">點擊查看</span>
+          <span class="girl-career__hint">${esc(profileStatusHint)}</span>
         </summary>
         <div class="girl-career__content">
           <div class="girl-career__intro">現役／歷屆狀態以女孩主資料為準；有 departure_season 的成員會依賽季明確標示離隊年份，歷史資料仍完整保留。</div>
