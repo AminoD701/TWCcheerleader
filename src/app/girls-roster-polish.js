@@ -290,16 +290,21 @@
       });
     }
     const shown = [...grid.querySelectorAll(':scope > .card')].filter(card => card.style.display !== 'none').length;
-    toolbar.innerHTML = `
-      <div>
-        <div class="girls-roster-toolbar__eyebrow">CHEERLEADER ROSTER</div>
-        <div class="girls-roster-toolbar__title"><strong>現役女孩</strong><span>目前顯示 ${shown} 位 · 資料庫現役 ${activeCount()} 位</span></div>
-      </div>
-      <div class="girls-roster-toolbar__tabs">
-        <button type="button" class="girls-roster-tab is-active" data-girls-view="active">現役女孩</button>
-        <button type="button" class="girls-roster-tab" data-girls-view="archive">歷屆成員</button>
-      </div>
-    `;
+    const total = activeCount();
+    const signature = `${shown}|${total}`;
+    if (toolbar.dataset.signature !== signature) {
+      toolbar.dataset.signature = signature;
+      toolbar.innerHTML = `
+        <div>
+          <div class="girls-roster-toolbar__eyebrow">CHEERLEADER ROSTER</div>
+          <div class="girls-roster-toolbar__title"><strong>現役女孩</strong><span>目前顯示 ${shown} 位 · 資料庫現役 ${total} 位</span></div>
+        </div>
+        <div class="girls-roster-toolbar__tabs">
+          <button type="button" class="girls-roster-tab is-active" data-girls-view="active">現役女孩</button>
+          <button type="button" class="girls-roster-tab" data-girls-view="archive">歷屆成員</button>
+        </div>
+      `;
+    }
     return toolbar;
   }
 
