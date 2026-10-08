@@ -1,0 +1,33 @@
+#home-container{display:none!important;width:100%;max-width:1180px;margin:18px auto 72px;padding:0 16px;box-sizing:border-box}
+body[data-app-mode="home"] #home-container{display:block!important}
+body:not([data-app-mode="home"]) #home-container{display:none!important}
+.home-overview{color:#fff}
+.home-overview__hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:28px;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:radial-gradient(circle at 92% 0,rgba(56,189,248,.14),transparent 34%),linear-gradient(145deg,#141a21,#0c1015)}
+.home-overview__eyebrow,.home-overview__panel-head span,.home-overview__quick button>span{display:block;color:#7dd3fc;font:900 9px/1 var(--sport-font);letter-spacing:1.7px}
+.home-overview__hero h1{margin:7px 0 8px;font-size:clamp(29px,5vw,46px);line-height:1.05}
+.home-overview__hero p{max-width:650px;margin:0;color:#98a3b1;font-size:13px;line-height:1.7}
+.home-overview__hero-actions{display:flex;gap:8px;flex-shrink:0}
+.home-overview__hero-actions button,.home-overview__panel-head button{border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#151b22;color:#fff;font-weight:850;cursor:pointer}
+.home-overview__hero-actions button{min-height:42px;padding:0 14px}
+.home-overview__quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.home-overview__quick button{min-height:112px;padding:16px;border:1px solid rgba(255,255,255,.085);border-radius:16px;background:#11161c;color:#fff;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.home-overview__quick button:hover{transform:translateY(-2px);border-color:rgba(125,211,252,.25);background:#161c23}
+.home-overview__quick strong{display:block;margin-top:7px;font-size:17px}
+.home-overview__quick small{display:block;margin-top:5px;color:#8f9aa8;font-size:11px;line-height:1.45}
+.home-overview__columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.home-overview__panel{padding:20px;border:1px solid rgba(255,255,255,.085);border-radius:18px;background:#101419}
+.home-overview__panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.home-overview__panel-head strong{display:block;margin-top:5px;font-size:18px}
+.home-overview__panel-head button{min-height:34px;padding:0 11px;color:#aeb8c5;font-size:10px}
+.home-overview__list{display:grid;gap:7px}
+.home-overview__row{width:100%;display:flex;align-items:center;gap:11px;padding:11px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.018);color:#fff;text-align:left;cursor:pointer}
+.home-overview__row:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+.home-overview__date{display:grid;place-items:center;width:52px;height:42px;flex:0 0 52px;border-radius:10px;background:rgba(125,211,252,.075);color:#bae6fd;font:900 13px/1 var(--sport-font)}
+.home-overview__row-copy{min-width:0}
+.home-overview__row-copy strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.home-overview__row-copy small{display:block;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#85909d;font-size:10px}
+.home-overview__news-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 10px rgba(125,211,252,.35)}
+.home-overview__empty{padding:24px 14px;border:1px dashed rgba(255,255,255,.09);border-radius:12px;color:#7f8a97;text-align:center;font-size:11px}
+.home-overview__footnote{margin-top:12px;color:#65717e;font-size:10px;text-align:right}
+@media(max-width:820px){.home-overview__quick{grid-template-columns:repeat(2,1fr)}.home-overview__columns{grid-template-columns:1fr}}
+@media(max-width:620px){#home-container{margin-top:10px;padding:0 10px}.home-overview__hero{align-items:flex-start;flex-direction:column;padding:20px}.home-overview__hero-actions{width:100%}.home-overview__hero-actions button{flex:1}.home-overview__quick{gap:8px}.home-overview__quick button{min-height:98px;padding:13px}.home-overview__quick strong{font-size:15px}.home-overview__panel{padding:15px}.home-overview__panel-head strong{font-size:16px}.home-overview__footnote{text-align:left}}
