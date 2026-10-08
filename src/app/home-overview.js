@@ -39,6 +39,8 @@
     if (typeof window.setMode === 'function') window.setMode(mode);
   }
 
+  let lastRenderKey = '';
+
   function render() {
     const root = document.getElementById('home-container');
     if (!root) return;
@@ -61,6 +63,13 @@
     const latestNews = [...news]
       .sort((a,b) => newsTime(b) - newsTime(a))
       .slice(0,3);
+
+    const renderKey = JSON.stringify({
+      events: upcoming.map(item => [item.date, item.time, item.eventname, item.host]),
+      news: latestNews.map(item => [item.id, item.date, item.title, item.tag, item.subtag])
+    });
+    if (renderKey === lastRenderKey && root.querySelector('.home-overview')) return;
+    lastRenderKey = renderKey;
 
     root.innerHTML = `
       <section class="home-overview">
@@ -137,14 +146,13 @@
     const observer = new MutationObserver(scheduleRender);
     observer.observe(document.body, { attributes:true, attributeFilter:['data-app-mode'] });
 
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries += 1;
-      if (document.body?.dataset.appMode === 'home') render();
-      const data = snapshot();
-      if ((data.events?.length || data.news?.length || data.girls?.length) && tries > 4) clearInterval(timer);
-      if (tries > 40) clearInterval(timer);
-    }, 250);
+    // Data arrives asynchronously on first load. Retry a few times without
+    // repainting the whole homepage every 250ms.
+    [500, 1500, 3000, 6000].forEach(delay => {
+      setTimeout(() => {
+        if (document.body?.dataset.appMode === 'home') render();
+      }, delay);
+    });
   }
 
   window.renderHomeOverview = render;
