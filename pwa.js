@@ -163,7 +163,7 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/girls-default-sort.js?v=3', 'girls-default-sort');
+  loadScriptOnce('./src/app/girls-default-sort.js?v=4', 'girls-default-sort');
   loadScriptOnce('./src/app/girls-roster-polish.js?v=3', 'girls-roster-polish');
   loadScriptOnce('./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements');
   loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
