@@ -1,0 +1,192 @@
+.marquee-wrapper.spotlight-marquee {
+  background: linear-gradient(90deg, rgba(6,14,22,.97), rgba(18,24,32,.94), rgba(6,14,22,.97));
+  border-color: rgba(0,176,255,.28);
+}
+.marquee-wrapper.spotlight-marquee::before {
+  content: attr(data-label);
+  background: linear-gradient(135deg, #00b0ff, #0066ff);
+  min-width: 108px;
+  justify-content: center;
+}
+.marquee-wrapper.spotlight-marquee .marquee-highlight {
+  color: #70d7ff;
+  border-color: #70d7ff;
+}
+
+.season-spotlight {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+  padding: 0 15px;
+  cursor: pointer;
+}
+.season-spotlight[hidden] { display: none !important; }
+.season-spotlight__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 18px;
+  padding: 7px 13px;
+  border-radius: 7px 7px 0 0;
+  background: #00b0ff;
+  color: #00141f;
+  font: 900 12px/1 var(--sport-font);
+  letter-spacing: 1.8px;
+}
+.season-spotlight__live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgba(255,255,255,.7);
+  animation: season-pulse 1.7s infinite;
+}
+.season-spotlight__body {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 26px 28px;
+  border: 1px solid rgba(0,176,255,.35);
+  border-top: 4px solid #00b0ff;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 86% 15%, rgba(0,176,255,.17), transparent 30%),
+    linear-gradient(135deg, rgba(17,24,32,.98), rgba(5,9,14,.98));
+  box-shadow: 0 18px 45px rgba(0,0,0,.38);
+}
+.season-spotlight__body::after {
+  content: 'POSTSEASON';
+  position: absolute;
+  right: -12px; bottom: -28px;
+  font: 900 clamp(54px, 9vw, 110px)/1 var(--sport-font);
+  letter-spacing: -3px;
+  color: rgba(255,255,255,.025);
+  pointer-events: none;
+}
+.season-spotlight__stage {
+  color: #70d7ff;
+  font: 900 14px/1 var(--tc-font);
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+}
+.season-spotlight__teams {
+  color: #fff;
+  font: 900 clamp(24px, 4vw, 38px)/1.15 var(--tc-font);
+  letter-spacing: 1px;
+}
+.season-spotlight__teams span {
+  color: #00b0ff;
+  font-family: var(--sport-font);
+  font-size: .7em;
+  margin: 0 8px;
+}
+.season-spotlight__next {
+  margin-top: 12px;
+  color: #aebdca;
+  font-size: 14px;
+  font-weight: 700;
+}
+.season-spotlight__actions {
+  position: relative;
+  z-index: 2;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 11px;
+}
+.season-spotlight__status {
+  color: #fff;
+  font: 900 12px/1 var(--tc-font);
+  letter-spacing: 1.5px;
+}
+.season-spotlight__button {
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 16px;
+  background: #00b0ff;
+  color: #00141f;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 7px 18px rgba(0,176,255,.18);
+  transition: transform .2s, filter .2s;
+}
+.season-spotlight:hover .season-spotlight__button { transform: translateX(3px); filter: brightness(1.1); }
+
+.season-league-card {
+  border-color: rgba(0,176,255,.7) !important;
+  box-shadow: 0 12px 30px rgba(0,176,255,.13), 0 10px 20px rgba(0,0,0,.5) !important;
+}
+.season-league-badge {
+  position: absolute;
+  top: 13px; right: 13px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #00b0ff;
+  color: #00141f;
+  font: 900 10px/1 var(--sport-font);
+  letter-spacing: 1px;
+}
+
+.match-postseason-banner {
+  width: min(1100px, calc(100% - 30px));
+  margin: 0 auto 18px;
+  padding: 16px 20px;
+  border: 1px solid rgba(0,176,255,.36);
+  border-left: 5px solid #00b0ff;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(0,176,255,.12), rgba(17,20,24,.96) 42%, rgba(17,20,24,.96));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.match-postseason-banner > div:first-child { display: flex; flex-direction: column; gap: 4px; }
+.match-postseason-banner span {
+  color: #70d7ff;
+  font: 900 11px/1 var(--sport-font);
+  letter-spacing: 1.8px;
+}
+.match-postseason-banner strong { color: #fff; font-size: 20px; }
+.match-postseason-banner small { color: #9aa9b8; font-weight: 700; }
+.match-postseason-banner__mark {
+  color: rgba(112,215,255,.15);
+  font: 900 30px/.78 var(--sport-font);
+  text-align: right;
+  letter-spacing: -1px;
+}
+.match-card.is-postseason { border-top-color: #00b0ff !important; }
+.match-postseason-ribbon {
+  position: absolute;
+  top: 13px; left: 13px;
+  z-index: 7;
+  padding: 5px 8px;
+  border-radius: 3px;
+  background: #00b0ff;
+  color: #00141f;
+  font: 900 9px/1 var(--sport-font);
+  letter-spacing: 1.2px;
+  pointer-events: none;
+}
+
+@keyframes season-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65); }
+  70% { box-shadow: 0 0 0 7px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+@media (max-width: 768px) {
+  .marquee-wrapper.spotlight-marquee::before { min-width: 72px; }
+  .season-spotlight { margin-bottom: 18px; padding: 0 10px; }
+  .season-spotlight__eyebrow { margin-left: 10px; font-size: 9px; padding: 6px 9px; }
+  .season-spotlight__body { padding: 19px 17px; gap: 16px; align-items: flex-start; flex-direction: column; }
+  .season-spotlight__stage { font-size: 11px; letter-spacing: 2px; margin-bottom: 7px; }
+  .season-spotlight__teams { font-size: 23px; }
+  .season-spotlight__next { font-size: 12px; line-height: 1.5; }
+  .season-spotlight__actions { width: 100%; min-width: 0; flex-direction: row; justify-content: space-between; align-items: center; }
+  .season-spotlight__button { padding: 9px 12px; font-size: 12px; }
+  .match-postseason-banner { width: calc(100% - 20px); padding: 13px 14px; margin-bottom: 12px; }
+  .match-postseason-banner strong { font-size: 16px; }
+  .match-postseason-banner small { font-size: 11px; line-height: 1.4; }
+  .match-postseason-banner__mark { font-size: 23px; }
+}
