@@ -196,12 +196,40 @@
     removeDailyShortcut();
   };
 
-  window.addEventListener('load', () => {
+  let booted = false;
+  const boot = () => {
+    if (booted) {
+      refreshEnhancements();
+      return;
+    }
+    booted = true;
     installStyles();
     initDailyOnAppOpen();
     refreshEnhancements();
-    const observer = new MutationObserver(refreshEnhancements);
-    observer.observe(document.body, {childList:true, subtree:true});
+
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(refreshEnhancements);
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-app-mode']
+    });
+
     window.addEventListener('popstate', () => setTimeout(refreshEnhancements, 0));
-  });
+  };
+
+  window.refreshGameAppEnhancements = refreshEnhancements;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once:true });
+  } else {
+    boot();
+  }
+
+  // Route assets can be injected after the page load event has already fired.
+  // Re-run once on the next frame so the enhanced hub always replaces the
+  // legacy index.html renderer, regardless of script load timing.
+  requestAnimationFrame(refreshEnhancements);
 })();
