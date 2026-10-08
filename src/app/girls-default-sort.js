@@ -1,8 +1,11 @@
 (() => {
-  const sortedArrays = new WeakSet();
-  const TAIWAN_RE = /(臺灣|台灣|台籍|Taiwan)/i;
-  const TRAINEE_RE = /(練習生|培訓生)/;
+  const TAIWAN_RE = /(臺灣|台灣|台籍|臺籍|Taiwan)/i;
+  const KOREA_RE = /(韓國|韓籍|Korea|Korean)/i;
+  const JAPAN_RE = /(日本|日籍|Japan|Japanese)/i;
+  const TRAINEE_RE = /(練習生|培訓生|培訓)/;
+  const LEADER_RE = /(應援團長|團長)/;
   const MASCOT_RE = /(吉祥物|mascot)/i;
+  const NEW_MEMBER_RE = /(新成員|新加入|新人)/;
   const FORMER_RE = /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/;
 
   const noteText = girl => String(girl?.note || girl?.['備註'] || girl?.備註 || '').trim();
@@ -24,16 +27,25 @@
 
   function categoryRank(girl) {
     const note = cleanedNote(girl);
-    if (MASCOT_RE.test(note)) return 4;
-    if (TRAINEE_RE.test(note)) return 2;
-    if (note) return 3;
+
+    // 身分類別固定排在一般啦啦隊女孩之後。
+    if (TRAINEE_RE.test(note)) return 4;
+    if (LEADER_RE.test(note)) return 5;
+    if (MASCOT_RE.test(note)) return 6;
+
+    // 「新成員」仍屬一般啦啦隊女孩，依國籍排序，不視為特殊身分。
+    const hasSpecialRole = Boolean(note) && !NEW_MEMBER_RE.test(note);
+    if (hasSpecialRole) return 7;
 
     const nationality = String(girl?.nat || girl?.['國籍'] || girl?.國籍 || '').trim();
-    return nationality && !TAIWAN_RE.test(nationality) ? 0 : 1;
+    if (KOREA_RE.test(nationality)) return 0;
+    if (JAPAN_RE.test(nationality)) return 1;
+    if (nationality && !TAIWAN_RE.test(nationality)) return 2;
+    return 3;
   }
 
   function sortGirls(girls) {
-    if (!Array.isArray(girls) || girls.length === 0 || sortedArrays.has(girls)) return false;
+    if (!Array.isArray(girls) || girls.length === 0) return false;
 
     const ordered = girls
       .map((girl, index) => ({ girl, index, rank: categoryRank(girl) }))
@@ -41,7 +53,6 @@
       .map(item => item.girl);
 
     girls.splice(0, girls.length, ...ordered);
-    sortedArrays.add(girls);
     return true;
   }
 
