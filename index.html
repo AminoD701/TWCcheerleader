@@ -6248,72 +6248,107 @@ window.renderMinigameStart = function() {
             const type = document.getElementById('mg-setup-type').value;
             const targetSize = parseInt(document.getElementById('mg-setup-round').value);
 
-            let uniqueMap = new Map();
-            dbGirls.forEach(g => { 
-                if(!uniqueMap.has(g.uid)) {
-                    // ✨ 同時合併運動類型與所屬球隊，避免跨隊女孩被遺漏
-                    uniqueMap.set(g.uid, { ...g, allSports: (g.sport || ""), combinedTeam: (g.team || "") });
-                } else {
-                    let e = uniqueMap.get(g.uid);
-                    e.allSports += " " + (g.sport || ""); 
-                    e.combinedTeam += " " + (g.team || "");
+            const formerPattern = /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/;
+            const isFormerRow = g => {
+                const departureSeason = String(g?.departureseason || g?.departure_season || g?.['離隊賽季'] || '').trim();
+                const note = String(g?.note || g?.['備註'] || g?.備註 || '').trim();
+                return Boolean(departureSeason) || formerPattern.test(note);
+            };
+            const identityKey = g => g.uid || `${String(g.realname || '').trim()}|${String(g.nickname || '').trim()}`;
+            const localNat = value => /(臺灣|台灣|香港|澳門|馬來西亞)/.test(String(value || ''));
+            const foreignNat = value => {
+                const n = String(value || '').trim();
+                return Boolean(n) && !localNat(n) && !['未知', '-', '—'].includes(n);
+            };
+            const taiwanProTeams = new Set([
+                'Passion Sisters','Fubon Angels','Wing Stars','Uni-Girls','Rakuten Girls','Dragon Beauties',
+                'Aqua Mermaids','Formosa Sexy','Muse Girls','Taishin Wonders','Leopard Girls','New Taipei Queens',
+                'Pilots Crew','Youngkey Girls','Tokki Cutie','Peach Girls','Little Witches','Si-ster'
+            ]);
+            const kboTeams = new Set([
+                'doosan bears','kt wiz','kia tigers','kiwoom heroes','hanwha eagles',
+                'ssg landers','samsung lions','nc dinos','lotte giants','lg twins'
+            ]);
+
+            const uniqueMap = new Map();
+            dbGirls.forEach(g => {
+                const key = identityKey(g);
+                if (!key) return;
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, {
+                        ...g,
+                        uid: key,
+                        allSports: '',
+                        combinedTeam: '',
+                        __rows: []
+                    });
                 }
-            });
-            
-            // ✨ 終極排除令：只要備註有寫身分，且不是「練習生」或「培訓生」，通通禁止參賽！
-            let pool = Array.from(uniqueMap.values()).filter(g => {
-                if (!g.img) return false;
-                const note = (g.note || g['備註'] || g.備註 || "").trim();
-                if (note !== "" && !note.includes("練習生") && !note.includes("培訓生")) return false;
-                return true;
+                const item = uniqueMap.get(key);
+                item.__rows.push(g);
+                item.allSports += ` ${g.sport || ''}`;
+                item.combinedTeam += ` ${g.team || ''}`;
+                if (!item.img && g.img) item.img = g.img;
             });
 
-            // 定義 KBO 十大球團
-            const kboTeams = ["doosan bears", "kt wiz", "kia tigers", "kiwoom heroes", "hanwha eagles", "ssg landers", "samsung lions", "nc dinos", "lotte giants", "lg twins"];
+            let pool = Array.from(uniqueMap.values()).filter(person => {
+                const activeRows = person.__rows.filter(row => !isFormerRow(row));
+                if (!activeRows.length) return false;
+                person.__activeRows = activeRows;
 
-            // ✨ 依照玩家選擇的陣營進行精準篩選
-            if (type === 'tw') {
-                pool = pool.filter(g => (g.nat||"").includes("臺") || (g.nat||"").includes("台") || (g.nat||"").includes("港") || (g.nat||"").includes("馬") || (g.combinedTeam||"").toLowerCase().includes("luxygirls"));
-            } else if (type === 'foreign') {
-                pool = pool.filter(g => {
-                    let isForeign = g.nat && !(g.nat||"").includes("臺") && !(g.nat||"").includes("台") && !(g.nat||"").includes("港") && !(g.nat||"").includes("馬") && g.nat !== "未知" && g.nat !== "-";
-                    // 確保駐台外援不會混到純 KBO 的女孩
-                    let isKBO = kboTeams.some(t => (g.combinedTeam || "").toLowerCase().includes(t));
-                    return isForeign && !isKBO;
+                const preferred = activeRows.find(row => taiwanProTeams.has(String(row.team || '').trim())) || activeRows[0];
+                Object.assign(person, {
+                    team: preferred.team || person.team,
+                    sport: preferred.sport || person.sport,
+                    nat: preferred.nat || person.nat,
+                    realname: preferred.realname || person.realname,
+                    nickname: preferred.nickname || person.nickname,
+                    img: preferred.img || person.img
                 });
+
+                return Boolean(person.img);
+            });
+
+            if (type === 'tw') {
+                pool = pool.filter(person => person.__activeRows.some(row => localNat(row.nat)));
+            } else if (type === 'foreign') {
+                // 駐台外援＝目前仍效力台灣職業球隊、且國籍不是台港澳馬。
+                // 不再以 note 是否為空判定，也不把 KBO-only 女孩混進來。
+                pool = pool.filter(person => person.__activeRows.some(row => {
+                    const team = String(row.team || '').trim();
+                    return taiwanProTeams.has(team) && foreignNat(row.nat);
+                }));
             } else if (type === 'kbo') {
-                // 只要球隊名稱包含任何一個 KBO 隊伍就入列
-                pool = pool.filter(g => kboTeams.some(t => (g.combinedTeam || "").toLowerCase().includes(t)));
+                pool = pool.filter(person => person.__activeRows.some(row => {
+                    const team = String(row.team || '').trim().toLowerCase();
+                    return kboTeams.has(team);
+                }));
             } else if (type === 'baseball') {
-                pool = pool.filter(g => g.allSports.includes("棒"));
+                pool = pool.filter(person => person.__activeRows.some(row => String(row.sport || '').includes('棒')));
             } else if (type === 'basketball') {
-                pool = pool.filter(g => g.allSports.includes("籃"));
+                pool = pool.filter(person => person.__activeRows.some(row => String(row.sport || '').includes('籃')));
             } else if (type === 'volleyball') {
-                pool = pool.filter(g => g.allSports.includes("排"));
+                pool = pool.filter(person => person.__activeRows.some(row => String(row.sport || '').includes('排')));
             }
 
-            // 打亂名單順序
             pool.sort(() => Math.random() - 0.5);
 
-            // ✨ 智慧判定：根據目前篩選出的總人數，決定能舉辦的「最大賽事規模」
-            let actualSizes = [128, 64, 32, 16, 8];
-            let maxPossible = actualSizes.find(s => s <= pool.length) || 0;
-            
+            const actualSizes = [128, 64, 32, 16, 8];
+            const maxPossible = actualSizes.find(s => s <= pool.length) || 0;
             mgRound = Math.min(targetSize, maxPossible);
-            
-            if(mgRound === 0) { 
-                alert(`⚠️ 該賽區符合條件的女孩數量（目前僅 ${pool.length} 人），不足以舉辦 8 強賽！請換個賽區試試！`); 
-                return; 
+
+            if (mgRound === 0) {
+                alert(`⚠️ 該賽區符合條件的現役女孩目前僅 ${pool.length} 人，不足以舉辦 8 強賽。`);
+                return;
             }
-            if(mgRound < targetSize) {
-                alert(`⚠️ 該賽區女孩總數為 ${pool.length} 人，無法舉辦 ${targetSize} 強賽，系統已自動為您調整為「${mgRound} 強賽」！`);
+            if (mgRound < targetSize) {
+                alert(`⚠️ 該賽區目前有 ${pool.length} 位符合條件的現役女孩，無法舉辦 ${targetSize} 強賽，已自動調整為 ${mgRound} 強賽。`);
             }
 
             mgQueue = pool.slice(0, mgRound);
             mgNextQueue = [];
             mgTotalMatches = mgRound / 2;
             mgMatchCount = 1;
-            
+
             renderMinigameMatch();
         };
 
