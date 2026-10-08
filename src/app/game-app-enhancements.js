@@ -64,14 +64,14 @@
       <div class="app-gacha-backdrop" data-close-daily></div>
       <section class="app-gacha-card" role="dialog" aria-modal="true" aria-label="今日幸運女孩">
         <button class="app-gacha-close" type="button" data-close-daily aria-label="關閉">×</button>
-        <div class="app-gacha-kicker">✨ APP 每日一抽</div>
+        <div class="app-gacha-kicker">DAILY GACHA</div>
         <h2>今日幸運女孩</h2>
         ${result.image ? `<img src="${esc(result.image)}" alt="${esc(result.name)}" class="app-gacha-photo" onerror="this.style.display='none'">` : ''}
         <div class="app-gacha-name">${esc(result.name)}</div>
         ${result.nickname ? `<div class="app-gacha-nickname">${esc(result.nickname)}</div>` : ''}
         ${result.team ? `<div class="app-gacha-team">${esc(result.team)}</div>` : ''}
         <p>${auto ? '今天第一次開啟 APP，已自動完成每日一抽。' : '這是你今天的抽卡結果，明天會自動更新。'}</p>
-        <button class="app-gacha-primary" type="button" data-close-daily>收下今天的幸運 💖</button>
+        <button class="app-gacha-primary" type="button" data-close-daily>收下今天的結果</button>
       </section>`;
     document.body.appendChild(modal);
     modal.querySelectorAll('[data-close-daily]').forEach(el => el.addEventListener('click', closeModal));
@@ -106,12 +106,12 @@
     const dailyStatus = result ? `${esc(result.name)}｜今天已抽` : '開啟 APP 後自動抽取';
     hub.innerHTML = `
       <div class="game-hub__head">
-        <div><h2>🎮 遊戲中心</h2><p>選一個模式開始，不再重複顯示舊版入口。</p></div>
+        <div><h2>遊戲中心</h2><p>選一個模式開始，每個玩法都保留自己的進度與設定。</p></div>
         <div class="game-hub__badge">GAME HUB</div>
       </div>
       <div class="game-hub__grid">
         <button type="button" class="game-mode-card game-mode-card--daily" data-show-daily>
-          <div class="game-mode-card__icon">✨</div>
+          <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.8L19 10l-5.1 2.2L12 17l-1.9-4.8L5 10l5.1-2.2L12 3z"/><path d="M19 3l.8 2.1L22 6l-2.2.9L19 9l-.8-2.1L16 6l2.2-.9L19 3z"/></svg></div>
           <div class="game-mode-card__eyebrow">DAILY GACHA</div>
           <div class="game-mode-card__title">每日一抽</div>
           <div class="game-mode-card__desc">APP 每天第一次開啟時自動抽出一位今日幸運女孩，同一天不會重抽。</div>
@@ -119,14 +119,14 @@
           <div class="game-mode-card__status"><span>${dailyStatus}</span><span class="game-mode-card__go">查看結果</span></div>
         </button>
         <a class="game-mode-card game-mode-card--mini" href="?mode=minigame">
-          <div class="game-mode-card__icon">⚡</div>
+          <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2L5 13h6l-1 9 8-12h-6l1-8z"/></svg></div>
           <div class="game-mode-card__eyebrow">QUICK GAME</div>
           <div class="game-mode-card__title">小遊戲</div>
           <div class="game-mode-card__desc">快速進入互動玩法。進入後可以再選條件與玩法，不需要離開整個網站。</div>
           <div class="game-mode-card__status"><span>適合快速玩一局</span><span class="game-mode-card__go">開始遊戲</span></div>
         </a>
         <a class="game-mode-card game-mode-card--dream" href="?mode=dreamteam">
-          <div class="game-mode-card__icon">🏆</div>
+          <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5V4z"/><path d="M8 6H4v1c0 3 2 5 5 5M16 6h4v1c0 3-2 5-5 5M12 13v4M8 21h8M9 17h6"/></svg></div>
           <div class="game-mode-card__eyebrow">DREAM TEAM</div>
           <div class="game-mode-card__title">夢幻隊伍</div>
           <div class="game-mode-card__desc">組出你心中的理想啦啦隊陣容，想換規則或重新選人時可以隨時返回調整。</div>
