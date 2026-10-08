@@ -2,7 +2,10 @@ name: Update automatic news
 
 on:
   schedule:
+    # Primary hourly run.
     - cron: '17 * * * *'
+    # Fallback watchdog. It only proceeds when the last successful refresh is stale.
+    - cron: '47 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -26,13 +29,48 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Check whether refresh is due
+        id: freshness
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          event = os.environ.get('GITHUB_EVENT_NAME', '')
+          schedule = os.environ.get('GITHUB_EVENT_SCHEDULE', '')
+          due = True
+
+          # The :47 cron is only a watchdog. If the primary hourly run refreshed
+          # successfully within the last 70 minutes, skip this fallback run.
+          if event == 'schedule' and schedule == '47 * * * *':
+              path = Path('data/auto-news-meta.json')
+              if path.exists():
+                  try:
+                      meta = json.loads(path.read_text(encoding='utf-8'))
+                      updated = datetime.fromisoformat(str(meta.get('updatedAt','')).replace('Z','+00:00'))
+                      age_minutes = (datetime.now(timezone.utc) - updated.astimezone(timezone.utc)).total_seconds() / 60
+                      due = age_minutes >= 70
+                      print(f'Last refresh age: {age_minutes:.1f} minutes')
+                  except Exception as exc:
+                      print(f'Freshness check failed; fallback will run: {exc}')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"due={'true' if due else 'false'}\n")
+          PY
       - name: Install news URL decoder
+        if: steps.freshness.outputs.due == 'true'
         run: python -m pip install --disable-pip-version-check googlenewsdecoder==0.2.1 selectolax==0.4.13
       - name: Fetch latest cheerleader news
+        if: steps.freshness.outputs.due == 'true'
         run: python tools/run_auto_news.py
       - name: Write news refresh metadata
+        if: steps.freshness.outputs.due == 'true'
         run: python tools/write_auto_news_meta.py
       - name: Commit updated news
+        if: steps.freshness.outputs.due == 'true'
         run: |
           git add data/auto-news.json data/auto-news-meta.json
           if git diff --cached --quiet; then
