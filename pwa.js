@@ -163,7 +163,7 @@
     enhanceStandaloneMore();
   };
 
-  loadScriptOnce('./src/app/girls-default-sort.js?v=4', 'girls-default-sort');
+  loadScriptOnce('./src/app/girls-default-sort.js?v=5', 'girls-default-sort');
   loadScriptOnce('./src/app/girls-roster-polish.js?v=3', 'girls-roster-polish');
   loadScriptOnce('./src/app/game-app-enhancements.js?v=8', 'game-app-enhancements');
   loadScriptOnce('./src/app/minigame-refined.js?v=2', 'minigame-refined');
@@ -171,8 +171,8 @@
   loadScriptOnce('./src/app/gacha-history.js?v=2', 'gacha-history');
   loadScriptOnce('./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides');
   loadScriptOnce('./src/app/girl-career.js?v=6', 'girl-career');
-  loadScriptOnce('./src/app/former-archive.js?v=3', 'former-archive');
-  loadScriptOnce('./src/app/data-lab.js?v=7', 'data-lab');
+  loadScriptOnce('./src/app/former-archive.js?v=4', 'former-archive');
+  loadScriptOnce('./src/app/data-lab.js?v=8', 'data-lab');
   loadScriptOnce('./src/app/events-archive.js?v=4', 'events-archive');
   loadScriptOnce('./src/app/home-overview.js?v=2', 'home-overview');
   loadScriptOnce('./src/app/season-spotlight.js?v=4', 'season-spotlight');
