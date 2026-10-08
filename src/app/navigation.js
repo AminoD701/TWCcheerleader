@@ -116,7 +116,15 @@ function showHub(mode) {
   };
 }
 
+function hideCustomPanels(exceptMode = '') {
+  const archive = document.getElementById('archive-container');
+  const datalab = document.getElementById('datalab-container');
+  if (archive && exceptMode !== 'archive') archive.style.display = 'none';
+  if (datalab && exceptMode !== 'datalab') datalab.style.display = 'none';
+}
+
 function showCustomMode(mode) {
+  hideCustomPanels(mode);
   legacySetMode('games');
   document.querySelectorAll('#main-content > div:not(#schedule-section-switcher)').forEach(el => { el.style.display = 'none'; });
   document.querySelectorAll('#main-content > section').forEach(el => { el.style.display = 'none'; });
@@ -192,6 +200,7 @@ function restoreSavedScroll(saved) {
 
 function applyMode(mode) {
   currentMode = mode;
+  hideCustomPanels(mode);
   const urlBeforeLegacy = new URL(location.href);
   const hub = document.querySelector('#navigation-hub');
   if (hub) { hub.hidden = mode !== 'my' && mode !== 'more'; hub.style.display = hub.hidden ? 'none' : 'block'; }
