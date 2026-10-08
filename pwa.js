@@ -94,10 +94,11 @@
     });
   }
 
+  // Avoid an automatic reload loop when a standalone iOS PWA changes controllers.
   navigator.serviceWorker?.addEventListener('controllerchange', () => {
     if (refreshing) return;
     refreshing = true;
-    location.reload();
+    // The new controller handles the next navigation naturally.
   });
 
   const createInstallButton = () => {
