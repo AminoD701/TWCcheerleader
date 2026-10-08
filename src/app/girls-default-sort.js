@@ -7,6 +7,7 @@
   const MASCOT_RE = /(吉祥物|mascot)/i;
   const NEW_MEMBER_RE = /(新成員|新加入|新人)/;
   const FORMER_RE = /(已離隊|離隊|已退隊|退隊|不續約|已卸任|前成員)/;
+  const HISTORICAL_TEAMS = new Set(['Little Witches']);
 
   const noteText = girl => String(girl?.note || girl?.['備註'] || girl?.備註 || '').trim();
   const cleanedNote = girl => noteText(girl)
@@ -20,7 +21,9 @@
 
   function isFormer(girl) {
     const status = String(girl?.status || '').trim().toLowerCase();
-    return Boolean(departureSeason(girl))
+    const team = String(girl?.team || '').trim();
+    return HISTORICAL_TEAMS.has(team)
+      || Boolean(departureSeason(girl))
       || FORMER_RE.test(noteText(girl))
       || ['former', 'ended', 'departed', 'inactive', '離隊', '已離隊'].includes(status);
   }
@@ -98,7 +101,8 @@
     sortGirls,
     isFormer,
     departureSeason,
-    applyDefaultSort
+    applyDefaultSort,
+    historicalTeams: HISTORICAL_TEAMS
   });
 
   let attempts = 0;
