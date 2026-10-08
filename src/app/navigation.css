@@ -53,3 +53,124 @@
 .footer-meta{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.07)}.footer-meta p{margin:0;max-width:760px;color:#6f7a87;font-size:10px;line-height:1.65}.footer-signature{white-space:nowrap;color:#8994a1;font:900 11px/1 var(--sport-font);letter-spacing:1.8px}
 .footer #pwa-install-btn{grid-column:auto;position:static!important;margin:12px 0 0!important}
 @media(max-width:760px){.footer-content--modern{grid-template-columns:1fr;padding:28px 16px calc(88px + env(safe-area-inset-bottom,0px));gap:22px}.footer-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px}.footer-meta{grid-column:auto;align-items:flex-start;flex-direction:column}.footer-signature{font-size:10px}.footer #pwa-install-btn{margin:10px 0 0!important}}
+
+
+/* =========================================================
+   Reading comfort pass
+   Keeps the dark sports identity while reducing visual noise.
+   ========================================================= */
+:root{
+  --content-max:1180px;
+  --reading-radius:16px;
+  --reading-border:rgba(255,255,255,.085);
+  --reading-muted:#9aa5b2;
+}
+html{scroll-behavior:smooth}
+body{
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+#main-content{
+  padding-top:20px;
+}
+#main-content > :not(.marquee-wrapper):not(#season-spotlight){
+  scroll-margin-top:92px;
+}
+.grid-container,
+.event-list-container,
+.schedule-matrix-container,
+#matches-container,
+#games-container,
+#profile-container,
+#archive-container,
+#datalab-container{
+  box-sizing:border-box;
+}
+.grid-container{
+  gap:22px!important;
+  margin-top:24px!important;
+}
+.grid-container .card{
+  border-width:1px!important;
+  border-radius:14px!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.28)!important;
+}
+.grid-container .card:hover{
+  transform:translateY(-3px)!important;
+  box-shadow:0 16px 36px rgba(0,0,0,.38)!important;
+}
+.grid-container .photo-area{
+  border-bottom-width:2px!important;
+}
+.grid-container .info-section{
+  padding:20px!important;
+}
+.grid-container .header-info{
+  border-bottom-width:1px!important;
+  margin-bottom:13px!important;
+  padding-bottom:13px!important;
+}
+.marquee-wrapper{
+  box-shadow:none!important;
+  border-color:rgba(255,255,255,.07)!important;
+  margin-bottom:22px!important;
+}
+.marquee-content{
+  line-height:1.55;
+}
+.navigation-hub,
+.match-postseason-banner,
+.season-spotlight__body,
+.events-calendar,
+.events-quick,
+.datalab-query,
+.datalab-panel,
+.archive-hero{
+  border-color:var(--reading-border)!important;
+}
+.event-card,
+.match-card,
+.navigation-hub__item{
+  box-shadow:0 8px 24px rgba(0,0,0,.24)!important;
+}
+.footer{
+  margin-top:86px!important;
+}
+.footer-content--modern{
+  padding-top:40px!important;
+}
+.footer-link-group button,
+.footer-link-group a{
+  min-height:30px;
+  display:flex;
+  align-items:center;
+}
+button,a,[role="button"],select,input{
+  -webkit-tap-highlight-color:transparent;
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+select:focus-visible,
+input:focus-visible{
+  outline:2px solid var(--event-accent,#7dd3fc);
+  outline-offset:3px;
+}
+@media(max-width:767px){
+  #main-content{padding-top:12px}
+  .grid-container{
+    gap:14px!important;
+    margin-top:16px!important;
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+  .grid-container .info-section{padding:14px!important}
+  .marquee-wrapper{margin-bottom:16px!important}
+  .marquee-content{font-size:13px!important}
+  .footer{margin-top:58px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .grid-container .card,
+  .grid-container .card:hover{transition:none!important;transform:none!important}
+}
