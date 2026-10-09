@@ -15,11 +15,7 @@
     const legacyGacha = document.getElementById('gacha-btn-wrapper');
     if (legacyGacha) legacyGacha.style.setProperty('display', 'none', 'important');
 
-    document.querySelectorAll('button,a').forEach(el => {
-      if (el.closest('#navigation-hub')) return;
-      const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (/今日一抽|每日一抽/.test(text)) el.remove();
-    });
+
   };
 
   if (isStandalone()) {
@@ -211,11 +207,11 @@
     ],
     more: [
       ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements'],
-      ['./src/app/gacha-history.js?v=2', 'gacha-history']
+      ['./src/app/', 'gacha-history']
     ],
     my: [
       ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements'],
-      ['./src/app/gacha-history.js?v=2', 'gacha-history']
+      ['./src/app/', 'gacha-history']
     ]
   });
 
