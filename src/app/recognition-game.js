@@ -225,10 +225,24 @@
     storage.set(key,{...previous,[game.mode]:best});
     const stats=groupStats(lastResults);
     const result={correct:game.correct,answered,percentage,label,praise,best,stats,mode:game.mode};
-    frame('<div class="recognition-share-preview"><img class="recognition-photo-art" src="'+CHEER_PHOTO+'" alt="" aria-hidden="true"><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">渣男鑑定所</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">產生分享圖片</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
+    frame('<div class="recognition-share-preview"><img class="recognition-photo-art" src="'+CHEER_PHOTO+'" alt="" aria-hidden="true"><div class="recognition-share-kicker">TWC CHEERLEADER / RECOGNITION QUIZ</div><div class="recognition-share-heading">渣男鑑定所</div><div class="recognition-share-label">'+esc(label)+'</div><div class="recognition-share-score">'+game.correct+' <span>/ '+answered+'</span></div><p>'+esc(praise)+'</p><div class="recognition-share-stats"><div><small>正確率</small><strong>'+percentage+'%</strong></div><div><small>本機最佳</small><strong>'+best+' 題</strong></div></div><div class="recognition-share-category">'+stats.map(g=>'<span>'+esc(g.name)+'　'+g.correct+'/'+g.total+'</span>').join('')+'</div><div class="recognition-share-footer">TWC CHEERLEADER · 你能認出幾位女孩？</div></div><div class="recognition-actions"><button class="recognition-btn primary" id="recognition-share">分享成績圖片</button><button class="recognition-btn" id="recognition-share-link">分享挑戰連結</button><button class="recognition-btn" id="recognition-again">再挑戰一次</button><button class="recognition-btn" id="recognition-wrong">查看錯題</button><button class="recognition-btn" id="recognition-home">返回遊戲中心</button></div>');
     document.getElementById('recognition-again').onclick=open;
     document.getElementById('recognition-home').onclick=back;
     document.getElementById('recognition-share').onclick=e=>shareResult(result,e.currentTarget);
+    document.getElementById('recognition-share-link').onclick=async e=>{
+      const btn=e.currentTarget;
+      const url=new URL(location.href);url.searchParams.set('mode','games');url.searchParams.set('challenge','recognition');url.searchParams.delete('newsId');
+      const link=url.toString();
+      const old=btn.textContent;
+      try {
+        if(navigator.share) { await navigator.share({title:'渣男鑑定所 · TWC CHEERLEADER',text:'我剛玩完渣男鑑定所，你也來試試！',url:link}); }
+        else if(navigator.clipboard?.writeText) { await navigator.clipboard.writeText(link);btn.textContent='連結已複製'; }
+        else { window.prompt('複製挑戰連結',link); }
+      } catch(error) {
+        if(error?.name!=='AbortError') window.prompt('複製挑戰連結',link);
+      }
+      setTimeout(()=>{if(btn.isConnected)btn.textContent=old;},2200);
+    };
     document.getElementById('recognition-wrong').onclick=()=>{
       const wrong=lastResults.filter(x=>!x.ok);
       frame('<div class="recognition-panel"><h2 class="recognition-app-title">錯題回顧</h2>'+(wrong.length?wrong.map(x=>'<p class="recognition-result">你的答案：'+esc(x.answer)+'<br>正確答案：<strong>'+esc(x.person.name)+'</strong></p>').join(''):'<p>全部答對，太厲害了！</p>')+'</div>');
