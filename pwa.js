@@ -206,12 +206,10 @@
       ['./src/app/dreamteam-refined.js?v=2', 'dreamteam-refined']
     ],
     more: [
-      ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements'],
-      ['./src/app/', 'gacha-history']
+      ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements']
     ],
     my: [
-      ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements'],
-      ['./src/app/', 'gacha-history']
+      ['./src/app/game-app-enhancements.js?v=15', 'game-app-enhancements']
     ]
   });
 
