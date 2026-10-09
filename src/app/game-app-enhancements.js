@@ -103,13 +103,13 @@
     const hub = document.createElement('section');
     hub.className = 'game-hub';
     hub.dataset.gameEnhancementHome = '1';
-    const dailyStatus = result ? `${esc(result.name)}｜今天已抽` : '開啟 APP 後自動抽取';
+    const dailyStatus = result ? `${esc(result.name)}｜今天已抽` : '點擊查看今日抽卡';
     hub.innerHTML = `
       <div class="game-hub__head">
         <div><h2>遊戲中心</h2><p>選一個模式開始，每個玩法都保留自己的進度與設定。</p></div>
         <div class="game-hub__badge">GAME HUB</div>
       </div>
-      <div class="game-hub__grid">\n        <button type="button" class="game-mode-card game-mode-card--recognition" data-open-recognition>\n          <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M7 18c.5-3 2.5-4 5-4s4.5 1 5 4"/></svg></div>\n          <div class="game-mode-card__eyebrow">PHOTO QUIZ</div>\n          <div class="game-mode-card__title">渣男鑑定所</div>\n          <div class="game-mode-card__desc">看照片猜名字，挑戰 20 題快賽或無限認人模式。</div>\n          <div class="game-mode-card__status"><span>四選一認人挑戰</span><span class="game-mode-card__go">開始挑戰</span></div>\n        </button>
+      <div class="game-hub__grid">\n        <button type="button" class="game-mode-card game-mode-card--recognition" data-open-recognition>\n          <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M7 18c.5-3 2.5-4 5-4s4.5 1 5 4"/></svg></div>\n          <div class="game-mode-card__eyebrow">PHOTO QUIZ</div>\n          <div class="game-mode-card__title">渣男鑑定所</div>\n          <div class="game-mode-card__desc">看照片猜名字，挑戰四種不同難度的關卡。</div>\n          <div class="game-mode-card__status"><span>四選一認人挑戰</span><span class="game-mode-card__go">開始挑戰</span></div>\n        </button>
         <button type="button" class="game-mode-card game-mode-card--daily" data-show-daily>
           <div class="game-mode-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.8L19 10l-5.1 2.2L12 17l-1.9-4.8L5 10l5.1-2.2L12 3z"/><path d="M19 3l.8 2.1L22 6l-2.2.9L19 9l-.8-2.1L16 6l2.2-.9L19 3z"/></svg></div>
           <div class="game-mode-card__eyebrow">DAILY GACHA</div>
@@ -133,9 +133,10 @@
           <div class="game-mode-card__status"><span>自由組隊與調整</span><span class="game-mode-card__go">建立隊伍</span></div>
         </a>
       </div>
-      <div class="game-hub__tip"><strong>操作提示：</strong>抽卡紀錄與抖內已移到「更多」；遊戲中心只保留遊戲相關入口。</div>`;
+      <div class="game-hub__tip"><strong>操作提示：</strong>每日一抽可直接查看當日幸運女孩。</div>`;
     root.replaceChildren(hub);
-    hub.querySelector('[data-show-daily]')?.addEventListener('click', () => showDailyResult(result));\n    hub.querySelector('[data-open-recognition]')?.addEventListener('click', () => window.openRecognitionGame?.());
+    hub.querySelector('[data-show-daily]')?.addEventListener('click', () => showDailyResult(result));
+    hub.querySelector('[data-open-recognition]')?.addEventListener('click', () => window.openRecognitionGame?.());
     hub.querySelectorAll('a[href*="?mode="]').forEach(link => {
       link.addEventListener('click', event => {
         const target = new URL(link.href, location.href).searchParams.get('mode');
