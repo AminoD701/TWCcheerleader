@@ -174,7 +174,6 @@ function showHub(mode) {
           title: '互動玩法',
           entries: [
             { target: 'games', title: '遊戲中心', note: '進入網站互動玩法。' },
-            { action: 'gacha-history', title: '今日一抽紀錄', note: '查看每天抽到的幸運女孩。' },
             { target: 'vote', title: '應援投票', note: '參加網站期間限定應援活動。' }
           ]
         },
@@ -206,10 +205,6 @@ function showHub(mode) {
     const action = event.target.closest('[data-hub-action]');
     if (action) {
       event.preventDefault();
-      if (action.dataset.hubAction === 'gacha-history') {
-        if (typeof window.showGachaHistory === 'function') window.showGachaHistory();
-        else alert('抽卡紀錄功能正在載入，請稍後再試一次。');
-      }
       return;
     }
     const a = event.target.closest('[data-hub-mode]');
