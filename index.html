@@ -3592,6 +3592,12 @@
                   <button type="button" class="twc-game-tile" data-twc-action="vote"><span class="twc-game-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="15" width="22" height="13" rx="2"/><path d="M10 15V5h12v10M12.5 10h7M12 21h8M12 24h5"/></svg></span><span class="twc-game-copy"><small>FAN VOTE</small><strong>全民應援大賞</strong><span>為喜歡的女孩投下支持的一票</span></span><span class="twc-game-arrow">↗</span></button>
                 </div>
               </section>`;
+            // Open shared quiz links only once; keep the regular hub untouched otherwise.
+            if (new URLSearchParams(location.search).get('challenge') === 'recognition') {
+              const sharedUrl=new URL(location.href);sharedUrl.searchParams.delete('challenge');
+              history.replaceState(history.state,'',sharedUrl.toString());
+              requestAnimationFrame(() => window.openRecognitionGame?.());
+            }
             container.querySelectorAll('[data-twc-action]').forEach(btn => btn.addEventListener('click', () => {
               if (btn.dataset.twcAction === 'recognition') window.openRecognitionGame?.();
               else if (btn.dataset.twcAction === 'daily') { if (typeof window.showDailyGachaResult === 'function') window.showDailyGachaResult(); else alert('女孩資料載入中，請稍候再試。'); }
