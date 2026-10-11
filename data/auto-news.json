@@ -39,6 +39,19 @@
     "img": "https://news-images.tvbs.com.tw/api/v1/image/01a125bc-19f8-7168-9ca3-eaefb1475fcd.jpg?t=16x9&wp=l,t&c=0,76,1889,1139&w=1200&h=675"
   },
   {
+    "id": "auto-caf26eaf2666a4af",
+    "date": "2026/10/10 19:38",
+    "title": "中職季後賽》統一拚延長戰線！ 1比0領先情況第三名洋投獅帝芬七局登板中繼 | 緯來體育新聞",
+    "tag": "棒球情報",
+    "subtag": "中職",
+    "content": "來源：LINE TODAY\n\n新聞摘要：統一獅今天（10日）在季後挑戰賽G2背水一戰，前六局打完1比0領先的南霸天為求守住勝果，七局上直接換上洋投獅帝芬登板、力拼把戰線延長。 統一...",
+    "hashtags": "棒球情報 中職",
+    "url": "https://today.line.me/tw/v3/article/MLBPv3M",
+    "source": "LINE TODAY",
+    "auto": true,
+    "img": "https://today-obs.line-scdn.net/0hIxaIAU_OFldcMAr6cItpAGRmGiZvVgxeflILZnA0SjR2HFFRZwRFNH45SnsiB1FWfFJYYno3G2AiCVcIMg/w1200"
+  },
+  {
     "id": "auto-c986a59da3647cf5",
     "date": "2026/10/10 16:37",
     "title": "新屋鵝肉「5+1」創意料理 韓籍啦啦隊女神RuRu應援",
@@ -63,19 +76,6 @@
     "source": "LINE TODAY",
     "auto": true,
     "img": "https://today-obs.line-scdn.net/0hadpAFNQFPktNOCLkn_ZBHHVuMjp-XiRCb14hLWs_YSxkFHsUcA5tKG05MmczDCobbV93KG9sN3hgW3kUIw/w1200"
-  },
-  {
-    "id": "auto-20042d06731e4a8a",
-    "date": "2026/10/09 21:03",
-    "title": "中職季後賽》去年受傷無緣總冠軍賽勝騎士今年季後賽首戰投7局奪勝投：希望再拋一次彩帶| 緯來體育新聞",
-    "tag": "棒球情報",
-    "subtag": "中職",
-    "content": "來源：LINE TODAY\n\n新聞摘要：中信兄弟9日在中職季後挑戰賽首戰迎戰統一獅，洋投勝騎士展現穩定壓制力，主投7局繳出優質先發，搭配隊友攻守支援，幫助兄弟拿下系列賽首勝，並獲選...",
-    "hashtags": "棒球情報 中職",
-    "url": "https://today.line.me/tw/v3/article/ZapEXlO",
-    "source": "LINE TODAY",
-    "auto": true,
-    "img": "https://today-obs.line-scdn.net/0hmYbO_0E0MnZfNi7ZsTRNIWdgPgdsUCh_fQd5R3xkbU53GiYkNARhFX9jbFoiBnQpfwUoE3gxPBMhDnIjNg/w1200"
   },
   {
     "id": "auto-903bcda1aeafb103",
@@ -249,13 +249,13 @@
   {
     "id": "auto-5f12495137954f7f",
     "date": "2026/10/07 19:09",
-    "title": "「學霸女神」一粒放棄法國交換與白領生活　媽1則訊息成啦啦隊女神",
+    "title": "「學霸女神」一粒放棄法國交換與白領生活媽1則訊息成啦啦隊女神| 娛樂",
     "tag": "啦啦隊情報",
     "subtag": "一粒",
-    "content": "來源：三立新聞\n\n新聞摘要：台鋼雄鷹啦啦隊人氣成員「一粒」趙宜莉今（7）日宣布離隊，結束3年啦啦隊生涯。擁有輔大高學歷與多益960分的一粒，原是台北上班族，因疫情中斷交換計畫，在家人鼓勵下返鄉參加徵選誤打誤撞入行，憑藉「粒保樂園」應援舞爆紅。她感性感謝球迷一路支持，並表示卸下台鋼戰袍後將好好思考未來方向，動向備受關注。",
+    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：台鋼雄鷹啦啦隊人氣成員「一粒」趙宜莉今（7）日宣布離隊，結束3年啦啦隊生涯。擁有輔大高學歷與多益960分的一粒，原是台北上班族，因疫情中斷交換計畫，在家人鼓勵下返鄉參加徵選誤打誤撞入行，憑藉「粒保樂園」應援舞爆紅。她感性感謝球迷一路支持，並表示卸下台鋼戰袍後將好好思考未來方向，動向備受關注。",
     "hashtags": "一粒 啦啦隊情報",
     "url": "https://www.setn.com/news/1918932",
-    "source": "三立新聞",
+    "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/10/02/5733612-PH.jpg"
   },
@@ -356,10 +356,10 @@
     "title": "中職／小龍女台灣大賽班表　權喜原、金娜妍全勤！1、2樓走道也排女孩",
     "tag": "啦啦隊情報",
     "subtag": "娜妍",
-    "content": "來源：三立新聞\n\n新聞摘要：中華職棒37年台灣大賽將於10月17日點燃戰火，味全龍奪下上半季冠軍與全年勝率第1，享有5場主場優勢。由於天母球場整修，賽事全數移師臺北大巨蛋舉辦。味全龍球團於6日正式公布小龍女啦啦隊的應援班表，除部分成員因故缺席外，多數啦啦隊員皆將全勤出席。球團也規劃多處應援熱區，包含一三壘舞台及各樓層走道，期盼透過豪華啦啦隊陣容炒熱季後賽氣氛，全力搶勝。",
+    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：中華職棒37年台灣大賽將於10月17日點燃戰火，味全龍奪下上半季冠軍與全年勝率第1，享有5場主場優勢。由於天母球場整修，賽事全數移師臺北大巨蛋舉辦。味全龍球團於6日正式公布小龍女啦啦隊的應援班表，除部分成員因故缺席外，多數啦啦隊員皆將全勤出席。球團也規劃多處應援熱區，包含一三壘舞台及各樓層走道，期盼透過豪華啦啦隊陣容炒熱季後賽氣氛，全力搶勝。",
     "hashtags": "娜妍 啦啦隊情報",
     "url": "https://www.setn.com/news/1918179",
-    "source": "三立新聞",
+    "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/07/21/5638554-PH.jpg"
   },
@@ -377,6 +377,19 @@
     "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/06/35395165.jpg&M=1&s=Y&x=0&y=389&sw=1280&sh=854&exp=3600"
   },
   {
+    "id": "auto-4d24eea3659b6a69",
+    "date": "2026/10/06 13:00",
+    "title": "雙十去哪玩？新北「國慶隨行杯」500份免費領 逛餐車市集、看啦啦隊等精彩演出",
+    "tag": "啦啦隊情報",
+    "subtag": "綜合",
+    "content": "來源：UDN\n\n新聞摘要：免費領「國慶紀念隨行杯」！雙十國慶即將到來，10/10「新北國慶升旗典禮」不僅有重頭戲升旗典禮，還集結了文創市集與餐車，邀請民眾一同為中華民國慶生。",
+    "hashtags": "啦啦隊情報 綜合",
+    "url": "https://travel.udn.com/travel/story/7205/9797319",
+    "source": "UDN",
+    "auto": true,
+    "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/06/35393918.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=710&exp=3600"
+  },
+  {
     "id": "auto-0ee11a16c118f4a4",
     "date": "2026/10/06 09:31",
     "title": "樂天女孩玩水祭遭射下半身、潑啤酒！只有你笑、她卻在忍耐 這種「好玩」到底傷了誰？",
@@ -388,6 +401,19 @@
     "source": "udn 女子漾",
     "auto": true,
     "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/06/35393296.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600"
+  },
+  {
+    "id": "auto-2147c51880438d41",
+    "date": "2026/10/05 17:53",
+    "title": "「小龍女」賴可一日店長超寵粉！親自帶逛櫃位、簽拍立得零距離互動 | 娛樂 | CTWANT",
+    "tag": "啦啦隊情報",
+    "subtag": "賴可",
+    "content": "來源：CTWANT\n\n新聞摘要：味全龍啦啦隊「小龍女」人氣成員賴可（LIKE）昨（4日）驚喜現身新店裕隆城百貨廣場，化身台灣專業機能襪品牌一日店長。擁有甜美臉蛋及E罩杯火辣好身材的她，一登場就吸引大批粉絲包圍，還以活力十足的應援舞熱...",
+    "hashtags": "賴可 啦啦隊情報",
+    "url": "https://www.ctwant.com/article/500989/",
+    "source": "CTWANT",
+    "auto": true,
+    "img": "https://static.ctwant.com/images/cover/89/500989/lg-90da174341d513ce992d498f158712aa.JPG"
   },
   {
     "id": "auto-9b43013153c037f5",
@@ -414,19 +440,6 @@
     "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/10/05/5736561-PH.jpg"
-  },
-  {
-    "id": "auto-b18eb38cad3be1a7",
-    "date": "2026/10/05 13:55",
-    "title": "樂天女孩遭惡意潑酒急診！岱縈罕長文怒拒排班　球團報警：永久禁止入場",
-    "tag": "啦啦隊情報",
-    "subtag": "綜合",
-    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：樂天桃猿主場「玩水祭」賽後爆發球迷失控事件，有男子無視規範，朝樂天女孩及工作人員潑灑啤酒與不明液體，導致Kira與艾融眼睛刺痛就醫。岱縈也發文怒轟並透露自己眼睛感染，揚言未來拒排此類活動。球團今日發布公告證實此事，強調已配合警方調查，涉案人士將永不得進入球場，並將依法追究責任，呼籲球迷理性應援以維護安全。",
-    "hashtags": "啦啦隊情報 綜合",
-    "url": "https://www.setn.com/news/1917582",
-    "source": "三立新聞網SETN.com",
-    "auto": true,
-    "img": "https://attach.setn.com/newsimages/2026/10/05/5736507-PH.jpg"
   },
   {
     "id": "auto-82cc244896d69108",
@@ -481,19 +494,6 @@
     "img": "https://attach.setn.com/newsimages/2026/10/05/5736241-PH.jpg"
   },
   {
-    "id": "auto-c0db4b4918e3d79b",
-    "date": "2026/10/05 10:43",
-    "title": "啦啦隊女神「李多慧」驚喜接下代言！揭密保持「發光肌」的秘密武器：iRESTORE 光透美容面罩",
-    "tag": "啦啦隊情報",
-    "subtag": "綜合",
-    "content": "來源：TVBS 女人我最大\n\n新聞摘要：以招牌甜美笑容與滿滿活力深受廣大粉絲喜愛的職棒味全龍隊啦啦隊女神「李多慧」，正式宣布成為 iRESTORE 光透美容面罩代言人！無論是在球場上高強度的舞蹈應援，還是面對滿檔的行程，李多慧每一次亮相總是展現零瑕疵、充滿彈潤光澤的好膚質。這次她首度公開私下維持最佳膚況的秘密武器——iRESTORE 光透美容面罩！李多慧代言",
-    "hashtags": "啦啦隊情報 綜合",
-    "url": "https://woman.tvbs.com.tw/beauty/67670",
-    "source": "TVBS 女人我最大",
-    "auto": true,
-    "img": "https://woman-asset.tvbs.com.tw/images/2026/10/20261005103756-OkgBxvn6.webp"
-  },
-  {
     "id": "auto-a99871c54fca6e60",
     "date": "2026/10/04 22:50",
     "title": "年紀越大越勝利的啦啦隊女神！粉狂點名梓梓　本人認了：花錢醫美",
@@ -507,30 +507,30 @@
     "img": "https://media.nownews.com/nn_media/thumbnail/2026/10/1791124923500-d5045d734f904e7eb67d2c6bb850f2f0-1200x815.webp?unShow=false"
   },
   {
-    "id": "auto-802a143c8bbc5c56",
-    "date": "2026/10/03 15:00",
-    "title": "獨家／小迪後第2位現役港籍啦啦隊員　嘉盈曝已辦居留證！租屋常駐台灣",
-    "tag": "啦啦隊情報",
-    "subtag": "嘉盈",
-    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：富邦悍將培訓學員、香港籍成員嘉盈正式成為Fubon Angels mini，成為繼PS女孩小迪後第二位來台發展的港籍啦啦隊員。嘉盈人氣居冠，目前正申請台灣居留證並由經紀公司安排宿舍，未來將台港兩地往返時間縮短。曾任香港職籃啦啦隊的她，十分期待接下來的PLG職籃賽季，將在富邦勇士主場帶來精彩應援。",
-    "hashtags": "嘉盈 小迪 啦啦隊情報",
-    "url": "https://www.setn.com/news/1916303",
-    "source": "三立新聞網SETN.com",
-    "auto": true,
-    "img": "https://attach.setn.com/newsimages/2026/10/03/5734239-PH.jpg"
-  },
-  {
-    "id": "auto-5f6da3914ac4fb2b",
+    "id": "auto-17691d9ffbd9acb5",
     "date": "2026/10/03 15:00",
     "title": "「啦啦隊新有菜」植牙飆淚！嘴巴撐開爆哭出來：牙齒真的很重要",
     "tag": "啦啦隊情報",
     "subtag": "綜合",
     "content": "來源：三立新聞網SETN.com\n\n新聞摘要：味全龍啦啦隊人氣成員李恩菲擁有甜美外型，被封為「台版新有菜」。她近日在社群平台分享剛完成植牙手術的心得，透露療程中最痛苦的並非電鋸或槌子敲擊，而是嘴巴因長時間被撐開到破皮，甚至痛到忍不住哭出來。此外，術後也必須遵守醫囑，至少一個禮拜不能從事激烈運動。李恩菲藉此親身經驗，呼籲粉絲務必重視平時的牙齒保健與口腔照護。",
     "hashtags": "啦啦隊情報 綜合",
-    "url": "https://www.setn.com/news/1916701",
+    "url": "https://health.setn.com/news/1916701",
     "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/01/20/5425983-PH.jpg"
+  },
+  {
+    "id": "auto-8973f72a9f76b1d4",
+    "date": "2026/10/03 12:02",
+    "title": "獨家／小迪後第2位現役港籍啦啦隊員　嘉盈曝已辦居留證！租屋常駐台灣",
+    "tag": "啦啦隊情報",
+    "subtag": "嘉盈",
+    "content": "來源：娛樂星聞\n\n新聞摘要：富邦悍將培訓學員、香港籍成員嘉盈正式成為Fubon Angels mini，成為繼PS女孩小迪後第二位來台發展的港籍啦啦隊員。嘉盈人氣居冠，目前正申請台灣居留證並由經紀公司安排宿舍，未來將台港兩地往返時間縮短。曾任香港職籃啦啦隊的她，十分期待接下來的PLG職籃賽季，將在富邦勇士主場帶來精彩應援。",
+    "hashtags": "嘉盈 小迪 啦啦隊情報",
+    "url": "https://star.setn.com/news/1916303",
+    "source": "娛樂星聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2026/10/03/5734239-PH.jpg"
   },
   {
     "id": "auto-a20f379a4db28a67",
