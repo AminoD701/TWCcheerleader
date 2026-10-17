@@ -39,6 +39,19 @@
     "img": "https://img.youtube.com/vi/-xFdYtBrRTQ/maxresdefault.jpg"
   },
   {
+    "id": "auto-d8954286a4fc6dbb",
+    "date": "2026/10/17 19:48",
+    "title": "味全龍首戰完封兄弟！蔣銲8局無失分奪MVP 喊話：任務還沒完成 | 鏡報",
+    "tag": "棒球情報",
+    "subtag": "中職",
+    "content": "來源：LINE TODAY\n\n新聞摘要：中華職棒台灣大賽史上首度「龍象大戰」今（17）日在臺北大巨蛋熱鬧開打，味全龍靠著先發洋投蔣銲繳出8局無失分的優質好投壓制，終場以3：0完封中...",
+    "hashtags": "棒球情報 中職",
+    "url": "https://today.line.me/tw/v3/article/5yv8Z1E",
+    "source": "LINE TODAY",
+    "auto": true,
+    "img": "https://today-obs.line-scdn.net/0hoxUosyv1MFdoFizjB9dPAFBAPCZbcCpeSiArOEQVaGVEOiMBBHNjNExGPHtNdXEASHgtMx4RO2QVLiQHUQ/w1200"
+  },
+  {
     "id": "auto-fe1727e4c2798ff4",
     "date": "2026/10/17 19:36",
     "title": "台灣大賽》龍象大戰4萬人滿場！ 中信兄弟首場若落敗沒奪過總冠軍 | TSNA",
@@ -63,19 +76,6 @@
     "source": "UDN",
     "auto": true,
     "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/17/35430144.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600"
-  },
-  {
-    "id": "auto-3b9721a6d04e76b2",
-    "date": "2026/10/17 16:58",
-    "title": "中職總冠軍戰「張家兄弟」對決！張政禹笑嗆張士綸",
-    "tag": "棒球情報",
-    "subtag": "中職",
-    "content": "來源：LINE TODAY\n\n新聞摘要：最新中華職棒動態，中信兄弟、富邦悍將、樂天桃猿、台鋼雄鷹、統一獅、味全龍等球隊資訊，鎖定LINE TODAY中職頻道，精彩好球不錯過！",
-    "hashtags": "棒球情報 中職",
-    "url": "https://today.line.me/tw/v3/tab/CPBL?pollAnswers=%7B%22moduleId%22%3A%2268e491d5b69b1322880cc5bb%22%2C%22pollId%22%3A289891060%2C%22answers%22%3A%5B%222%22%5D%7D",
-    "source": "LINE TODAY",
-    "auto": true,
-    "img": "https://today-obs.line-scdn.net/0h_4dZt2BFABtZIx-gD4d_TAV1A3RqTxMYPRVRLyciG1QodBwdORsEFiNIA3kvbw8ePS4EHBpiGFQseEYsAyUTKBkiF3t3dAwmExhMAjdTX1USQQE2OR9HAQw/w1200"
   },
   {
     "id": "auto-b9423eba1d54eb38",
@@ -160,9 +160,9 @@
     "date": "2026/10/16 06:00",
     "title": "林襄、李多慧對決峮峮！龍象大戰場外更香　小龍女首戰陣容超豪華",
     "tag": "啦啦隊情報",
-    "subtag": "峮峮",
+    "subtag": "林襄",
     "content": "來源：NOWnews今日新聞\n\n新聞摘要：中職中信兄弟與味全龍將展開37年來首度的「龍象大戰」，總冠軍賽於10月17日起在台北大巨蛋舉行，不僅場上球員表現引發關注，場外啦啦隊們陣容同樣成為焦點。味全龍啦啦...",
-    "hashtags": "峮峮 林襄 啦啦隊情報",
+    "hashtags": "林襄 峮峮 啦啦隊情報",
     "url": "https://www.nownews.com/news/6883718",
     "source": "NOWnews今日新聞",
     "auto": true,
@@ -173,9 +173,9 @@
     "date": "2026/10/15 22:27",
     "title": "「小王淨」PS女孩怡琪出車禍！下巴裂開　經紀人和短今衝醫院陪伴",
     "tag": "啦啦隊情報",
-    "subtag": "怡琪",
+    "subtag": "短今",
     "content": "來源：NOWnews今日新聞\n\n新聞摘要：中信兄弟啦啦隊PS女孩怡琪擁有身高170公分修長比例，以及清秀又甜美的五官，被球迷暱稱「小王淨」，今（15）日她公開一張騎腳踏車發生車禍、下巴破洞縫針的照片，嚇壞...",
-    "hashtags": "怡琪 短今 啦啦隊情報",
+    "hashtags": "短今 怡琪 啦啦隊情報",
     "url": "https://www.nownews.com/news/6883829",
     "source": "NOWnews今日新聞",
     "auto": true,
@@ -455,15 +455,15 @@
     "img": "https://attach.setn.com/newsimages/2026/10/11/5744903-PH.jpg"
   },
   {
-    "id": "auto-17c24f433235d409",
-    "date": "2026/10/11 01:46",
+    "id": "auto-65c37cde04d6d9c5",
+    "date": "2026/10/11 01:40",
     "title": "中職／季後挑戰賽第3戰打回台中　「扛壩子」峮峮帶領16位PS女孩應援",
     "tag": "啦啦隊情報",
     "subtag": "峮峮",
-    "content": "來源：娛樂星聞\n\n新聞摘要：統一獅在季後挑戰賽第2戰完封中信兄弟成功續命，雙方將於11日在台中洲際棒球場進行關鍵第3戰。中信兄弟啦啦隊Passion Sisters隨即公布豪華應援陣容，由人氣扛壩子峮峮領軍，攜手隊長妮可等共17位女孩全力應援，其中更有5位成員為本季首次在季後賽亮相，誓言捍衛主場搶下最後勝利。",
+    "content": "來源：三立新聞\n\n新聞摘要：統一獅在季後挑戰賽第2戰完封中信兄弟成功續命，雙方將於11日在台中洲際棒球場進行關鍵第3戰。中信兄弟啦啦隊Passion Sisters隨即公布豪華應援陣容，由人氣扛壩子峮峮領軍，攜手隊長妮可等共17位女孩全力應援，其中更有5位成員為本季首次在季後賽亮相，誓言捍衛主場搶下最後勝利。",
     "hashtags": "峮峮 啦啦隊情報",
-    "url": "https://star.setn.com/news/1920608",
-    "source": "娛樂星聞",
+    "url": "https://www.setn.com/news/1920608",
+    "source": "三立新聞",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/10/11/5743960-PH.jpg"
   },
@@ -485,9 +485,9 @@
     "date": "2026/10/09 16:06",
     "title": "啦啦隊》禹菡接任桃氣女孩隊長！艾麗轉正盼持續努力 吳瑞律喊話一起享受比賽",
     "tag": "啦啦隊情報",
-    "subtag": "禹菡",
+    "subtag": "艾麗",
     "content": "來源：TSNA體育新聞團隊\n\n新聞摘要：啦啦隊》禹菡接任桃氣女孩隊長！艾麗轉正盼持續努力 吳瑞律喊話一起享受比賽",
-    "hashtags": "禹菡 艾麗 啦啦隊情報",
+    "hashtags": "艾麗 禹菡 啦啦隊情報",
     "url": "https://tsna.com/article/204007",
     "source": "TSNA體育新聞團隊",
     "auto": true,
@@ -507,19 +507,6 @@
     "img": "https://media.nownews.com/nn_media/thumbnail/2026/10/1791440545743-f7012a6873894d9fae49e5eed0e8a101-1200x780.webp?unShow=false"
   },
   {
-    "id": "auto-3057a409f1247733",
-    "date": "2026/10/08 16:40",
-    "title": "中職／離開台鋼？韓籍啦啦隊Mingo跳「辭職舞」 網：時機很敏感",
-    "tag": "啦啦隊情報",
-    "subtag": "Mingo",
-    "content": "來源：UDN\n\n新聞摘要：台鋼雄鷹隊昨天才宣布7位啦啦隊女孩離隊的消息，引發許多球迷哀號。韓籍啦啦隊成員Mingo（朴旻曙）不在這波3Q名單，但昨晚突然發布翻跳「離職舞」影片，引發網友聯想。",
-    "hashtags": "Mingo 啦啦隊情報",
-    "url": "https://udn.com/news/story/7001/9803296",
-    "source": "UDN",
-    "auto": true,
-    "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/08/35403190.jpg&M=1&s=Y&x=0&y=107&sw=1280&sh=853&exp=3600"
-  },
-  {
     "id": "auto-9fa9da9d402ebefe",
     "date": "2026/10/08 15:00",
     "title": "啦啦隊》​浪LIVE電豹女九頭身超級新人艾麗加盟 一年完成雙棲里程碑",
@@ -533,17 +520,17 @@
     "img": "https://imgs.tsna.com/article/2026N1791441359_97e56cbe5e224bbbb01a0e81c66fbf64.jpg"
   },
   {
-    "id": "auto-414663f4561d0a4c",
+    "id": "auto-3057a409f1247733",
     "date": "2026/10/08 15:00",
-    "title": "一粒證實斷開Wing Stars 孫協志親曝關鍵主因：讓圈子更多新苗| 星聞",
+    "title": "中職／離開台鋼？韓籍啦啦隊Mingo跳「辭職舞」 網：時機很敏感",
     "tag": "啦啦隊情報",
-    "subtag": "一粒",
-    "content": "來源：三立新聞\n\n新聞摘要：中華職棒台鋼雄鷹啦啦隊Wing Stars爆出七名成員集體離隊震撼彈，包括人氣成員一粒、李樂與妡0等人將告別團隊，引發球迷熱議。對此，策略長孫協志今出席活動時大方回應，表示成員單純是合約到期，團隊本著培養新人的初衷，給予所有人滿滿祝福，期盼女孩們在演藝與啦啦隊圈各自開枝散葉、發展順利。",
-    "hashtags": "一粒 啦啦隊情報",
-    "url": "https://www.setn.com/news/1919332",
-    "source": "三立新聞",
+    "subtag": "Mingo",
+    "content": "來源：UDN\n\n新聞摘要：台鋼雄鷹隊昨天才宣布7位啦啦隊女孩離隊的消息，引發許多球迷哀號。韓籍啦啦隊成員Mingo（朴旻曙）不在這波3Q名單，但昨晚突然發布翻跳「離職舞」影片，引發網友聯想。",
+    "hashtags": "Mingo 啦啦隊情報",
+    "url": "https://udn.com/news/story/7001/9803296",
+    "source": "UDN",
     "auto": true,
-    "img": "https://attach.setn.com/newsimages/2024/07/25/4742141-PH.jpg"
+    "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/08/35403190.jpg&M=1&s=Y&x=0&y=107&sw=1280&sh=853&exp=3600"
   },
   {
     "id": "auto-e6eec18d21741967",
@@ -557,5 +544,18 @@
     "source": "NOWnews今日新聞",
     "auto": true,
     "img": "https://media.nownews.com/nn_media/thumbnail/2026/10/1791328740598-86fa9c6894a04496923bedf3cd3774f9-1200x781.webp?unShow=false"
+  },
+  {
+    "id": "auto-1f2ceaffbd4519a2",
+    "date": "2026/10/08 15:00",
+    "title": "一粒證實斷開Wing Stars 孫協志親曝關鍵主因：讓圈子更多新苗",
+    "tag": "啦啦隊情報",
+    "subtag": "一粒",
+    "content": "來源：娛樂星聞\n\n新聞摘要：中華職棒台鋼雄鷹啦啦隊Wing Stars爆出七名成員集體離隊震撼彈，包括人氣成員一粒、李樂與妡0等人將告別團隊，引發球迷熱議。對此，策略長孫協志今出席活動時大方回應，表示成員單純是合約到期，團隊本著培養新人的初衷，給予所有人滿滿祝福，期盼女孩們在演藝與啦啦隊圈各自開枝散葉、發展順利。",
+    "hashtags": "一粒 啦啦隊情報",
+    "url": "https://star.setn.com/news/1919332",
+    "source": "娛樂星聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2024/07/25/4742141-PH.jpg"
   }
 ]
