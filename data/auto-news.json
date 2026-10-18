@@ -39,19 +39,6 @@
     "img": "https://img.youtube.com/vi/-xFdYtBrRTQ/maxresdefault.jpg"
   },
   {
-    "id": "auto-d8954286a4fc6dbb",
-    "date": "2026/10/17 19:48",
-    "title": "味全龍首戰完封兄弟！蔣銲8局無失分奪MVP 喊話：任務還沒完成 | 鏡報",
-    "tag": "棒球情報",
-    "subtag": "中職",
-    "content": "來源：LINE TODAY\n\n新聞摘要：中華職棒台灣大賽史上首度「龍象大戰」今（17）日在臺北大巨蛋熱鬧開打，味全龍靠著先發洋投蔣銲繳出8局無失分的優質好投壓制，終場以3：0完封中...",
-    "hashtags": "棒球情報 中職",
-    "url": "https://today.line.me/tw/v3/article/5yv8Z1E",
-    "source": "LINE TODAY",
-    "auto": true,
-    "img": "https://today-obs.line-scdn.net/0hoxUosyv1MFdoFizjB9dPAFBAPCZbcCpeSiArOEQVaGVEOiMBBHNjNExGPHtNdXEASHgtMx4RO2QVLiQHUQ/w1200"
-  },
-  {
     "id": "auto-fe1727e4c2798ff4",
     "date": "2026/10/17 19:36",
     "title": "台灣大賽》龍象大戰4萬人滿場！ 中信兄弟首場若落敗沒奪過總冠軍 | TSNA",
@@ -89,6 +76,19 @@
     "source": "中時新聞網",
     "auto": true,
     "img": "https://images.chinatimes.com/newsphoto/2026-10-17/656/20261017002604_20261017172132.jpg"
+  },
+  {
+    "id": "auto-3b9721a6d04e76b2",
+    "date": "2026/10/17 16:58",
+    "title": "中職總冠軍戰「張家兄弟」對決！張政禹笑嗆張士綸",
+    "tag": "棒球情報",
+    "subtag": "中職",
+    "content": "來源：LINE TODAY\n\n新聞摘要：最新中華職棒動態，中信兄弟、富邦悍將、樂天桃猿、台鋼雄鷹、統一獅、味全龍等球隊資訊，鎖定LINE TODAY中職頻道，精彩好球不錯過！",
+    "hashtags": "棒球情報 中職",
+    "url": "https://today.line.me/tw/v3/tab/CPBL?pollAnswers=%7B%22moduleId%22%3A%2268e491d5b69b1322880cc5bb%22%2C%22pollId%22%3A289891060%2C%22answers%22%3A%5B%222%22%5D%7D",
+    "source": "LINE TODAY",
+    "auto": true,
+    "img": "https://today-obs.line-scdn.net/0h_4dZt2BFABtZIx-gD4d_TAV1A3RqTxMYPRVRLyciG1QodBwdORsEFiNIA3kvbw8ePS4EHBpiGFQseEYsAyUTKBkiF3t3dAwmExhMAjdTX1USQQE2OR9HAQw/w1200"
   },
   {
     "id": "auto-b9423eba1d54eb38",
@@ -173,9 +173,9 @@
     "date": "2026/10/16 06:00",
     "title": "林襄、李多慧對決峮峮！龍象大戰場外更香　小龍女首戰陣容超豪華",
     "tag": "啦啦隊情報",
-    "subtag": "林襄",
+    "subtag": "峮峮",
     "content": "來源：NOWnews今日新聞\n\n新聞摘要：中職中信兄弟與味全龍將展開37年來首度的「龍象大戰」，總冠軍賽於10月17日起在台北大巨蛋舉行，不僅場上球員表現引發關注，場外啦啦隊們陣容同樣成為焦點。味全龍啦啦...",
-    "hashtags": "林襄 峮峮 啦啦隊情報",
+    "hashtags": "峮峮 林襄 啦啦隊情報",
     "url": "https://www.nownews.com/news/6883718",
     "source": "NOWnews今日新聞",
     "auto": true,
@@ -323,6 +323,19 @@
     "source": "CTWANT",
     "auto": true,
     "img": "https://static.ctwant.com/images/cover/11/502111/lg-d56e9503897175ef8c67aec9338270af.jpg"
+  },
+  {
+    "id": "auto-0bd8ed84644ef2b7",
+    "date": "2026/10/14 03:55",
+    "title": "歐冠／啦啦隊于小文打頭陣吉祥物詮釋MJ經典月球漫步| 生活",
+    "tag": "啦啦隊情報",
+    "subtag": "于小文",
+    "content": "來源：三立新聞\n\n新聞摘要：11日的「歐亞籃球熱戰」於小巨蛋點燃戰火，西班牙頂尖勁旅巴塞隆納與SBL明星隊場內殺得如火如荼，場外的啦啦隊和吉祥物同樣相當吸睛，暫停時間的啦啦隊表演令巴薩主將「炸彈」Juan Carlos Navarro目不轉睛、看到忘我，場面十分逗趣。",
+    "hashtags": "于小文 啦啦隊情報",
+    "url": "https://www.setn.com/news/43444",
+    "source": "三立新聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2014/10/12/155542-PH.jpg"
   },
   {
     "id": "auto-4bef9b6e99cbec60",
