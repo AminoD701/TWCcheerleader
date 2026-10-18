@@ -4806,5 +4806,1265 @@
     "venue": "洲際棒球場",
     "type": "棒球",
     "note": "補賽；G14；原4/4"
+  },
+  {
+    "date": "2026-10-17",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北國王",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G1"
+  },
+  {
+    "date": "2026-10-18",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "高雄全家海神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G2"
+  },
+  {
+    "date": "2026-10-24",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G3"
+  },
+  {
+    "date": "2026-10-24",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "臺北台新戰神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G4"
+  },
+  {
+    "date": "2026-10-25",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "高雄全家海神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G5"
+  },
+  {
+    "date": "2026-10-25",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新北國王",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G6"
+  },
+  {
+    "date": "2026-10-31",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G7"
+  },
+  {
+    "date": "2026-10-31",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "臺北台新戰神",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G8"
+  },
+  {
+    "date": "2026-11-01",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G9"
+  },
+  {
+    "date": "2026-11-01",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北中信特攻",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G10"
+  },
+  {
+    "date": "2026-11-07",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G11"
+  },
+  {
+    "date": "2026-11-08",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G12"
+  },
+  {
+    "date": "2026-11-14",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G13"
+  },
+  {
+    "date": "2026-11-14",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "高雄全家海神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G14"
+  },
+  {
+    "date": "2026-11-15",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北國王",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G15"
+  },
+  {
+    "date": "2026-11-15",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "臺北台新戰神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G16"
+  },
+  {
+    "date": "2026-11-21",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "高雄全家海神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G17"
+  },
+  {
+    "date": "2026-11-22",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北中信特攻",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G18"
+  },
+  {
+    "date": "2026-11-25",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G19"
+  },
+  {
+    "date": "2026-11-27",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G20"
+  },
+  {
+    "date": "2026-12-02",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "臺北台新戰神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G21"
+  },
+  {
+    "date": "2026-12-04",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新北中信特攻",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G22"
+  },
+  {
+    "date": "2026-12-05",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G23"
+  },
+  {
+    "date": "2026-12-05",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "臺北台新戰神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G24"
+  },
+  {
+    "date": "2026-12-06",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G25"
+  },
+  {
+    "date": "2026-12-06",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北中信特攻",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G26"
+  },
+  {
+    "date": "2026-12-12",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G27"
+  },
+  {
+    "date": "2026-12-12",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北國王",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G28"
+  },
+  {
+    "date": "2026-12-13",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "高雄全家海神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G29"
+  },
+  {
+    "date": "2026-12-13",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "臺北台新戰神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G30"
+  },
+  {
+    "date": "2026-12-19",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "高雄全家海神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G31"
+  },
+  {
+    "date": "2026-12-19",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G32"
+  },
+  {
+    "date": "2026-12-20",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G33"
+  },
+  {
+    "date": "2026-12-20",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "臺北台新戰神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G34"
+  },
+  {
+    "date": "2026-12-23",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北國王",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G35"
+  },
+  {
+    "date": "2026-12-25",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北中信特攻",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G36"
+  },
+  {
+    "date": "2026-12-26",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G37"
+  },
+  {
+    "date": "2026-12-26",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北國王",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G38"
+  },
+  {
+    "date": "2026-12-27",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G39"
+  },
+  {
+    "date": "2026-12-27",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北中信特攻",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G40"
+  },
+  {
+    "date": "2026-12-30",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G41"
+  },
+  {
+    "date": "2027-01-02",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北國王",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G42"
+  },
+  {
+    "date": "2027-01-02",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G43"
+  },
+  {
+    "date": "2027-01-03",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "臺北台新戰神",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G44"
+  },
+  {
+    "date": "2027-01-03",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G45"
+  },
+  {
+    "date": "2027-01-06",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北國王",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G46"
+  },
+  {
+    "date": "2027-01-09",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北中信特攻",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G47"
+  },
+  {
+    "date": "2027-01-09",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "高雄全家海神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G48"
+  },
+  {
+    "date": "2027-01-10",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "臺北台新戰神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G49"
+  },
+  {
+    "date": "2027-01-10",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G50"
+  },
+  {
+    "date": "2027-01-16",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G51"
+  },
+  {
+    "date": "2027-01-16",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北國王",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G52"
+  },
+  {
+    "date": "2027-01-17",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G53"
+  },
+  {
+    "date": "2027-01-17",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "高雄全家海神",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G54"
+  },
+  {
+    "date": "2027-01-23",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北中信特攻",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G55"
+  },
+  {
+    "date": "2027-01-23",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G56"
+  },
+  {
+    "date": "2027-01-24",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "高雄全家海神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G57"
+  },
+  {
+    "date": "2027-01-24",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G58"
+  },
+  {
+    "date": "2027-01-30",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G59"
+  },
+  {
+    "date": "2027-01-30",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G60"
+  },
+  {
+    "date": "2027-01-31",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新北中信特攻",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G61"
+  },
+  {
+    "date": "2027-01-31",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "臺北台新戰神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G62"
+  },
+  {
+    "date": "2027-02-13",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G63"
+  },
+  {
+    "date": "2027-02-13",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北中信特攻",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G64"
+  },
+  {
+    "date": "2027-02-14",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北國王",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G65"
+  },
+  {
+    "date": "2027-02-14",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G66"
+  },
+  {
+    "date": "2027-02-17",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G67"
+  },
+  {
+    "date": "2027-02-19",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G68"
+  },
+  {
+    "date": "2027-02-20",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "臺北台新戰神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G69"
+  },
+  {
+    "date": "2027-02-20",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北中信特攻",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G70"
+  },
+  {
+    "date": "2027-02-21",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G71"
+  },
+  {
+    "date": "2027-02-21",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G72"
+  },
+  {
+    "date": "2027-02-27",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G73"
+  },
+  {
+    "date": "2027-02-27",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "高雄全家海神",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G74"
+  },
+  {
+    "date": "2027-02-28",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G75"
+  },
+  {
+    "date": "2027-02-28",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北國王",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G76"
+  },
+  {
+    "date": "2027-03-06",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北中信特攻",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G77"
+  },
+  {
+    "date": "2027-03-06",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G78"
+  },
+  {
+    "date": "2027-03-07",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G79"
+  },
+  {
+    "date": "2027-03-07",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "高雄全家海神",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G80"
+  },
+  {
+    "date": "2027-03-13",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北中信特攻",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G81"
+  },
+  {
+    "date": "2027-03-13",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G82"
+  },
+  {
+    "date": "2027-03-14",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "高雄全家海神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G83"
+  },
+  {
+    "date": "2027-03-14",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G84"
+  },
+  {
+    "date": "2027-03-20",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新北國王",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G85"
+  },
+  {
+    "date": "2027-03-20",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "高雄全家海神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G86"
+  },
+  {
+    "date": "2027-03-21",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G87"
+  },
+  {
+    "date": "2027-03-21",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "臺北台新戰神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G88"
+  },
+  {
+    "date": "2027-03-26",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G89"
+  },
+  {
+    "date": "2027-03-27",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G90"
+  },
+  {
+    "date": "2027-03-27",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "臺北台新戰神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G91"
+  },
+  {
+    "date": "2027-03-28",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北國王",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G92"
+  },
+  {
+    "date": "2027-03-28",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新北中信特攻",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G93"
+  },
+  {
+    "date": "2027-04-03",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "高雄全家海神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G94"
+  },
+  {
+    "date": "2027-04-03",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G95"
+  },
+  {
+    "date": "2027-04-04",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G96"
+  },
+  {
+    "date": "2027-04-04",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "臺北台新戰神",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G97"
+  },
+  {
+    "date": "2027-04-09",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "高雄全家海神",
+    "venue": "",
+    "type": "籃球",
+    "note": "例行賽；G98"
+  },
+  {
+    "date": "2027-04-10",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G99"
+  },
+  {
+    "date": "2027-04-10",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G100"
+  },
+  {
+    "date": "2027-04-11",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北國王",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G101"
+  },
+  {
+    "date": "2027-04-11",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "新北中信特攻",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G102"
+  },
+  {
+    "date": "2027-04-14",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G103"
+  },
+  {
+    "date": "2027-04-17",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新北國王",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G104"
+  },
+  {
+    "date": "2027-04-17",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北中信特攻",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G105"
+  },
+  {
+    "date": "2027-04-18",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G106"
+  },
+  {
+    "date": "2027-04-18",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "臺北台新戰神",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G107"
+  },
+  {
+    "date": "2027-04-24",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "新北國王",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G108"
+  },
+  {
+    "date": "2027-04-24",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "臺北台新戰神",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G109"
+  },
+  {
+    "date": "2027-04-25",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "高雄全家海神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "高雄巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G110"
+  },
+  {
+    "date": "2027-04-25",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北中信特攻",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G111"
+  },
+  {
+    "date": "2027-04-28",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "臺北台新戰神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G112"
+  },
+  {
+    "date": "2027-05-01",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "新北中信特攻",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G113"
+  },
+  {
+    "date": "2027-05-01",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "高雄全家海神",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G114"
+  },
+  {
+    "date": "2027-05-02",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G115"
+  },
+  {
+    "date": "2027-05-02",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "桃園台啤永豐雲豹",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "桃園巨蛋",
+    "type": "籃球",
+    "note": "例行賽；G116"
+  },
+  {
+    "date": "2027-05-05",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G117"
+  },
+  {
+    "date": "2027-05-07",
+    "time": "19:00",
+    "league": "TPBL",
+    "hometeam": "新北國王",
+    "awayteam": "高雄全家海神",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G118"
+  },
+  {
+    "date": "2027-05-08",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "福爾摩沙夢想家",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G119"
+  },
+  {
+    "date": "2027-05-08",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G120"
+  },
+  {
+    "date": "2027-05-09",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "新竹御嵿攻城獅",
+    "awayteam": "新北國王",
+    "venue": "新竹縣體育館",
+    "type": "籃球",
+    "note": "例行賽；G121"
+  },
+  {
+    "date": "2027-05-09",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "臺北台新戰神",
+    "awayteam": "高雄全家海神",
+    "venue": "和平籃球館",
+    "type": "籃球",
+    "note": "例行賽；G122"
+  },
+  {
+    "date": "2027-05-15",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "臺北台新戰神",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G123"
+  },
+  {
+    "date": "2027-05-15",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新北國王",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G124"
+  },
+  {
+    "date": "2027-05-16",
+    "time": "14:30",
+    "league": "TPBL",
+    "hometeam": "福爾摩沙夢想家",
+    "awayteam": "桃園台啤永豐雲豹",
+    "venue": "臺中洲際迷你蛋",
+    "type": "籃球",
+    "note": "例行賽；G125"
+  },
+  {
+    "date": "2027-05-16",
+    "time": "17:00",
+    "league": "TPBL",
+    "hometeam": "新北中信特攻",
+    "awayteam": "新竹御嵿攻城獅",
+    "venue": "新莊體育館",
+    "type": "籃球",
+    "note": "例行賽；G126"
   }
 ]
