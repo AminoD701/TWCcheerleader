@@ -1,7 +1,7 @@
 [
   {
     "id": "auto-72cc39070efcdfc6",
-    "date": "2026/10/18 12:13",
+    "date": "2026/10/18 12:31",
     "title": "味全龍總冠軍先發捕手安排 葉總優先思考「習慣」 | Go Baseball 夠棒網",
     "tag": "棒球情報",
     "subtag": "中職",
@@ -186,9 +186,9 @@
     "date": "2026/10/15 22:27",
     "title": "「小王淨」PS女孩怡琪出車禍！下巴裂開　經紀人和短今衝醫院陪伴",
     "tag": "啦啦隊情報",
-    "subtag": "短今",
+    "subtag": "怡琪",
     "content": "來源：NOWnews今日新聞\n\n新聞摘要：中信兄弟啦啦隊PS女孩怡琪擁有身高170公分修長比例，以及清秀又甜美的五官，被球迷暱稱「小王淨」，今（15）日她公開一張騎腳踏車發生車禍、下巴破洞縫針的照片，嚇壞...",
-    "hashtags": "短今 怡琪 啦啦隊情報",
+    "hashtags": "怡琪 短今 啦啦隊情報",
     "url": "https://www.nownews.com/news/6883829",
     "source": "NOWnews今日新聞",
     "auto": true,
@@ -442,6 +442,19 @@
     "img": "https://attach.setn.com/newsimages/2026/10/11/5744903-PH.jpg"
   },
   {
+    "id": "auto-17c24f433235d409",
+    "date": "2026/10/11 01:46",
+    "title": "中職／季後挑戰賽第3戰打回台中　「扛壩子」峮峮帶領16位PS女孩應援",
+    "tag": "啦啦隊情報",
+    "subtag": "峮峮",
+    "content": "來源：娛樂星聞\n\n新聞摘要：統一獅在季後挑戰賽第2戰完封中信兄弟成功續命，雙方將於11日在台中洲際棒球場進行關鍵第3戰。中信兄弟啦啦隊Passion Sisters隨即公布豪華應援陣容，由人氣扛壩子峮峮領軍，攜手隊長妮可等共17位女孩全力應援，其中更有5位成員為本季首次在季後賽亮相，誓言捍衛主場搶下最後勝利。",
+    "hashtags": "峮峮 啦啦隊情報",
+    "url": "https://star.setn.com/news/1920608",
+    "source": "娛樂星聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2026/10/11/5743960-PH.jpg"
+  },
+  {
     "id": "auto-0dbd72b493f7b6ca",
     "date": "2026/10/09 16:06",
     "title": "啦啦隊》禹菡接任桃氣女孩隊長！艾麗轉正盼持續努力 吳瑞律喊話一起享受比賽",
@@ -473,12 +486,12 @@
     "title": "TPBL／戰神大補強迎戰新賽季 「CODE RED」衝擊總冠軍",
     "tag": "籃球情報",
     "subtag": "TPBL",
-    "content": "來源：UDN\n\n新聞摘要：台北台新戰神隊今天舉行2026-27賽季季前媒體日，由台北戰神營運長楊勝凱與新任總教練圖齊（Gianluca Tucci）率領全體隊職員出席，新陣容首度亮相並公布年度口號「CODE RED」，戰神們整裝待發，全員以最佳狀態衝擊新賽季，也號召戰友一起進入戰神模式，啟動冠軍任務，寫入與戰友共同編寫的總冠軍程式。",
+    "content": "來源：UDN\n\n新聞摘要：TPBL／戰神大補強迎戰新賽季 「CODE RED」衝擊總冠軍 UDN",
     "hashtags": "籃球情報 TPBL",
     "url": "https://udn.com/news/story/7003/9803645",
     "source": "UDN",
     "auto": true,
-    "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/08/35403785.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600"
+    "img": "basketball-bg.png"
   },
   {
     "id": "auto-9fa9da9d402ebefe",
