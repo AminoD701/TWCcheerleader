@@ -3,6 +3,11 @@
   // intentionally show the SPORTS TEAM logo.
   const squads = [
     {
+      names: ['臺中連莊', '台中連莊', '臺中連莊 Win+Streak', '台中連莊 Win+Streak'],
+      teamName: '臺中連莊',
+      logo: './images/witches_logo.png?v=1'
+    },
+    {
       names: ['ACE VIVA', 'Ace Viva', 'Ace VIVA'],
       teamName: '臺中連莊 Win+Streak',
       logo: 'https://storage.googleapis.com/p-xc-m/event/419/squads/c45ab61917b75ee85815bf0d1431b0ebe5bb523b6395705ad65a2540c674a24a?q=100&w=256%25'
