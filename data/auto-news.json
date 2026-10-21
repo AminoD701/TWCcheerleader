@@ -52,6 +52,19 @@
     "img": "https://images.chinatimes.com/newsphoto/2026-10-20/656/20261020004940.jpg"
   },
   {
+    "id": "auto-451b537fe47032ea",
+    "date": "2026/10/20 17:30",
+    "title": "TPBL》林俊吉關鍵一擊率夢想家逆轉海神 攜手高柏鎧包辦開季首週MVP",
+    "tag": "籃球情報",
+    "subtag": "TPBL",
+    "content": "來源：TSNA體育新聞團隊\n\n新聞摘要：TPBL》林俊吉關鍵一擊率夢想家逆轉海神 攜手高柏鎧包辦開季首週MVP",
+    "hashtags": "籃球情報 TPBL",
+    "url": "https://tsna.com/article/204539",
+    "source": "TSNA體育新聞團隊",
+    "auto": true,
+    "img": "https://imgs.tsna.com/article/2026N1792488551_1a723bef139e4110833de6a2aff14982.jpg"
+  },
+  {
     "id": "auto-791af82bc9fb0d36",
     "date": "2026/10/20 16:34",
     "title": "寵粉下血本！啦啦隊女神梓梓拋震撼驚喜 割愛「原味衣物」送粉絲",
@@ -312,19 +325,6 @@
     "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/17/35430144.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=853&exp=3600"
   },
   {
-    "id": "auto-7539fae7779410fa",
-    "date": "2026/10/17 17:21",
-    "title": "TPBL》在滅火器樂團歌聲中 夢想家主場升起總冠軍旗幟",
-    "tag": "籃球情報",
-    "subtag": "TPBL",
-    "content": "來源：中時新聞網\n\n新聞摘要：TPBL上季總冠軍福爾摩沙夢想家，17日在台中洲際迷你蛋迎來全新球季開幕戰，遭遇上季總冠軍賽對手新北國王，夢想家在比賽開打前，除了找來滅火器樂團現場表演，更在歌聲當中，在場邊大螢幕旁邊緩緩升起上季總冠軍旗幟",
-    "hashtags": "籃球情報 TPBL",
-    "url": "https://www.chinatimes.com/realtimenews/20261017002596-260403",
-    "source": "中時新聞網",
-    "auto": true,
-    "img": "https://images.chinatimes.com/newsphoto/2026-10-17/656/20261017002604_20261017172132.jpg"
-  },
-  {
     "id": "auto-34edde18b5737f08",
     "date": "2026/10/17 10:00",
     "title": "4啦啦隊女孩婚後近況盤點！啾啾閃婚當媽　她昔捲小三風波也嫁了",
@@ -518,5 +518,18 @@
     "source": "TSNA體育新聞團隊",
     "auto": true,
     "img": "https://imgs.tsna.com/article/2026N1791797891_872243887fb746a7a13523ce636e46d3.jpg"
+  },
+  {
+    "id": "auto-1ee3aaf913b3c437",
+    "date": "2026/10/11 15:00",
+    "title": "中職季後賽／中信兄弟背水一戰　峮峮領軍！PS女孩加碼變21人最終戰應援",
+    "tag": "啦啦隊情報",
+    "subtag": "峮峮",
+    "content": "來源：娛樂星聞\n\n新聞摘要：中職季後挑戰賽戰況白熱化，中信兄弟被統一獅扳平戰局，12日將迎來關鍵第4戰決定台灣大賽門票誰屬。場邊應援同樣備受關注，人氣啦啦隊PS女孩由峮峮領軍，擴編至21人豪華陣容，齊聚滿場象迷全力為球員應援，力拼晉級總冠軍賽。",
+    "hashtags": "峮峮 啦啦隊情報",
+    "url": "https://star.setn.com/news/1920967",
+    "source": "娛樂星聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2026/10/11/5744903-PH.jpg"
   }
 ]
