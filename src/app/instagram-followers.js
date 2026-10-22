@@ -78,8 +78,9 @@
       return;
     }
     const cards = Array.from(grid.querySelectorAll(':scope > .card'));
-    cards.sort((a,b) => (Number(b.dataset.igFollowers) || -1) - (Number(a.dataset.igFollowers) || -1));
-    cards.forEach(card => grid.appendChild(card));
+    const sorted = cards.slice().sort((a,b) => (Number(b.dataset.igFollowers) || -1) - (Number(a.dataset.igFollowers) || -1));
+    if (cards.every((card,index) => card === sorted[index])) return;
+    sorted.forEach(card => grid.appendChild(card));
   }
 
   function ensureRanking() {
@@ -126,7 +127,11 @@
       list.appendChild(btn);
     });
 
-    box.replaceChildren(head, list);
+    const signature = followerData.updatedAt + '|' + followerData.ranking.slice(0,10).map(item => item.username + ':' + item.followers).join(',');
+    if (box.dataset.signature !== signature) {
+      box.dataset.signature = signature;
+      box.replaceChildren(head, list);
+    }
   }
 
   function sync() {
@@ -151,10 +156,17 @@
       .catch(err => console.warn('Instagram follower data unavailable', err));
 
     new MutationObserver(() => requestAnimationFrame(sync)).observe(document.body, {
-      subtree:true, childList:true, attributes:true, attributeFilter:['data-app-mode']
+      attributes:true, attributeFilter:['data-app-mode']
     });
-    setTimeout(sync, 400);
-    setTimeout(sync, 1000);
+    const attachGridObserver = () => {
+      const grid = document.getElementById('grid-container');
+      if (!grid || grid.dataset.igFollowerObserver === '1') return;
+      grid.dataset.igFollowerObserver = '1';
+      new MutationObserver(() => requestAnimationFrame(sync)).observe(grid, {childList:true});
+    };
+    attachGridObserver();
+    setTimeout(() => { attachGridObserver(); sync(); }, 400);
+    setTimeout(() => { attachGridObserver(); sync(); }, 1000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
