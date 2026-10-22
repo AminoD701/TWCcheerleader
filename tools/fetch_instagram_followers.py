@@ -4,6 +4,7 @@ import csv
 import html
 import io
 import json
+import os
 import random
 import re
 import time
@@ -64,6 +65,40 @@ def parse_compact_number(raw: str) -> int | None:
     factor = {"":1,"K":1000,"M":1000000,"B":1000000000,"萬":10000,"億":100000000}.get(m.group(2).upper(),1)
     return int(round(float(m.group(1)) * factor))
 
+def fetch_profile_api(username: str) -> int | None:
+    urls = [
+        f"https://i.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(username)}",
+        f"https://www.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(username)}",
+    ]
+    headers = {
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept": "*/*",
+        "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.7",
+        "X-IG-App-ID": "936619743392459",
+        "Referer": f"https://www.instagram.com/{username}/",
+    }
+    last_error = None
+    for url in urls:
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                body = resp.read().decode("utf-8", errors="replace")
+            payload = json.loads(body)
+            user = (payload.get("data") or {}).get("user") or {}
+            for key in ("edge_followed_by",):
+                node = user.get(key) or {}
+                if isinstance(node.get("count"), int):
+                    return int(node["count"])
+            for key in ("follower_count", "followers_count"):
+                if isinstance(user.get(key), int):
+                    return int(user[key])
+            last_error = ValueError("profile API returned no follower count")
+        except Exception as exc:
+            last_error = exc
+    if last_error:
+        raise last_error
+    return None
+
 def parse_followers(page: str) -> int | None:
     for pattern in [
         r'"edge_followed_by"\s*:\s*\{\s*"count"\s*:\s*(\d+)',
@@ -92,6 +127,7 @@ def load_previous() -> dict:
 
 def main() -> None:
     rows = list(csv.DictReader(io.StringIO(fetch_text(SHEET_CSV))))
+    test_limit = int(os.environ.get("IG_TEST_LIMIT", "0") or "0")
     targets, seen = [], set()
     for row in rows:
         if not is_active(row):
@@ -107,6 +143,8 @@ def main() -> None:
             "nickname": (row.get("nickname") or "").strip(),
             "team": (row.get("team") or "").strip(),
         })
+        if test_limit and len(targets) >= test_limit:
+            break
 
     previous = load_previous()
     old_profiles = previous.get("profiles") if isinstance(previous.get("profiles"), dict) else {}
@@ -117,7 +155,12 @@ def main() -> None:
         username = target["username"]
         old = old_profiles.get(username) if isinstance(old_profiles, dict) else None
         try:
-            followers = parse_followers(fetch_text(f"https://www.instagram.com/{username}/", 20))
+            try:
+                followers = fetch_profile_api(username)
+            except Exception as api_exc:
+                followers = parse_followers(fetch_text(f"https://www.instagram.com/{username}/", 20))
+                if followers is None:
+                    raise ValueError(f"API+HTML failed: {api_exc}")
             if followers is None:
                 raise ValueError("follower count not found")
             profiles[username] = {**target, "followers": followers, "lastSuccess": now, "status":"ok"}
