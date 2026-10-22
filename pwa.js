@@ -168,6 +168,7 @@
     girls: [
       ['./src/app/girls-default-sort.js?v=7', 'girls-default-sort'],
       ['./src/app/girls-roster-polish.js?v=5', 'girls-roster-polish'],
+      ['./src/app/instagram-followers.js?v=1', 'instagram-followers'],
       ['./src/app/team-logo-overrides.js?v=9', 'team-logo-overrides'],
       ['./src/app/girl-career.js?v=6', 'girl-career']
     ],
