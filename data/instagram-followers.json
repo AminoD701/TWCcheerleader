@@ -1,0 +1,10 @@
+{
+  "updatedAt": "",
+  "source": "instagram-public-page",
+  "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
+  "profileCount": 0,
+  "successCount": 0,
+  "failedCount": 0,
+  "profiles": {},
+  "ranking": []
+}
