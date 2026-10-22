@@ -69,3 +69,13 @@ test('generated automatic feed follows taxonomy and sports caps', async () => {
   const cheer = rows.filter(row => row.tag === '啦啦隊情報');
   assert.ok(cheer.length >= sports.length, 'cheerleader coverage should not be drowned out by sports headlines');
 });
+
+
+test('crawler does not admit celebrity collisions from roster names alone', async () => {
+  const source = await read('tools/run_auto_news.py');
+  assert.match(source, /A roster name alone is not enough/);
+  assert.match(source, /identity_terms = tuple\(core\.CHEER_TERMS\)/);
+
+  const rows = JSON.parse(await read('data/auto-news.json'));
+  assert.ok(!rows.some(row => /珍妮佛洛佩茲|Jennifer Lopez/i.test(`${row.title} ${row.content}`)));
+});
