@@ -27,6 +27,8 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch public Instagram follower counts
+        env:
+          IG_TEST_LIMIT: ${{ github.event_name == 'push' && '12' || '0' }}
         run: python tools/fetch_instagram_followers.py
 
       - name: Commit follower snapshot
