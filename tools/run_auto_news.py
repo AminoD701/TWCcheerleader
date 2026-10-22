@@ -154,12 +154,15 @@ def strict_cheer_context(
     if contains_any(hay, tuple(core.CHEER_TERMS)):
         return True
 
-    # Canonical full real names are substantially less collision-prone than
-    # nicknames. Allow an exact real-name headline match even when the article
-    # omits words such as "啦啦隊" or "應援". Nicknames/aliases still require
-    # explicit cheer context, so Momo/Sana/Ella-style collisions remain blocked.
+    # A roster name alone is not enough. Celebrity and common-name collisions
+    # (for example Jennifer Lopez matching a roster entry named "珍妮佛") must
+    # still show an explicit Taiwan cheer/sports identity in the article text.
+    identity_terms = tuple(core.CHEER_TERMS) + tuple(matched_teams or []) + (
+        "中華職棒", "中職", "CPBL", "TPBL", "PLG", "P. LEAGUE+",
+        "TPVL", "職排", "職業排球", "球場應援", "主場應援",
+    )
     for name in matched_girls:
-        if name in REAL_NAME_SET and girl_is_in_title(name, title):
+        if name in REAL_NAME_SET and girl_is_in_title(name, title) and contains_any(hay, identity_terms):
             return True
 
     return False
