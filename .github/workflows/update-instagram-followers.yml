@@ -12,7 +12,7 @@ on:
       - '.github/workflows/update-instagram-followers.yml'
 
 concurrency:
-  group: update-instagram-followers
+  group: update-instagram-followers-v2
   cancel-in-progress: true
 
 permissions:
