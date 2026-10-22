@@ -1,0 +1,52 @@
+name: Update Instagram follower counts
+
+on:
+  schedule:
+    # Daily at 03:25 UTC / 11:25 Asia/Taipei.
+    - cron: '25 3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/fetch_instagram_followers.py'
+      - '.github/workflows/update-instagram-followers.yml'
+
+concurrency:
+  group: update-instagram-followers
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-followers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Fetch public Instagram follower counts
+        run: python tools/fetch_instagram_followers.py
+
+      - name: Commit follower snapshot
+        run: |
+          git add data/instagram-followers.json
+          if git diff --cached --quiet; then
+            echo "No follower changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Auto update Instagram follower counts"
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push attempt $attempt failed; retrying..."
+            sleep 3
+          done
+          exit 1
