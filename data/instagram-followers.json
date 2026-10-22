@@ -1,10 +1,143 @@
 {
-  "updatedAt": "",
+  "updatedAt": "2026-10-22T13:03:20+08:00",
   "source": "instagram-public-page",
   "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
-  "profileCount": 0,
+  "profileCount": 12,
   "successCount": 0,
-  "failedCount": 0,
-  "profiles": {},
+  "failedCount": 12,
+  "profiles": {
+    "jiayin_ching": {
+      "username": "jiayin_ching",
+      "ig": "https://www.instagram.com/jiayin_ching/",
+      "realName": "莊佳熒",
+      "nickname": "JC",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "vanessa_ooi_99": {
+      "username": "vanessa_ooi_99",
+      "ig": "https://www.instagram.com/vanessa_ooi_99/",
+      "realName": "黃可欣",
+      "nickname": "尼莫",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "_940905_": {
+      "username": "_940905_",
+      "ig": "https://www.instagram.com/_940905_/",
+      "realName": "林恬妤",
+      "nickname": "恬魚",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "nacccni": {
+      "username": "nacccni",
+      "ig": "https://www.instagram.com/nacccni/",
+      "realName": "呂米妮",
+      "nickname": "米妮",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "_peng.7_": {
+      "username": "_peng.7_",
+      "ig": "https://www.instagram.com/_peng.7_/",
+      "realName": "簡妏錡",
+      "nickname": "芃芃",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "y.rouu_": {
+      "username": "y.rouu_",
+      "ig": "https://www.instagram.com/y.rouu_/",
+      "realName": "黃羽瑈",
+      "nickname": "瑈瑈",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "llyincc__": {
+      "username": "llyincc__",
+      "ig": "https://www.instagram.com/llyincc__/",
+      "realName": "蔡沛穎",
+      "nickname": "林浠",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "yinnng_0522": {
+      "username": "yinnng_0522",
+      "ig": "https://www.instagram.com/yinnng_0522/",
+      "realName": "蔡佩螢",
+      "nickname": "螢螢",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "nina_84_na": {
+      "username": "nina_84_na",
+      "ig": "https://www.instagram.com/nina_84_na/",
+      "realName": "陳俞蓁",
+      "nickname": "Nina",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "etetet": {
+      "username": "etetet",
+      "ig": "https://www.instagram.com/etetet/",
+      "realName": "陳怡婷",
+      "nickname": "ET",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "iamchien_chien": {
+      "username": "iamchien_chien",
+      "ig": "https://www.instagram.com/iamchien_chien/",
+      "realName": "潘怡千",
+      "nickname": "千千",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    },
+    "yu_jun.hu": {
+      "username": "yu_jun.hu",
+      "ig": "https://www.instagram.com/yu_jun.hu/",
+      "realName": "吳俞君",
+      "nickname": "昆昆",
+      "team": "Wing Stars",
+      "followers": null,
+      "lastSuccess": "",
+      "status": "unavailable",
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+    }
+  },
   "ranking": []
 }
