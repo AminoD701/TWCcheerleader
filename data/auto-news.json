@@ -104,19 +104,6 @@
     "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/22/35444969.jpg&M=1&s=Y&x=0&y=0&sw=1280&sh=853&sl=W&fw=800&exp=3600"
   },
   {
-    "id": "auto-84f0193f0a3c290a",
-    "date": "2026/10/22 01:31",
-    "title": "棒球延長賽怎麼算？MLB突破僵局制、牛棚調度、再見安打與全場總分完整解析- GlobalScoreLab全球體育比分",
-    "tag": "棒球情報",
-    "subtag": "MLB",
-    "content": "來源：udn部落格\n\n新聞摘要：棒球延長賽怎麼算？MLB突破僵局制、牛棚調度、再見安打與全場總分完整解析- GlobalScoreLab全球體育比分 udn部落格",
-    "hashtags": "棒球情報 MLB",
-    "url": "https://classic-blog.udn.com/ruxuewang429/192647016",
-    "source": "udn部落格",
-    "auto": true,
-    "img": "baseball-bg.png"
-  },
-  {
     "id": "auto-d527dd20e64638b8",
     "date": "2026/10/21 22:41",
     "title": "圖輯／力挽狂瀾 兄弟延長賽5：4味全龍拿下總冠軍系列賽首勝",
@@ -195,6 +182,19 @@
     "img": "https://attach.setn.com/newsimages/2026/10/20/5755844-PH.jpg"
   },
   {
+    "id": "auto-203d74518aba5cb3",
+    "date": "2026/10/20 16:32",
+    "title": "韓國啦啦隊宣布「AV女優身份出道」！曝三人行體驗：男優好厲害- 娛樂",
+    "tag": "啦啦隊情報",
+    "subtag": "綜合",
+    "content": "來源：中時新聞網\n\n新聞摘要：近年不少韓國啦啦隊女神選擇來台發展，不僅名氣水漲船高，也接獲不少廣告代言，不過一名自稱曾在韓國棒球場上應援的前啦啦隊成員尹秀雅，近期宣布轉換跑道，但是並非來台發展，而是將以日本AV女優身份出道，她也在社",
+    "hashtags": "啦啦隊情報 綜合",
+    "url": "https://www.chinatimes.com/realtimenews/20261020003435-260404",
+    "source": "中時新聞網",
+    "auto": true,
+    "img": "https://images.chinatimes.com/newsphoto/2026-10-20/656/20261020003587.jpg"
+  },
+  {
     "id": "auto-449a4dae1de69ccd",
     "date": "2026/10/20 15:21",
     "title": "「韓國啦啦隊」尹秀雅AV女優出道！　拍片初體驗震撼：男優很厲害",
@@ -206,6 +206,19 @@
     "source": "ETtoday星光雲| ETtoday新聞雲",
     "auto": true,
     "img": "https://cdn2.ettoday.net/images/8975/e8975953.png"
+  },
+  {
+    "id": "auto-63cf45847b01e536",
+    "date": "2026/10/20 11:56",
+    "title": "MLB》季後賽「飆速」！光芒佩洛塔12局僅失1分 奪美聯冠軍賽MVP",
+    "tag": "棒球情報",
+    "subtag": "MLB",
+    "content": "來源：自由體育\n\n新聞摘要：美聯冠軍賽G6，光芒30歲明星強投佩洛塔（Freddy Peralta）今天交出5.1局失1分好投，幫助光芒以7比3贏球並淘汰守護者，這是光芒隊史第三次闖進世界大賽。佩洛塔在美聯冠軍賽出賽3場，合計投12局僅掉1分，榮獲美聯冠軍賽MVP。",
+    "hashtags": "棒球情報 MLB",
+    "url": "https://sports.ltn.com.tw/news/breakingnews/5612083",
+    "source": "自由體育",
+    "auto": true,
+    "img": "https://img.ltn.com.tw/Upload/sports/page/800S/2026/10/20/phpK3gQIK.jpg"
   },
   {
     "id": "auto-d07434dd9caea434",
@@ -336,18 +349,5 @@
     "source": "NOWnews今日新聞",
     "auto": true,
     "img": "https://media.nownews.com/nn_media/thumbnail/2026/10/1792374171069-54e95eb26af043759216ce6785794257-1200x675.webp?unShow=false"
-  },
-  {
-    "id": "auto-4f5e3dc318acbfdb",
-    "date": "2026/10/18 17:50",
-    "title": "台灣大賽》李多慧跳8年啦啦隊沒奪冠過！ 若味全龍奪冠要送「祭品文」",
-    "tag": "啦啦隊情報",
-    "subtag": "綜合",
-    "content": "來源：TSNA體育新聞團隊\n\n新聞摘要：台灣大賽》李多慧跳8年啦啦隊沒奪冠過！ 若味全龍奪冠要送「祭品文」",
-    "hashtags": "啦啦隊情報 綜合",
-    "url": "https://tsna.com/article/204448",
-    "source": "TSNA體育新聞團隊",
-    "auto": true,
-    "img": "https://imgs.tsna.com/article/2026N1792316770_e8e6bf2bc215441a9abe34270fc1a8bf.jpg"
   }
 ]
