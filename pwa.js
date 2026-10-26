@@ -163,7 +163,7 @@
   const routeAssets = Object.freeze({
     home: [
       ['./src/app/home-overview.js?v=6', 'home-overview'],
-      ['./src/app/season-spotlight.js?v=4', 'season-spotlight']
+      ['./src/app/season-spotlight.js?v=5', 'season-spotlight']
     ],
     girls: [
       ['./src/app/girls-default-sort.js?v=7', 'girls-default-sort'],
