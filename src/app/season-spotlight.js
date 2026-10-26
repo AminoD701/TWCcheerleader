@@ -237,7 +237,7 @@ function renderMarquee() {
   const champion = championshipSummary();
   let message;
   if (champion) {
-    message = `🏆 2026 中華職棒總冠軍　｜　<strong>${champion.champion}</strong> 台灣大賽 ${champion.championWins}：${champion.opponentWins} 封王　｜　G6 1：0 完封中信兄弟　｜　點擊回顧完整系列賽`;
+    message = `🏆 2026 中華職棒總冠軍　｜　<strong>${champion.champion}</strong> 台灣大賽 ${champion.championWins}：${champion.opponentWins} 封王　｜　G6 6：0 完封中信兄弟　｜　點擊回顧完整系列賽`;
     wrapper.dataset.label = 'CHAMPION';
   } else if (state.stageRows.length && next) {
     message = `🔥 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　下一戰 <span class="marquee-highlight">${formatDate(next)} ${next.time || ''}</span>　${next.awayteam} @ ${next.hometeam}　｜　📍 ${next.venue || '場地待定'}　｜　點擊查看完整賽程`;
@@ -276,7 +276,7 @@ function injectMatchCenterBanner() {
     <div>
       <span>2026 TAIWAN SERIES CHAMPION</span>
       <strong>🏆 ${champion.champion} · ${champion.championWins}：${champion.opponentWins} 封王</strong>
-      <small>G6｜味全龍 1：0 中信兄弟　系列賽正式結束</small>
+      <small>G6｜味全龍 6：0 中信兄弟　系列賽正式結束</small>
     </div>
     <div class="match-postseason-banner__mark">CHAM<br>PION</div>` : `
     <div>
