@@ -39,19 +39,6 @@
     "img": "https://today-obs.line-scdn.net/0hSRuBZRz5DH1IOxDHwLFzKnBtAAx7XRZ0alQXGjpoUkVnF0p_dw1fHmk6AFFtXBh_aFpFEmQyUUxjXE14dA/w1200"
   },
   {
-    "id": "auto-a485b8beef234826",
-    "date": "2026/10/25 11:08",
-    "title": "台灣大賽》味全龍大巨蛋拚封王！ G5冠軍戰內外野皆完售創紀錄- 棒球",
-    "tag": "棒球情報",
-    "subtag": "中職",
-    "content": "來源：TSNA體育新聞團隊\n\n新聞摘要：台灣大賽》味全龍大巨蛋拚封王！ G5冠軍戰內外野皆完售創紀錄",
-    "hashtags": "棒球情報 中職",
-    "url": "https://tsna.com/article/204745",
-    "source": "TSNA體育新聞團隊",
-    "auto": true,
-    "img": "https://imgs.tsna.com/article/2026N1792897688_e7c669dbac66430f837859287a8fc35f.jpg"
-  },
-  {
     "id": "auto-bef8cb612110115d",
     "date": "2026/10/24 17:10",
     "title": "韓啦啦隊女神放棄牙科專業！考取證照仍選擇應援　親揭來台發展意願",
@@ -323,6 +310,19 @@
     "source": "NOWnews今日新聞",
     "auto": true,
     "img": "https://media.nownews.com/nn_media/thumbnail/2026/10/1792291060084-84fc13a933104501ad95f6bd9287f1b9-1200x675.webp?unShow=false"
+  },
+  {
+    "id": "auto-f85e18be53b2fc97",
+    "date": "2026/10/19 11:00",
+    "title": "LTN投票箱》龍象首度決戰台灣大賽 中職37年總冠軍誰屬？",
+    "tag": "棒球情報",
+    "subtag": "中職",
+    "content": "來源：自由時報\n\n新聞摘要：台灣大賽上週末在台北大巨蛋熱鬧開打，由味全龍與中信兄弟爭奪今年中華職棒總冠軍。令不少球迷意外的是，龍象這兩支人氣極高的元老級傳統勁旅，在中職長達37年歷史中，竟還是頭一遭在台灣大賽對決。而經過前2場激戰，味全帶著2勝的優勢，將乘勝追擊期能舉起冠軍獎盃；中信兄弟勢必重整旗鼓，希望能「奪還」黃衫軍的冠軍榮耀。請問龍象首度決戰台灣大賽，你認為哪一隊能贏得中職37年總冠軍？歡迎在下方「LTN投票箱」投票，表達你的看法。",
+    "hashtags": "棒球情報 中職",
+    "url": "https://news.ltn.com.tw/news/life/breakingnews/5601402",
+    "source": "自由時報",
+    "auto": true,
+    "img": "https://img.ltn.com.tw/Upload/news/600/2026/10/10/phpjHJJfJ.jpg"
   },
   {
     "id": "auto-4f5e3dc318acbfdb",
