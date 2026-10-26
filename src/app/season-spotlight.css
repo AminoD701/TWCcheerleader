@@ -241,3 +241,65 @@
     padding: 4px 6px;
   }
 }
+
+
+/* 2026 Taiwan Series champion state */
+.season-spotlight.is-champion .season-spotlight__eyebrow{
+  background:linear-gradient(135deg,#ffd54a,#ff9f1a);
+  color:#241500;
+}
+.season-spotlight.is-champion .season-spotlight__body{
+  min-height:230px;
+  border-color:rgba(255,197,61,.45);
+  border-top-color:#ffc43d;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255,196,61,.24), transparent 28%),
+    radial-gradient(circle at 22% 90%, rgba(212,35,46,.18), transparent 34%),
+    linear-gradient(135deg,#1a1113 0%,#101317 58%,#080b0f 100%);
+  box-shadow:0 22px 58px rgba(0,0,0,.48),0 0 36px rgba(255,196,61,.07);
+}
+.season-spotlight.is-champion .season-spotlight__body::after{
+  content:'CHAMPIONS';
+  color:rgba(255,213,74,.045);
+}
+.season-spotlight__champion-copy{position:relative;z-index:2}
+.season-spotlight__champion-name{
+  color:#fff;
+  font:950 clamp(38px,6vw,68px)/.98 var(--tc-font);
+  letter-spacing:2px;
+  text-shadow:0 6px 24px rgba(0,0,0,.34);
+}
+.season-spotlight__champion-score{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:10px;
+  color:#ffc43d;
+  font:950 30px/1 var(--sport-font);
+  letter-spacing:2px;
+}
+.season-spotlight__champion-score span{color:#6f7782;font-size:.72em}
+.season-spotlight.is-champion .season-spotlight__stage{color:#ffc43d}
+.season-spotlight.is-champion .season-spotlight__status{color:#ffd66b}
+.season-spotlight.is-champion .season-spotlight__button{
+  background:linear-gradient(135deg,#ffd54a,#ff9f1a);
+  color:#201200;
+  box-shadow:0 8px 24px rgba(255,175,26,.2);
+}
+.marquee-wrapper.spotlight-marquee[data-label="CHAMPION"]::before{
+  background:linear-gradient(135deg,#ffd54a,#ff9f1a);
+  color:#211400;
+}
+.match-postseason-banner.is-champion{
+  border-color:rgba(255,196,61,.4);
+  border-left-color:#ffc43d;
+  background:linear-gradient(90deg,rgba(255,196,61,.12),rgba(94,18,25,.16) 32%,rgba(17,20,24,.97) 72%);
+}
+.match-postseason-banner.is-champion span{color:#ffd66b}
+.match-postseason-banner.is-champion .match-postseason-banner__mark{color:rgba(255,213,74,.16)}
+
+@media(max-width:768px){
+  .season-spotlight.is-champion .season-spotlight__body{min-height:0}
+  .season-spotlight__champion-name{font-size:36px}
+  .season-spotlight__champion-score{font-size:24px}
+}
