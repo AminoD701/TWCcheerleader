@@ -54,6 +54,33 @@ function isFinished(match) {
   return String(match.homescore || '').trim() !== '' && String(match.awayscore || '').trim() !== '';
 }
 
+function isCancelled(match) {
+  return /取消|延賽/.test(String(match.note || ''));
+}
+
+function championshipSummary() {
+  if (state.stage !== '台灣大賽') return null;
+  const wins = new Map();
+  state.stageRows.filter(isFinished).forEach(match => {
+    const home = Number(match.homescore);
+    const away = Number(match.awayscore);
+    if (!Number.isFinite(home) || !Number.isFinite(away) || home === away) return;
+    const winner = home > away ? match.hometeam : match.awayteam;
+    wins.set(winner, (wins.get(winner) || 0) + 1);
+  });
+  const championEntry = [...wins.entries()].find(([, count]) => count >= 4);
+  if (!championEntry) return null;
+  const [champion, championWins] = championEntry;
+  const opponent = [...wins.keys()].find(team => team !== champion) || teamsForStage().find(team => team !== champion) || '';
+  return {
+    champion,
+    opponent,
+    championWins,
+    opponentWins: wins.get(opponent) || 0,
+    clincher: [...state.stageRows].reverse().find(match => isFinished(match) && (match.hometeam === champion || match.awayteam === champion)) || state.latestFinal
+  };
+}
+
 function formatDate(match) {
   const d = parseDate(match.date);
   if (!d) return String(match.date || '');
@@ -77,7 +104,7 @@ function updateState(rows) {
   const now = new Date();
   state.next = state.stageRows.find(match => {
     const dt = matchDateTime(match);
-    return dt && !isFinished(match) && dt.getTime() >= now.getTime() - 4 * 60 * 60 * 1000;
+    return dt && !isFinished(match) && !isCancelled(match) && dt.getTime() >= now.getTime() - 4 * 60 * 60 * 1000;
   }) || null;
   state.latestFinal = [...state.stageRows].reverse().find(isFinished) || null;
 }
@@ -119,11 +146,14 @@ function teamsForStage() {
 
 function stageStatus() {
   if (!state.stageRows.length) return '';
+  const champion = championshipSummary();
+  if (champion) return champion.champion + ' 封王';
   const now = new Date();
   const first = matchDateTime(state.stageRows[0]);
-  const last = matchDateTime(state.stageRows[state.stageRows.length - 1]);
+  const playable = state.stageRows.filter(match => !isCancelled(match));
+  const last = matchDateTime(playable[playable.length - 1]);
   if (first && now < first) return '即將開打';
-  if (last && now.getTime() > last.getTime() + 6 * 60 * 60 * 1000 && state.stageRows.every(isFinished)) return '系列賽結束';
+  if (last && now.getTime() > last.getTime() + 6 * 60 * 60 * 1000 && playable.every(isFinished)) return '系列賽結束';
   return '火熱進行中';
 }
 
@@ -144,11 +174,28 @@ function renderHero() {
 
   const teams = teamsForStage();
   const next = state.next;
-  const nextLine = next
-    ? `下一戰｜${formatDate(next)} ${next.time || ''}｜${next.awayteam} @ ${next.hometeam}`
-    : (state.latestFinal ? `最新戰況｜${state.latestFinal.awayteam} ${state.latestFinal.awayscore}：${state.latestFinal.homescore} ${state.latestFinal.hometeam}` : '完整賽程已公布');
+  const champion = championshipSummary();
+  const nextLine = champion
+    ? `台灣大賽 ${champion.championWins}：${champion.opponentWins}｜G6 ${champion.clincher?.awayteam || ''} ${champion.clincher?.awayscore ?? ''}：${champion.clincher?.homescore ?? ''} ${champion.clincher?.hometeam || ''}`
+    : (next
+      ? `下一戰｜${formatDate(next)} ${next.time || ''}｜${next.awayteam} @ ${next.hometeam}`
+      : (state.latestFinal ? `最新戰況｜${state.latestFinal.awayteam} ${state.latestFinal.awayscore}：${state.latestFinal.homescore} ${state.latestFinal.hometeam}` : '完整賽程已公布'));
 
-  const nextMarkup = `
+  hero.classList.toggle('is-champion', Boolean(champion));
+  const nextMarkup = champion ? `
+    <div class="season-spotlight__eyebrow"><span>🏆</span> 2026 TAIWAN SERIES CHAMPION</div>
+    <div class="season-spotlight__body">
+      <div class="season-spotlight__champion-copy">
+        <div class="season-spotlight__stage">中華職棒年度總冠軍</div>
+        <div class="season-spotlight__champion-name">${champion.champion}</div>
+        <div class="season-spotlight__champion-score">${champion.championWins} <span>—</span> ${champion.opponentWins}</div>
+        <div class="season-spotlight__next">${nextLine}</div>
+      </div>
+      <div class="season-spotlight__actions">
+        <span class="season-spotlight__status">封王 · SERIES COMPLETE</span>
+        <button type="button" class="season-spotlight__button">回顧台灣大賽 <span>→</span></button>
+      </div>
+    </div>` : `
     <div class="season-spotlight__eyebrow"><span class="season-spotlight__live-dot"></span> 2026 CPBL POSTSEASON</div>
     <div class="season-spotlight__body">
       <div>
@@ -187,8 +234,12 @@ function renderMarquee() {
   };
 
   const next = state.next;
+  const champion = championshipSummary();
   let message;
-  if (state.stageRows.length && next) {
+  if (champion) {
+    message = `🏆 2026 中華職棒總冠軍　｜　<strong>${champion.champion}</strong> 台灣大賽 ${champion.championWins}：${champion.opponentWins} 封王　｜　G6 1：0 完封中信兄弟　｜　點擊回顧完整系列賽`;
+    wrapper.dataset.label = 'CHAMPION';
+  } else if (state.stageRows.length && next) {
     message = `🔥 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　下一戰 <span class="marquee-highlight">${formatDate(next)} ${next.time || ''}</span>　${next.awayteam} @ ${next.hometeam}　｜　📍 ${next.venue || '場地待定'}　｜　點擊查看完整賽程`;
   } else if (state.stageRows.length && state.latestFinal) {
     message = `🏆 2026 CPBL POSTSEASON　｜　<strong>${state.stage}</strong>　｜　最新戰況 <span class="marquee-highlight">${state.latestFinal.awayteam} ${state.latestFinal.awayscore}：${state.latestFinal.homescore} ${state.latestFinal.hometeam}</span>　｜　點擊查看完整賽程`;
@@ -218,9 +269,16 @@ function injectMatchCenterBanner() {
   const container = document.getElementById('matches-container');
   if (!container || container.querySelector('.match-postseason-banner')) return;
   const next = state.next;
+  const champion = championshipSummary();
   const banner = document.createElement('div');
-  banner.className = 'match-postseason-banner';
-  banner.innerHTML = `
+  banner.className = 'match-postseason-banner' + (champion ? ' is-champion' : '');
+  banner.innerHTML = champion ? `
+    <div>
+      <span>2026 TAIWAN SERIES CHAMPION</span>
+      <strong>🏆 ${champion.champion} · ${champion.championWins}：${champion.opponentWins} 封王</strong>
+      <small>G6｜味全龍 1：0 中信兄弟　系列賽正式結束</small>
+    </div>
+    <div class="match-postseason-banner__mark">CHAM<br>PION</div>` : `
     <div>
       <span>2026 CPBL POSTSEASON</span>
       <strong>${state.stage} · ${stageStatus()}</strong>
