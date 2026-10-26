@@ -4839,7 +4839,7 @@
     "awayteam": "福爾摩沙夢想家",
     "venue": "新竹縣體育館",
     "type": "籃球",
-    "note": "例行賽；G3"
+    "note": "例行賽；G3；颱風延賽"
   },
   {
     "date": "2026-10-24",
@@ -4849,7 +4849,7 @@
     "awayteam": "臺北台新戰神",
     "venue": "新莊體育館",
     "type": "籃球",
-    "note": "例行賽；G4"
+    "note": "例行賽；G4；颱風延賽"
   },
   {
     "date": "2026-10-25",
@@ -4859,7 +4859,9 @@
     "awayteam": "高雄全家海神",
     "venue": "新竹縣體育館",
     "type": "籃球",
-    "note": "例行賽；G5"
+    "note": "例行賽；G5",
+    "homescore": 129,
+    "awayscore": 132
   },
   {
     "date": "2026-10-25",
@@ -4869,7 +4871,9 @@
     "awayteam": "新北國王",
     "venue": "新莊體育館",
     "type": "籃球",
-    "note": "例行賽；G6"
+    "note": "例行賽；G6",
+    "homescore": 81,
+    "awayscore": 89
   },
   {
     "date": "2026-10-31",
@@ -6072,14 +6076,14 @@
     "note": "例行賽；G126"
   },
   {
-    "date": "2026-10-24",
+    "date": "2027-01-13",
     "time": "17:00",
     "league": "PLG",
     "hometeam": "桃園璞園領航猿",
     "awayteam": "臺北富邦勇士",
     "venue": "桃園市立綜合體育館",
     "type": "籃球",
-    "note": "例行賽；G1"
+    "note": "例行賽；G1；原10/24颱風延賽"
   },
   {
     "date": "2026-10-25",
@@ -6089,7 +6093,9 @@
     "awayteam": "臺南台鋼獵鷹",
     "venue": "桃園市立綜合體育館",
     "type": "籃球",
-    "note": "例行賽；G2"
+    "note": "例行賽；G2",
+    "homescore": 79,
+    "awayscore": 105
   },
   {
     "date": "2026-10-31",
@@ -6703,7 +6709,7 @@
     "awayteam": "可利工程師",
     "venue": "中原大學體育館",
     "type": "排球",
-    "note": "例行賽；G3"
+    "note": "例行賽；G3；颱風延賽"
   },
   {
     "date": "2026-10-25",
@@ -6713,7 +6719,7 @@
     "awayteam": "臺中連莊",
     "venue": "中原大學體育館",
     "type": "排球",
-    "note": "例行賽；G4"
+    "note": "例行賽；G4；颱風延賽"
   },
   {
     "date": "2026-10-31",
@@ -7555,7 +7561,9 @@
     "awayteam": "味全龍",
     "venue": "臺北大巨蛋",
     "type": "棒球",
-    "note": "台灣大賽；G3"
+    "note": "台灣大賽；G3",
+    "homescore": 0,
+    "awayscore": 6
   },
   {
     "date": "2026-10-21",
@@ -7565,27 +7573,9 @@
     "awayteam": "味全龍",
     "venue": "臺北大巨蛋",
     "type": "棒球",
-    "note": "台灣大賽；G4"
-  },
-  {
-    "date": "2026-10-23",
-    "time": "18:35",
-    "league": "CPBL",
-    "hometeam": "味全龍",
-    "awayteam": "中信兄弟",
-    "venue": "臺北大巨蛋",
-    "type": "棒球",
-    "note": "台灣大賽；G5；如有必要"
-  },
-  {
-    "date": "2026-10-24",
-    "time": "17:05",
-    "league": "CPBL",
-    "hometeam": "味全龍",
-    "awayteam": "中信兄弟",
-    "venue": "臺北大巨蛋",
-    "type": "棒球",
-    "note": "台灣大賽；G6；如有必要"
+    "note": "台灣大賽；G4",
+    "homescore": 5,
+    "awayscore": 4
   },
   {
     "date": "2026-10-25",
@@ -7595,6 +7585,30 @@
     "awayteam": "中信兄弟",
     "venue": "臺北大巨蛋",
     "type": "棒球",
-    "note": "台灣大賽；G7；如有必要"
+    "note": "台灣大賽；G5",
+    "homescore": 3,
+    "awayscore": 4
+  },
+  {
+    "date": "2026-10-26",
+    "time": "15:05",
+    "league": "CPBL",
+    "hometeam": "味全龍",
+    "awayteam": "中信兄弟",
+    "venue": "臺北大巨蛋",
+    "type": "棒球",
+    "note": "台灣大賽；G6；味全龍封王",
+    "homescore": 1,
+    "awayscore": 0
+  },
+  {
+    "date": "2026-10-27",
+    "time": "18:35",
+    "league": "CPBL",
+    "hometeam": "味全龍",
+    "awayteam": "中信兄弟",
+    "venue": "樂天棒球場",
+    "type": "棒球",
+    "note": "台灣大賽；G7；取消（味全龍4勝2敗封王）"
   }
 ]
