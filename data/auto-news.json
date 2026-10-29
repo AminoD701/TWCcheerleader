@@ -13,19 +13,6 @@
     "img": "https://attach.setn.com/newsimages/2026/10/29/5767454-PH.jpg"
   },
   {
-    "id": "auto-be4d774a0630ba8f",
-    "date": "2026/10/29 13:19",
-    "title": "樂天女孩親曝辣照！孟潔告白粉絲 卉妮金髮性感 彭彭比基尼暴擊",
-    "tag": "啦啦隊情報",
-    "subtag": "彭彭",
-    "content": "來源：娛樂星聞\n\n新聞摘要：27位樂天女孩美照一次收藏！《2027 Rakuten Girls年度寫真桌曆》預購進入最後倒數，樂天女孩孟潔公開專屬手套背後故事、卉妮精選金髮性感封面吸睛、而彭彭親挑比基尼泳裝甜辣登場，更加碼4款限定小禮物寵粉！樂天桃猿、樂天女孩粉絲把握最後機會！27位女孩以日系清新、陽光戶外及性感時尚等多變私服造型，解鎖球場外的迷人魅力；桌曆結合年度寫真、明信片收藏與月曆記事功能，讓粉絲一次珍藏女孩們的限定美",
-    "hashtags": "彭彭 卉妮 孟潔 啦啦隊情報",
-    "url": "https://star.setn.com/news/1930230",
-    "source": "娛樂星聞",
-    "auto": true,
-    "img": "https://attach.setn.com/newsimages/2026/10/29/5766928-PH.jpg"
-  },
-  {
     "id": "auto-f4559e76f4dcdf1e",
     "date": "2026/10/28 21:54",
     "title": "啦啦隊第一人！峮峮奪金鐘狂嗑這食物慶功 親揭回歸《飢餓》最新進度",
@@ -37,6 +24,19 @@
     "source": "TVBS新聞網",
     "auto": true,
     "img": "https://news-images.tvbs.com.tw/api/v1/image/01a182b6-e3dc-7025-8aae-725a0fed58b0.jpg?t=16x9&c=0,80,1536,944&w=1200&h=675"
+  },
+  {
+    "id": "auto-15cafdf8f97fce49",
+    "date": "2026/10/28 20:52",
+    "title": "中職／中信啦啦隊「PS女孩」發雞排、珍奶香爆！中國信託證券送出1000份",
+    "tag": "啦啦隊情報",
+    "subtag": "綜合",
+    "content": "來源：UDN\n\n新聞摘要：中國信託證券感謝中信兄弟球迷，28日全台十家分公司同步發送雞排及珍珠奶茶各100份，共發出1,000份，謝謝球迷一整年不離不棄的支持。",
+    "hashtags": "啦啦隊情報 綜合",
+    "url": "https://udn.com/news/story/7001/9843126",
+    "source": "UDN",
+    "auto": true,
+    "img": "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/t3/2026/10/28/35463413.jpg&M=1&s=Y&x=0&y=404&sw=1280&sh=854&exp=3600"
   },
   {
     "id": "auto-3b114c2e5e286c44",
@@ -70,10 +70,10 @@
     "title": "PLG／領航猿啦啦隊Pilots Crew全新單曲　請「上古神獸」Endo編舞",
     "tag": "啦啦隊情報",
     "subtag": "Pilots Crew",
-    "content": "來源：三立新聞\n\n新聞摘要：桃園璞園領航猿啦啦隊Pilots Crew推出全新單曲〈Next Crew〉，融合搖滾與電電子舞曲打造熱血風格，並邀請「上古神獸」Endo編排高難度開場舞。成員牙牙、寧寧、姵宸、金世星、金曉熙與新人娜比各自發揮特色嗓音，展現多元舞台魅力。製作人期望透過這首充滿爆發力的原創單曲，凝聚團隊氣勢，陪伴球迷迎接全新球季的挑戰。",
+    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：桃園璞園領航猿啦啦隊Pilots Crew推出全新單曲〈Next Crew〉，融合搖滾與電電子舞曲打造熱血風格，並邀請「上古神獸」Endo編排高難度開場舞。成員牙牙、寧寧、姵宸、金世星、金曉熙與新人娜比各自發揮特色嗓音，展現多元舞台魅力。製作人期望透過這首充滿爆發力的原創單曲，凝聚團隊氣勢，陪伴球迷迎接全新球季的挑戰。",
     "hashtags": "Pilots Crew 啦啦隊情報",
     "url": "https://www.setn.com/news/1929586",
-    "source": "三立新聞",
+    "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/10/28/5765301-PH.jpg"
   },
@@ -132,7 +132,7 @@
   {
     "id": "auto-9b93202e120c5cea",
     "date": "2026/10/27 10:17",
-    "title": "獨家／啦啦隊生涯首冠在味全龍金娜妍、權喜原落淚！沒想過是在台灣| 運動",
+    "title": "獨家／啦啦隊生涯首冠在味全龍　金娜妍、權喜原落淚！沒想過是在台灣",
     "tag": "啦啦隊情報",
     "subtag": "娜妍",
     "content": "來源：三立新聞網SETN.com\n\n新聞摘要：味全龍在台灣大賽第6戰6：0擊敗中信兄弟封王！小龍女「韓籍3本柱」李多慧、金娜妍和權喜原首嚐冠軍滋味，金娜妍和權喜原在球隊確定封王那一刻感動落淚！她們在封王儀式後接受《三立新聞網》採訪，金娜妍說當啦啦隊7年了，沒想過會在台灣體驗球隊封王！邁入第2年啦啦隊生涯的權喜原也說自己很榮幸。",
@@ -180,19 +180,6 @@
     "source": "ETtoday運動雲",
     "auto": true,
     "img": "https://cdn2.ettoday.net/images/8986/e8986118.jpg"
-  },
-  {
-    "id": "auto-d043b986c2cc06f7",
-    "date": "2026/10/27 01:28",
-    "title": "九局上 紅色彩帶灑落巨蛋 再見美技守備 恭喜味全龍獲得中華職棒37年的總冠軍（10/26 台灣大賽G6 中信 VS 味全）",
-    "tag": "棒球情報",
-    "subtag": "中職",
-    "content": "來源：LINE TODAY\n\n新聞摘要：中華職棒投打對決不漏接，鎖定 LINE TODAY 逐球速報，從即時戰況到預期勝率，看懂球賽走勢。 馬上加入 LINE TODAY 運動官方...",
-    "hashtags": "棒球情報 中職",
-    "url": "https://today.line.me/tw/v3/article/wJvwR7G",
-    "source": "LINE TODAY",
-    "auto": true,
-    "img": "https://today-obs.line-scdn.net/0hVwlVHT2vCVhRLxXgZDR2DwN5CjdiQxpbNRlYbC8uEjsZbAlcGC4fQXZYHBQgaA91MjVObitfVBMjf0ZlHyJGXxFYEgMZZAldbzIeVT9MHBQJbxJeCEgA/w1200"
   },
   {
     "id": "auto-d6d260e500cc4d09",
@@ -247,17 +234,17 @@
     "img": "https://today-obs.line-scdn.net/0hZQqMlqGFBX5MNBnGFHJ6KXRiCQ9_Uh93blIYGm02D0YxGEJ_eFJWHT49WFJoBkAtbFpMEToyXEcyVEN6IA/w1200"
   },
   {
-    "id": "auto-e831dd4a038d0e01",
-    "date": "2026/10/26 19:18",
-    "title": "樂天女孩穎樂、笑笑解鎖「第一次」　進軍日本絕美寫真登場！",
-    "tag": "啦啦隊情報",
-    "subtag": "笑笑",
-    "content": "來源：三立新聞\n\n新聞摘要：日本知名《週刊YOUNG MAGAZINE》（講談社）舉辦的「YANMANGA杯」，選拔中脫穎而出的前四名樂天女孩穎樂、高橋佳帆、溫妮與笑笑，受邀前往日本鎌倉進行專屬寫真拍攝。此次拍攝完美結合「Cheerful」與「Cool」雙主題，樂天女孩解鎖泳裝、浴衣及制服等多款造型，夢幻寫真極致魅惑！樂天女孩夢幻陣容不僅將登上《週刊YOUNG MAGAZINE》，更於今正式於樂天Kobo發行電子寫真集，台日",
-    "hashtags": "笑笑 啦啦隊情報",
-    "url": "https://www.setn.com/news/1900335",
-    "source": "三立新聞",
+    "id": "auto-086cd876bb95870c",
+    "date": "2026/10/26 17:34",
+    "title": "快訊／兄弟奇蹟之路遭終結！味全龍6比0霸氣封王　隊史第6座總冠軍",
+    "tag": "棒球情報",
+    "subtag": "中職",
+    "content": "來源：ETtoday運動雲\n\n新聞摘要：2026年中華職棒台灣大賽第6戰今（26日）在台北大巨蛋登場，握有聽牌優勢的味全龍迎戰中信兄弟，靠著先發洋投梅賽鍶8局僅被敲2安、無失分的強勢表現，加上張政禹3局下適時安打先馳得點，8局下更一口氣灌進5分，包括蔣少宏轟出兩分砲，最終以6比0擊敗黃衫軍，成功阻斷兄弟逆轉戰局的希望，奪下隊史第6座總冠軍，繼2023年後再度登上中職之巔！",
+    "hashtags": "棒球情報 中職",
+    "url": "https://sports.ettoday.net/news/3261142",
+    "source": "ETtoday運動雲",
     "auto": true,
-    "img": "https://attach.setn.com/newsimages/2026/09/02/5694013-PH.jpg"
+    "img": "https://cdn2.ettoday.net/images/8984/e8984924.jpg"
   },
   {
     "id": "auto-f0be471514611fae",
@@ -312,17 +299,30 @@
     "img": "https://attach.setn.com/newsimages/2026/10/25/5761744-PH.jpg"
   },
   {
-    "id": "auto-a485b8beef234826",
-    "date": "2026/10/25 11:08",
-    "title": "台灣大賽》味全龍大巨蛋拚封王！ G5冠軍戰內外野皆完售創紀錄- 棒球",
+    "id": "auto-d043b986c2cc06f7",
+    "date": "2026/10/25 15:00",
+    "title": "九局上 紅色彩帶灑落巨蛋 再見美技守備 恭喜味全龍獲得中華職棒37年的總冠軍（10/26 台灣大賽G6 中信 VS 味全）",
     "tag": "棒球情報",
     "subtag": "中職",
-    "content": "來源：TSNA體育新聞團隊\n\n新聞摘要：台灣大賽》味全龍大巨蛋拚封王！ G5冠軍戰內外野皆完售創紀錄",
+    "content": "來源：LINE TODAY\n\n新聞摘要：中華職棒投打對決不漏接，鎖定 LINE TODAY 逐球速報，從即時戰況到預期勝率，看懂球賽走勢。 馬上加入 LINE TODAY 運動官方...",
     "hashtags": "棒球情報 中職",
-    "url": "https://tsna.com/article/204745",
-    "source": "TSNA體育新聞團隊",
+    "url": "https://today.line.me/tw/v3/article/wJvwR7G",
+    "source": "LINE TODAY",
     "auto": true,
-    "img": "https://imgs.tsna.com/article/2026N1792897688_e7c669dbac66430f837859287a8fc35f.jpg"
+    "img": "https://today-obs.line-scdn.net/0hVwlVHT2vCVhRLxXgZDR2DwN5CjdiQxpbNRlYbC8uEjsZbAlcGC4fQXZYHBQgaA91MjVObitfVBMjf0ZlHyJGXxFYEgMZZAldbzIeVT9MHBQJbxJeCEgA/w1200"
+  },
+  {
+    "id": "auto-ba2781160bb41872",
+    "date": "2026/10/25 04:12",
+    "title": "歡慶雙十！恆富Online攜手啦啦隊女神短今　重磅活動",
+    "tag": "啦啦隊情報",
+    "subtag": "短今",
+    "content": "來源：三立新聞\n\n新聞摘要：迎接雙十連假，恆富Online攜手啦啦隊女神短今推出雙十系列活動，自10月5日至14日規劃四大活動，結合登入回饋、實體大獎、限定獎池與指定回饋方案，將國慶元素融入線上娛樂，為連假增添更多遊戲樂趣。",
+    "hashtags": "短今 啦啦隊情報",
+    "url": "https://www.setn.com/news/1444097",
+    "source": "三立新聞",
+    "auto": true,
+    "img": "https://attach.setn.com/newsimages/2026/10/05/5736868-PH.jpg"
   },
   {
     "id": "auto-57675401c4f2aef2",
@@ -338,19 +338,6 @@
     "img": "https://img.ltn.com.tw/Upload/sports/page/800S/2026/10/23/php8BAfZs.jpg"
   },
   {
-    "id": "auto-d07434dd9caea434",
-    "date": "2026/10/20 15:00",
-    "title": "啦啦隊女神梓梓把寫真書變收藏　拍攝「實穿衣物」做成寫真卡",
-    "tag": "啦啦隊情報",
-    "subtag": "梓梓",
-    "content": "來源：三立新聞網SETN.com\n\n新聞摘要：人氣啦啦隊女神梓梓推出全新寫真卡收藏商品《夢想の赤木晴梓》，精選多款清新甜美與成熟魅力的造型。除方便保存外，更驚喜收錄親筆簽名卡與融入實際服裝布料的「實穿衣物卡」，讓粉絲珍藏獨特紀念。該商品已在台灣各大卡店與官方網站全面開賣，喜愛梓梓的粉絲千萬別錯過這場充滿驚喜的收藏盛宴。",
-    "hashtags": "梓梓 啦啦隊情報",
-    "url": "https://www.setn.com/news/1925366",
-    "source": "三立新聞網SETN.com",
-    "auto": true,
-    "img": "https://attach.setn.com/newsimages/2026/10/20/5755312-PH.jpg"
-  },
-  {
     "id": "auto-6a7d05f089706700",
     "date": "2026/10/20 15:00",
     "title": "2026桃園亞洲職棒交流賽　台日韓啦啦隊與夢幻應援團震撼登場",
@@ -362,19 +349,6 @@
     "source": "三立新聞網SETN.com",
     "auto": true,
     "img": "https://attach.setn.com/newsimages/2026/10/20/5755325-PH.jpg"
-  },
-  {
-    "id": "auto-0dd45d8ef53a0c90",
-    "date": "2026/10/20 15:00",
-    "title": "韓「啦啦隊女神」下海當AV女優！ 自爆出道作體驗三人行：男優好厲害",
-    "tag": "啦啦隊情報",
-    "subtag": "綜合",
-    "content": "來源：TVBS新聞網\n\n新聞摘要：近年台灣啦啦隊不少韓援加盟，掀起一波「韓流啦啦隊」旋風，沒想到成人業界也迎來震撼彈，一名自稱曾在韓國棒球場擔任過啦啦隊成員的尹秀雅，宣布進軍日本AV界！由知名片商「Idea Pocket」重磅推出，並宣布她將在下個月發行出道首作，同時公開尹秀雅的宣傳照，以「肉感健康系、亞洲棒球啦啦隊女孩」為賣點，H級傲人身材更是引起熱議，她本人更在限動分享拍片心得，直呼：「男優真的好厲害！」辛辣發言也引人遐想。",
-    "hashtags": "啦啦隊情報 綜合",
-    "url": "https://news.tvbs.com.tw/entertainment/jk-pop/4038776",
-    "source": "TVBS新聞網",
-    "auto": true,
-    "img": "https://news-images.tvbs.com.tw/api/v1/image/01a15887-8437-7366-a73f-1302d350295a.jpg?t=16x9&c=0,0,1200,675&w=1200&h=675"
   },
   {
     "id": "auto-96e811cf16515a80",
