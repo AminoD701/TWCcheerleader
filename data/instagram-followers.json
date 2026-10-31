@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-30T18:18:57+08:00",
+  "updatedAt": "2026-10-31T17:51:56+08:00",
   "source": "instagram-public-page",
   "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
   "profileCount": 470,
@@ -598,7 +598,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "hhhhh__ji": {
       "username": "hhhhh__ji",
@@ -1071,7 +1071,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "sammie_923": {
       "username": "sammie_923",
@@ -2028,7 +2028,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "ching3.___.9": {
       "username": "ching3.___.9",
@@ -3865,7 +3865,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "nabiyaaa._32": {
       "username": "nabiyaaa._32",
@@ -4635,7 +4635,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "baeja_07": {
       "username": "baeja_07",
@@ -5108,7 +5108,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "newseoyoon": {
       "username": "newseoyoon",
