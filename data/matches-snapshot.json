@@ -4883,7 +4883,9 @@
     "awayteam": "桃園台啤永豐雲豹",
     "venue": "新莊體育館",
     "type": "籃球",
-    "note": "例行賽；G7"
+    "note": "例行賽；G7",
+    "homescore": 81,
+    "awayscore": 89
   },
   {
     "date": "2026-10-31",
@@ -4893,7 +4895,9 @@
     "awayteam": "臺北台新戰神",
     "venue": "高雄巨蛋",
     "type": "籃球",
-    "note": "例行賽；G8"
+    "note": "例行賽；G8",
+    "homescore": 132,
+    "awayscore": 121
   },
   {
     "date": "2026-11-01",
@@ -4903,7 +4907,9 @@
     "awayteam": "新竹御嵿攻城獅",
     "venue": "新莊體育館",
     "type": "籃球",
-    "note": "例行賽；G9"
+    "note": "例行賽；G9",
+    "homescore": 93,
+    "awayscore": 95
   },
   {
     "date": "2026-11-01",
@@ -4913,7 +4919,9 @@
     "awayteam": "新北中信特攻",
     "venue": "高雄巨蛋",
     "type": "籃球",
-    "note": "例行賽；G10"
+    "note": "例行賽；G10",
+    "homescore": 100,
+    "awayscore": 128
   },
   {
     "date": "2026-11-07",
@@ -4923,7 +4931,9 @@
     "awayteam": "福爾摩沙夢想家",
     "venue": "和平籃球館",
     "type": "籃球",
-    "note": "例行賽；G11"
+    "note": "例行賽；G11",
+    "homescore": 103,
+    "awayscore": 90
   },
   {
     "date": "2026-11-08",
@@ -4933,7 +4943,9 @@
     "awayteam": "桃園台啤永豐雲豹",
     "venue": "和平籃球館",
     "type": "籃球",
-    "note": "例行賽；G12"
+    "note": "例行賽；G12",
+    "homescore": 102,
+    "awayscore": 91
   },
   {
     "date": "2026-11-14",
@@ -6105,7 +6117,9 @@
     "awayteam": "桃園璞園領航猿",
     "venue": "國立成功大學",
     "type": "籃球",
-    "note": "例行賽；G3"
+    "note": "例行賽；G3",
+    "homescore": 115,
+    "awayscore": 94
   },
   {
     "date": "2026-11-01",
@@ -6115,7 +6129,9 @@
     "awayteam": "新竹洋基工程",
     "venue": "國立成功大學",
     "type": "籃球",
-    "note": "例行賽；G4"
+    "note": "例行賽；G4",
+    "homescore": 104,
+    "awayscore": 99
   },
   {
     "date": "2026-11-14",
@@ -6729,7 +6745,9 @@
     "awayteam": "台鋼天鷹",
     "venue": "臺灣體大體育館",
     "type": "排球",
-    "note": "例行賽；G5"
+    "note": "例行賽；G5",
+    "homescore": 3,
+    "awayscore": 2
   },
   {
     "date": "2026-10-31",
@@ -6739,7 +6757,9 @@
     "awayteam": "可利工程師",
     "venue": "臺灣大學體育館",
     "type": "排球",
-    "note": "例行賽；G6"
+    "note": "例行賽；G6",
+    "homescore": 3,
+    "awayscore": 0
   },
   {
     "date": "2026-11-01",
@@ -6749,7 +6769,9 @@
     "awayteam": "桃園雲豹飛將",
     "venue": "臺灣體大體育館",
     "type": "排球",
-    "note": "例行賽；G7"
+    "note": "例行賽；G7",
+    "homescore": 1,
+    "awayscore": 3
   },
   {
     "date": "2026-11-01",
@@ -6759,7 +6781,9 @@
     "awayteam": "台鋼天鷹",
     "venue": "臺灣大學體育館",
     "type": "排球",
-    "note": "例行賽；G8"
+    "note": "例行賽；G8",
+    "homescore": 1,
+    "awayscore": 3
   },
   {
     "date": "2026-11-07",
@@ -6769,7 +6793,9 @@
     "awayteam": "臺北伊斯特",
     "venue": "中原大學體育館",
     "type": "排球",
-    "note": "例行賽；G9"
+    "note": "例行賽；G9",
+    "homescore": 3,
+    "awayscore": 0
   },
   {
     "date": "2026-11-07",
@@ -6779,7 +6805,9 @@
     "awayteam": "台鋼天鷹",
     "venue": "臺灣體大體育館",
     "type": "排球",
-    "note": "例行賽；G10"
+    "note": "例行賽；G10",
+    "homescore": 2,
+    "awayscore": 3
   },
   {
     "date": "2026-11-08",
@@ -6789,7 +6817,9 @@
     "awayteam": "可利工程師",
     "venue": "中原大學體育館",
     "type": "排球",
-    "note": "例行賽；G11"
+    "note": "例行賽；G11",
+    "homescore": 3,
+    "awayscore": 1
   },
   {
     "date": "2026-11-08",
@@ -6799,7 +6829,9 @@
     "awayteam": "臺北伊斯特",
     "venue": "臺灣體大體育館",
     "type": "排球",
-    "note": "例行賽；G12"
+    "note": "例行賽；G12",
+    "homescore": 3,
+    "awayscore": 0
   },
   {
     "date": "2026-11-14",
