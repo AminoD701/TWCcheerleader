@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-17T20:14:48+08:00",
+  "updatedAt": "2026-11-18T20:01:55+08:00",
   "source": "instagram-public-page",
   "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
   "profileCount": 467,
@@ -433,7 +433,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "yimanping": {
       "username": "yimanping",
@@ -1170,7 +1170,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "manjung0217": {
       "username": "manjung0217",
@@ -1808,7 +1808,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "leehozeong": {
       "username": "leehozeong",
@@ -3337,7 +3337,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "iam_hyerii": {
       "username": "iam_hyerii",
@@ -3843,7 +3843,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "m.0_sol": {
       "username": "m.0_sol",
