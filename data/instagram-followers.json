@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-20T19:59:01+08:00",
+  "updatedAt": "2026-11-21T19:32:04+08:00",
   "source": "instagram-public-page",
   "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
   "profileCount": 467,
@@ -323,7 +323,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "_maggie_chen": {
       "username": "_maggie_chen",
@@ -2567,7 +2567,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "leerochi": {
       "username": "leerochi",
