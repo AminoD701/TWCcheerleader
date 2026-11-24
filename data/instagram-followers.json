@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-23T21:25:53+08:00",
+  "updatedAt": "2026-11-24T22:04:35+08:00",
   "source": "instagram-public-page",
   "note": "Best-effort public-page snapshot. Failed profiles keep their previous successful count.",
   "profileCount": 467,
@@ -235,7 +235,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "matt49chw": {
       "username": "matt49chw",
@@ -1049,7 +1049,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "momoko.k_0105": {
       "username": "momoko.k_0105",
@@ -1918,7 +1918,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "amy__0930": {
       "username": "amy__0930",
@@ -3051,7 +3051,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "ycyc_1010": {
       "username": "ycyc_1010",
@@ -3128,7 +3128,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "yipan_11.2": {
       "username": "yipan_11.2",
@@ -4129,7 +4129,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "HTTP Error 429: Too Many Requests"
+      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
     },
     "maisie21315": {
       "username": "maisie21315",
@@ -4822,7 +4822,7 @@
       "followers": null,
       "lastSuccess": "",
       "status": "unavailable",
-      "lastError": "API+HTML failed: HTTP Error 429: Too Many Requests"
+      "lastError": "HTTP Error 429: Too Many Requests"
     },
     "o9_e4_": {
       "username": "o9_e4_",
